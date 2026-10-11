@@ -1,6 +1,6 @@
 #include <PoseidonVK/EngineVK.hpp>
 #include <PoseidonVK/VertexBufferVK.hpp>
-#include <PoseidonVK/ShapeTransformVK.hpp>
+#include <PoseidonVK/RayTransformVK.hpp>
 #include <Poseidon/World/Scene/Scene.hpp>
 #include <Poseidon/World/Scene/Camera/Camera.hpp>
 #include <Poseidon/World/Terrain/Landscape.hpp>

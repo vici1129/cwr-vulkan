@@ -1,4 +1,8 @@
 #include <catch2/catch_test_macros.hpp>
+#include <BuildConfig.h>
+#if CWR_HAS_VULKAN
+#include <PoseidonVK/RayTransformVK.hpp>
+#endif
 #include <PoseidonVK/ShapeGeometryVK.hpp>
 #include <PoseidonVK/ShapeTransformVK.hpp>
 #include <PoseidonVK/ScreenGeometryVK.hpp>
@@ -11,6 +15,7 @@
 
 using namespace Poseidon;
 
+#if CWR_HAS_VULKAN
 TEST_CASE("RTAO instance coordinates and depth reconstruction agree with raster geometry", "[Graphics][vulkan-shape][rtao]")
 {
     Matrix4 model(MRotationY, .7f);
@@ -36,6 +41,7 @@ TEST_CASE("RTAO instance coordinates and depth reconstruction agree with raster 
     const auto result=camera.FastTransform(reconstructed);
     REQUIRE(result.Distance2(world)<.0001f);
 }
+#endif
 
 TEST_CASE("Render identities survive neither copying nor address reuse", "[Graphics][vulkan-shape][temporal]")
 {
