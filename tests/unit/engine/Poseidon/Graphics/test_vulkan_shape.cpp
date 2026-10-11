@@ -11,6 +11,32 @@
 
 using namespace Poseidon;
 
+TEST_CASE("RTAO instance coordinates and depth reconstruction agree with raster geometry", "[Graphics][vulkan-shape][rtao]")
+{
+    Matrix4 model(MRotationY, .7f);
+    model.SetOrientation(model.Orientation()*1.7f);
+    model.SetPosition(Vector3(7108,75,6076));
+    Matrix4 camera(MRotationY, -.4f);
+    camera.SetPosition(Vector3(7110,74,6060));
+    const Vector3 local(.4f,.2f,.8f);
+    const auto world = model.FastTransform(local);
+    const auto instance = vk::RayInstanceTransform(model);
+    for (int i=0;i<3;++i)
+        REQUIRE(instance.matrix[i][0]*local.X()+instance.matrix[i][1]*local.Y()+instance.matrix[i][2]*local.Z()+instance.matrix[i][3]
+                == Catch::Approx(world[i]).margin(.001f));
+    Matrix4 projection(MZero);
+    projection(0,0)=1.3f; projection(1,1)=2.1f; projection(2,2)=1.001f;
+    projection.SetPosition(Vector3(0,0,-.1001f));
+    const auto mvp=vk::ShapeMVP(camera.InverseScaled()*model,projection);
+    float clip[4]{};
+    for (int i=0;i<4;++i) clip[i]=mvp[i]*local.X()+mvp[4+i]*local.Y()+mvp[8+i]*local.Z()+mvp[12+i];
+    const float depth=clip[2]/clip[3];
+    const float z=projection.Position().Z()/(depth-projection(2,2));
+    const Vector3 reconstructed(clip[0]/clip[3]/projection(0,0)*z, -clip[1]/clip[3]/projection(1,1)*z,z);
+    const auto result=camera.FastTransform(reconstructed);
+    REQUIRE(result.Distance2(world)<.0001f);
+}
+
 TEST_CASE("Render identities survive neither copying nor address reuse", "[Graphics][vulkan-shape][temporal]")
 {
     render::RenderIdentity original;

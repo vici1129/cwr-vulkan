@@ -81,6 +81,8 @@ struct TextureImage
     VkImageView view = VK_NULL_HANDLE;
     VkImageView colorView = VK_NULL_HANDLE; // sRGB decode before filtering, same bytes/alpha.
     VkDescriptorPool pool = VK_NULL_HANDLE;
+    BufferVK rayAlpha; // optional immutable base-mip RGBA for building cutout ray hits
+    uint32_t rayWidth = 0, rayHeight = 0;
     std::array<VkDescriptorSet, 8> descriptors{};
     std::array<VkDescriptorSet, 8> dataDescriptors{};
     ~TextureImage();
@@ -90,6 +92,21 @@ struct MeshSlice
 {
     std::shared_ptr<MeshBuffers> buffers;
     VkDeviceSize vertexOffset = 0, indexOffset = 0;
+};
+struct RTAORange
+{
+    uint32_t first = 0, count = 0;
+    std::shared_ptr<TextureImage> alpha;
+    uint32_t sampler = 0;
+    float cutoff = 0;
+    bool operator==(const RTAORange&) const = default;
+};
+struct RTAOInstance
+{
+    std::shared_ptr<MeshBuffers> mesh;
+    std::vector<RTAORange> ranges;
+    VkTransformMatrixKHR transform{}; // existing model-to-world, row major
+    bool index16 = true;
 };
 // Backend-private Vulkan ownership. SDL owns the window; this owns its surface.
 struct ShadowAlphaBatch
@@ -145,6 +162,10 @@ class VulkanContext
     bool SetSSAO(bool enabled, float strength, float radius, float bias, float fade);
     bool SSAOEnabled() const { return _ssaoEnabled; }
     void DrawSSAO(const std::array<float, 4>& projection);
+    std::string SetRTAO(std::string_view mode);
+    bool RTAOEnabled() const { return _rtaoEnabled && _rtaoAvailable; }
+    void SetRTAOScene(std::vector<RTAOInstance> instances, const std::array<float, 16>& camera);
+    void PrepareRTAOAlpha(const std::shared_ptr<TextureImage>& image, uint32_t width, uint32_t height, const void* rgba);
     std::string SetAntiAliasing(std::string_view mode);
     bool SetRenderScale(int percent);
     std::string SetHDR(std::string_view mode);
@@ -179,6 +200,15 @@ class VulkanContext
     const std::array<float, 4>& EyeCoef() const { return _eyeCoef; }
 
   private:
+    struct RTAOState;
+    std::shared_ptr<RTAOState> _rtao;
+    bool _rtaoRequested = false, _rtaoAvailable = false, _rtaoEnabled = false;
+    std::string _rtaoReason = "restart with CWR_VK_RTAO=1 to opt into Vulkan ray-query capabilities";
+    void InitRTAO();
+    void RetireRTAO();
+    void DrawRTAO(const std::array<float, 4>& projection);
+    void DestroyRTAOTargets() noexcept;
+    void DestroyRTAO() noexcept;
     friend struct VulkanCommandStateTest;
     // Only the currently recording command buffer. All production draws use
     // _shapeLayout; diagnostic drawing invalidates this before its other layout.

@@ -382,6 +382,13 @@ int main()
         VulkanContext context;
         Check(!context.SSAOEnabled(), "SSAO must be disabled by default");
         Check(context.SetSSAO(true, 0.7f, 1.2f, 0.03f, 80), "valid SSAO controls are accepted");
+        Check(!context.RTAOEnabled(), "RTAO defaults off");
+        Check(context.SetRTAO("on").starts_with("UNSUPPORTED:"), "RTAO rejects missing device capabilities");
+        Check(context.SSAOEnabled(), "unsupported RTAO leaves SSAO intact");
+        Check(context.SetRTAO("status").find("rayQueriesExecuted=no") != std::string::npos,
+              "RTAO never claims tracing from initialization alone");
+        Check(context.SetRTAO("invalid").starts_with("INVALID:"), "RTAO rejects unknown commands");
+        Check(context.SetRTAO("off").starts_with("OK:") && context.SSAOEnabled(), "RTAO off preserves SSAO preference");
         Check(context.SSAOEnabled(), "SSAO runtime enable must take effect");
         Check(!context.SetSSAO(false, std::numeric_limits<float>::quiet_NaN(), 1, 0, 80), "reject NaN SSAO strength");
         Check(!context.SetSSAO(false, 1, 0, 0, 80), "reject zero SSAO radius");

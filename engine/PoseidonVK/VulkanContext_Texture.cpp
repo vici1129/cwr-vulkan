@@ -22,6 +22,7 @@ void TextureImage::Destroy() noexcept
 {
     if (device)
     {
+        DestroyBuffer(device, rayAlpha);
         if (pool)
             vkDestroyDescriptorPool(device, pool, nullptr);
         if (view)

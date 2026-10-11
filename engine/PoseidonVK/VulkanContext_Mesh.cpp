@@ -44,13 +44,16 @@ std::shared_ptr<MeshBuffers> VulkanContext::UploadMesh(const void* vertices, siz
         throw std::invalid_argument("Vulkan Shape: upload needs a live device and nonempty geometry");
     auto mesh = std::make_shared<MeshBuffers>();
     mesh->device = _device;
+    const VkBufferUsageFlags rayUsage = _rtaoAvailable ? VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT |
+        VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT : 0;
     const auto vertexResult =
-        CreateHostVisibleBuffer(_physical, _device, vertexBytes, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, mesh->vertices);
+        CreateHostVisibleBuffer(_physical, _device, vertexBytes, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | rayUsage, mesh->vertices);
     if (vertexResult != VK_SUCCESS)
         throw std::runtime_error("Vulkan Shape: vertex buffer allocation failed (" + std::to_string(vertexResult) +
                                  ")");
     const auto indexResult =
-        CreateHostVisibleBuffer(_physical, _device, indexBytes, VK_BUFFER_USAGE_INDEX_BUFFER_BIT, mesh->indices);
+        CreateHostVisibleBuffer(_physical, _device, rayUsage ? (indexBytes + 3) & ~size_t(3) : indexBytes,
+                                VK_BUFFER_USAGE_INDEX_BUFFER_BIT | rayUsage, mesh->indices);
     if (indexResult != VK_SUCCESS)
         throw std::runtime_error("Vulkan Shape: index buffer allocation failed (" + std::to_string(indexResult) + ")");
     UploadMappedBuffer(mesh->vertices, vertices, vertexBytes);

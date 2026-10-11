@@ -552,7 +552,8 @@ void VulkanContext::DrawAAPass(unsigned index, VkFramebuffer framebuffer, VkDesc
 
 void VulkanContext::FinishAAWorld(const std::array<float, 4>& projection)
 {
-    DrawSSAO(projection);
+    if (RTAOEnabled()) DrawRTAO(projection);
+    else DrawSSAO(projection);
     if (!_worldActive)
         return;
     FlushScreenBatch();

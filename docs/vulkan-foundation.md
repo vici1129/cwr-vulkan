@@ -1,5 +1,197 @@
 # Vulkan backend development
 
+## First hardware ray-query ambient occlusion (2026-10-11)
+
+Based on public `main` **2bd25ff**. RTAO defaults **Off**. Opt into the Vulkan
+device capabilities at process startup with `CWR_VK_RTAO=1`, then use:
+
+```sqf
+triRTAO "on"
+triRTAO "off"
+triRTAO "status"
+```
+
+There is no new menu or persistent setting. The environment variable enables
+capabilities, not AO. Without it the ordinary Vulkan 1.0 device path remains.
+GL33 returns `UNSUPPORTED: RTAO requires Vulkan`. A missing opt-in, extension,
+feature, queue capability, AS limit or entry point returns a reason; failed
+enablement leaves SSAO and ordinary rendering intact. RTAO can be built and run
+without FSR. With FSR enabled, its Vulkan 1.2 feature chain is merged without
+duplicating buffer-device-address feature structures.
+
+### Actual geometry and tracing
+
+- Uses `VK_KHR_ray_query`, `VK_KHR_acceleration_structure` and their deferred
+  host operations dependency, Vulkan 1.2 buffer device addresses, `shaderInt64`
+  for building material addresses, and a compute-capable graphics queue. See the
+  [Khronos ray-query requirements](https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_ray_query.html)
+  and [AS requirements](https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_acceleration_structure.html).
+  No ray-tracing pipeline, SBT, NVIDIA SDK, NGX or vendor-specific dispatch is used.
+- Queries the existing landscape object buckets within 80 m of the camera,
+  including off-screen objects. Bounds intersecting that neighborhood are eligible.
+  Collection is independent of raster visibility and the CSM enable switch. It
+  does not enumerate or build the entire island, or create another world database.
+- Static, undamaged, non-deforming visual LOD0 geometry supplies the BLAS.
+  Native immutable `VertexBufferVK` position/UV/index allocations are reused;
+  eligible off-screen shapes can create the same native buffer through the
+  existing shape API. Model-to-world transforms come directly from the objects.
+  BLAS cache keys include allocation identity and the actual included material
+  ranges, including distinct subsets of a shared mesh. Shared ownership prevents
+  address reuse and premature destruction. Unused cache entries age out after
+  120 active AO world frames; referenced frame-slot structures retain them safely.
+- Each of the two frame slots retains its own TLAS, instance upload and scratch
+  resources. An identical instance list reuses its TLAS; changed membership,
+  transforms or BLAS references rebuild that slot after its fence. This milestone
+  has no deforming BLAS updates and no per-frame rebuild of unchanged meshes.
+  Collection caps at 1,024 instances; each BLAS is limited to 1,024 section
+  geometries and one million triangles. These are safeguards, not coverage targets.
+- Opaque sections cast normally. Stock building walls often use cutout textures
+  for windows/doors: those triangles produce non-opaque ray-query candidates,
+  interpolate their **existing** mesh UVs and test the decoded texture's real alpha
+  before confirming an intersection. Base-mip alpha, clamp/repeat, point/bilinear
+  sampling and the existing cutoff are used. Cached alpha bytes are owned by
+  the existing texture allocation. Transparent holes are not filled with walls.
+  This limited building-only hit test is not a replacement material system.
+- Foliage cards, blended/dynamic/animated textures, hidden/proxy placeholders,
+  animated or damaged objects, surface-fitted meshes, roads/surface decals,
+  water and transparent effects are excluded as occluders. Opaque tree trunks,
+  posts and similar rigid sections can participate. There are no invented hulls.
+  **Terrain receives AO but is not in the TLAS.** Its software-transformed,
+  clipped render vertices are transient; this milestone does not reconstruct an
+  island heightfield or claim terrain-to-wall occlusion. Proxy doors and damaged
+  buildings also need later coverage work.
+
+The half-resolution compute pass reconstructs view positions from world depth,
+removes temporal projection jitter, estimates a normal from the nearer depth
+derivative on each axis and transforms into the same world space as the TLAS.
+Four cosine-weighted hemisphere rays query actual triangles over a 2 m radius,
+with a 3.5 cm surface offset. Distance-weighted occlusion fades out by 60 m radial
+camera distance, inside the collection margin. Integer world-cell hashing keeps
+the sample rotation independent of frame number and avoids large-island-coordinate
+precision loss in floating-point random hashes. A 5x5 depth-aware half-resolution
+filter upsamples/modulates the linear HDR world color, preserving alpha.
+
+RTAO **replaces the SSAO pass** while enabled. The SSAO shader, settings and path
+are unchanged, and disabling RTAO restores the previous SSAO preference. Empty
+coverage leaves world lighting untouched; it does not substitute hidden SSAO.
+The pass runs at the existing completed-world boundary before TAA/FSR, AA
+composition, bloom and tone mapping. Existing world atmosphere/fog/CSM rendering
+and native-resolution cockpit, weapon, HUD and UI boundaries remain in place.
+This is post-lighting modulation, not separately computed ambient irradiance:
+already-composited world transparency/fog can inherit a small modulation from
+the opaque depth beneath them. It does not separate direct and indirect light.
+
+### Status and lifetime evidence
+
+`status` reports live BLAS (including entries retained by TLAS frame slots), cache
+entries, actual TLAS allocations, latest scene instance/instanced-triangle counts,
+completed passes/builds, GPU-written ray/hit counts, and whether the latest world
+submitted the AO dispatch. `rayQueriesExecuted` is a lifetime completed-ray
+indicator; `lastCompletedRays`/`Hits` refer to the last retired pass and may precede
+an empty scene or an Off toggle. They are read only after the frame fence, so
+initialization alone cannot report tracing. `lastWorldDispatch=no` distinguishes
+a skipped world pass. Off stops AO work but keeps existing cached allocations for
+reuse. Device-idle shutdown destroys TLAS before its referenced BLAS/buffers;
+resize recreates descriptors/images/filter pipelines without throwing away BLAS.
+
+Set `CWR_VK_PROFILE=1` for separate GPU timestamps around BLAS building, TLAS
+building, ray dispatch and filtering. Full-frame GPU timestamps remain the
+existing complete command-buffer workload measurement. Status labels unavailable
+timing explicitly; counts do not require profiling. CPU recording, acquisition,
+presentation and display pacing are not included in these GPU costs.
+
+### RTX 4060 Ti gameplay qualification
+
+Windows, RTX 4060 Ti 8 GB, driver 617.14, isolated stock GOG data/profile, muted
+direct developer launches (not Steam-route qualification). The stock Malden
+Infantry mission was relocated to Houdan. Comparisons used fixed noon/clear
+weather and camera `[7116,73,6085,-1,-0.1,-0.2]` in raw engine X/up/Z order.
+The useful traced set was **18 cached BLAS, 67 instances and 12,818 instanced
+triangles**, with two TLAS allocations for the frame slots. It included opaque
+sections and cutout walls of `hruzdum`, `dum_rasovna`, `cihlovej_dum_mini`,
+`deutshe_mini`, opaque shed geometry, rigid fence/post/sign sections and selected
+opaque trunks. The native 1080p view executed about **1.987 million rays/frame**
+and recorded about **36,273 hits/frame**; initialization had zero rays and zero AS.
+
+Frozen Off/SSAO/RTAO captures show a ground contact band beside the house,
+window/door recess shading and post contacts. SSAO adds screen-depth edge/contact
+contrast, including foliage silhouettes absent from the TLAS. RTAO follows real
+nearby solid surfaces and preserves alpha openings; it is not uniformly stronger.
+The camera `[7111,72.5,6082,1,-0.7,0]` looks away from the building. RTAO still
+shades the ground at the right side from the off-screen wall, where SSAO lacks
+that wall's screen-depth samples. Four-ray grain is visible on close ground;
+TAA reduces it. Bias, half-resolution normals/filtering and fixed visual LOD0 can
+miss very thin contacts, soften edges or disagree with a distant raster LOD.
+No broad solid foliage-card shadows or gross trails were observed in the sampled
+motion sequence, but this is not a claim of flicker-free rendering in all content.
+
+A 20-view moving-camera sequence, actual player movement/mouse look, map opening
+and return, empty-area/coast/village transitions, and resize to 1280x720 with
+minimize/restore were exercised. Empty coverage submitted no AO dispatch; returning
+to the village rebuilt evicted geometry. TAA, FSR Native/Quality/Performance,
+MSAA2/4, SMAA, CSM, atmosphere, bloom and fog were exercised together with RTAO.
+The main qualification run closed after **29,781 submitted frames with zero
+core/synchronization validation errors or warnings**. The final executable rerun
+closed after **23,728 submitted frames, also zero errors and warnings**, repeating
+the AO comparisons, AA mode changes, off-screen view, scene transitions and resize.
+Separate no-FSR ray-query
+execution closed after 4,346 frames, also zero findings. The ordinary no-opt-in
+Vulkan run logged API **1.0**, rejected RTAO enablement and closed after 4,493 frames
+with zero findings. GL33-only build/menu startup and its unsupported reply passed.
+HDR10 negotiation returned the existing SDR fallback because the OS/surface did
+not expose HDR10. Internal linear FP16 lighting, bloom and SDR tone mapping were
+verified; **physical HDR output was not verified**.
+
+Vulkan+FSR, Vulkan without FSR and GL33-only RelWithDebInfo builds pass. Focused
+Vulkan rendering/shape/shadow tests pass **845 assertions / 71 cases**, including
+ray-instance transform and depth-reconstruction agreement with raster geometry;
+the GL33-focused subset passes **467 assertions / 48 cases**. Standalone Vulkan
+policy/lifetime checks pass **376 guards**, including default-Off, unsupported
+enablement preserving SSAO, invalid controls and no false ray-execution status.
+Ray-query SPIR-V validates for Vulkan 1.2. No unsupported physical GPU was
+available; missing-opt-in/GL33 rejection and feature checks are the fallback
+evidence, not a claim of broad hardware qualification.
+
+### Measured GPU workload
+
+Validation disabled, frozen Houdan view, 1920x1080 output, 900 m visibility,
+existing projected shadows enabled, CSM/atmosphere/shafts/bloom disabled, VSync
+off. Each sample warms for 3 seconds then collects 8 seconds of timestamps.
+The first three modes were repeated in reverse order; table values average those
+two windows. GPU clocks were automatic (roughly 750 MHz Off, 885-900 MHz SSAO,
+1,215-1,230 MHz RTAO, 1,530 MHz TAA/RTAO and 1,635 MHz FSR/RTAO).
+
+| World mode | BLAS/TLAS steady-state builds | Ray query ms | Filter ms | SSAO ms | Complete GPU frame ms |
+| --- | --- | --- | --- | --- | --- |
+| Off | none | n/a | n/a | n/a | 1.385 |
+| SSAO | none | n/a | n/a | 0.303 | 1.481 |
+| RTAO, AA Off | none (cached) | 0.343 | 0.374 | skipped | 1.642 |
+| RTAO + TAA | none (cached) | 0.276 | 0.299 | skipped | 1.740 |
+| RTAO + FSR Quality (1280x720 input) | none (cached) | 0.131 | 0.131 | skipped | 1.688 |
+
+The initial 18 BLAS builds cost **0.552 ms GPU**; the initial TLAS build cost
+**0.160 ms GPU**. The second frame slot also builds a TLAS once. Unchanged scenes
+execute no build commands (empty timestamp intervals were below 0.001 ms).
+Changed instances use a small TLAS rebuild, not a deformation update/refit.
+Automatic clock changes mean differences between whole-frame rows are not an
+isolated fixed-clock AO overhead or an FPS improvement. Ray/filter times are
+measured directly, not inferred from FPS. The cached path and cold build are
+reported separately; CPU collection/driver recording costs are not quantified
+by these GPU timestamps.
+
+Local evidence is under ignored `build/shadow-live/rtao-{first,census,census2,
+alpha,quality,perf-final,nofsr,default,gl33,final}` in the original developer
+checkout. `rtao-perf-final/rtao-perf.json` retains samples and clock readings;
+its measured executable SHA256 is
+`172C91A742BF8FE74A058639DA74320B3E5410B15923456C6FD47916E1E65948`.
+The final qualification executable is
+`7BDD2592E666688427DA4BC3DC6582835B0C729FC1D575846BE5A1C293B39E18`;
+subsequent changes from the measurement build concern capability/lifetime/cache
+guards and formatting, not the measured ray/filter shaders. The original dirty
+checkout and private NGX files were preserved; this public change was developed
+in an isolated checkout from `2bd25ff`. Only original GPL-compatible engine and
+shader changes are distributed. No new vendor code or stock game assets are added.
+
 ## Opt-in atmospheric perspective and sunlight shafts (2026-10-11)
 
 Based on public `main` **e340399**. Both effects default **Off**, independently,

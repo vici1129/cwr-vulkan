@@ -1,0 +1,101 @@
+#version 460
+#extension GL_EXT_ray_query : require
+#extension GL_EXT_buffer_reference2 : require
+#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
+#extension GL_GOOGLE_include_directive : require
+#include "rtao_depth.glsl"
+layout(local_size_x=8,local_size_y=8) in;
+layout(set=0,binding=1) uniform accelerationStructureEXT scene;
+layout(set=0,binding=2,rgba32f) uniform writeonly image2D resultAO;
+layout(set=0,binding=3,std430) buffer Counters { uint rays; uint hits; } counters;
+shared uint groupRays;
+shared uint groupHits;
+struct Material {
+    uint64_t indices, vertices, alpha;
+    uint first, index16, width, height, samplerFlags;
+    float cutoff;
+};
+layout(buffer_reference,std430,buffer_reference_align=8) readonly buffer Materials { Material m[]; };
+layout(buffer_reference,std430,buffer_reference_align=4) readonly buffer Words { uint data[]; };
+layout(buffer_reference,std430,buffer_reference_align=4) readonly buffer Floats { float data[]; };
+layout(set=0,binding=5,std430) readonly buffer Instances { uint64_t materials[]; };
+vec2 vertexUV(Material m,uint index) {
+    uint word=Words(m.indices).data[m.index16!=0?index/2:index];
+    uint vertex=m.index16!=0?(word>>((index&1)*16))&65535:word;
+    return vec2(Floats(m.vertices).data[vertex*8+6],Floats(m.vertices).data[vertex*8+7]);
+}
+float alphaTexel(Material m,ivec2 p) {
+    ivec2 size=ivec2(m.width,m.height);
+    p.x=(m.samplerFlags&1)!=0?clamp(p.x,0,size.x-1):((p.x%size.x)+size.x)%size.x;
+    p.y=(m.samplerFlags&2)!=0?clamp(p.y,0,size.y-1):((p.y%size.y)+size.y)%size.y;
+    return float(Words(m.alpha).data[p.y*size.x+p.x]>>24)/255;
+}
+bool opaqueHit(rayQueryEXT query) {
+    Material m=Materials(materials[rayQueryGetIntersectionInstanceCustomIndexEXT(query,false)]).m[rayQueryGetIntersectionGeometryIndexEXT(query,false)];
+    if(m.alpha==uint64_t(0)) return true;
+    uint first=m.first+rayQueryGetIntersectionPrimitiveIndexEXT(query,false)*3;
+    vec2 bary=rayQueryGetIntersectionBarycentricsEXT(query,false);
+    vec2 uv=vertexUV(m,first)*(1-bary.x-bary.y)+vertexUV(m,first+1)*bary.x+vertexUV(m,first+2)*bary.y;
+    vec2 p=uv*vec2(m.width,m.height)-.5;
+    if((m.samplerFlags&4)!=0) return alphaTexel(m,ivec2(floor(p+.5)))>=m.cutoff;
+    ivec2 base=ivec2(floor(p)); vec2 f=fract(p);
+    float a=mix(mix(alphaTexel(m,base),alphaTexel(m,base+ivec2(1,0)),f.x),
+                mix(alphaTexel(m,base+ivec2(0,1)),alphaTexel(m,base+ivec2(1,1)),f.x),f.y);
+    return a>=m.cutoff;
+}
+
+vec4 traceAO(ivec2 pixel) {
+    // Store the selected full-resolution sample's view depth for bilateral upsampling.
+    ivec2 full=min(pixel*2+1,depthSize()-1);
+    float depth=depthAt(full);
+    vec3 p=positionAt(full);
+    float cameraDistance=length(p);
+    if(depth<=0 || depth>=.999999 || p.z<=0 || cameraDistance>=ao.settings.w) return vec4(1,p.z,0,0);
+    vec3 l=positionAt(full-ivec2(1,0)), r=positionAt(full+ivec2(1,0));
+    vec3 t=positionAt(full-ivec2(0,1)), b=positionAt(full+ivec2(0,1));
+    vec3 dx=abs(p.z-l.z)<abs(r.z-p.z)?p-l:r-p;
+    vec3 dy=abs(p.z-t.z)<abs(b.z-p.z)?p-t:b-p;
+    vec3 n=cross(dx,dy);
+    if(dot(n,n)<1e-12) return vec4(1,p.z,0,0);
+    n=normalize(n);
+    if(dot(n,p)>0) n=-n;
+    n=normalize(mat3(ao.camera)*n);
+    vec3 world=(ao.camera*vec4(p,1)).xyz;
+    vec3 tangent=normalize(cross(abs(n.y)<.95?vec3(0,1,0):vec3(1,0,0),n));
+    vec3 bitangent=cross(n,tangent);
+    // Fixed, world-anchored rotation: no per-frame random flicker or history machinery.
+    uvec3 cell=uvec3(ivec3(floor(world*64)));
+    uint hash=cell.x*1597334677u ^ cell.y*3812015801u ^ cell.z*2798796415u;
+    hash^=hash>>16; hash*=2246822519u; hash^=hash>>13;
+    float angle=6.2831853*float(hash&65535u)/65536;
+    float occlusion=0;
+    uint hitCount=0;
+    for(int i=0;i<4;++i) {
+        float u=(float(i)+.5)/4;
+        float phi=angle+float(i)*2.39996323;
+        vec3 direction=tangent*cos(phi)*sqrt(u)+bitangent*sin(phi)*sqrt(u)+n*sqrt(1-u);
+        rayQueryEXT query;
+        rayQueryInitializeEXT(query,scene,0,255,
+            world+n*ao.settings.y,.01,direction,ao.settings.x);
+        while(rayQueryProceedEXT(query)) {
+            if(rayQueryGetIntersectionTypeEXT(query,false)==gl_RayQueryCandidateIntersectionTriangleEXT && opaqueHit(query))
+                rayQueryConfirmIntersectionEXT(query);
+        }
+        if(rayQueryGetIntersectionTypeEXT(query,true)==gl_RayQueryCommittedIntersectionTriangleEXT) {
+            float distance=rayQueryGetIntersectionTEXT(query,true);
+            occlusion+=1-smoothstep(0,ao.settings.x,distance);
+            ++hitCount;
+        }
+    }
+    atomicAdd(groupRays,4); atomicAdd(groupHits,hitCount);
+    float fade=1-smoothstep(ao.settings.w*.7,ao.settings.w,cameraDistance);
+    return vec4(1-min(.55,occlusion*.25*ao.settings.z*fade),p.z,0,0);
+}
+void main() {
+    if(gl_LocalInvocationIndex==0) { groupRays=0; groupHits=0; }
+    barrier();
+    ivec2 p=ivec2(gl_GlobalInvocationID.xy);
+    if(all(lessThan(p,imageSize(resultAO)))) imageStore(resultAO,p,traceAO(p));
+    barrier();
+    if(gl_LocalInvocationIndex==0) { atomicAdd(counters.rays,groupRays); atomicAdd(counters.hits,groupHits); }
+}

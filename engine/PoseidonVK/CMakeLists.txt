@@ -57,12 +57,30 @@ foreach(kind fxaa smaa_edge smaa_weight smaa_blend aa_composite aa_composite_ms 
             ThirdParty/SMAA/SMAA.hlsl ThirdParty/FXAA/Fxaa3_11.h VERBATIM)
     list(APPEND VK_SHADER_HEADERS "${header}")
 endforeach()
+foreach(kind rtao rtao_ms rtao_filter rtao_filter_ms)
+    set(stage comp)
+    if(kind MATCHES "filter")
+        set(stage frag)
+    endif()
+    string(REGEX REPLACE "_ms$" "" source "${kind}")
+    set(defines)
+    if(kind MATCHES "_ms$")
+        set(defines -DMULTISAMPLE_DEPTH=1)
+    endif()
+    set(header "${CMAKE_CURRENT_BINARY_DIR}/generated/PoseidonVK/Shaders/${kind}.${stage}.hpp")
+    add_custom_command(OUTPUT "${header}"
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/generated/PoseidonVK/Shaders"
+        COMMAND "${Vulkan_GLSLANG_VALIDATOR_EXECUTABLE}" -V --target-env vulkan1.2 ${defines}
+            --vn "Cwr${kind}_${stage}" -o "${header}" "${CMAKE_CURRENT_SOURCE_DIR}/Shaders/${source}.${stage}"
+        DEPENDS "Shaders/${source}.${stage}" Shaders/rtao_depth.glsl VERBATIM)
+    list(APPEND VK_SHADER_HEADERS "${header}")
+endforeach()
 add_custom_target(PoseidonVKShaders DEPENDS ${VK_SHADER_HEADERS})
 
 add_library(PoseidonVK STATIC VulkanContext.cpp VulkanContext_Gamma.cpp VulkanContext_SSAO.cpp VulkanContext_Triangle.cpp VulkanContext_Mesh.cpp VulkanContext_Texture.cpp TextureVK.cpp BufferVK.cpp VertexBufferVK.cpp
     EngineVK.cpp EngineVK_Shadow.cpp VulkanContext_Shadow.cpp EngineVK_Mesh.cpp EngineVK_2D.cpp EngineVK_Software.cpp EngineVK_Unsupported.cpp GraphicsBackendVK.cpp)
 add_dependencies(PoseidonVK PoseidonVKShaders)
-target_sources(PoseidonVK PRIVATE VulkanContext_AA.cpp EngineVK_Temporal.cpp EngineVK_Atmosphere.cpp)
+target_sources(PoseidonVK PRIVATE VulkanContext_AA.cpp EngineVK_Temporal.cpp EngineVK_Atmosphere.cpp EngineVK_RTAO.cpp)
 target_include_directories(PoseidonVK PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated")
 target_link_libraries(PoseidonVK PUBLIC Poseidon Vulkan::Vulkan)
 if(WIN32)
@@ -87,6 +105,7 @@ target_include_directories(PoseidonVKPolicyTests PRIVATE "${CMAKE_CURRENT_BINARY
 target_link_libraries(PoseidonVKPolicyTests PRIVATE Vulkan::Vulkan)
 add_test(NAME PoseidonVKPolicyTests COMMAND PoseidonVKPolicyTests)
 foreach(target PoseidonVK PoseidonVKPolicyTests)
+    target_sources(${target} PRIVATE VulkanContext_RTAO.cpp)
     target_sources(${target} PRIVATE VulkanContext_FSR.cpp VulkanContext_HDR.cpp VulkanContext_Bloom.cpp VulkanContext_Atmosphere.cpp)
     if(TARGET CwrFsr3)
         target_link_libraries(${target} PRIVATE CwrFsr3)

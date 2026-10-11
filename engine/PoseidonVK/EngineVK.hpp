@@ -46,6 +46,8 @@ class EngineVK final : public Engine
     void UpdateAtmosphere();
     bool UsesHDRLighting() const override { return true; }
     bool SetSSAO(bool enabled, float strength, float radius, float bias, float fade) override;
+    RString SetRTAO(RString mode) override { return _vk.SetRTAO(static_cast<const char*>(mode)).c_str(); }
+    void CollectRTAOScene();
     bool InitDrawDone() override { return _vk.FrameOpen(); }
     bool IsAbleToDraw() override { return !_failed && !_paused && IsOpen(); }
     void Clear(bool clearZ = true, bool clear = true, PackedColor color = PackedColor(0)) override;

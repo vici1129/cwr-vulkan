@@ -130,6 +130,17 @@ void VulkanContext::CreateInstance(const char* const* extensions, uint32_t count
     app.pApplicationName = "CWR Remastered";
     app.pEngineName = "PoseidonVK (diagnostic indexed rendering)";
     app.apiVersion = VK_API_VERSION_1_0;
+    if (const char* opt = std::getenv("CWR_VK_RTAO"); opt && std::strcmp(opt, "1") == 0)
+    {
+        uint32_t version = VK_API_VERSION_1_0;
+        auto enumerate = reinterpret_cast<PFN_vkEnumerateInstanceVersion>(vkGetInstanceProcAddr(nullptr, "vkEnumerateInstanceVersion"));
+        if (enumerate && enumerate(&version) == VK_SUCCESS && version >= VK_API_VERSION_1_2)
+        {
+            app.apiVersion = VK_API_VERSION_1_2;
+            _rtaoRequested = true;
+        }
+        else _rtaoReason = "requires a Vulkan 1.2 loader";
+    }
 #ifdef CWR_FSR3
     if (const char* opt = std::getenv("CWR_VK_FSR"); opt && std::strcmp(opt, "1") == 0)
     {
@@ -381,6 +392,52 @@ void VulkanContext::CreateDevice(VkSurfaceKHR surface)
     }
     else if (_fsrRequested) _fsrReason = "requires a Vulkan 1.2 device";
 #endif
+    VkPhysicalDeviceRayQueryFeaturesKHR ray{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_QUERY_FEATURES_KHR};
+    VkPhysicalDeviceAccelerationStructureFeaturesKHR accel{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR};
+    VkPhysicalDeviceBufferDeviceAddressFeatures address{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES};
+    if (_rtaoRequested)
+    {
+        _rtaoReason = "requires Vulkan 1.2, rayQuery, accelerationStructure, bufferDeviceAddress, shaderInt64 and a compute-capable graphics queue";
+        bool supported = properties.apiVersion >= VK_API_VERSION_1_2;
+        for (const char* ext : {VK_KHR_RAY_QUERY_EXTENSION_NAME, VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME,
+                               VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME})
+            if (!HasExtension(extensions, ext)) { supported = false; _rtaoReason = std::string("missing ") + ext; }
+        if (supported)
+        {
+            VkPhysicalDeviceFeatures2 queried{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2};
+            queried.pNext = &ray; ray.pNext = &accel; accel.pNext = &address;
+            auto query = reinterpret_cast<PFN_vkGetPhysicalDeviceFeatures2>(vkGetInstanceProcAddr(_instance, "vkGetPhysicalDeviceFeatures2"));
+            if (query) query(_physical, &queried);
+            uint32_t count = 0;
+            vkGetPhysicalDeviceQueueFamilyProperties(_physical, &count, nullptr);
+            std::vector<VkQueueFamilyProperties> q(count);
+            vkGetPhysicalDeviceQueueFamilyProperties(_physical, &count, q.data());
+            supported = availableFeatures.shaderInt64 && ray.rayQuery && accel.accelerationStructure && address.bufferDeviceAddress &&
+                (q[_families.graphics].queueFlags & VK_QUEUE_COMPUTE_BIT);
+            VkFormatProperties format{};
+            vkGetPhysicalDeviceFormatProperties(_physical, VK_FORMAT_R32G32B32_SFLOAT, &format);
+            supported &= (format.bufferFeatures & VK_FORMAT_FEATURE_ACCELERATION_STRUCTURE_VERTEX_BUFFER_BIT_KHR) != 0;
+        }
+        if (supported)
+        {
+            ray = {VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_QUERY_FEATURES_KHR}; ray.rayQuery = VK_TRUE;
+            accel = {VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR}; accel.accelerationStructure = VK_TRUE;
+            address = {VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES}; address.bufferDeviceAddress = VK_TRUE;
+            ray.pNext = &accel;
+            address.pNext = const_cast<void*>(info.pNext);
+            accel.pNext = &address;
+#ifdef CWR_FSR3
+            if (_fsrAvailable) { f12.bufferDeviceAddress = VK_TRUE; accel.pNext = const_cast<void*>(info.pNext); }
+#endif
+            info.pNext = &ray;
+            for (const char* ext : {VK_KHR_RAY_QUERY_EXTENSION_NAME, VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME,
+                                   VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME}) enabled.push_back(ext);
+            info.enabledExtensionCount = uint32_t(enabled.size()); info.ppEnabledExtensionNames = enabled.data();
+            _rtaoAvailable = true;
+            features.shaderInt64 = VK_TRUE;
+            _rtaoReason = "available";
+        }
+    }
     _textureAnisotropy = TextureAnisotropy(features.samplerAnisotropy, properties.limits.maxSamplerAnisotropy);
     Check(vkCreateDevice(_physical, &info, nullptr, &_device), "create logical device");
     if (_hdrMetadataEnabled)
@@ -395,6 +452,7 @@ void VulkanContext::CreateDevice(VkSurfaceKHR surface)
     if (_present != _graphics)
         Name(VK_OBJECT_TYPE_QUEUE, ObjectHandle(_present), "PoseidonVK present queue");
     CreateFrameResources();
+    if (_rtaoAvailable) InitRTAO();
     std::fprintf(stderr, "Vulkan: logical device ready: %s, two frame slots\n", _deviceName.c_str());
     std::fprintf(stderr, "Vulkan: linear texture anisotropy %.1fx (supported=%u); point samplers unchanged\n",
                  _textureAnisotropy, features.samplerAnisotropy);
@@ -451,6 +509,7 @@ void VulkanContext::CreateFrameResources()
 
 void VulkanContext::DestroySwapchain() noexcept
 {
+    DestroyRTAOTargets();
     DestroyAAResources();
     _commands = {};
     for (auto& pipeline : _shadowPipelines)
@@ -825,6 +884,7 @@ bool VulkanContext::BeginFrame(uint32_t width, uint32_t height)
         }
         frame.ssaoTimestamped = false;
     }
+    RetireRTAO();
     frame.meshes.clear();
     if (frame.csmTimestamped)
     {
@@ -1102,6 +1162,7 @@ unsigned VulkanContext::Shutdown() noexcept
     {
         // Also safe after partial initialization or device loss; shutdown must not throw.
         vkDeviceWaitIdle(_device);
+        DestroyRTAO();
         DestroyShadowResources();
         for (auto& entry : _meshes)
             if (auto mesh = entry.lock())
