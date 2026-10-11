@@ -181,7 +181,16 @@ void EngineVK::BeginWorldEffects(bool enabled)
         const auto& p = GScene->GetCamera()->ProjectionNormal();
         _worldProjection = {p(0, 0), p(1, 1), p(2, 2), p.Position().Z()};
         _vk.BeginAAWorld();
-        CollectRTAOScene();
+        try
+        {
+            CollectRTAOScene();
+        }
+        catch (const std::exception& error)
+        {
+            if (!_vk.RTReflectionsEnabled())
+                throw;
+            _vk.FailRTReflections(error.what());
+        }
         UpdateAtmosphere();
         BeginTemporalWorld();
     }

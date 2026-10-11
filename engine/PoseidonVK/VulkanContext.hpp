@@ -99,6 +99,7 @@ struct RTAORange
     std::shared_ptr<TextureImage> alpha;
     uint32_t sampler = 0;
     float cutoff = 0;
+    std::shared_ptr<TextureImage> color; // existing decoded RGBA, only needed for reflection hit shading
     bool operator==(const RTAORange&) const = default;
 };
 struct RTAOInstance
@@ -168,7 +169,11 @@ class VulkanContext
     bool RTAOEnabled() const { return _rtaoEnabled && _rtaoAvailable; }
     std::string SetRTShadows(std::string_view mode);
     bool RTShadowsEnabled() const { return _rtShadowsEnabled && _rtaoAvailable; }
-    bool RaySceneEnabled() const { return RTAOEnabled() || RTShadowsEnabled(); }
+    std::string SetRTReflections(std::string_view mode);
+    void FailRTReflections(std::string_view reason);
+    bool RTReflectionsEnabled() const { return _rtReflectionsEnabled && _rtaoAvailable; }
+    bool RaySceneEnabled() const { return RTAOEnabled() || RTShadowsEnabled() || RTReflectionsEnabled(); }
+    void SetReflectionLighting(const std::array<std::array<float, 4>, 8>& data) { _reflectionLighting = data; }
     void SetRTSun(const std::array<float, 4>& sun) { _rtSun = sun; }
     void SetRTCoverage(uint32_t terrain, uint32_t foliage)
     {
@@ -214,6 +219,9 @@ class VulkanContext
     struct RTAOState;
     std::shared_ptr<RTAOState> _rtao;
     bool _rtShadowsEnabled = false, _rtShadowTargets = false;
+    bool _rtReflectionsEnabled = false, _rtWaterTargets = false;
+    std::string _rtReflectionFailure;
+    std::array<std::array<float, 4>, 8> _reflectionLighting{};
     std::array<float, 4> _rtSun{};
     uint32_t _rtTerrain = 0, _rtFoliage = 0;
     bool _rtaoRequested = false, _rtaoAvailable = false, _rtaoEnabled = false;
@@ -376,7 +384,7 @@ class VulkanContext
     };
     struct AATarget
     {
-        DepthAttachment color, depth, multisample, edges, weights, filtered, motion, sunlight;
+        DepthAttachment color, depth, multisample, edges, weights, filtered, motion, sunlight, water;
         VkDescriptorSet motionSet = VK_NULL_HANDLE;
         VkImageView sampledDepth = VK_NULL_HANDLE;
         VkDescriptorSet colorSet = VK_NULL_HANDLE, depthSet = VK_NULL_HANDLE;

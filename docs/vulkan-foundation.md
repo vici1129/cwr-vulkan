@@ -1,5 +1,167 @@
 # Vulkan backend development
 
+## First hardware water reflections (2026-10-12)
+
+Built on public **eebe9bcb**, default **Off**. Startup still uses
+`CWR_VK_RTAO=1`; reflections do not require RTAO or RT sunlight to be enabled.
+
+```sqf
+triRTReflections "on"
+triRTReflections "off"
+triRTReflections "status"
+```
+
+This is a Vulkan `rayQueryEXT` closest-hit implementation, not SSR. It uses the
+existing capability checks, spatial collection, mesh buffers, alpha data, BLAS
+cache and two frame-slot TLAS structures. All three effects share that scene.
+Independent MRT blending is required. Missing capabilities/startup opt-in return
+the reason without changing ordinary rendering. Optional resource failures
+disable reflections, retain ordinary water and report the failure; retry requires
+a restart. GL33 returns the Vulkan-required reply. No private NGX code is included.
+
+### Real water surfaces and textured hits
+
+Landscape water uses `SpecularTexture` with the legacy **Detail** shader family,
+not the explicit Water family. A no-op-by-default engine draw marker identifies
+native landscape water without changing that shader selection. Software water
+uses the existing `CaptureTemporalTerrain(..., water)` boundary. Off retains the
+original diffuse animation, secondary-texture sampling, lighting and composition.
+
+With reflections selected, an FP16 world attachment records only rasterized
+water's linear view depth, world-normal X/Z and fog visibility. Normals combine
+the actual water triangle with the existing specular/bump texture and slow wave
+UV translation; software shoreline UVs already contain their water animation.
+Foreground surfaces invalidate this record; projected shadows retain it. Water
+position reconstruction removes projection jitter and uses the real surface
+depth, camera transform and projection, not a guessed screen-wide water plane.
+
+One ray per qualifying water pixel travels at most **70 m** from a **4 cm**
+surface offset (2 cm ray minimum). Receivers fade from 60 to **80 m**. The shared
+160 m scene neighborhood covers that reach, independently of camera visibility.
+Closest committed intersections provide instance/geometry/primitive IDs,
+barycentric UVs and triangle positions. Real decoded RGBA textures are reused
+through the existing alpha-data buffers, with point/bilinear sampling and wrap
+flags; no arbitrary object colors or screen-color hit substitution is used.
+
+- Rigid, undamaged visual-LOD0 buildings, piers, walls and eligible static objects
+  reuse their existing mesh buffers/transforms. Real alpha tests preserve window,
+  fence and static vegetation gaps. Animated/deforming/proxy/hidden objects,
+  dynamic textures, terrain-fitted objects and genuine blended effects remain
+  outside this shared scene.
+- Nearby terrain reuses the cached, actual-height 16x16-cell patches introduced
+  by RT sunlight. Reflection-enabled patches group triangles by their actual
+  landscape texture and add world-grid UVs with existing terrain UV jitter.
+  Texturing activation can create a new cached mesh/material subset once; stable
+  frames do not rebuild it. No whole-island reconstruction or second AS system.
+- Hit lighting is deliberately basic: decoded base color, geometric normal,
+  engine sun/ambient colors, eye accommodation, night response and distance fog.
+  It is **not** a full material renderer: local lights, emissive overrides,
+  material specular, detail textures and secondary shadow rays are not evaluated.
+  Clamped terrain transition textures and raster terrain LOD can differ from the
+  bounded reflected height/UV representation.
+
+Misses or untextured hits use a gradient derived from the existing weather sky
+texture's horizon/zenith colors plus the engine sun-sky lobe and night response.
+This is not a reflected cloud/stars/moon cubemap. Excluded geometry is absent from
+the TLAS, so a ray may instead reach supported geometry behind it or the sky.
+Far/underwater/unsupported receivers retain ordinary water.
+
+Fresnel weight ranges from 0.025 to 0.425 before distance fading, retaining the
+original water texture rather than replacing it with a perfect mirror. A small
+3x3 depth-aware water-only filter blends into linear HDR world color before
+TAA/FSR, bloom and tone mapping. Original direct sunlight/CSM and AO selections,
+fog/atmosphere, shafts, overlays and HDR headroom remain in their established
+pipeline. Reflection hit fog uses the engine fog color rather than a second
+volumetric evaluation. Water is marked reactive for TAA/FSR; reflected geometry
+does not pretend to have valid stationary-surface motion vectors. This avoids
+long reflection history trails but leaves some fine-edge shimmer/aliasing.
+
+`status` separates **completed water rays**, intersections and **successfully
+texture-shaded hits**, with terrain and alpha-tested shaded-hit counts. Shared
+live/cached BLAS, TLAS and instance/triangle counts follow. Execution booleans
+are lifetime evidence, not capability initialization; last samples may precede
+an Off toggle. A dispatch with no visible qualifying water has zero water rays.
+`CWR_VK_PROFILE=1` reports separate shared BLAS/TLAS, fused trace+hit-shading,
+filter/composition and complete GPU-frame intervals. Trace and hit shading are
+one compute shader, not two separately timed passes.
+
+### Coastal qualification and costs
+
+RTX 4060 Ti 8 GB / driver 617.14, isolated stock GOG Malden Infantry gameplay,
+900 m visibility. Useful shoreline views were `[3500,8,3230,1,-.1,0]` and
+`[3520,8,3240,1,-.5,.2]` (engine X/up/Z, direction). Original water Off/On captures
+show recognizable house walls/roofs, pier decking/posts, trees and beach terrain
+in the water. Tilting down retains house/tree reflections while the source
+geometry leaves the camera view. Actual foliage holes remain open. Miss-heavy
+open-water views use the weather-colored sky. These are sampled observations,
+not a promise of complete scene coverage or flicker-free edges.
+
+The close view used **18 BLAS, two TLAS, 80 instances, 11,080 triangles**, including
+nine terrain patches and 56 extended alpha subsets. A representative 1080p TAA
+sample traced **1,606,710 rays**, with **235,969 textured hits** including
+**161,118 terrain hits and 18,933 alpha-tested hits**. Reflection-only operation
+also recorded real hits with both other RT selections Off. Native overlays were
+unaffected; dry inland views executed zero water rays.
+
+Noon, dawn, overcast/night, animated water with a 12-step moving camera,
+inland/coast scene changes, TAA, FSR Quality/Native, MSAA2/4, SMAA, RTAO and RT
+sunlight together, atmosphere/bloom/shafts, resizing to 1280x720 and
+minimize/restore were exercised. Night did not retain daylight-colored
+reflections. The main run closed normally after **25,902 submitted frames with
+zero core/synchronization validation errors or warnings**. HDR requested the
+existing SDR fallback: FP16 composition was exercised, **physical HDR10 output
+was unavailable**. These are developer launches, not Steam-route qualification.
+
+The final 2560x1440 validation run closed after **25,342 submitted/presented
+frames with zero core/synchronization errors or warnings**. It repeated the AA
+and combined-RT checks, then independently disabled RTAO/RT sunlight while
+retaining reflections and exercised SSAO. A TAA sample recorded 2,857,659 water
+rays and 419,614 textured hits (286,668 terrain, 33,818 alpha-tested). A downward
+off-screen-source view retained recognizable roof/tree reflections.
+
+An additional Everon Heavy Metal coastal run, built **without FSR**, exercised
+reflection-only TAA followed by all three RT effects and MSAA4/overcast. At
+`[5100,16,3780,0,-.35,1]` it recorded 847,257 water rays and 114,842 shaded hits,
+predominantly the actual steep terrain bank (114,688); that bank legitimately
+blocks most village reflections. It closed after **16,452 frames, zero core/sync
+findings**. The no-opt-in Vulkan 1.0 menu smoke retained zero AS/rays and closed
+after 803 frames with zero findings. GL33-only menu startup returned the
+Vulkan-required reply and closed normally.
+
+Performance uses the close view above, noon/clear, VSync off, validation off,
+atmosphere/bloom/shafts off and CSM on. Each measurement warms three seconds and
+collects eight seconds; Off/On baselines repeat in reverse order. Automatic GPU
+clocks differ between modes, so subtracting whole-frame times is not a reliable
+incremental reflection cost. Complete GPU frame means the submitted workload,
+not CPU scene collection/recording or presentation latency.
+
+| Output | Mode | Trace + hit shading ms | Filter + blend ms | Complete GPU frame ms |
+| --- | --- | --- | --- | --- |
+| 1920x1080 | Original water, AA/RT Off | n/a | n/a | 1.812 |
+| 1920x1080 | Reflections only, AA Off | 0.536 | 0.277 | 2.039 |
+| 1920x1080 | All RT + TAA | 0.363 | 0.142 | 2.226 |
+| 1920x1080 | All RT + FSR Native | 0.358 | 0.137 | 2.694 |
+| 1920x1080 | All RT + FSR Quality | 0.189 | 0.069 | 2.056 |
+| 2560x1440 | Original water, AA/RT Off | n/a | n/a | 1.866 |
+| 2560x1440 | Reflections only, AA Off | 0.660 | 0.311 | 2.148 |
+| 2560x1440 | All RT + TAA | 0.637 | 0.301 | 3.628 |
+| 2560x1440 | All RT + FSR Native | 0.614 | 0.307 | 4.798 |
+| 2560x1440 | All RT + FSR Quality | 0.295 | 0.085 | 2.650 |
+
+Initial 1080p shared construction of 18 BLAS/one TLAS measured **0.568/0.251 ms**;
+the second frame slot builds its own TLAS. Warm stationary frames reuse both
+levels (empty timestamp intervals approximately 0.0001 ms, not hidden rebuilds).
+The 1440p initial build measured **0.364/0.164 ms**, with **0.172 ms** for the
+other slot's TLAS. Different automatic clock states explain why AS time is not
+resolution-monotonic. No AS builds occurred in the warm fixed-camera windows.
+
+Focused tests: Vulkan **991 assertions / 75 cases**, GL33-only **987 / 74**,
+driver-free Vulkan policy/lifetime **390 checks**. The CPU-only header test also
+passes with PCH disabled and a rejecting Vulkan-header sentinel. The deliberate
+policy teardown-error fixture is not an actual GPU validation finding.
+Vulkan builds with/without FSR and the GL33-only build pass; reflection compute,
+filter, MSAA variants and water MRT SPIR-V pass SDK validation.
+
 ## First hardware ray-query sunlight shadows (2026-10-12)
 
 Built on public RTAO commit **c87d79b**, retaining the subsequent CPU-only

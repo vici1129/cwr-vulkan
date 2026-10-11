@@ -35,6 +35,7 @@ class EngineVK final : public Engine
     void CaptureTemporalMesh(const Shape&, TLVertexTable&, int) override;
     void CaptureTemporalTerrain(TLVertexTable&, bool) override;
     void SetTemporalTerrain(bool terrain) override { _temporalTerrain = terrain; }
+    void SetWaterSurface(bool water) override { _waterSurface = water; }
     void ResetTemporalHistory() override;
     RString SetAntiAliasing(RString mode) override { return _vk.SetAntiAliasing(static_cast<const char*>(mode)).c_str(); }
     bool SetWorldRenderScale(int percent) override { return _vk.SetRenderScale(percent); }
@@ -52,12 +53,19 @@ class EngineVK final : public Engine
     {
         std::vector<float> heights;
         std::shared_ptr<vk::MeshBuffers> mesh;
+        std::vector<vk::RTAORange> ranges;
+        bool textured = false;
     };
     std::map<std::pair<int, int>, RTTerrainPatch> _rtTerrainPatches;
     const void* _rtLandscape = nullptr;
     float _rtTerrainGrid = 0;
     RString SetRTShadows(RString mode) override { return _vk.SetRTShadows(static_cast<const char*>(mode)).c_str(); }
     bool SeparateSunlight() const override { return _vk.RTShadowsEnabled(); }
+    RString SetRTReflections(RString mode) override
+    {
+        return _vk.SetRTReflections(static_cast<const char*>(mode)).c_str();
+    }
+    bool _waterSurface = false;
     bool InitDrawDone() override { return _vk.FrameOpen(); }
     bool IsAbleToDraw() override { return !_failed && !_paused && IsOpen(); }
     void Clear(bool clearZ = true, bool clear = true, PackedColor color = PackedColor(0)) override;

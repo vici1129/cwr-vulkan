@@ -2,6 +2,7 @@
 #include <PoseidonVK/VertexBufferVK.hpp>
 #include <PoseidonVK/ShapeTransformVK.hpp>
 #include <PoseidonVK/ShapeLightingVK.hpp>
+#include <Poseidon/Core/Global.hpp>
 #include <Poseidon/World/Scene/Scene.hpp>
 #include <Poseidon/World/Scene/Camera/Camera.hpp>
 #include <Poseidon/Graphics/Core/TLVertex.hpp>
@@ -79,6 +80,26 @@ void EngineVK::PrepareTriangleTL(const MipInfo& mip, const render::LegacySpec& s
         }
     }
     _sectionSampler = vk::ShapeSampler(spec);
+    _lighting.rtWater = {};
+    // Landscape water deliberately uses Detail, not the legacy Water shader family.
+    // The explicit draw boundary also avoids labelling arbitrary specular materials as water.
+    if (_waterSurface && _vk.RTReflectionsEnabled())
+    {
+        try
+        {
+            if (!_sectionDetail)
+                if (auto* texture = dynamic_cast<TextureVK*>(
+                        _textures.Load(Remaster >> "CfgDetailTextures" >> "specular").GetRef()))
+                    _sectionDetail = texture->Image(_vk);
+            // Same slow wave translation used by legacy TGWater; original color sampling stays unchanged.
+            const float move = std::fmod(Glob.time.toFloat() * .3f + std::sin(Glob.time.toFloat() * .5f) * .5f, 2.f);
+            _lighting.rtWater = {_sectionDetail ? 1.f : 0.f, move * .5f, move, 0};
+        }
+        catch (const std::exception& error)
+        {
+            _vk.FailRTReflections(error.what());
+        }
+    }
     _sectionShadow = ((_shapeFlags | render::MergeLegacy(spec)) & IsShadow) != 0;
     vk::ShapeFog(_lighting, _sectionShadow ? GScene->GetShadowFogMinRange() : GScene->GetFogMinRange(),
                  _sectionShadow ? GScene->GetShadowFogMaxRange() : GScene->GetFogMaxRange(), _fogColor,

@@ -146,6 +146,7 @@ void EngineVK::CaptureTemporalMesh(const Shape& shape, TLVertexTable& table, int
 }
 void EngineVK::CaptureTemporalTerrain(TLVertexTable& table, bool water)
 {
+    _waterSurface = water;
     table.previousClip.clear();
     if (!_vk.TemporalEnabled() || !_vk.TemporalHistoryValid() || water)
         return;

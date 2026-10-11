@@ -765,17 +765,29 @@ bool VulkanContext::RecreateSwapchain(uint32_t width, uint32_t height)
     }
     CreateGammaPass(format.format);
     CreateSSAOResources(SceneFormat);
-    try { CreateAAResources(SceneFormat); }
-    catch (const std::exception& error)
+    for (;;)
     {
-        if (!IsFSR(_requestedAA)) throw;
-        _fsrAvailable = false;
-        _fsrReason = error.what();
-        std::fprintf(stderr, "FSR selection failed: %s; restoring ordinary AA\n", error.what());
-        DestroyAAResources();
-        _requestedAA = IsFSR(previousAA) ? AAMode::Off : previousAA;
-        _requestedScale = previousScale;
-        CreateAAResources(SceneFormat);
+        try
+        {
+            CreateAAResources(SceneFormat);
+            break;
+        }
+        catch (const std::exception& error)
+        {
+            if (RTReflectionsEnabled())
+                FailRTReflections(error.what());
+            else if (IsFSR(_requestedAA))
+            {
+                _fsrAvailable = false;
+                _fsrReason = error.what();
+                std::fprintf(stderr, "FSR selection failed: %s; restoring ordinary AA\n", error.what());
+                _requestedAA = IsFSR(previousAA) ? AAMode::Off : previousAA;
+                _requestedScale = previousScale;
+            }
+            else
+                throw;
+            DestroyAAResources();
+        }
     }
     _recreate = false;
     std::fprintf(stderr, "Vulkan HDR: %s; format=%d colorSpace=%d scene=RGBA16F peak=%.0f white=%.0f metadata=%s\n",

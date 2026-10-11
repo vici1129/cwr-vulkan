@@ -12,6 +12,23 @@ layout(set=0,binding=0) uniform sampler2D sceneDepth;
 ivec2 depthSize() { return textureSize(sceneDepth,0); }
 float depthAt(ivec2 p) { return texelFetch(sceneDepth,clamp(p,ivec2(0),depthSize()-1),0).r; }
 #endif
+#ifdef WATER_REFLECTION
+#ifdef MULTISAMPLE_DEPTH
+layout(set=0,binding=7) uniform sampler2DMS waterSurface;
+vec4 waterAt(ivec2 p) {
+    p=clamp(p,ivec2(0),depthSize()-1);
+    vec4 w=vec4(0); float closest=1e30;
+    for(int i=0;i<textureSamples(waterSurface);++i) {
+        vec4 s=texelFetch(waterSurface,p,i);
+        if(s.w>0 && s.w<closest) {w=s; closest=s.w;}
+    }
+    return w;
+}
+#else
+layout(set=0,binding=7) uniform sampler2D waterSurface;
+vec4 waterAt(ivec2 p) {return texelFetch(waterSurface,clamp(p,ivec2(0),depthSize()-1),0);}
+#endif
+#endif
 layout(push_constant) uniform Parameters {
     mat4 camera;
     vec4 projection;

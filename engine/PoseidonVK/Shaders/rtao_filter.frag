@@ -5,7 +5,18 @@ layout(set=0,binding=4) uniform sampler2D rawAO;
 layout(location=0) in vec2 texCoord;
 layout(location=0) out vec4 outColor;
 void main() {
-#ifdef SUN_SHADOW
+#ifdef WATER_REFLECTION
+    ivec2 p=ivec2(gl_FragCoord.xy); vec4 w=waterAt(p);
+    if(w.w<=0) {outColor=vec4(0);return;}
+    vec4 sum=vec4(0);float weight=0;
+    for(int y=-1;y<=1;++y) for(int x=-1;x<=1;++x) {
+        ivec2 q=clamp(p+ivec2(x,y),ivec2(0),depthSize()-1);vec4 other=waterAt(q);
+        if(other.w<=0) continue;
+        float v=exp(-abs(w.w-other.w)/max(.05,w.w*.002))*exp(-float(x*x+y*y));
+        sum+=texelFetch(rawAO,q,0)*v;weight+=v;
+    }
+    outColor=sum/max(weight,.0001);
+#elif defined(SUN_SHADOW)
     // Full-resolution deterministic visibility needs no stochastic denoiser.
     outColor=vec4(texelFetch(rawAO,ivec2(gl_FragCoord.xy),0).rgb,0);
 #else

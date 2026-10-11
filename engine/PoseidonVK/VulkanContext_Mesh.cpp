@@ -6,6 +6,8 @@
 #include <PoseidonVK/Shaders/shape.vert.hpp>
 #include <PoseidonVK/Shaders/shape.frag.hpp>
 #include <PoseidonVK/Shaders/shape_sun.frag.hpp>
+#include <PoseidonVK/Shaders/shape_water.frag.hpp>
+#include <PoseidonVK/Shaders/shape_water_temporal.frag.hpp>
 #include <PoseidonVK/Shaders/shape_sun_temporal.frag.hpp>
 #include <PoseidonVK/Shaders/shadow_sun.frag.hpp>
 #include <PoseidonVK/Shaders/shape_temporal.frag.hpp>
@@ -191,6 +193,11 @@ void VulkanContext::CreateShapePipeline(bool translucent, bool screen, bool dept
             shader.pCode = Cwrshadow_sun_frag;
             shader.codeSize = sizeof(Cwrshadow_sun_frag);
         }
+        if (_worldActive && _rtWaterTargets && !shadow)
+        {
+            shader.pCode = TemporalEnabled() ? Cwrshape_water_temporal_frag : Cwrshape_water_frag;
+            shader.codeSize = TemporalEnabled() ? sizeof(Cwrshape_water_temporal_frag) : sizeof(Cwrshape_water_frag);
+        }
         Require(vkCreateShaderModule(_device, &shader, nullptr, &fragment), "create fragment shader");
         VkPipelineShaderStageCreateInfo stages[2]{};
         stages[0].sType = stages[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -257,12 +264,20 @@ void VulkanContext::CreateShapePipeline(bool translucent, bool screen, bool dept
         VkPipelineColorBlendStateCreateInfo blend{VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO};
         blend.attachmentCount = 1;
         blend.pAttachments = &attachment;
-        VkPipelineColorBlendAttachmentState temporalAttachments[]{attachment, {}, {}};
+        VkPipelineColorBlendAttachmentState temporalAttachments[]{attachment, {}, {}, {}};
         if (TemporalEnabled())
         {
             // Projected shadows only modulate color; keep the receiving surface's motion.
             temporalAttachments[1].colorWriteMask = shadow ? 0 : 15;
             blend.attachmentCount = 2;
+            blend.pAttachments = temporalAttachments;
+        }
+        if (_worldActive && _rtWaterTargets)
+        {
+            // Only actual water writes a positive depth. Other visible surfaces invalidate it.
+            // Projected shadows do not replace surface identity.
+            temporalAttachments[3].colorWriteMask = shadow ? 0 : 15;
+            blend.attachmentCount = 4;
             blend.pAttachments = temporalAttachments;
         }
         if (_worldActive && _rtShadowTargets)
@@ -272,7 +287,7 @@ void VulkanContext::CreateShapePipeline(bool translucent, bool screen, bool dept
             if (shadow)
                 temporalAttachments[2] = attachment;
             temporalAttachments[2].colorWriteMask = shadow ? 7 : 15;
-            blend.attachmentCount = 3;
+            blend.attachmentCount = _rtWaterTargets ? 4 : 3;
             blend.pAttachments = temporalAttachments;
         }
         const VkDynamicState states[] = {VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR};
@@ -368,6 +383,8 @@ void VulkanContext::DrawMesh(const std::shared_ptr<MeshBuffers>& mesh, uint32_t 
     if (lighting)
     {
         auto receiver = *lighting;
+        if (!_worldActive || !_rtWaterTargets || shadow || !depthTest)
+            receiver.rtWater[0] = 0;
         if (!_worldActive || !_rtShadowTargets || shadow || blend || !depthTest || !depthWrite)
             receiver.rtSun[0] = 0;
         if (_worldActive && _atmosphereEnabled && !shadow && depthTest &&

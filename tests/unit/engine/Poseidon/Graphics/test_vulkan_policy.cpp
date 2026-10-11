@@ -384,6 +384,20 @@ int main()
         Check(context.SetSSAO(true, 0.7f, 1.2f, 0.03f, 80), "valid SSAO controls are accepted");
         Check(!context.RTAOEnabled(), "RTAO defaults off");
         Check(!context.RTShadowsEnabled(), "RT sunlight defaults off independently of AO");
+        Check(!context.RTReflectionsEnabled(), "RT water defaults off independently of AO and sunlight");
+        Check(context.SetRTReflections("on").starts_with("UNSUPPORTED:"), "RT water rejects missing ray capabilities");
+        Check(context.SSAOEnabled() && !context.RTAOEnabled() && !context.RTShadowsEnabled(),
+              "water rejection leaves other lighting selections intact");
+        Check(context.SetRTReflections("bad").starts_with("INVALID:"), "water control validates input");
+        Check(context.SetRTReflections("off").starts_with("OK:"), "ordinary water remains available");
+        Check(context.SetRTReflections("status").find("rayQueriesExecuted=no hitShadingExecuted=no") !=
+                  std::string::npos,
+              "water status distinguishes completed shading from capability initialization");
+        context.FailRTReflections("test resource unavailable");
+        Check(!context.RTReflectionsEnabled() && context.SSAOEnabled(),
+              "failed water resources preserve ordinary lighting");
+        Check(context.SetRTReflections("status").find("fallback=test resource unavailable") != std::string::npos,
+              "water resource failures expose a concrete fallback reason");
         Check(context.SetRTShadows("on").starts_with("UNSUPPORTED:"), "RT sunlight rejects missing capabilities");
         Check(context.SSAOEnabled() && !context.RTAOEnabled(), "RT shadow rejection preserves AO selection");
         Check(context.SetRTShadows("invalid").starts_with("INVALID:"), "RT sunlight validates controls");

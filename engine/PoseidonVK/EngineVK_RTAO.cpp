@@ -16,11 +16,33 @@ void EngineVK::CollectRTAOScene()
     const auto* camera = GScene->GetCamera();
     auto* land = GScene->GetLandscape();
     const auto position = camera->Position();
-    const bool shadows = _vk.RTShadowsEnabled();
+    const bool reflections = _vk.RTReflectionsEnabled();
+    const bool shadows = _vk.RTShadowsEnabled() || reflections;
     const float radius = shadows ? 160.f : 80.f;
     const auto sunDirection = -GScene->MainLight()->Direction().Normalized();
     const float daylight = std::clamp(1.f - GScene->MainLight()->NightEffect(), 0.f, 1.f);
     _vk.SetRTSun({sunDirection.X(), sunDirection.Y(), sunDirection.Z(), sunDirection.Y() > .01f ? daylight : 0.f});
+    if (reflections)
+    {
+        const auto* sun = GScene->MainLight();
+        const auto eye = GetAccomodateEye();
+        auto rgba = [](ColorVal c) { return std::array<float, 4>{c.R(), c.G(), c.B(), 1}; };
+        auto zenith = sun->SkyColor() * eye, horizon = zenith;
+        if (auto* sky = land->SkyTexture())
+        {
+            zenith = zenith * sky->GetPixel(0, 0, 0);
+            horizon = horizon * sky->GetPixel(0, 1, 1);
+        }
+        _vk.SetReflectionLighting({rgba(sun->Ambient() * eye),
+                                   rgba(sun->Diffuse() * eye),
+                                   rgba(zenith),
+                                   rgba(horizon),
+                                   rgba(sun->SunSkyColor() * eye),
+                                   rgba(_fogColor),
+                                   _vk.EyeCoef(),
+                                   {GScene->GetFogMinRange(),
+                                    1.f / std::max(1.f, GScene->GetFogMaxRange() - GScene->GetFogMinRange()), 0, 0}});
+    }
     uint32_t foliageCount = 0, terrainCount = 0;
     // Existing spatial buckets, independent of visibility and the CSM toggle.
     // AO fades out at 60m; the extra 20m covers short rays and nearby bounds.
@@ -69,6 +91,14 @@ void EngineVK::CollectRTAOScene()
                     if (alpha == AlphaStats::Blend && (!shadows || !(flags & IsTransparent)))
                         continue;
                     vk::RTAORange candidate{uint32_t(s), 0};
+                    candidate.sampler = vk::ShapeSampler(render::SplitLegacy(flags));
+                    if (reflections)
+                        if (auto* tex = dynamic_cast<TextureVK*>(texture); tex && !tex->IsDynamic())
+                        {
+                            candidate.color = tex->Image(_vk);
+                            const auto& pixels = tex->Pixels();
+                            _vk.PrepareRTAOAlpha(candidate.color, pixels.width, pixels.height, pixels.rgba.data());
+                        }
                     bool extended = false;
                     if ((flags & IsTransparent) || alpha == AlphaStats::Cutout)
                     {
@@ -150,21 +180,58 @@ void EngineVK::CollectRTAOScene()
                     for (int i = 0; i <= cells; ++i)
                         heights.push_back(land->SurfaceY((x * cells + i) * grid, (z * cells + j) * grid));
                 auto& patch = _rtTerrainPatches[key];
-                if (!patch.mesh || patch.heights != heights)
+                if (!patch.mesh || patch.heights != heights || patch.textured != reflections)
                 {
                     // Same immutable position/normal/UV layout as native shapes.
                     std::vector<std::array<float, 8>> vertices;
                     for (int j = 0; j <= cells; ++j)
                         for (int i = 0; i <= cells; ++i)
-                            vertices.push_back(
-                                {float(i) * grid, heights[j * stride + i], float(j) * grid, 0, 1, 0, 0, 0});
+                        {
+                            float wx = (x * cells + i) * grid / land->GetLandGrid(),
+                                  wz = (z * cells + j) * grid / land->GetLandGrid();
+                            // Same landscape UV jitter at the four actual land-grid corners.
+                            int lx = int(std::floor(wx)), lz = int(std::floor(wz));
+                            float u[4], v[4];
+                            land->GetRandomColor(lx, lz, u[0], v[0]);
+                            land->GetRandomColor(lx + 1, lz, u[1], v[1]);
+                            land->GetRandomColor(lx, lz + 1, u[2], v[2]);
+                            land->GetRandomColor(lx + 1, lz + 1, u[3], v[3]);
+                            auto interp = [&](float* a)
+                            {
+                                return std::lerp(std::lerp(a[0], a[1], wx - lx), std::lerp(a[2], a[3], wx - lx),
+                                                 wz - lz);
+                            };
+                            vertices.push_back({float(i) * grid, heights[j * stride + i], float(j) * grid, 0, 1, 0,
+                                                wx + interp(u), wz + interp(v)});
+                        }
                     std::vector<uint32_t> indices;
+                    std::map<TextureVK*, std::vector<uint32_t>> groups;
                     for (int j = 0; j < cells; ++j)
                         for (int i = 0; i < cells; ++i)
                         {
                             uint32_t a = j * stride + i;
-                            indices.insert(indices.end(), {a, a + 1, a + stride, a + 1, a + stride + 1, a + stride});
+                            TextureVK* texture = nullptr;
+                            if (reflections)
+                                texture = dynamic_cast<TextureVK*>(land->GetTexture(
+                                    land->GetTexture(int((z * cells + j) * grid / land->GetLandGrid()),
+                                                     int((x * cells + i) * grid / land->GetLandGrid()))));
+                            auto& group = groups[texture];
+                            group.insert(group.end(), {a, a + 1, a + stride, a + 1, a + stride + 1, a + stride});
                         }
+                    patch.ranges.clear();
+                    patch.textured = reflections;
+                    for (auto& [texture, group] : groups)
+                    {
+                        vk::RTAORange range{uint32_t(indices.size()), uint32_t(group.size())};
+                        if (texture && !texture->IsDynamic())
+                        {
+                            range.color = texture->Image(_vk);
+                            const auto& pixels = texture->Pixels();
+                            _vk.PrepareRTAOAlpha(range.color, pixels.width, pixels.height, pixels.rgba.data());
+                        }
+                        patch.ranges.push_back(range);
+                        indices.insert(indices.end(), group.begin(), group.end());
+                    }
                     patch.mesh = _vk.UploadMesh(vertices.data(), vertices.size() * sizeof(vertices[0]), indices.data(),
                                                 indices.size() * sizeof(uint32_t));
                     patch.heights = std::move(heights);
@@ -174,7 +241,7 @@ void EngineVK::CollectRTAOScene()
                 instance.index16 = false;
                 instance.mask = 2;
                 instance.kind = 2;
-                instance.ranges.push_back({0, cells * cells * 6});
+                instance.ranges = patch.ranges;
                 Matrix4 model(MIdentity);
                 model.SetPosition(Vector3(x * patchSize, 0, z * patchSize));
                 instance.transform = vk::RayInstanceTransform(model);

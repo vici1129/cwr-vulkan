@@ -1198,7 +1198,9 @@ void Landscape::DrawWater(const LandBegEnd& bigRect, Scene& scene)
                         shape->PrepareTextures(z2, 0);
                         LightList work(true);
                         const LightList& lights = scene.SelectLights(bCenter, bRadius, work);
+                        GEngine->SetWaterSurface(true);
                         shape->Draw(&GAnimatorWater, lights, ClipAll, 0, trans, iTrans);
+                        GEngine->SetWaterSurface(false);
                     }
                 }
                 else

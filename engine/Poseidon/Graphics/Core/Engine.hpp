@@ -382,6 +382,7 @@ class Engine : public IGraphicsEngine
     virtual void CaptureTemporalMesh(const Shape&, TLVertexTable&, int) {}
     virtual void CaptureTemporalTerrain(TLVertexTable&, bool) {}
     virtual void SetTemporalTerrain(bool) {}
+    virtual void SetWaterSurface(bool) {} // actual landscape water, independent of legacy shader family
     virtual void ResetTemporalHistory() {}
     virtual RString SetAntiAliasing(RString) { return "UNSUPPORTED: renderer has no AA selector"; }
     virtual RString SetHDR(RString) { return "UNSUPPORTED: renderer has no HDR output"; }
@@ -394,6 +395,7 @@ class Engine : public IGraphicsEngine
     virtual bool SetSSAO(bool, float, float, float, float) { return false; }
     virtual RString SetRTAO(RString) { return "UNSUPPORTED: RTAO requires Vulkan"; }
     virtual RString SetRTShadows(RString) { return "UNSUPPORTED: RT shadows require Vulkan"; }
+    virtual RString SetRTReflections(RString) { return "UNSUPPORTED: RT water reflections require Vulkan"; }
     virtual bool SeparateSunlight() const { return false; }
     virtual void NextFrame();                             // swap frames - get ready for next frame
     virtual bool InitDrawDone() { return true; }

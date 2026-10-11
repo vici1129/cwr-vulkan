@@ -8,6 +8,10 @@
 #include <PoseidonVK/Shaders/rtshadow_ms.comp.hpp>
 #include <PoseidonVK/Shaders/rtshadow_filter.frag.hpp>
 #include <PoseidonVK/Shaders/rtshadow_filter_ms.frag.hpp>
+#include <PoseidonVK/Shaders/rtwater.comp.hpp>
+#include <PoseidonVK/Shaders/rtwater_ms.comp.hpp>
+#include <PoseidonVK/Shaders/rtwater_filter.frag.hpp>
+#include <PoseidonVK/Shaders/rtwater_filter_ms.frag.hpp>
 #include <algorithm>
 #include <cstring>
 #include <cmath>
@@ -97,8 +101,10 @@ struct RayMaterial
     uint64_t indices, vertices, alpha;
     uint32_t first, index16, width, height, sampler;
     float cutoff;
+    uint64_t color;
+    uint32_t colorWidth, colorHeight;
 };
-static_assert(sizeof(RayMaterial) == 48);
+static_assert(sizeof(RayMaterial) == 64);
 struct Push
 {
     std::array<float, 16> camera;
@@ -128,7 +134,7 @@ struct VulkanContext::RTAOState
     uint32_t alignment = 256;
     VkDescriptorSetLayout setLayout = VK_NULL_HANDLE;
     VkPipelineLayout layout = VK_NULL_HANDLE;
-    std::array<VkPipeline, 4> compute{}, filter{};
+    std::array<VkPipeline, 6> compute{}, filter{};
     struct Slot
     {
         std::shared_ptr<Acceleration> tlas;
@@ -138,6 +144,9 @@ struct VulkanContext::RTAOState
         std::vector<VkAccelerationStructureInstanceKHR> previous;
         DepthAttachment ao;
         DepthAttachment sunlight;
+        DepthAttachment reflection;
+        std::shared_ptr<RTBuffer> reflectionLight;
+        VkDescriptorSet waterSet = VK_NULL_HANDLE;
         VkExtent2D extent{};
         VkDescriptorPool pool = VK_NULL_HANDLE;
         VkDescriptorSet set = VK_NULL_HANDLE;
@@ -160,7 +169,85 @@ struct VulkanContext::RTAOState
     uint32_t lastTerrainHits = 0, lastAlphaHits = 0;
     double sunRayMs = 0, sunFilterMs = 0;
     bool sunDispatched = false;
+    uint64_t waterRays = 0, shadedHits = 0;
+    uint32_t lastWaterRays = 0, lastWaterHits = 0, lastShaded = 0, lastShadedTerrain = 0, lastShadedAlpha = 0;
+    bool waterDispatched = false;
+    double waterRayMs = 0, waterFilterMs = 0;
 };
+
+void VulkanContext::FailRTReflections(std::string_view reason)
+{
+    _rtReflectionFailure = reason;
+    _rtReflectionsEnabled = false;
+    _recreate = true;
+    ResetTemporalHistory();
+    if (_rtao)
+    {
+        _rtao->scene.clear(); // never query the preceding camera's stale coverage
+        _rtao->waterDispatched = false;
+        for (auto& slot : _rtao->slots)
+            slot.previous.clear(); // retry any interrupted TLAS build
+    }
+    std::fprintf(stderr, "RT water unavailable: %s; preserving ordinary water\n", _rtReflectionFailure.c_str());
+}
+
+std::string VulkanContext::SetRTReflections(std::string_view mode)
+{
+    if (mode == "status")
+    {
+        std::ostringstream out;
+        out << "RTReflections=" << (RTReflectionsEnabled() ? "on" : "off") << " capability=" << _rtaoReason;
+        if (!_rtReflectionFailure.empty())
+            out << " fallback=" << _rtReflectionFailure;
+        if (_rtao)
+            out << " waterRays=" << _rtao->lastWaterRays << " hits=" << _rtao->lastWaterHits
+                << " shadedHits=" << _rtao->lastShaded << " shadedTerrain=" << _rtao->lastShadedTerrain
+                << " shadedAlpha=" << _rtao->lastShadedAlpha << " totalWaterRays=" << _rtao->waterRays
+                << " totalShadedHits=" << _rtao->shadedHits
+                << " rayQueriesExecuted=" << (_rtao->waterRays ? "yes" : "no")
+                << " hitShadingExecuted=" << (_rtao->shadedHits ? "yes" : "no")
+                << " lastWorldDispatch=" << (_rtao->waterDispatched ? "yes" : "no");
+        else
+            out << " waterRays=0 shadedHits=0 rayQueriesExecuted=no hitShadingExecuted=no";
+        if (_rtao && _rtao->timingSamples)
+            out << " lastGPUms(traceShade/filter)=" << _rtao->waterRayMs << '/' << _rtao->waterFilterMs;
+        else
+            out << " GPUtimings=unavailable";
+        out << "; shared " << SetRTAO("status")
+            << "; actual water only, 80m receivers/70m rays, static textured hits and weather sky fallback";
+        return out.str();
+    }
+    if (mode != "on" && mode != "off")
+        return "INVALID: triRTReflections on, off, status";
+    if (mode == "on" && !_rtaoAvailable)
+        return "UNSUPPORTED: " + _rtaoReason;
+    if (mode == "on")
+    {
+        VkPhysicalDeviceFeatures features{};
+        vkGetPhysicalDeviceFeatures(_physical, &features);
+        if (!features.independentBlend)
+            return "UNSUPPORTED: RT water requires independent MRT blending";
+        if (!_rtReflectionFailure.empty())
+            return "UNSUPPORTED: " + _rtReflectionFailure;
+    }
+    if (_rtReflectionsEnabled != (mode == "on"))
+    {
+        _rtReflectionsEnabled = mode == "on";
+        _recreate = true;
+        ResetTemporalHistory();
+    }
+    if (!_rtReflectionsEnabled && _rtao)
+    {
+        _rtao->waterDispatched = false;
+        if (!RaySceneEnabled())
+        {
+            _rtao->scene.clear();
+            _rtao->instanceCount = _rtao->triangleCount = 0;
+        }
+    }
+    return _rtReflectionsEnabled ? "OK: hardware water reflections enabled (next frame)"
+                                 : "OK: original water restored";
+}
 
 std::string VulkanContext::SetRTShadows(std::string_view mode)
 {
@@ -207,7 +294,7 @@ std::string VulkanContext::SetRTShadows(std::string_view mode)
         _rtTerrain = _rtFoliage = 0;
         if (_rtao)
             _rtao->sunDispatched = false;
-        if (_rtao && !RTAOEnabled())
+        if (_rtao && !RaySceneEnabled())
         {
             _rtao->scene.clear();
             _rtao->instanceCount = _rtao->triangleCount = 0;
@@ -291,7 +378,7 @@ std::string VulkanContext::SetRTAO(std::string_view mode)
         }
         else
             out << " BLAS=0 TLAS=0 instances=0 completedPasses=0 rayQueriesExecuted=no";
-        out << "; shared static LOD0 scene radius=" << (RTShadowsEnabled() ? 160 : 80)
+        out << "; shared static LOD0 scene radius=" << (RTShadowsEnabled() || RTReflectionsEnabled() ? 160 : 80)
             << "m; AO mask excludes terrain/foliage; all rays exclude animation, damage, alpha blending and proxies";
         return out.str();
     }
@@ -303,7 +390,7 @@ std::string VulkanContext::SetRTAO(std::string_view mode)
     ResetTemporalHistory();
     if (!_rtaoEnabled && _rtao)
     {
-        if (!RTShadowsEnabled())
+        if (!RaySceneEnabled())
         {
             _rtao->scene.clear();
             _rtao->instanceCount = _rtao->triangleCount = 0;
@@ -357,13 +444,20 @@ void VulkanContext::RetireRTAO()
         rt.totalSunHits += counts[3];
         rt.lastTerrainHits = counts[4];
         rt.lastAlphaHits = counts[5];
+        rt.lastWaterRays = counts[6];
+        rt.lastWaterHits = counts[7];
+        rt.lastShaded = counts[8];
+        rt.lastShadedTerrain = counts[9];
+        rt.lastShadedAlpha = counts[10];
+        rt.waterRays += counts[6];
+        rt.shadedHits += counts[8];
         ++rt.completed;
         rt.blasBuilds += slot.built;
         rt.tlasBuilds += slot.tlasBuilt;
         if (slot.queries)
         {
-            uint64_t stamps[12]{};
-            if (vkGetQueryPoolResults(_device, slot.queries, 0, 12, sizeof(stamps), stamps, sizeof(uint64_t),
+            uint64_t stamps[16]{};
+            if (vkGetQueryPoolResults(_device, slot.queries, 0, 16, sizeof(stamps), stamps, sizeof(uint64_t),
                                       VK_QUERY_RESULT_64_BIT) == VK_SUCCESS)
             {
                 const uint64_t mask = _timestampBits == 64 ? UINT64_MAX : (uint64_t(1) << _timestampBits) - 1;
@@ -374,6 +468,8 @@ void VulkanContext::RetireRTAO()
                 rt.filterMs = ms(6);
                 rt.sunRayMs = ms(8);
                 rt.sunFilterMs = ms(10);
+                rt.waterRayMs = ms(12);
+                rt.waterFilterMs = ms(14);
                 ++rt.timingSamples;
                 uint64_t frame[2]{};
                 if (_frames[_frame].frameQueries &&
@@ -392,6 +488,12 @@ void VulkanContext::RetireRTAO()
                                  "terrain=%u foliage=%u\n",
                                  rt.sunRayMs, rt.sunFilterMs, rt.frameMs, rt.lastSunRays, rt.lastSunHits, _rtTerrain,
                                  _rtFoliage);
+                if (rt.completed % 120 == 0)
+                    std::fprintf(stderr,
+                                 "Vulkan RT water GPU: traceShade=%.4f filter=%.4f frame=%.4f ms; rays=%u hits=%u "
+                                 "shaded=%u terrain=%u alpha=%u\n",
+                                 rt.waterRayMs, rt.waterFilterMs, rt.frameMs, rt.lastWaterRays, rt.lastWaterHits,
+                                 rt.lastShaded, rt.lastShadedTerrain, rt.lastShadedAlpha);
             }
         }
         slot.pending = false;
@@ -411,21 +513,26 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
     rt.instanceCount = rt.triangleCount = 0;
     rt.worldDispatched = false;
     rt.sunDispatched = false;
+    rt.waterDispatched = false;
     if (rt.scene.empty())
         return;
     const VkExtent2D half{(_worldExtent.width + 1) / 2, (_worldExtent.height + 1) / 2};
     if (!rt.layout)
     {
-        VkDescriptorSetLayoutBinding bindings[7]{};
+        if (rt.setLayout)
+            vkDestroyDescriptorSetLayout(_device, rt.setLayout, nullptr);
+        rt.setLayout = VK_NULL_HANDLE;
+        VkDescriptorSetLayoutBinding bindings[9]{};
         const VkDescriptorType types[]{
             VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR,
             VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,          VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
             VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-            VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER};
-        for (uint32_t i = 0; i < 7; ++i)
+            VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+            VK_DESCRIPTOR_TYPE_STORAGE_BUFFER};
+        for (uint32_t i = 0; i < 9; ++i)
             bindings[i] = {i, types[i], 1, VK_SHADER_STAGE_COMPUTE_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, nullptr};
         VkDescriptorSetLayoutCreateInfo set{VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO};
-        set.bindingCount = 7;
+        set.bindingCount = 9;
         set.pBindings = bindings;
         Require(vkCreateDescriptorSetLayout(_device, &set, nullptr, &rt.setLayout), "create descriptors");
         const VkPushConstantRange push{VK_SHADER_STAGE_COMPUTE_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(Push)};
@@ -436,7 +543,7 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
         layout.pPushConstantRanges = &push;
         Require(vkCreatePipelineLayout(_device, &layout, nullptr, &rt.layout), "create layout");
     }
-    if (!rt.compute[0])
+    if (std::any_of(rt.compute.begin(), rt.compute.begin() + (_rtWaterTargets ? 6 : 4), [](auto p) { return !p; }))
     {
         auto shader = [&](const uint32_t* code, size_t size)
         {
@@ -447,11 +554,14 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
             Require(vkCreateShaderModule(_device, &info, nullptr, &module), "create shader");
             return module;
         };
-        for (int i = 0; i < 4; ++i)
+        for (int i = 0; i < 6; ++i)
         {
-            const uint32_t* codes[]{Cwrrtao_comp, Cwrrtao_ms_comp, Cwrrtshadow_comp, Cwrrtshadow_ms_comp};
-            const size_t sizes[]{sizeof(Cwrrtao_comp), sizeof(Cwrrtao_ms_comp), sizeof(Cwrrtshadow_comp),
-                                 sizeof(Cwrrtshadow_ms_comp)};
+            if (rt.compute[i] || (i >= 4 && !_rtWaterTargets))
+                continue;
+            const uint32_t* codes[]{Cwrrtao_comp,        Cwrrtao_ms_comp, Cwrrtshadow_comp,
+                                    Cwrrtshadow_ms_comp, Cwrrtwater_comp, Cwrrtwater_ms_comp};
+            const size_t sizes[]{sizeof(Cwrrtao_comp),        sizeof(Cwrrtao_ms_comp), sizeof(Cwrrtshadow_comp),
+                                 sizeof(Cwrrtshadow_ms_comp), sizeof(Cwrrtwater_comp), sizeof(Cwrrtwater_ms_comp)};
             auto module = shader(codes[i], sizes[i]);
             VkComputePipelineCreateInfo info{VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO};
             info.layout = rt.layout;
@@ -464,23 +574,31 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
             Require(result, "create ray query pipeline");
         }
     }
-    if (!rt.filter[0])
+    if (std::any_of(rt.filter.begin(), rt.filter.begin() + (_rtWaterTargets ? 6 : 4), [](auto p) { return !p; }))
     {
         VkShaderModuleCreateInfo shader{VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO};
         shader.codeSize = sizeof(Cwrgamma_vert);
         shader.pCode = Cwrgamma_vert;
         VkShaderModule vertex = VK_NULL_HANDLE;
         Require(vkCreateShaderModule(_device, &shader, nullptr, &vertex), "create fullscreen vertex");
-        for (int i = 0; i < 4; ++i)
+        for (int i = 0; i < 6; ++i)
         {
-            const uint32_t* codes[]{Cwrrtao_filter_frag, Cwrrtao_filter_ms_frag, Cwrrtshadow_filter_frag,
-                                    Cwrrtshadow_filter_ms_frag};
-            const size_t sizes[]{sizeof(Cwrrtao_filter_frag), sizeof(Cwrrtao_filter_ms_frag),
-                                 sizeof(Cwrrtshadow_filter_frag), sizeof(Cwrrtshadow_filter_ms_frag)};
+            if (rt.filter[i] || (i >= 4 && !_rtWaterTargets))
+                continue;
+            const uint32_t* codes[]{Cwrrtao_filter_frag,        Cwrrtao_filter_ms_frag, Cwrrtshadow_filter_frag,
+                                    Cwrrtshadow_filter_ms_frag, Cwrrtwater_filter_frag, Cwrrtwater_filter_ms_frag};
+            const size_t sizes[]{sizeof(Cwrrtao_filter_frag),     sizeof(Cwrrtao_filter_ms_frag),
+                                 sizeof(Cwrrtshadow_filter_frag), sizeof(Cwrrtshadow_filter_ms_frag),
+                                 sizeof(Cwrrtwater_filter_frag),  sizeof(Cwrrtwater_filter_ms_frag)};
             shader.codeSize = sizes[i];
             shader.pCode = codes[i];
             VkShaderModule fragment = VK_NULL_HANDLE;
-            Require(vkCreateShaderModule(_device, &shader, nullptr, &fragment), "create filter shader");
+            const auto fragmentResult = vkCreateShaderModule(_device, &shader, nullptr, &fragment);
+            if (fragmentResult != VK_SUCCESS)
+            {
+                vkDestroyShaderModule(_device, vertex, nullptr);
+                Require(fragmentResult, "create filter shader");
+            }
             VkPipelineShaderStageCreateInfo stages[2]{};
             for (auto& stage : stages)
             {
@@ -514,6 +632,12 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
                 output.colorBlendOp = VK_BLEND_OP_REVERSE_SUBTRACT;
             }
             output.srcAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+            if (i >= 4)
+            {
+                output.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+                output.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+                output.colorBlendOp = VK_BLEND_OP_ADD;
+            }
             output.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
             output.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT;
             VkPipelineColorBlendStateCreateInfo blend{VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO};
@@ -547,12 +671,12 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
     }
     if (!slot.pool)
     {
-        VkDescriptorPoolSize sizes[]{{VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 6},
-                                     {VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR, 2},
-                                     {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 2},
-                                     {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 4}};
+        VkDescriptorPoolSize sizes[]{{VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 12},
+                                     {VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR, 3},
+                                     {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 3},
+                                     {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 9}};
         VkDescriptorPoolCreateInfo pool{VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO};
-        pool.maxSets = 2;
+        pool.maxSets = 3;
         pool.poolSizeCount = 4;
         pool.pPoolSizes = sizes;
         Require(vkCreateDescriptorPool(_device, &pool, nullptr, &slot.pool), "create descriptor pool");
@@ -562,11 +686,16 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
         allocate.pSetLayouts = &rt.setLayout;
         Require(vkAllocateDescriptorSets(_device, &allocate, &slot.set), "allocate descriptors");
         Require(vkAllocateDescriptorSets(_device, &allocate, &slot.sunSet), "allocate sun descriptors");
+        Require(vkAllocateDescriptorSets(_device, &allocate, &slot.waterSet), "allocate water descriptors");
         CreateAAImage(slot.ao, VK_FORMAT_R32G32B32A32_SFLOAT, VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
                       VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_ASPECT_COLOR_BIT, half);
         slot.extent = half;
-        if (_rtShadowTargets)
+        if (RTShadowsEnabled())
             CreateAAImage(slot.sunlight, VK_FORMAT_R32G32B32A32_SFLOAT,
+                          VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_SAMPLE_COUNT_1_BIT,
+                          VK_IMAGE_ASPECT_COLOR_BIT, _worldExtent);
+        if (_rtWaterTargets)
+            CreateAAImage(slot.reflection, VK_FORMAT_R32G32B32A32_SFLOAT,
                           VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_SAMPLE_COUNT_1_BIT,
                           VK_IMAGE_ASPECT_COLOR_BIT, _worldExtent);
     }
@@ -577,15 +706,18 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
         return result;
     };
     if (!slot.counters)
-        slot.counters = buffer(24, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, true);
+        slot.counters = buffer(48, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, true);
     if (!slot.materials)
         slot.materials = buffer(1024 * sizeof(uint64_t), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, true);
-    std::memset(slot.counters->buffer.mapped, 0, 24);
+    if (!slot.reflectionLight)
+        slot.reflectionLight = buffer(sizeof(_reflectionLighting), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, true);
+    UploadMappedBuffer(slot.reflectionLight->buffer, _reflectionLighting.data(), sizeof(_reflectionLighting));
+    std::memset(slot.counters->buffer.mapped, 0, 48);
     if (!slot.queries && _timestampBits && _profile.enabled)
     {
         VkQueryPoolCreateInfo info{VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO};
         info.queryType = VK_QUERY_TYPE_TIMESTAMP;
-        info.queryCount = 12;
+        info.queryCount = 16;
         Require(vkCreateQueryPool(_device, &info, nullptr, &slot.queries), "create GPU timestamps");
     }
     FlushScreenBatch();
@@ -593,7 +725,7 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
     _worldPassOpen = false;
     _commands = {};
     if (slot.queries)
-        vkCmdResetQueryPool(command, slot.queries, 0, 12);
+        vkCmdResetQueryPool(command, slot.queries, 0, 16);
     auto stamp = [&](uint32_t i)
     {
         if (slot.queries)
@@ -675,10 +807,12 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
                 counts.push_back(range.count / 3);
                 ranges.push_back({range.count / 3, 0, 0, 0});
                 blas->triangles += range.count / 3;
-                materials.push_back({Address(_device, entry.mesh->indices), Address(_device, entry.mesh->vertices),
-                                     range.alpha ? Address(_device, range.alpha->rayAlpha) : 0, range.first,
-                                     entry.index16 ? 1u : 0u, range.alpha ? range.alpha->rayWidth : 0,
-                                     range.alpha ? range.alpha->rayHeight : 0, range.sampler, range.cutoff});
+                materials.push_back(
+                    {Address(_device, entry.mesh->indices), Address(_device, entry.mesh->vertices),
+                     range.alpha ? Address(_device, range.alpha->rayAlpha) : 0, range.first, entry.index16 ? 1u : 0u,
+                     range.alpha ? range.alpha->rayWidth : 0, range.alpha ? range.alpha->rayHeight : 0, range.sampler,
+                     range.cutoff, range.color ? Address(_device, range.color->rayAlpha) : 0,
+                     range.color ? range.color->rayWidth : 0, range.color ? range.color->rayHeight : 0});
             }
             if (geometries.empty() || geometries.size() > 1024 || blas->triangles > 1000000)
                 continue;
@@ -769,12 +903,14 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
     // Cache only local working geometry. Frame slots keep evicted entries alive
     // until every TLAS that references them has completed and been replaced.
     std::erase_if(rt.cache, [&](const auto& item) { return !item || item->used + 120 < rt.serial; });
-    // Both effects consume this frame slot's single shared TLAS. Sun first,
-    // then optional AO; skipped timestamp intervals remain explicitly empty.
-    for (int effect : {1, 0})
+    // All three effects consume this frame slot's single shared TLAS: sunlight,
+    // water, then AO. Skipped timestamp intervals remain explicitly empty.
+    for (int effect : {1, 2, 0})
     {
-        const uint32_t rayStamp = effect ? 8 : 4, filterStamp = effect ? 10 : 6;
-        if (effect ? !(RTShadowsEnabled() && _rtShadowTargets) : !RTAOEnabled())
+        const uint32_t rayStamp = 4 + effect * 4, filterStamp = rayStamp + 2;
+        if (effect == 2 ? !(RTReflectionsEnabled() && _rtWaterTargets)
+            : effect    ? !(RTShadowsEnabled() && _rtShadowTargets)
+                        : !RTAOEnabled())
         {
             stamp(rayStamp);
             stamp(rayStamp + 1);
@@ -782,8 +918,8 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
             stamp(filterStamp + 1);
             continue;
         }
-        const auto set = effect ? slot.sunSet : slot.set;
-        auto& target = effect ? slot.sunlight : slot.ao;
+        const auto set = effect == 2 ? slot.waterSet : effect ? slot.sunSet : slot.set;
+        auto& target = effect == 2 ? slot.reflection : effect ? slot.sunlight : slot.ao;
         const auto dispatchExtent = effect ? _worldExtent : half;
         VkDescriptorImageInfo images[3]{
             {_aaSampler, _aaTargets[_image].sampledDepth, VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL},
@@ -792,14 +928,18 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
         VkDescriptorImageInfo direct{
             _aaSampler, _rtShadowTargets ? _aaTargets[_image].sunlight.view : _aaTargets[_image].color.view,
             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
-        VkDescriptorBufferInfo counter{slot.counters->buffer.buffer, 0, 24};
+        VkDescriptorImageInfo water{_aaSampler,
+                                    _rtWaterTargets ? _aaTargets[_image].water.view : _aaTargets[_image].color.view,
+                                    VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
+        VkDescriptorBufferInfo reflectionLight{slot.reflectionLight->buffer.buffer, 0, VK_WHOLE_SIZE};
+        VkDescriptorBufferInfo counter{slot.counters->buffer.buffer, 0, 48};
         VkDescriptorBufferInfo materialBuffer{slot.materials->buffer.buffer, 0, VK_WHOLE_SIZE};
         VkWriteDescriptorSetAccelerationStructureKHR as{
             VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR};
         as.accelerationStructureCount = 1;
         as.pAccelerationStructures = &slot.tlas->handle;
-        VkWriteDescriptorSet writes[7]{};
-        for (uint32_t i = 0; i < 7; ++i)
+        VkWriteDescriptorSet writes[9]{};
+        for (uint32_t i = 0; i < 9; ++i)
         {
             writes[i].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
             writes[i].dstSet = set;
@@ -820,7 +960,11 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
         writes[5].pBufferInfo = &materialBuffer;
         writes[6].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
         writes[6].pImageInfo = &direct;
-        vkUpdateDescriptorSets(_device, 7, writes, 0, nullptr);
+        writes[7].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        writes[7].pImageInfo = &water;
+        writes[8].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        writes[8].pBufferInfo = &reflectionLight;
+        vkUpdateDescriptorSets(_device, 9, writes, 0, nullptr);
         VkImageMemoryBarrier image{VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER};
         image.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         image.newLayout = VK_IMAGE_LAYOUT_GENERAL;
@@ -870,7 +1014,9 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
         vkCmdDraw(command, 3, 1, 0, 0);
         vkCmdEndRenderPass(command);
         stamp(filterStamp + 1);
-        if (effect)
+        if (effect == 2)
+            rt.waterDispatched = true;
+        else if (effect)
             rt.sunDispatched = true;
         else
             rt.worldDispatched = true;
@@ -889,6 +1035,14 @@ void VulkanContext::DestroyRTAOTargets() noexcept
         slot.pool = VK_NULL_HANDLE;
         slot.set = VK_NULL_HANDLE;
         slot.sunSet = VK_NULL_HANDLE;
+        slot.waterSet = VK_NULL_HANDLE;
+        if (slot.reflection.view)
+            vkDestroyImageView(_device, slot.reflection.view, nullptr);
+        if (slot.reflection.image)
+            vkDestroyImage(_device, slot.reflection.image, nullptr);
+        if (slot.reflection.memory)
+            vkFreeMemory(_device, slot.reflection.memory, nullptr);
+        slot.reflection = {};
         if (slot.sunlight.view)
             vkDestroyImageView(_device, slot.sunlight.view, nullptr);
         if (slot.sunlight.image)

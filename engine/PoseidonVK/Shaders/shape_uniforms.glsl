@@ -25,4 +25,5 @@ layout(set = 2, binding = 0, std140) uniform ShapeLighting {
     vec4 atmosphereSun; // direction towards sun, daylight/clear-air weight
     vec4 atmosphereColor; // engine sun color, camera altitude density
     vec4 rtSun;
+    vec4 rtWater;
 } lighting;

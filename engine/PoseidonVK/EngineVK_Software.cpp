@@ -4,6 +4,7 @@
 #include <PoseidonVK/ShapeLightingVK.hpp>
 #include <Poseidon/World/Scene/Scene.hpp>
 #include <Poseidon/World/Scene/Camera/Camera.hpp>
+#include <Poseidon/IO/ParamFileExt.hpp>
 
 namespace Poseidon
 {
@@ -15,7 +16,8 @@ void EngineVK::PrepareMesh(const render::LegacySpec&)
 }
 void EngineVK::BeginMesh(TLVertexTable& mesh, const render::LegacySpec&)
 {
-    if (_temporalTerrain) CaptureTemporalTerrain(mesh, false);
+    if (_temporalTerrain && !_waterSurface)
+        CaptureTemporalTerrain(mesh, false);
     if (_softwareMesh || _activeShape)
         throw std::logic_error("Vulkan software BeginMesh requires an idle open frame");
     _softwareVertices.assign(mesh.NVertex(), {});
@@ -113,11 +115,28 @@ void EngineVK::SubmitSoftware(const std::vector<uint32_t>& indices)
     const float cutoff = shadow ? std::max(1, (GetShadowFactor() * 7) >> 4) / 255.f :
                                  state.cutoff;
     vk::ShapeLighting receiver;
-    receiver.temporal[3] = _temporalTerrain ? -1.f : 0.f; // certified stationary surface overlay
+    std::shared_ptr<vk::TextureImage> waterBump;
+    if (_waterSurface && _vk.RTReflectionsEnabled())
+    {
+        try
+        {
+            auto texture = _textures.Load(Remaster >> "CfgDetailTextures" >> "specular");
+            if (auto* bump = dynamic_cast<TextureVK*>(texture.GetRef()))
+                waterBump = bump->Image(_vk);
+            receiver.rtWater = {waterBump ? 1.f : 0.f, 0, 0, 0}; // shoreline UVs already animate in Landscape::DrawMesh
+            receiver.temporal[3] = 2;                            // reactive water, never stationary terrain history
+        }
+        catch (const std::exception& error)
+        {
+            _vk.FailRTReflections(error.what());
+        }
+    }
+    if (!receiver.rtWater[0])
+        receiver.temporal[3] = _temporalTerrain ? -1.f : 0.f;
     receiver.fogColor = {_fogColor.R(), _fogColor.G(), _fogColor.B(), 1};
     receiver.eyeCoef = _vk.EyeCoef();
     const bool atmosphere = _shadowWorld && _vk.AtmosphereEnabled();
-    if (_shadowWorld && (_shadowTuning.enabled || atmosphere || _vk.RTShadowsEnabled()) &&
+    if (_shadowWorld && (_shadowTuning.enabled || atmosphere || _vk.RTShadowsEnabled() || receiver.rtWater[0]) &&
         !(_softwareFlags & (DisableSun | NoZBuf | NoDropdown | IsLight | IsShadow | IsAlphaFog)) && GScene &&
         GScene->GetCamera())
     {
@@ -130,19 +149,24 @@ void EngineVK::SubmitSoftware(const std::vector<uint32_t>& indices)
         receiver.atmosphereSun[3] = atmosphere ? 1.f : 0.f;
         receiver.rtSun[0] = _vk.RTShadowsEnabled() && !_softwareMesh->directSun.empty() ? 1.f : 0.f;
     }
-    _vk.DrawMesh(
-        mesh.buffers, 0, indices.size(), false, {}, {1, 1, 1, 1}, image,
-        vk::ShapeSampler(render::SplitLegacy(_softwareFlags)), cutoff, blend, true, (_softwareFlags & NoZBuf) == 0,
-        nullptr, {}, 1, {0, -1, 0}, mesh.vertexOffset, mesh.indexOffset, (_softwareFlags & NoZWrite) == 0,
-        receiver.shadowReceiver[0] || receiver.atmosphereSun[3] || receiver.rtSun[0] || _temporalTerrain ? &receiver
-                                                                                                         : nullptr,
-        shadow, !shadow && (_softwareFlags & IsLight) != 0);
+    if (receiver.rtWater[0] && receiver.shadowReceiver[1] <= 0)
+        receiver.rtWater = {}; // unsupported software projection retains ordinary water
+    _vk.DrawMesh(mesh.buffers, 0, indices.size(), false, {}, {1, 1, 1, 1}, image,
+                 vk::ShapeSampler(render::SplitLegacy(_softwareFlags)), cutoff, blend, true,
+                 (_softwareFlags & NoZBuf) == 0, nullptr, waterBump, 0, {0, -1, 0}, mesh.vertexOffset, mesh.indexOffset,
+                 (_softwareFlags & NoZWrite) == 0,
+                 receiver.shadowReceiver[0] || receiver.atmosphereSun[3] || receiver.rtSun[0] || receiver.rtWater[0] ||
+                         _temporalTerrain
+                     ? &receiver
+                     : nullptr,
+                 shadow, !shadow && (_softwareFlags & IsLight) != 0);
 }
 void EngineVK::EndMesh(TLVertexTable& mesh)
 {
     if (_softwareMesh != &mesh)
         throw std::logic_error("Vulkan software EndMesh must match BeginMesh");
     _softwareMesh = nullptr;
+    _waterSurface = false;
     _softwareVertices.clear();
     _softwareMip = MipInfo();
 }

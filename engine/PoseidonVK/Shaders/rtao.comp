@@ -7,7 +7,7 @@
 layout(local_size_x=8,local_size_y=8) in;
 layout(set=0,binding=1) uniform accelerationStructureEXT scene;
 layout(set=0,binding=2,rgba32f) uniform writeonly image2D resultAO;
-layout(set=0,binding=3,std430) buffer Counters { uint rays; uint hits; uint sunRays; uint sunHits; uint terrainHits; uint alphaHits; } counters;
+layout(set=0,binding=3,std430) buffer Counters { uint rays; uint hits; uint sunRays; uint sunHits; uint terrainHits; uint alphaHits; uint waterRays; uint waterHits; uint shadedHits; uint shadedTerrain; uint shadedAlpha; } counters;
 #ifdef SUN_SHADOW
 #ifdef MULTISAMPLE_DEPTH
 layout(set=0,binding=6) uniform sampler2DMS directLight;
@@ -30,10 +30,13 @@ shared uint groupRays;
 shared uint groupHits;
 shared uint terrainHits;
 shared uint alphaHits;
+shared uint shadedHits;
 struct Material {
     uint64_t indices, vertices, alpha;
     uint first, index16, width, height, samplerFlags;
     float cutoff;
+    uint64_t color;
+    uint colorWidth, colorHeight;
 };
 layout(buffer_reference,std430,buffer_reference_align=8) readonly buffer Materials { Material m[]; };
 layout(buffer_reference,std430,buffer_reference_align=4) readonly buffer Words { uint data[]; };
@@ -64,6 +67,9 @@ bool opaqueHit(rayQueryEXT query) {
     return a>=m.cutoff;
 }
 
+#ifdef WATER_REFLECTION
+#include "rtao_water.glsl"
+#endif
 vec4 traceAO(ivec2 pixel) {
     // Store the selected full-resolution sample's view depth for bilateral upsampling.
     ivec2 full=min(pixel*2+1,depthSize()-1);
@@ -151,13 +157,21 @@ vec4 traceAO(ivec2 pixel) {
 #endif
 }
 void main() {
-    if(gl_LocalInvocationIndex==0) { groupRays=0; groupHits=0; terrainHits=0; alphaHits=0; }
+    if(gl_LocalInvocationIndex==0) { groupRays=0; groupHits=0; terrainHits=0; alphaHits=0; shadedHits=0; }
     barrier();
     ivec2 p=ivec2(gl_GlobalInvocationID.xy);
-    if(all(lessThan(p,imageSize(resultAO)))) imageStore(resultAO,p,traceAO(p));
+    if(all(lessThan(p,imageSize(resultAO))))
+#ifdef WATER_REFLECTION
+        imageStore(resultAO,p,traceWater(p));
+#else
+        imageStore(resultAO,p,traceAO(p));
+#endif
     barrier();
     if(gl_LocalInvocationIndex==0) {
-#ifdef SUN_SHADOW
+#ifdef WATER_REFLECTION
+        atomicAdd(counters.waterRays,groupRays); atomicAdd(counters.waterHits,groupHits);
+        atomicAdd(counters.shadedHits,shadedHits); atomicAdd(counters.shadedTerrain,terrainHits); atomicAdd(counters.shadedAlpha,alphaHits);
+#elif defined(SUN_SHADOW)
         atomicAdd(counters.sunRays,groupRays); atomicAdd(counters.sunHits,groupHits);
         atomicAdd(counters.terrainHits,terrainHits); atomicAdd(counters.alphaHits,alphaHits);
 #else

@@ -14,6 +14,9 @@ layout(location = 6) in vec4 directSun;
 #ifdef RT_SUN
 layout(location = 2) out vec4 outSun;
 #endif
+#ifdef RT_WATER
+layout(location = 3) out vec4 outWater;
+#endif
 #ifdef TEMPORAL
 layout(location = 1) out vec4 motion;
 #define WORLD_TEXTURE(s, uv) texture(s, uv, lighting.temporalExtent.z)
@@ -80,6 +83,17 @@ void main() {
         fogColor = mix(fogColor, scatter, weight);
     }
     outColor.rgb = mix(fogColor, outColor.rgb, visibility);
+#ifdef RT_WATER
+    outWater=vec4(0);
+    if(lighting.rtWater.x>.5) {
+        // Existing water bump texture and animated water UV stream, z/x tangent axes.
+        vec3 bump=WORLD_TEXTURE(detailTexture,texCoord+lighting.rtWater.yz).xyz*2-1;
+        vec3 geometric=normalize(cross(dFdx(shadowWorld),dFdy(shadowWorld)));
+        if(geometric.y<0) geometric=-geometric;
+        vec3 n=normalize(geometric+vec3(bump.y,0,bump.x)*.06);
+        outWater=vec4(n.x,n.z,visibility,1.0/gl_FragCoord.w);
+    }
+#endif
     // World tone mapping follows reconstruction; cockpit geometry uses the same
     // curve. Authored 2D UI remains bounded at reference white.
     if (lighting.outputColor.x > .5)
@@ -88,7 +102,7 @@ void main() {
 #ifdef TEMPORAL
     // UV displacement current -> previous (including projection jitter), expected
     // previous depth, validity. Unsupported/translucent fragments overwrite validity.
-    bool reactive = lighting.temporal.w > 1.5 || (lighting.temporal.w > .5 && outColor.a < .98);
+    bool reactive = lighting.rtWater.x>.5 || lighting.temporal.w > 1.5 || (lighting.temporal.w > .5 && outColor.a < .98);
     motion = vec4(0,0,0,reactive ? -1 : 0);
     if (previousClip.w > 0.0001 && !reactive) {
         vec3 oldNdc = previousClip.xyz / previousClip.w;
