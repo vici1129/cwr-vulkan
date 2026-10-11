@@ -11,18 +11,21 @@ layout(location = 4) in vec3 shadowWorld;
 layout(location = 5) in vec4 previousClip;
 #ifdef TEMPORAL
 layout(location = 1) out vec4 motion;
+#define WORLD_TEXTURE(s, uv) texture(s, uv, lighting.temporalExtent.z)
+#else
+#define WORLD_TEXTURE(s, uv) texture(s, uv)
 #endif
 layout(set = 0, binding = 0) uniform sampler2D diffuseTexture;
 layout(set = 1, binding = 0) uniform sampler2D detailTexture;
 layout(push_constant) uniform ShapeDraw { mat4 mvp; vec4 color; float alphaCutoff; float reserved; float detailEnabled; vec4 lightDirection; } draw;
 void main() {
-    outColor = texture(diffuseTexture, texCoord) * draw.color * vertexColor;
+    outColor = WORLD_TEXTURE(diffuseTexture, texCoord) * draw.color * vertexColor;
     // Match GL33 TGDetail's 32x UV and PSDetail's alpha modulation.
     if (draw.detailEnabled > 1.5) {
         // Explicit Water shader family, not SpecularTexture alone.
-        vec3 bumpNormal = -(texture(detailTexture, texCoord).xyz * 2.0 - 1.0);
+        vec3 bumpNormal = -(WORLD_TEXTURE(detailTexture, texCoord).xyz * 2.0 - 1.0);
         outColor.rgb += clamp(dot(draw.lightDirection.xyz, bumpNormal), 0.0, 1.0);
-    } else if (draw.detailEnabled > 0.5) outColor.rgb *= texture(detailTexture, texCoord * 32.0).a * 2.0;
+    } else if (draw.detailEnabled > 0.5) outColor.rgb *= WORLD_TEXTURE(detailTexture, texCoord * 32.0).a * 2.0;
     // PSNormal/PSDetail add specular after diffuse/detail, before night-eye and fog.
     if (draw.detailEnabled < 1.5) outColor.rgb += specularColor;
     if (draw.reserved > 0.5) {

@@ -7,6 +7,8 @@
 #include <PoseidonVK/Shaders/aa_composite.frag.hpp>
 #include <PoseidonVK/Shaders/aa_composite_ms.frag.hpp>
 #include <PoseidonVK/Shaders/taa.frag.hpp>
+#include <PoseidonVK/Shaders/fsr_masks.frag.hpp>
+#include <PoseidonVK/Shaders/fsr_composite.frag.hpp>
 #include <PoseidonVK/ThirdParty/SMAA/AreaTex.h>
 #include <PoseidonVK/ThirdParty/SMAA/SearchTex.h>
 #include <cstdio>
@@ -34,10 +36,21 @@ std::string VulkanContext::SetAntiAliasing(std::string_view name)
     if (name == "status")
         return std::string("active=") + AAName(_aaMode) + " requested=" + AAName(_requestedAA) +
                " scale=" + std::to_string(_renderScale) + " requestedScale=" + std::to_string(_requestedScale) +
-               " sampleMask=" + std::to_string(_aaSampleSupport);
+               " sampleMask=" + std::to_string(_aaSampleSupport) +
+               " world=" + std::to_string(_worldExtent.width) + "x" + std::to_string(_worldExtent.height) +
+               " output=" + std::to_string(_extent.width) + "x" + std::to_string(_extent.height) +
+               " fsr=" + (_fsrAvailable ? "available" : _fsrReason) +
+               " fsrDispatches=" + std::to_string(_fsrDispatches) + " fsrResets=" + std::to_string(_fsrResets);
     AAMode mode;
     if (!ParseAA(name, mode))
-        return "INVALID: off, fxaa, smaa, taa, msaa2, msaa4, msaa8, motion, motion-off, status";
+        return "INVALID: off, fxaa, smaa, taa, msaa2, msaa4, msaa8, fsr-native, fsr-quality, fsr-balanced, fsr-performance, motion, motion-off, status";
+    if (IsFSR(mode))
+    {
+        if (!_fsrAvailable) return "UNSUPPORTED: FSR " + _fsrReason + "; previous mode retained";
+        if (_aaColorFormat != VK_FORMAT_B8G8R8A8_UNORM && _aaColorFormat != VK_FORMAT_R8G8B8A8_UNORM)
+            return "UNSUPPORTED: FSR requires the qualified UNORM scene path; previous mode retained";
+        if (_requestedScale != 100) return "CONFLICT: FSR requires render scale 100; previous settings retained";
+    }
     if (mode == AAMode::TAA && _physical)
     {
         VkPhysicalDeviceFeatures features{};
@@ -56,6 +69,11 @@ std::string VulkanContext::SetAntiAliasing(std::string_view name)
 
 bool VulkanContext::SetRenderScale(int percent)
 {
+    if (percent != 100 && IsFSR(_requestedAA))
+    {
+        std::fprintf(stderr, "CONFLICT: supersampling cannot be combined with FSR; previous settings retained\n");
+        return false;
+    }
     if (!ValidRenderScale(percent) || !_physical)
         return false;
     VkPhysicalDeviceProperties properties{};
@@ -72,12 +90,13 @@ bool VulkanContext::SetRenderScale(int percent)
 }
 
 void VulkanContext::CreateAAImage(DepthAttachment& target, VkFormat format, VkImageUsageFlags usage,
-                                  VkSampleCountFlagBits samples, VkImageAspectFlags aspect)
+                                  VkSampleCountFlagBits samples, VkImageAspectFlags aspect, VkExtent2D extent)
 {
     VkImageCreateInfo image{VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO};
     image.imageType = VK_IMAGE_TYPE_2D;
     image.format = format;
-    image.extent = {_worldExtent.width, _worldExtent.height, 1};
+    if (!extent.width) extent = _worldExtent;
+    image.extent = {extent.width, extent.height, 1};
     image.mipLevels = image.arrayLayers = 1;
     image.samples = samples;
     image.tiling = VK_IMAGE_TILING_OPTIMAL;
@@ -126,7 +145,8 @@ void VulkanContext::CreateAAResources(VkFormat format)
     _worldSamples = AASamples(_aaMode);
     if (!(_aaSampleSupport & _worldSamples))
         throw std::runtime_error("Vulkan AA: requested sample count became unsupported");
-    _worldExtent = ScaledExtent(_extent, _renderScale);
+    _aaColorFormat = format;
+    _worldExtent = IsFSR(_aaMode) ? FSRRenderExtent() : ScaledExtent(_extent, _renderScale);
     if (_worldExtent.width > properties.limits.maxFramebufferWidth ||
         _worldExtent.height > properties.limits.maxFramebufferHeight)
         throw std::runtime_error("Vulkan AA: scaled drawable exceeds framebuffer limits");
@@ -154,7 +174,7 @@ void VulkanContext::CreateAAResources(VkFormat format)
     attachments[2] = color;
     attachments[2].samples = VK_SAMPLE_COUNT_1_BIT;
     attachments[2].loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    const bool temporal = _aaMode == AAMode::TAA;
+    const bool temporal = IsTemporal(_aaMode);
     if (temporal)
     {
         attachments[2].format = VK_FORMAT_R16G16B16A16_SFLOAT;
@@ -219,7 +239,7 @@ void VulkanContext::CreateAAResources(VkFormat format)
     Require(vkCreateRenderPass(_device, &pass, nullptr, &_aaPass), "create AA pass");
     color.format = VK_FORMAT_R8G8B8A8_UNORM;
     Require(vkCreateRenderPass(_device, &pass, nullptr, &_aaDataPass), "create AA weights pass");
-    if (temporal)
+    if (_aaMode == AAMode::TAA)
     {
         color.format = VK_FORMAT_R16G16B16A16_SFLOAT;
         Require(vkCreateRenderPass(_device, &pass, nullptr, &_taaPass), "create temporal history pass");
@@ -310,7 +330,7 @@ void VulkanContext::CreateAAResources(VkFormat format)
             framebuffer(_aaDataPass, &target.weights.view, 1, target.weightFB);
         }
     }
-    if (temporal)
+    if (_aaMode == AAMode::TAA)
         for (auto& history : _taaHistory)
         {
             CreateAAImage(history.color, VK_FORMAT_R16G16B16A16_SFLOAT, colorUsage, VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_ASPECT_COLOR_BIT);
@@ -337,6 +357,7 @@ void VulkanContext::CreateAAResources(VkFormat format)
         descriptor(_smaaArea->view, false, _smaaAreaSet);
         descriptor(_smaaSearch->view, false, _smaaSearchSet);
     }
+    if (IsFSR(_aaMode)) CreateFSR();
     const VkDescriptorSetLayout sets[]{_textureLayout, _textureLayout, _textureLayout, _textureLayout};
     const VkPushConstantRange push{VK_SHADER_STAGE_FRAGMENT_BIT, 0, 8 * sizeof(float)};
     VkPipelineLayoutCreateInfo layout{VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO};
@@ -346,13 +367,14 @@ void VulkanContext::CreateAAResources(VkFormat format)
     layout.pPushConstantRanges = &push;
     Require(vkCreatePipelineLayout(_device, &layout, nullptr, &_aaLayout), "create AA layout");
     const uint32_t* codes[]{Cwrfxaa_frag, Cwrsmaa_edge_frag, Cwrsmaa_weight_frag, Cwrsmaa_blend_frag,
-                            _worldSamples == VK_SAMPLE_COUNT_1_BIT ? Cwraa_composite_frag : Cwraa_composite_ms_frag, Cwrtaa_frag};
+                            IsFSR(_aaMode) ? Cwrfsr_composite_frag : _worldSamples == VK_SAMPLE_COUNT_1_BIT ? Cwraa_composite_frag : Cwraa_composite_ms_frag, Cwrtaa_frag, Cwrfsr_masks_frag};
     const size_t sizes[]{
         sizeof(Cwrfxaa_frag), sizeof(Cwrsmaa_edge_frag), sizeof(Cwrsmaa_weight_frag), sizeof(Cwrsmaa_blend_frag),
-        _worldSamples == VK_SAMPLE_COUNT_1_BIT ? sizeof(Cwraa_composite_frag) : sizeof(Cwraa_composite_ms_frag), sizeof(Cwrtaa_frag)};
-    for (unsigned i = 0; i < 6; ++i)
+        IsFSR(_aaMode) ? sizeof(Cwrfsr_composite_frag) : _worldSamples == VK_SAMPLE_COUNT_1_BIT ? sizeof(Cwraa_composite_frag) : sizeof(Cwraa_composite_ms_frag), sizeof(Cwrtaa_frag), sizeof(Cwrfsr_masks_frag)};
+    for (unsigned i = 0; i < 7; ++i)
     {
-        if (i == 5 && !temporal) continue;
+        if (i == 5 && _aaMode != AAMode::TAA) continue;
+        if (i == 6 && !IsFSR(_aaMode)) continue;
         if (i == 0 && _aaMode != AAMode::FXAA)
             continue;
         if (i > 0 && i < 4 && _aaMode != AAMode::SMAA)
@@ -391,6 +413,8 @@ void VulkanContext::CreateAAResources(VkFormat format)
             VkPipelineColorBlendStateCreateInfo blend{VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO};
             blend.attachmentCount = 1;
             blend.pAttachments = &output;
+            const VkPipelineColorBlendAttachmentState maskOutputs[]{output, output, output, output};
+            if (i == 6) { blend.attachmentCount = 4; blend.pAttachments = maskOutputs; }
             VkPipelineDepthStencilStateCreateInfo ds{VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO};
             const bool composite = i == 4 || (_renderScale == 100 && (i == 0 || i == 3));
             ds.depthTestEnable = ds.depthWriteEnable = composite;
@@ -411,7 +435,7 @@ void VulkanContext::CreateAAResources(VkFormat format)
             pipeline.pDepthStencilState = &ds;
             pipeline.pDynamicState = &dynamic;
             pipeline.layout = _aaLayout;
-            pipeline.renderPass = composite ? _resumePass : i == 5 ? _taaPass : (i == 1 || i == 2) ? _aaDataPass : _aaPass;
+            pipeline.renderPass = composite ? _resumePass : i == 6 ? _fsrMaskPass : i == 5 ? _taaPass : (i == 1 || i == 2) ? _aaDataPass : _aaPass;
             Require(vkCreateGraphicsPipelines(_device, VK_NULL_HANDLE, 1, &pipeline, nullptr, &_aaPipelines[i]),
                     "create AA pipeline");
         }
@@ -466,6 +490,7 @@ void VulkanContext::BeginAAWorld()
         const unsigned sample = (++_taaFrame % 8) + 1;
         _taaJitter = {2*(halton(sample,2)-.5f)/_worldExtent.width, 2*(halton(sample,3)-.5f)/_worldExtent.height};
     }
+    if (IsFSR(_aaMode)) JitterFSR();
     _worldActive = _worldPassOpen = true;
     _commands = {};
     VkClearValue clears[3]{};
@@ -475,7 +500,7 @@ void VulkanContext::BeginAAWorld()
     pass.renderPass = _worldPass;
     pass.framebuffer = SceneFramebuffer();
     pass.renderArea.extent = _worldExtent;
-    pass.clearValueCount = _aaMode == AAMode::TAA ? 3 : 2;
+    pass.clearValueCount = IsTemporal(_aaMode) ? 3 : 2;
     pass.pClearValues = clears;
     vkCmdBeginRenderPass(command, &pass, VK_SUBPASS_CONTENTS_INLINE);
 }
@@ -487,10 +512,10 @@ void VulkanContext::DrawAAPass(unsigned index, VkFramebuffer framebuffer, VkDesc
     const bool composite = index == 4 || (_renderScale == 100 && (index == 0 || index == 3));
     VkClearValue clear{};
     VkRenderPassBeginInfo pass{VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO};
-    pass.renderPass = composite ? _resumePass : index == 5 ? _taaPass : (index == 1 || index == 2) ? _aaDataPass : _aaPass;
+    pass.renderPass = composite ? _resumePass : index == 6 ? _fsrMaskPass : index == 5 ? _taaPass : (index == 1 || index == 2) ? _aaDataPass : _aaPass;
     pass.framebuffer = framebuffer;
     pass.renderArea.extent = extent;
-    pass.clearValueCount = composite ? 0 : 1;
+    pass.clearValueCount = composite || index == 6 ? 0 : 1;
     pass.pClearValues = &clear;
     vkCmdBeginRenderPass(command, &pass, VK_SUBPASS_CONTENTS_INLINE);
     vkCmdBindPipeline(command, VK_PIPELINE_BIND_POINT_GRAPHICS, _aaPipelines[index]);
@@ -510,6 +535,8 @@ void VulkanContext::DrawAAPass(unsigned index, VkFramebuffer framebuffer, VkDesc
         push[4]=_taaProjection[2]; push[5]=_taaProjection[3];
         push[6]=_taaValid ? 1.f : 0.f; push[7]=_motionDebug ? 1.f : 0.f;
     }
+    if (index == 6) { push[4] = _fsrJitterDelta[0]; push[5] = _fsrJitterDelta[1]; }
+    if (index == 4 && IsFSR(_aaMode)) { push[0] = _taaJitter[0] * .5f; push[1] = _taaJitter[1] * .5f; }
     vkCmdPushConstants(command, _aaLayout, VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(push), push);
     vkCmdDraw(command, 3, 1, 0, 0);
     // Composite leaves the native-resolution pass open for cockpit/HUD/UI.
@@ -530,6 +557,7 @@ void VulkanContext::FinishAAWorld(const std::array<float, 4>& projection)
     _worldPassOpen = false;
     auto& target = _aaTargets[_image];
     VkDescriptorSet source = target.colorSet;
+    if (IsFSR(_aaMode)) source = DispatchFSR(projection);
     if (_aaMode == AAMode::TAA)
     {
         _taaProjection = projection;
@@ -566,6 +594,7 @@ void VulkanContext::FinishAAWorld(const std::array<float, 4>& projection)
 
 void VulkanContext::DestroyAAResources() noexcept
 {
+    DestroyFSR();
     _worldActive = _worldPassOpen = false;
     _taaValid = _taaInitialized = false;
     _taaIndex = _taaFrame = 0;

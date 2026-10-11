@@ -147,7 +147,7 @@ class VulkanContext
     bool SetRenderScale(int percent);
     void BeginAAWorld();
     void FinishAAWorld(const std::array<float, 4>& projection);
-    bool TemporalEnabled() const { return _aaMode == AAMode::TAA && _worldActive; }
+    bool TemporalEnabled() const { return IsTemporal(_aaMode) && _worldActive; }
     bool TemporalHistoryValid() const { return _taaValid; }
     void ResetTemporalHistory() { _taaValid = false; }
     std::array<float, 2> TemporalJitter() const { return _taaJitter; }
@@ -336,7 +336,7 @@ class VulkanContext
     VkPipelineLayout _aaLayout = VK_NULL_HANDLE;
     VkSampler _aaSampler = VK_NULL_HANDLE;
     // FXAA, SMAA edge/weights/neighborhood, world composite.
-    std::array<VkPipeline, 6> _aaPipelines{};
+    std::array<VkPipeline, 7> _aaPipelines{};
     struct TemporalTarget
     {
         DepthAttachment color;
@@ -349,6 +349,20 @@ class VulkanContext
     unsigned _taaIndex = 0, _taaFrame = 0;
     std::array<float, 2> _taaJitter{};
     std::array<float, 4> _taaProjection{};
+    // Concrete AMD backend state exists only while an FSR mode is active.
+    struct FSRState;
+    std::shared_ptr<FSRState> _fsr;
+    bool _fsrRequested = false, _fsrAvailable = false;
+    std::string _fsrReason = "not built or runtime opt-in CWR_VK_FSR=1 absent";
+    VkFormat _aaColorFormat = VK_FORMAT_UNDEFINED;
+    uint64_t _fsrDispatches = 0, _fsrResets = 0;
+    VkRenderPass _fsrMaskPass = VK_NULL_HANDLE;
+    std::array<float, 2> _fsrJitterDelta{};
+    VkExtent2D FSRRenderExtent() const;
+    void CreateFSR();
+    void DestroyFSR() noexcept;
+    void JitterFSR();
+    VkDescriptorSet DispatchFSR(const std::array<float, 4>& projection);
     std::shared_ptr<TextureImage> _smaaArea, _smaaSearch;
     std::array<VkPipeline, 8> _worldShapePipelines{};
     std::array<VkPipeline, 16> _worldScreenPipelines{};
@@ -360,7 +374,7 @@ class VulkanContext
     void CreateAAResources(VkFormat format);
     void DestroyAAResources() noexcept;
     void CreateAAImage(DepthAttachment& image, VkFormat format, VkImageUsageFlags usage,
-                       VkSampleCountFlagBits samples, VkImageAspectFlags aspect);
+                       VkSampleCountFlagBits samples, VkImageAspectFlags aspect, VkExtent2D extent = {});
     void DrawAAPass(unsigned index, VkFramebuffer framebuffer, VkDescriptorSet source, VkExtent2D extent);
     std::vector<DepthAttachment> _depth;
     std::vector<VkImageView> _sampledDepthViews; // Depth only; attachment views retain stencil for shadows.

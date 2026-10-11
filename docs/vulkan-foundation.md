@@ -1,5 +1,195 @@
 # Vulkan backend development
 
+## AMD FSR 3.1.4 temporal upscaling (2026-10-11)
+
+Optional public Vulkan implementation, based on `ecf8f5b`. The actual AMD
+FidelityFX SDK **v1.1.4** FSR 3.1.4 upscaler and Vulkan backend are used, with
+no sample framework or Frame Generation. The pinned SDK commit is
+`c6efa6bf7f2027b3ec94f28578bb5965eabb9e55`. The selected source subset, local
+build adaptations and complete MIT notice are documented in
+[ThirdParty/FidelityFX](../engine/PoseidonVK/ThirdParty/FidelityFX/README.md).
+The combined application retains the repository's GPL-3.0-or-later license
+with its existing Section 7 terms. No private NGX files are part of this change.
+
+### Enablement and commands
+
+Build with `CWR_HAS_VULKAN=ON`, `CWR_FSR3=ON`, and
+`CWR_FSR_SHADER_COMPILER=<official SDK v1.1.4 FidelityFX_SC executable>`.
+Vulkan SDK >= 1.3.250 is required. The compiler and its adjacent dependencies
+are external build tools, not distributed runtime dependencies. Missing tools
+produce a configure warning and leave ordinary Vulkan available. FSR defaults
+OFF at build time. GL33 does not find or link the SDK.
+
+At runtime, start with `CWR_VK_FSR=1` to request the Vulkan 1.2 device path.
+Without it, the original API 1.0 device path is retained. Device checks include
+compute queue support, independent blending, storage image formats/features,
+and FP16/Int16 when the SDK selects half precision. Unsupported requests return
+`UNSUPPORTED` and preserve the selected AA mode. Off/100% remains the default
+and allocates no FSR context, input textures or reconstruction targets.
+
+```sqf
+triAA "fsr-native"
+triAA "fsr-quality"
+triAA "fsr-balanced"
+triAA "fsr-performance"
+triAA "status"
+```
+
+These are mutually exclusive AA modes. FSR and supersampling conflict in both
+selection orders: the command rejects the change without modifying the previous
+configuration. Use `triRenderScale 100` before selecting FSR. Status reports
+actual world/output dimensions, successful dispatches and history reset counts.
+Initialization alone does not increment the dispatch counter. Device-idle
+swapchain recreation owns SDK creation/destruction. Creation failures restore
+ordinary AA and report the cause; dispatch failure reports its result code,
+clears that output frame and schedules Off at the next idle boundary.
+
+Render sizes come directly from `ffxFsr3UpscalerGetRenderResolutionFromQualityMode`,
+including AMD's integer truncation. Output always uses the native drawable:
+
+| Mode | Ratio | 1920x1080 input | 2560x1440 input |
+| --- | --- | --- | --- |
+| Native AA | 1.0 | 1920x1080 | 2560x1440 |
+| Quality | 1.5 | 1280x720 | 1706x960 |
+| Balanced | 1.7 | 1129x635 | 1505x847 |
+| Performance | 2.0 | 960x540 | 1280x720 |
+
+### Input and composition contract
+
+The existing world-effects boundary renders sky, terrain, objects, transparent
+effects, water, fog, projected shadows and CSM at internal resolution. SSAO
+executes on the world's original sampled depth before FSR. The reconstructed
+color and jitter-adjusted sampled depth are composited to native attachments
+before cockpit, weapon, HUD, menus and text. Final gamma still executes once.
+
+FSR reuses existing per-instance/deformed-vertex history and its invalidation
+for camera cuts, teleports, save/load, NVG changes, bypassed world views and
+mode/size changes. AMD's jitter phase-count and offset helpers drive the existing
+projection jitter. The positive-height viewport maps positive projection offsets
+to right/down geometry displacement. Existing vectors are previous UV minus
+current UV including jitter; the input pass subtracts previous-minus-current
+jitter in UV units. FSR receives unjittered UV vectors and an input-width/height
+motion scale, so the SDK performs its own dilation/reprojection. Invalid motion
+stays zero; no rigid motion is invented for unsupported dynamic geometry.
+
+The input pass copies normal nonlinear 0-near/1-far depth to R32F, avoiding
+SDK transitions of the engine's combined depth/stencil attachment. Near/far
+and vertical FOV derive from the actual world projection. View units are metres,
+frame delta is wall-clock milliseconds, and the display-referred UNORM LDR scene
+uses unit exposure/pre-exposure, with no HDR or automatic exposure flag.
+The sRGB scene fallback is explicitly unqualified/rejected. World texture mip
+bias follows AMD's `log2(renderWidth/displayWidth)-1`; existing AA and overlays
+retain their prior bias. Optional RCAS sharpening is disabled.
+
+Two real R8 masks feed AMD's reactive and transparency/composition inputs.
+Existing material flags and motion validity mark water, smoke, alpha-blended
+effects and missing/unsupported correspondence as fully reactive with unlocked
+history. Valid alpha-tested cutouts use reactive 0.5/composition 0.75; valid opaque
+motion uses zero. The shader's alpha test occurs before mask coverage, and
+transparent fragments conservatively overwrite validity. This favors less
+history over ghost trails; small foliage, animated textures without explicit
+flags, sky without motion, and lower-resolution transparent edges remain limits.
+
+Two focused SDK corrections are retained with their provenance: exclude its
+unused Frame Generation swapchain callback from the upscaler-only link, and
+correct GLSL `rw_luma_history` from `rgba8` to `rgba16f` to match AMD's RGBA16F
+allocation. The latter was discovered through real dispatch validation on the
+RTX 4060 Ti. Neither substitutes or changes the reference reconstruction algorithm.
+
+### Qualification
+
+Validation uses real stock-game draws on the RTX 4060 Ti, driver 617.14.
+Direct developer launches use isolated profiles and `--nosound`; this is not
+Steam launch qualification. Local captures, action logs, executable hashes and
+validation logs are retained under `build/shadow-live/fsr-*` in the working game
+checkout. The desktop is 1920x1080; 2560x1440 tests use an oversized drawable.
+Desktop motion capture at 1440p is clipped outside the physical screen and does
+not qualify presentation on a physical 1440p monitor.
+
+The GPU profiler reports complete command-buffer workload as `Vulkan GPU:
+frame_ms`, and the interval immediately surrounding AMD's dispatch as `Vulkan
+FSR: dispatch_gpu_ms`. The latter excludes CWR input conversion and native
+composition; those costs remain in the full frame. Neither counter includes
+acquire/present pacing or CPU recording. Display-paced FPS is not a performance
+measurement. Clock observations must accompany timing comparisons.
+
+#### Observed results
+
+All four modes executed the reference GPU dispatches at 1080p and 1440p, with
+the exact input sizes above. The validation-enabled infantry/switching, 1440p,
+normal Single Mission save/load, Cobra and Abrams runs completed respectively
+36,830 / 23,806 / 26,514 / 8,107 / 29,214 submitted frames, each with **zero
+validation errors and warnings** after fixing shaderInt16 enablement and the
+SDK luma image-format mismatch.
+SSAO and CSM were enabled together during the image-quality runs. These are
+stock-game scenes, not a standalone SDK initialization test.
+
+Moving infantry, fences/foliage, tank turret rotation and airborne helicopter
+rotors were captured as frame sequences. Native AA looked sharper than the
+existing TAA in the sampled village view. SMAA retains spatial detail but has
+no temporal reconstruction; sparse fence/foliage coverage still changes with
+movement. Quality preserves more small detail than Balanced/Performance; the
+lowest input resolution visibly softens distant foliage and small soldiers.
+The inspected sequences showed no obvious persistent long trails around the
+soldier, turret or rotor. This is a bounded visual assessment, not a claim that
+all ghosting or shimmer is eliminated. Thin cutouts and disoccluded edges can
+still lose detail or shimmer, especially where conservative masks reject history.
+Runs were not deterministic pixel-matched replays, so they do not establish an
+objective image-quality ranking. Cockpit/weapon/HUD and pause-menu captures
+remain native-sized rather than being reconstructed with the world. Combat
+particles, water and fog were also inspected; water coverage was a diagnostic
+teleport rather than a complete normal mission traversal.
+
+Both supersampling conflict orders retained the previous configuration.
+Teleport, internal/external camera changes, NVG on/off, mode switches and
+960x640 resize/minimize/restore recovered and reset history. In a normal Single
+Mission (not `--test-mission`), Save followed by movement and Load restored
+the saved position, increased the FSR reset counter from 2 to 3 and resumed
+successful dispatch on the first rendered post-load frame.
+
+FSR-on Vulkan, FSR-off Vulkan and GL33 game/test builds passed. The Vulkan policy
+executable passed 327 checks in both optional-build configurations; focused
+shape/temporal/shadow tests passed 812 assertions in 74 cases, including the
+GL33 build. Unsupported-device behavior has not been physically qualified on
+AMD/Intel or a pre-1.2 Vulkan device. The explicit capability rejection and the
+non-FSR runtime/build paths avoid requiring the SDK for ordinary rendering.
+Live FSR-runtime-off and FSR-build-off Vulkan smoke runs retained Off when FSR
+was requested and closed with zero validation errors/warnings (6,330 and 7,986
+submitted frames); MSAA4 and TAA also ran in the latter. The GL33-only executable
+rendered normal infantry gameplay and rejected the Vulkan-only AA selector.
+The final rebuild repeated all 327 policy checks in both configurations and
+the narrower `[vulkan-shape],[temporal],[ShadowMath]` selection (751 assertions,
+59 cases). No private integration sources, SDK files or binaries were modified
+or included in the public commit; implementation used a separate clean worktree.
+
+#### GPU cost snapshot (validation disabled)
+
+Fixed, paused village view in `02Infantry.Abel`, 900 m view distance, clear
+16:00 lighting, SSAO/CSM off, no concurrent build or capture. Each mode ran for
+14 seconds; values average the final four two-second timestamp windows. FSR
+conversion/composition are included in frame cost but excluded from dispatch.
+The executable SHA-256 was
+`1c437149402bba5b9310387f5dcdb0f80d99fffe66cfec8a3c54b8dcd6ea28b7`.
+
+| Mode | 1080p frame / FSR ms | Graphics MHz sampled | 1440p frame / FSR ms | Graphics MHz sampled |
+| --- | --- | --- | --- | --- |
+| Off | 0.931 / -- | 465-2055 | 1.261 / -- | 615-705 |
+| SMAA | 1.425 / -- | 705-750 | 1.591 / -- | 1065-1140 |
+| TAA | 1.544 / -- | 825-855 | 1.714 / -- | 1320-1350 |
+| FSR Native AA | 1.867 / 1.052 | 1650-1725 | 2.133 / 1.274 | 2835 |
+| FSR Quality | 1.716 / 0.987 | 1230-1485 | 1.852 / 1.110 | 1965-2355 |
+| FSR Balanced | 1.723 / 1.003 | 1155-1215 | 1.873 / 1.127 | 1785-1845 |
+| FSR Performance | 1.672 / 0.978 | 1065-1140 | 1.815 / 1.104 | 1650-1725 |
+
+These are **raw costs, not a speedup benchmark**: automatic GPU clocks were
+not locked, and the GPU is lightly loaded. Memory clocks were 5001 MHz for
+non-FSR and 1080p reduced-resolution modes, 9201 MHz for Native AA and 1440p
+FSR; the first 1080p Off sample was still at 9201 MHz. No display-paced FPS
+or percentage performance gain is inferred. A controlled-clock, GPU-bound
+workload would be needed to quantify speedup. The raw samples and temperature/
+power observations are in the local `fsr-timing-1080` and `fsr-timing-1440`
+evidence directories. These measurements do not include enabled SSAO/CSM cost.
+
 ## Private NVIDIA DLSS experiment (2026-10-11)
 
 **Not a distributable feature.** An uncommitted, local Windows x64 experiment

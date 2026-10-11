@@ -123,6 +123,19 @@ void VulkanContext::CreateInstance(const char* const* extensions, uint32_t count
     app.pApplicationName = "CWR Remastered";
     app.pEngineName = "PoseidonVK (diagnostic indexed rendering)";
     app.apiVersion = VK_API_VERSION_1_0;
+#ifdef CWR_FSR3
+    if (const char* opt = std::getenv("CWR_VK_FSR"); opt && std::strcmp(opt, "1") == 0)
+    {
+        uint32_t version = VK_API_VERSION_1_0;
+        auto enumerateVersion = reinterpret_cast<PFN_vkEnumerateInstanceVersion>(vkGetInstanceProcAddr(nullptr, "vkEnumerateInstanceVersion"));
+        if (enumerateVersion && enumerateVersion(&version) == VK_SUCCESS && version >= VK_API_VERSION_1_2)
+        {
+            app.apiVersion = VK_API_VERSION_1_2;
+            _fsrRequested = true;
+        }
+        else _fsrReason = "requires a Vulkan 1.2 loader";
+    }
+#endif
     VkInstanceCreateInfo info{VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO};
     info.flags = flags;
     info.pApplicationInfo = &app;
@@ -182,7 +195,8 @@ void VulkanContext::CreateInstance(const char* const* extensions, uint32_t count
         debug.pNext = nullptr;
         Check(create(_instance, &debug, nullptr, &_debugMessenger), "create validation messenger");
     }
-    std::fprintf(stderr, "Vulkan: instance created (API 1.0); validation=%s, synchronization validation=%s\n",
+    std::fprintf(stderr, "Vulkan: instance created (API %u.%u); validation=%s, synchronization validation=%s\n",
+                 VK_VERSION_MAJOR(app.apiVersion), VK_VERSION_MINOR(app.apiVersion),
                  _validationEnabled ? "on" : "off", syncValidation ? "on" : "off");
 }
 
@@ -286,6 +300,75 @@ void VulkanContext::CreateDevice(VkSurfaceKHR surface)
     info.pEnabledFeatures = &features;
     VkPhysicalDeviceProperties properties{};
     vkGetPhysicalDeviceProperties(_physical, &properties);
+#ifdef CWR_FSR3
+    VkPhysicalDeviceVulkan11Features f11{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES};
+    VkPhysicalDeviceVulkan12Features f12{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES};
+    VkPhysicalDeviceSubgroupSizeControlFeatures subgroup{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_SIZE_CONTROL_FEATURES};
+    if (_fsrRequested && properties.apiVersion >= VK_API_VERSION_1_2)
+    {
+        VkPhysicalDeviceFeatures2 queried{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2};
+        queried.pNext = &f11; f11.pNext = &f12;
+        const bool sizeControl = HasExtension(extensions, VK_EXT_SUBGROUP_SIZE_CONTROL_EXTENSION_NAME);
+        if (sizeControl) f12.pNext = &subgroup;
+        vkGetPhysicalDeviceFeatures2(_physical, &queried);
+        uint32_t count = 0;
+        vkGetPhysicalDeviceQueueFamilyProperties(_physical, &count, nullptr);
+        std::vector<VkQueueFamilyProperties> queueProperties(count);
+        vkGetPhysicalDeviceQueueFamilyProperties(_physical, &count, queueProperties.data());
+        _fsrAvailable = features.independentBlend && availableFeatures.shaderStorageImageExtendedFormats &&
+            availableFeatures.shaderStorageImageWriteWithoutFormat &&
+            (queueProperties[_families.graphics].queueFlags & VK_QUEUE_COMPUTE_BIT) && properties.limits.maxColorAttachments >= 4;
+        VkPhysicalDeviceSubgroupProperties subgroupProperties{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_PROPERTIES};
+        VkPhysicalDeviceProperties2 properties2{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2};
+        properties2.pNext = &subgroupProperties;
+        vkGetPhysicalDeviceProperties2(_physical, &properties2);
+        const VkSubgroupFeatureFlags operations = VK_SUBGROUP_FEATURE_BASIC_BIT | VK_SUBGROUP_FEATURE_ARITHMETIC_BIT |
+                                                  VK_SUBGROUP_FEATURE_QUAD_BIT;
+        if (!(subgroupProperties.supportedStages & VK_SHADER_STAGE_COMPUTE_BIT) ||
+            (subgroupProperties.supportedOperations & operations) != operations) _fsrAvailable = false;
+        for (VkFormat format : {VK_FORMAT_R8_UNORM, VK_FORMAT_R16_SFLOAT, VK_FORMAT_R16G16_SFLOAT,
+                               VK_FORMAT_R16G16B16A16_SFLOAT, VK_FORMAT_R32_SFLOAT, VK_FORMAT_R32_UINT,
+                               VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_R32G32_SFLOAT, VK_FORMAT_R32G32B32A32_SFLOAT})
+        {
+            VkFormatProperties support{};
+            vkGetPhysicalDeviceFormatProperties(_physical, format, &support);
+            const VkFormatFeatureFlags required = VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT | VK_FORMAT_FEATURE_STORAGE_IMAGE_BIT;
+            if ((support.optimalTilingFeatures & required) != required) _fsrAvailable = false;
+        }
+        // AMD's backend selects FP16 from physical-device support; enable that
+        // feature and the associated storage access on the logical device too.
+        const bool fp16 = f12.shaderFloat16;
+        const bool storage16 = f11.storageBuffer16BitAccess;
+        const bool control = subgroup.subgroupSizeControl;
+        if (sizeControl && !control) _fsrAvailable = false;
+        f11 = {VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES};
+        f12 = {VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES};
+        subgroup = {VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_SIZE_CONTROL_FEATURES};
+        if (fp16 && (!storage16 || !availableFeatures.shaderInt16)) _fsrAvailable = false;
+        if (_fsrAvailable)
+        {
+            features.shaderStorageImageExtendedFormats = VK_TRUE;
+            features.shaderStorageImageWriteWithoutFormat = VK_TRUE;
+            features.shaderInt16 = fp16 ? VK_TRUE : VK_FALSE;
+            f11.storageBuffer16BitAccess = storage16;
+            f12.shaderFloat16 = fp16;
+            info.pNext = &f11; f11.pNext = &f12;
+            // The backend uses KHR entry points for dedicated allocations.
+            for (const char* ext : {VK_KHR_DEDICATED_ALLOCATION_EXTENSION_NAME, VK_KHR_GET_MEMORY_REQUIREMENTS_2_EXTENSION_NAME})
+                if (HasExtension(extensions, ext)) enabled.push_back(ext);
+            if (sizeControl && control)
+            {
+                enabled.push_back(VK_EXT_SUBGROUP_SIZE_CONTROL_EXTENSION_NAME);
+                subgroup.subgroupSizeControl = VK_TRUE;
+                f12.pNext = &subgroup;
+            }
+            info.enabledExtensionCount = uint32_t(enabled.size());
+            info.ppEnabledExtensionNames = enabled.data();
+        }
+        _fsrReason = _fsrAvailable ? "available" : "required compute, blending or storage-image features unavailable";
+    }
+    else if (_fsrRequested) _fsrReason = "requires a Vulkan 1.2 device";
+#endif
     _textureAnisotropy = TextureAnisotropy(features.samplerAnisotropy, properties.limits.maxSamplerAnisotropy);
     Check(vkCreateDevice(_physical, &info, nullptr, &_device), "create logical device");
     vkGetDeviceQueue(_device, _families.graphics, 0, &_graphics);
@@ -436,6 +519,8 @@ bool VulkanContext::RecreateSwapchain(uint32_t width, uint32_t height)
     if (modes.empty())
         throw std::runtime_error("Vulkan: surface has no present modes");
     WaitIdle();
+    const AAMode previousAA = _aaMode;
+    const int previousScale = _renderScale;
     // Simple first-stage recreation: idle, release, rebuild. Partial failure is
     // terminal in EngineVK and Shutdown releases every successfully created object.
     DestroySwapchain();
@@ -584,7 +669,18 @@ bool VulkanContext::RecreateSwapchain(uint32_t width, uint32_t height)
     }
     CreateGammaPass(format.format);
     CreateSSAOResources(format.format);
-    CreateAAResources(format.format);
+    try { CreateAAResources(format.format); }
+    catch (const std::exception& error)
+    {
+        if (!IsFSR(_requestedAA)) throw;
+        _fsrAvailable = false;
+        _fsrReason = error.what();
+        std::fprintf(stderr, "FSR selection failed: %s; restoring ordinary AA\n", error.what());
+        DestroyAAResources();
+        _requestedAA = IsFSR(previousAA) ? AAMode::Off : previousAA;
+        _requestedScale = previousScale;
+        CreateAAResources(format.format);
+    }
     _recreate = false;
     std::fprintf(stderr, "Vulkan: swapchain #%u ready: %ux%u, %zu images, format=%d, present mode=%d\n",
                  ++_swapchainGeneration, _extent.width, _extent.height, _images.size(), format.format,
@@ -904,7 +1000,8 @@ void VulkanContext::ReportProfile()
         _profile.csmGpuSamples ? _profile.csmGpuMs / _profile.csmGpuSamples : -1.0,
         static_cast<unsigned long long>(_profile.csmGpuSamples));
     if (_profile.taaGpuSamples)
-        std::fprintf(stderr, "Vulkan TAA: resolve_gpu_ms=%.4f samples=%llu\n",
+        std::fprintf(stderr, "Vulkan %s: %s_gpu_ms=%.4f samples=%llu\n",
+                     IsFSR(_aaMode) ? "FSR" : "TAA", IsFSR(_aaMode) ? "dispatch" : "resolve",
                      _profile.taaGpuMs/_profile.taaGpuSamples,
                      static_cast<unsigned long long>(_profile.taaGpuSamples));
     std::fprintf(stderr, "Vulkan SSAO: enabled=%d passes/frame=%.2f record_ms/frame=%.4f gpu_ms/pass=%.4f gpu_samples=%llu radius=%.2f strength=%.2f bias=%.3f fade=%.1f\n",
@@ -1007,6 +1104,8 @@ unsigned VulkanContext::Shutdown() noexcept
         vkDestroyInstance(_instance, nullptr);
     _instance = VK_NULL_HANDLE;
     _physical = VK_NULL_HANDLE;
+    _fsrAvailable = _fsrRequested = false;
+    _fsrReason = "not built or runtime opt-in CWR_VK_FSR=1 absent";
     _graphics = _present = VK_NULL_HANDLE;
     _setName = nullptr;
     _debugNamesEnabled = false;

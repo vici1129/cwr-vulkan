@@ -1,5 +1,16 @@
 # Third-Party Notices
 
+## AMD FidelityFX FSR 3.1.4 Vulkan upscaler
+
+`engine/PoseidonVK/ThirdParty/FidelityFX/sdk/` contains the selected MIT-licensed
+upscaler, Vulkan backend and dependencies from FidelityFX SDK v1.1.4, commit
+`c6efa6bf7f2027b3ec94f28578bb5965eabb9e55`. Copyright (C) 2024 Advanced Micro
+Devices, Inc. The complete license and required copyright/permission notice are
+retained in [sdk/LICENSE.txt](engine/PoseidonVK/ThirdParty/FidelityFX/sdk/LICENSE.txt)
+and the imported source files. See the [source manifest and build notes](engine/PoseidonVK/ThirdParty/FidelityFX/README.md).
+These files retain their MIT terms; the combined application retains this
+project's GPL license. No SDK tooling binaries or sample framework are distributed.
+
 The source code of this project is licensed under the **GNU General Public License
 v3.0 or later** (see [`LICENSE`](LICENSE)). This file reproduces all third-party components used by the project.
 

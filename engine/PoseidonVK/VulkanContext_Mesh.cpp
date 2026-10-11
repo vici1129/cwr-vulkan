@@ -1,6 +1,7 @@
 #include <PoseidonVK/VulkanContext.hpp>
 #include <PoseidonVK/ScreenPipelineVK.hpp>
 #include <algorithm>
+#include <cmath>
 #include <stdexcept>
 #include <PoseidonVK/Shaders/shape.vert.hpp>
 #include <PoseidonVK/Shaders/shape.frag.hpp>
@@ -344,7 +345,8 @@ void VulkanContext::DrawMesh(const std::shared_ptr<MeshBuffers>& mesh, uint32_t 
         receiver.temporal[1] = TemporalEnabled() ? _taaJitter[1] : 0;
         receiver.temporal[3] = TemporalEnabled() ?
             (!depthTest || (!depthWrite && lighting->temporal[3] >= 0) ? 2.f : blend ? 1.f : 0.f) : 0.f;
-        if (TemporalEnabled()) receiver.temporalExtent = {1.f / _worldExtent.width, 1.f / _worldExtent.height, 0, 0};
+        if (TemporalEnabled()) receiver.temporalExtent = {1.f / _worldExtent.width, 1.f / _worldExtent.height,
+            IsFSR(_aaMode) ? std::log2(float(_worldExtent.width) / _extent.width) - 1.f : 0.f, 0};
         receiver.shadow = _csmActive ? _csmState : ShadowLighting{};
         BindLighting(receiver, screen);
         if (_profile.enabled && !shadow)
@@ -361,7 +363,8 @@ void VulkanContext::DrawMesh(const std::shared_ptr<MeshBuffers>& mesh, uint32_t 
         ShapeLighting unlit;
         unlit.temporal = {TemporalEnabled() ? _taaJitter[0] : 0, TemporalEnabled() ? _taaJitter[1] : 0,
                           0, TemporalEnabled() ? (!depthWrite || !depthTest ? 2.f : blend ? 1.f : 0.f) : 0.f};
-        if (TemporalEnabled()) unlit.temporalExtent = {1.f / _worldExtent.width, 1.f / _worldExtent.height, 0, 0};
+        if (TemporalEnabled()) unlit.temporalExtent = {1.f / _worldExtent.width, 1.f / _worldExtent.height,
+            IsFSR(_aaMode) ? std::log2(float(_worldExtent.width) / _extent.width) - 1.f : 0.f, 0};
         unlit.fogColor = _fogColor;
         unlit.eyeCoef = _eyeCoef;
         BindLighting(unlit, true);

@@ -14,12 +14,25 @@ enum class AAMode
     TAA,
     MSAA2,
     MSAA4,
-    MSAA8
+    MSAA8,
+    FSRNative,
+    FSRQuality,
+    FSRBalanced,
+    FSRPerformance
 };
+inline bool IsFSR(AAMode mode)
+{
+    return mode >= AAMode::FSRNative && mode <= AAMode::FSRPerformance;
+}
+inline bool IsTemporal(AAMode mode) { return mode == AAMode::TAA || IsFSR(mode); }
 inline const char* AAName(AAMode mode)
 {
     switch (mode)
     {
+        case AAMode::FSRNative: return "fsr-native";
+        case AAMode::FSRQuality: return "fsr-quality";
+        case AAMode::FSRBalanced: return "fsr-balanced";
+        case AAMode::FSRPerformance: return "fsr-performance";
         case AAMode::FXAA:
             return "fxaa";
         case AAMode::SMAA:
@@ -38,7 +51,8 @@ inline const char* AAName(AAMode mode)
 }
 inline bool ParseAA(std::string_view name, AAMode& result)
 {
-    for (auto mode : {AAMode::Off, AAMode::FXAA, AAMode::SMAA, AAMode::TAA, AAMode::MSAA2, AAMode::MSAA4, AAMode::MSAA8})
+    for (auto mode : {AAMode::Off, AAMode::FXAA, AAMode::SMAA, AAMode::TAA, AAMode::MSAA2, AAMode::MSAA4, AAMode::MSAA8,
+                     AAMode::FSRNative, AAMode::FSRQuality, AAMode::FSRBalanced, AAMode::FSRPerformance})
         if (name == AAName(mode))
         {
             result = mode;

@@ -1,5 +1,8 @@
 # Anti-aliasing reference sources
 
+FSR Native AA and temporal upscaling use the official AMD FidelityFX SDK v1.1.4
+FSR 3.1.4 component and Vulkan backend. [Provenance, subset and MIT notice](FidelityFX/README.md).
+
 SMAA 1x uses the complete reference algorithm, HIGH preset, color edge detection,
 diagonal/corner handling and the original AreaTex/SearchTex bytes. Source:
 https://github.com/iryoku/smaa/tree/71c806a838bdd7d517df19192a20f0c61b3ca29d

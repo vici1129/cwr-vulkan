@@ -355,6 +355,15 @@ int main()
         Check(context.SetAntiAliasing("motion").find("OK:") == 0, "motion visualization is explicit");
         Check(context.SetAntiAliasing("motion-off").find("OK:") == 0, "disable motion visualization");
         Check(context.SetAntiAliasing("smaa+taa").find("INVALID:") == 0, "no implicit stacking");
+        const auto beforeFSR = context.SetAntiAliasing("status");
+        for (const char* name : {"fsr-native", "fsr-quality", "fsr-balanced", "fsr-performance"})
+        {
+            AAMode mode = AAMode::Off;
+            Check(ParseAA(name, mode) && IsFSR(mode) && IsTemporal(mode), "FSR selectors use the temporal world path");
+            Check(context.SetAntiAliasing(name).find("UNSUPPORTED:") == 0, "FSR needs explicit runtime capability");
+            Check(context.SetAntiAliasing("status") == beforeFSR, "unavailable FSR preserves configuration");
+            Check(AASamples(mode) == VK_SAMPLE_COUNT_1_BIT, "FSR cannot stack MSAA");
+        }
         Check(!context.SetRenderScale(150), "scale needs a device before limits query");
         for (int scale : {100,125,150,200}) Check(ValidRenderScale(scale), "supported render scale");
         Check(!ValidRenderScale(99) && !ValidRenderScale(201), "reject unbounded render scales");
