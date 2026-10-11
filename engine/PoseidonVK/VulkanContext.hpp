@@ -6,6 +6,7 @@
 #include <PoseidonVK/ScreenBatchVK.hpp>
 #include <PoseidonVK/AntiAliasingVK.hpp>
 #include <array>
+#include <algorithm>
 #include <atomic>
 #include <string>
 #include <memory>
@@ -117,6 +118,15 @@ struct ShadowAlphaBatch
     std::shared_ptr<TextureImage> texture;
     uint32_t first = 0, count = 0;
 };
+// Cached terrain is local to a stable grid origin, not the moving camera.
+inline std::array<float, 16> TranslateShadowMatrix(const float* matrix, const std::array<float, 3>& offset)
+{
+    std::array<float, 16> result;
+    std::copy_n(matrix, 16, result.begin());
+    for (int row = 0; row < 4; ++row)
+        result[12 + row] += matrix[row] * offset[0] + matrix[4 + row] * offset[1] + matrix[8 + row] * offset[2];
+    return result;
+}
 // No engine drawing, asset or GL types are involved in device/swapchain lifetime.
 class VulkanContext
 {
@@ -142,7 +152,9 @@ class VulkanContext
     void EndShadowPass();
     void RenderShadowDepth(const float* matrices, int count, int resolution,
                            std::span<const float> solid, std::span<const float> alpha,
-                           std::span<const ShadowAlphaBatch> batches);
+                           std::span<const ShadowAlphaBatch> batches,
+                           const std::shared_ptr<MeshBuffers>& terrain = {}, uint32_t terrainVertices = 0,
+                           const std::array<float, 3>& terrainOffset = {});
     void SetShadowState(const ShadowLighting& state) { _csmState = state; }
     void ResetShadowState() { _csmActive = false; }
     void DrawDiagnosticTriangle(); // Explicit DrawTestPattern seam, never an automatic gameplay draw.
@@ -190,6 +202,14 @@ class VulkanContext
     std::string SetSunShafts(std::string_view mode);
     std::string SetVolumetricFog(std::string_view mode);
     bool VolumetricFogEnabled() const { return _volumeEnabled; }
+    bool VolumetricScatteringEligible() const
+    {
+        return _volumeEnabled && VolumetricSourceEligible(_volumeFrame);
+    }
+    static bool VolumetricSourceEligible(const ShapeLighting& frame)
+    {
+        return frame.atmosphereSun[3] >= .001f && frame.fogParams[1] > frame.fogParams[0];
+    }
     void SetVolumetricFrame(const ShapeLighting& frame) { _volumeFrame = frame; }
     bool AtmosphereEnabled() const { return _atmosphereEnabled; }
     void SetAtmosphereFrame(const std::array<float, 4>& sun, const std::array<float, 4>& color,

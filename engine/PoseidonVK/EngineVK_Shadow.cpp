@@ -70,7 +70,9 @@ void EngineVK::RenderShadowDepthScene(const float* matrices, const float* splits
     state.strength = {1.f - _shadowSunFactor * (1.f - _shadowTuning.darkness), 1.f / resolution, 0, 0};
     _vk.SetShadowState(state);
     std::span<const float> solid{casters.solidXYZ, size_t(casters.solidVertexCount) * 3};
-    if (_vk.VolumetricFogEnabled() && GScene && GScene->GetLandscape())
+    std::shared_ptr<vk::MeshBuffers> terrain;
+    std::array<float, 3> terrainOffset{};
+    if (_vk.VolumetricScatteringEligible() && GScene && GScene->GetLandscape())
     {
         // The object CSM collection has no landscape triangles. A bounded patch
         // supplies valley/ridge occlusion using the existing terrain surface.
@@ -85,7 +87,9 @@ void EngineVK::RenderShadowDepthScene(const float* matrices, const float* splits
         if (_volumeLandscape != land || _volumeTerrainKey != key)
         {
             _volumeTerrain.clear();
-            auto vertex = [&](float x, float z) { return std::array<float, 3>{x, land->SurfaceY(x, z), z}; };
+            auto vertex = [&](float x, float z) {
+                return std::array<float, 3>{x - cx * grid, land->SurfaceY(x, z), z - cz * grid};
+            };
             auto triangle = [&](const auto& a, const auto& b, const auto& c)
             {
                 // Both sides: the ordinary solid CSM pipeline culls front faces.
@@ -100,21 +104,17 @@ void EngineVK::RenderShadowDepthScene(const float* matrices, const float* splits
                     triangle(a, b, c);
                     triangle(b, d, c);
                 }
+            const uint32_t unusedIndex = 0;
+            _volumeTerrainMesh = _vk.UploadMesh(_volumeTerrain.data(), _volumeTerrain.size() * sizeof(float),
+                                                &unusedIndex, sizeof(unusedIndex));
             _volumeLandscape = land;
             _volumeTerrainKey = key;
         }
-        _volumeCasters.assign(solid.begin(), solid.end());
-        const size_t offset = _volumeCasters.size();
-        _volumeCasters.resize(offset + _volumeTerrain.size());
-        for (size_t i = 0; i < _volumeTerrain.size(); i += 3)
-        {
-            _volumeCasters[offset + i] = _volumeTerrain[i] - position.X();
-            _volumeCasters[offset + i + 1] = _volumeTerrain[i + 1] - position.Y();
-            _volumeCasters[offset + i + 2] = _volumeTerrain[i + 2] - position.Z();
-        }
-        solid = _volumeCasters;
+        terrain = _volumeTerrainMesh;
+        terrainOffset = {cx * grid - position.X(), -position.Y(), cz * grid - position.Z()};
     }
     _vk.RenderShadowDepth(matrices, count, resolution, solid,
-                          {casters.alphaXYZUV, size_t(casters.alphaVertexCount) * 5}, batches);
+                          {casters.alphaXYZUV, size_t(casters.alphaVertexCount) * 5}, batches,
+                          terrain, terrain ? uint32_t(_volumeTerrain.size() / 3) : 0, terrainOffset);
 }
 } // namespace Poseidon

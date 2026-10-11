@@ -158,8 +158,7 @@ void VulkanContext::CreateVolumetricResources()
 void VulkanContext::DrawVolumetricFog(const std::array<float, 4>& projection)
 {
     _volumeDrew = false;
-    if (!_volumeEnabled || !_csmActive || _volumeTargets.empty() || _volumeFrame.atmosphereSun[3] < .001f ||
-        _volumeFrame.fogParams[1] <= _volumeFrame.fogParams[0])
+    if (!VolumetricScatteringEligible() || !_csmActive || _volumeTargets.empty())
         return;
     auto& frame = _frames[_frame];
     const auto command = frame.command;

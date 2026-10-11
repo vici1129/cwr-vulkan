@@ -1,5 +1,66 @@
 # Vulkan backend development
 
+## Focused MSAA and volumetric CSM follow-up (2026-10-12)
+
+Built on `64a7c1c`. Four narrowly scoped corrections:
+
+- RT sunlight's post-resolve subtraction now rejects ambiguous MSAA pixels.
+  All samples must have valid, coherent view depth and sunlight records; the
+  depth tolerance is max(2cm, 0.2% of depth), and sunlight channels tolerate 2%
+  with a 0.0001 floor. This permits small slopes but falls back to ordinary CSM
+  at discontinuities instead of subtracting one sample's full sunlight from an
+  averaged color. This is conservative rejection, not per-sample ray tracing;
+  steep slopes/material boundaries can lose the optional correction.
+- RT water requires every MSAA sample to carry water. The shared `waterAt`
+  guard runs in tracing and final composition, including filter neighbors, so
+  filtering cannot refill rejected water/foreground pixels. Mixed pixels retain
+  ordinary water/foreground rendering. Full-water pixels retain their blend,
+  excluding rejected neighbors; the single-sample path is unchanged. Both
+  guards cover MSAA 2x, 4x and 8x; RTAO is unchanged.
+- Volume-only CSM demand and terrain submission share the scattering draw's
+  source threshold (0.001) and valid-fog-range predicate. Current-frame source
+  data already includes weather, sun elevation and night vision. Independently
+  enabled surface CSM still requests its maps and retains its existing night
+  gate; a zero volumetric source does not disable surface shadows.
+- The terrain patch is now an immutable cached mesh, uploaded only when its
+  landscape/grid/cell/radius key changes. Vertices are relative to a stable grid
+  origin; each cascade incorporates origin-minus-camera translation into its
+  existing matrix. No per-frame combined-caster copy, terrain translation loop,
+  or terrain upload remains. Existing frame-held mesh ownership protects old
+  patches during replacement. The same bounded, double-sided geometry is drawn
+  separately, adding one draw per cascade. Maximum geometry is still 270,000
+  vertices / 3,240,000 bytes at 600m and 8m cells; cache-boundary rebuilds and
+  their allocations remain. This does not claim a measured end-to-end CPU/FPS
+  improvement or eliminate ordinary object caster collection.
+
+Verification: Vulkan/FSR and GL33-only builds pass; all twelve AO/sun/water shader
+variants compile. Driver-free policy/lifetime tests pass **412 checks**. Focused
+`[Shaders],[ShadowMath],[vulkan-shape]` tests pass **893 assertions / 66 cases**
+with Vulkan and **889 / 65** in GL33-only. Tests compile the shipped scalar
+coverage predicates, cover partial coverage at 2x/4x/8x, pin final water-filter
+rejection, test the common source threshold and verify cached terrain matrix
+translation. The broader `[Graphics]` run has **13 PAA/DDS failures and one
+stock-data skip**, reproduced with the unchanged pre-fix `35f7658` build; these
+are not counted as passes or changed in this fix.
+
+Live evidence is under `build/shadow-live/surgical-fixes-v1` (Malden, 1080p) and
+`surgical-everon-v1` (Everon, 2560x1440 attachments in an oversized desktop
+window). Malden exercised foggy dawn, noon water/pier reflections, overcast,
+night, cache-cell-crossing movement, volume Off/On, MSAA 2x/4x/8x, Off/FXAA/SMAA/
+TAA/FSR Quality, odd resize and minimize/restore with all three RT effects.
+Overcast reported zero sunlight/scattering and no CSM with surface CSM Off;
+turning surface CSM On retained ready maps without enabling scattering.
+Malden closed after **17,452 submissions / 17,451 presentations, zero Vulkan
+validation errors or warnings**. Everon exercised MSAA 8x, AA Off and TAA with
+all RT effects, dawn forest scattering and camera translation/rotation; it
+closed after **15,614 submissions/presentations, zero errors or warnings**.
+Its frozen-camera volume Off/On/Off sequence restored the compared 1600x850
+world-image region exactly (zero differing pixels). Pixel-level MSAA correctness
+is established
+by the source/math regression checks; these captures are gameplay smoke checks,
+not an exhaustive before/after silhouette comparison. Earlier GPU benchmark
+tables below describe the original implementation, not this optimization.
+
 ## First CSM volumetric sunlight and fog (2026-10-12)
 
 Built on public `35f7658`, default **Off**, Vulkan only. Process-local commands:
@@ -56,9 +117,10 @@ projected shadows. The existing caster collection provides buildings, objects,
 cutout foliage and other supported casters. It previously contained no terrain:
 while volumetrics is active, Vulkan appends a two-sided landscape patch sampled
 from `SurfaceY`. Its radius is `min(CSM far + 100m, 600m)` and cell size is at least
-8m (or the coarser current terrain grid). World vertices are cached until the
-camera crosses a cell or the landscape/grid/radius changes, then translated into
-the existing camera-relative depth stream. No second shadow-map system is added.
+8m (or the coarser current terrain grid). The follow-up above caches a grid-local
+mesh until the camera crosses a cell or the landscape/grid/radius changes, and
+applies camera translation through each cascade matrix instead of the vertex
+stream. No second shadow-map system is added.
 
 When a volumetric draw runs, the existing screen-space sun-shaft draws are
 suppressed. Their requested setting survives; status reports

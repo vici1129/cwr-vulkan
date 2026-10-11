@@ -98,7 +98,7 @@ foreach(kind rtao rtao_ms rtao_filter rtao_filter_ms rtshadow rtshadow_ms rtshad
         COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/generated/PoseidonVK/Shaders"
         COMMAND "${Vulkan_GLSLANG_VALIDATOR_EXECUTABLE}" -V --target-env vulkan1.2 ${defines}
             --vn "Cwr${kind}_${stage}" -o "${header}" "${CMAKE_CURRENT_SOURCE_DIR}/Shaders/${source}.${stage}"
-        DEPENDS "Shaders/${source}.${stage}" Shaders/rtao_depth.glsl Shaders/rtao_water.glsl Shaders/color_space.glsl VERBATIM)
+        DEPENDS "Shaders/${source}.${stage}" Shaders/rtao_depth.glsl Shaders/rtao_coverage.glsl Shaders/rtao_water.glsl Shaders/color_space.glsl VERBATIM)
     list(APPEND VK_SHADER_HEADERS "${header}")
 endforeach()
 add_custom_target(PoseidonVKShaders DEPENDS ${VK_SHADER_HEADERS})

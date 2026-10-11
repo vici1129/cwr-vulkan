@@ -142,7 +142,7 @@ class EngineVK final : public Engine
     bool SupportsProjectedShadows() const override { return true; }
     void SetShadowMapsEnabled(bool enabled) override;
     bool ShadowMapsEnabled() const override { return _shadowTuning.enabled; }
-    bool NeedsSunShadowDepth() const override { return _shadowTuning.enabled || _vk.VolumetricFogEnabled(); }
+    bool NeedsSunShadowDepth() const override { return _shadowTuning.enabled || _vk.VolumetricScatteringEligible(); }
     bool ShadowMapsBeforeWorld() const override { return true; }
     ShadowMapTuning GetShadowMapTuning() const override { return _shadowTuning; }
     void SetShadowMapTuning(const ShadowMapTuning& tuning) override;
@@ -200,8 +200,8 @@ class EngineVK final : public Engine
     void BeginTemporalWorld();
     void CaptureTemporalNative(const Shape&, bool dynamic);
     ShadowMapTuning _shadowTuning;
-    std::vector<float> _volumeCasters;
     std::vector<float> _volumeTerrain;
+    std::shared_ptr<vk::MeshBuffers> _volumeTerrainMesh;
     const void* _volumeLandscape = nullptr;
     std::array<float, 4> _volumeTerrainKey{};
     float _shadowSunFactor = 0;

@@ -252,12 +252,15 @@ void VulkanContext::CreateShadowTarget(Frame::ShadowTarget& target, int resoluti
 }
 
 void VulkanContext::RenderShadowDepth(const float* matrices, int count, int resolution, std::span<const float> solid,
-                                      std::span<const float> alpha, std::span<const ShadowAlphaBatch> batches)
+                                      std::span<const float> alpha, std::span<const ShadowAlphaBatch> batches,
+                                      const std::shared_ptr<MeshBuffers>& terrain, uint32_t terrainVertices,
+                                      const std::array<float, 3>& terrainOffset)
 {
     if (!_frameOpen)
         return;
     if (_csmActive || _shadowPass || !matrices || count < 1 || count > 4 || resolution < 128 || resolution > 4096 ||
-        solid.size() % 9 || alpha.size() % 15)
+        solid.size() % 9 || alpha.size() % 15 || terrainVertices % 3 ||
+        (terrainVertices && (!terrain || size_t(terrainVertices) * 3 * sizeof(float) > terrain->vertices.size)))
         throw std::invalid_argument("Vulkan invalid or repeated CSM depth pass");
     FlushScreenBatch();
     CreateShadowResources();
@@ -272,6 +275,10 @@ void VulkanContext::RenderShadowDepth(const float* matrices, int count, int reso
         solidMesh = UploadTransientMesh(solid.data(), solid.size_bytes(), &unusedIndex, sizeof(unusedIndex));
     if (!alpha.empty())
         alphaMesh = UploadTransientMesh(alpha.data(), alpha.size_bytes(), &unusedIndex, sizeof(unusedIndex));
+    // Immutable patch replacements stay alive until every referencing frame's
+    // fence signals, using the same ownership as ordinary cached Shape meshes.
+    if (terrain)
+        frame.meshes.push_back(terrain);
     for (const auto& batch : batches)
     {
         if (size_t(batch.first) + batch.count > alpha.size() / 5 || batch.count % 3)
@@ -329,6 +336,20 @@ void VulkanContext::RenderShadowDepth(const float* matrices, int count, int reso
                     vkCmdDraw(command, batch.count, 1, batch.first, 0);
                 }
         }
+        if (terrain && terrainVertices)
+        {
+            const auto translated = TranslateShadowMatrix(matrices + c * 16, terrainOffset);
+            std::copy(translated.begin(), translated.end(), push.begin());
+            push[16] = 0;
+            const VkDeviceSize offset = 0;
+            vkCmdBindPipeline(command, VK_PIPELINE_BIND_POINT_GRAPHICS, _csmPipelines[0]);
+            vkCmdBindVertexBuffers(command, 0, 1, &terrain->vertices.buffer, &offset);
+            vkCmdBindDescriptorSets(command, VK_PIPELINE_BIND_POINT_GRAPHICS, _csmLayout, 0, 1,
+                                    &_whiteTexture->descriptors[0], 0, nullptr);
+            vkCmdPushConstants(command, _csmLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0,
+                               sizeof(push), push.data());
+            vkCmdDraw(command, terrainVertices, 1, 0, 0);
+        }
         vkCmdEndRenderPass(command);
     }
     if (frame.csmQueries)
@@ -339,7 +360,7 @@ void VulkanContext::RenderShadowDepth(const float* matrices, int count, int reso
     if (_profile.enabled)
     {
         ++_profile.csmPasses;
-        _profile.csmVertices += solid.size() / 3 + alpha.size() / 5;
+        _profile.csmVertices += solid.size() / 3 + alpha.size() / 5 + terrainVertices;
     }
     pass.renderPass = ResumePass();
     pass.framebuffer = SceneFramebuffer();

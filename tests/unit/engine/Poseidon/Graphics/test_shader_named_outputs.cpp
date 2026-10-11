@@ -12,6 +12,16 @@
 #include <stddef.h>
 #include <catch2/catch_message.hpp>
 #include <cctype>
+#include <algorithm>
+#include <cmath>
+
+namespace RTCoverage
+{
+using std::abs;
+using std::min;
+using std::max;
+#include <PoseidonVK/Shaders/rtao_coverage.glsl>
+}
 
 // I-28 / B-025 — shader source related-computation co-location.
 //
@@ -133,6 +143,52 @@ TEST_CASE("Vulkan AA native-resolution footprint excludes neighboring depth", "[
             const float lo = float(pixel) * ratio, hi = lo + ratio;
             REQUIRE(lo == float(pixel));
             REQUIRE(hi == float(pixel + 1));
+        }
+    }
+}
+
+TEST_CASE("Post-resolve RT corrections reject mixed MSAA coverage", "[Graphics][Shaders][vulkan-aa]")
+{
+    using namespace RTCoverage;
+    const auto root = std::filesystem::path(TESTS_ROOT_DIR).parent_path() / "engine" / "PoseidonVK" / "Shaders";
+    const auto sun = ReadTextFile(root / "rtao.comp");
+    const auto depth = ReadTextFile(root / "rtao_depth.glsl");
+    const auto filter = ReadTextFile(root / "rtao_filter.frag");
+    REQUIRE(sun.find("!rtSameDepth(viewZ(d),z)") != std::string::npos);
+    REQUIRE(sun.find("!rtSameLight(direct[channel],other[channel])") != std::string::npos);
+    REQUIRE(depth.find("if(s.w<=0) return vec4(0);") != std::string::npos);
+    REQUIRE(filter.find("vec4 w=waterAt(p);") != std::string::npos);
+    REQUIRE(filter.find("if(w.w<=0) {outColor=vec4(0);return;}") != std::string::npos);
+    REQUIRE(filter.find("vec4 other=waterAt(q);") != std::string::npos);
+    REQUIRE(filter.find("if(other.w<=0) continue;") != std::string::npos);
+    REQUIRE(rtSameDepth(10, 10.01f)); // ordinary small slope
+    REQUIRE_FALSE(rtSameDepth(10, 11));
+    REQUIRE_FALSE(rtSameDepth(0, 0));
+    REQUIRE(rtSameLight(.8f, .801f));
+    REQUIRE_FALSE(rtSameLight(.8f, 0));
+    REQUIRE_FALSE(rtSameLight(.8f, .4f)); // material/CSM discontinuity
+    for (int samples : {2, 4, 8})
+    {
+        CAPTURE(samples);
+        for (int coverage = 1; coverage < samples; ++coverage)
+        {
+            bool coherent = true, fullWater = true;
+            for (int sample = 0; sample < samples; ++sample)
+            {
+                coherent &= rtSameDepth(10, sample < coverage ? 10.f : 20.f);
+                fullWater &= sample < coverage;
+            }
+            REQUIRE_FALSE(coherent);
+            REQUIRE_FALSE(fullWater);
+            const float resolved = .5f, correction = .8f;
+            const float oldSun = resolved - correction;
+            const float coveredSun = resolved - correction * float(coverage) / samples;
+            REQUIRE(oldSun < coveredSun);
+            REQUIRE(resolved - (coherent ? correction : 0.f) == resolved);
+            // Reject at composition even when valid filtered neighbors exist.
+            const float filteredAlpha = .4f, filteredColor = .6f;
+            const float alpha = fullWater ? filteredAlpha : 0.f;
+            REQUIRE(filteredColor * alpha + resolved * (1-alpha) == resolved);
         }
     }
 }

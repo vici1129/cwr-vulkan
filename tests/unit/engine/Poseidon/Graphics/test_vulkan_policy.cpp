@@ -229,6 +229,34 @@ int main()
                   hdrContext.SetVolumetricFog("status").find("requested=on") != std::string::npos,
                   "invalid volumetric request preserves selection");
             Check(hdrContext.SetVolumetricFog("off").starts_with("OK"), "disable volumetric fog");
+            ShapeLighting volume{};
+            volume.fogParams = {100, 1000, 0, 0};
+            Check(!VulkanContext::VolumetricSourceEligible(volume), "zero source needs no volume CSM");
+            volume.atmosphereSun[3] = .0009f;
+            Check(!VulkanContext::VolumetricSourceEligible(volume), "negligible source needs no volume CSM");
+            volume.atmosphereSun[3] = .001f;
+            Check(VulkanContext::VolumetricSourceEligible(volume), "draw and CSM share the source threshold");
+            hdrContext.SetVolumetricFrame(volume);
+            Check(!hdrContext.VolumetricScatteringEligible(), "source cannot enable an off effect");
+            volume.fogParams[1] = 100;
+            Check(!VulkanContext::VolumetricSourceEligible(volume), "empty fog range needs no volume CSM");
+            volume.fogParams[1] = 99;
+            Check(!VulkanContext::VolumetricSourceEligible(volume), "reversed fog range needs no volume CSM");
+            // Matrix translation must reproduce per-vertex camera subtraction,
+            // including nonidentity rotations and the homogeneous row.
+            const std::array<float, 16> matrix{1,2,3,4, 5,6,7,8, 9,10,11,12, 13,14,15,16};
+            for (const std::array<float, 3> offset : {std::array<float, 3>{0,0,0}, {7,-90,-5}, {-8,-120,8}})
+            {
+                const auto translated = TranslateShadowMatrix(matrix.data(), offset);
+                for (int row = 0; row < 4; ++row)
+                {
+                    const float x = 112, y = 35, z = -48;
+                    const float original = matrix[row]*(x+offset[0]) + matrix[4+row]*(y+offset[1]) +
+                                           matrix[8+row]*(z+offset[2]) + matrix[12+row];
+                    const float cached = translated[row]*x + translated[4+row]*y + translated[8+row]*z + translated[12+row];
+                    Check(original == cached, "cached terrain transform matches camera-relative vertices");
+                }
+            }
             Check(!hdrContext.AtmosphereEnabled(), "atmosphere defaults off");
             Check(hdrContext.SetAtmosphere("on").starts_with("OK") && hdrContext.AtmosphereEnabled(),
                   "enable atmospheric perspective independently");

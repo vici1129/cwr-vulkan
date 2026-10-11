@@ -20,6 +20,10 @@ vec4 waterAt(ivec2 p) {
     vec4 w=vec4(0); float closest=1e30;
     for(int i=0;i<textureSamples(waterSurface);++i) {
         vec4 s=texelFetch(waterSurface,p,i);
+        // The reflection is blended after color resolve. Require full water
+        // coverage; a single water sample must not modify foreground samples.
+        // Shared by tracing AND the final filter (including its neighbors).
+        if(s.w<=0) return vec4(0);
         if(s.w>0 && s.w<closest) {w=s; closest=s.w;}
     }
     return w;
