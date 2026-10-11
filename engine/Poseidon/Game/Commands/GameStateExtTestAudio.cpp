@@ -61,6 +61,10 @@ static GameValue TriRTAO(const GameState*, GameValuePar arg)
 {
     return GameValue(GEngine ? GEngine->SetRTAO(RString(arg)) : RString("UNSUPPORTED: no renderer"));
 }
+static GameValue TriContactShadows(const GameState*, GameValuePar arg)
+{
+    return GameValue(GEngine ? GEngine->SetContactShadows(RString(arg)) : RString("UNSUPPORTED: no renderer"));
+}
 static GameValue TriRTShadows(const GameState*, GameValuePar arg)
 {
     return GameValue(GEngine ? GEngine->SetRTShadows(RString(arg)) : RString("UNSUPPORTED: no renderer"));
@@ -3112,6 +3116,7 @@ INIT_MODULE(GameStateExtTest, 3)
     GGameState.NewFunction(GameFunction(GameString, "triVolumetricFog", TriVolumetricFog, GameString));
     GGameState.NewFunction(GameFunction(GameString, "triRTAO", TriRTAO, GameString));
     GGameState.NewFunction(GameFunction(GameString, "triRTShadows", TriRTShadows, GameString));
+    GGameState.NewFunction(GameFunction(GameString, "triContactShadows", TriContactShadows, GameString));
     GGameState.NewFunction(GameFunction(GameString, "triRTReflections", TriRTReflections, GameString));
     GGameState.NewFunction(GameFunction(GameBool, "triRenderScale", TriRenderScale, GameScalar));
     GGameState.NewFunction(GameFunction(GameString, "triSetPlayerFaceView", TriSetPlayerFaceView, GameArray));

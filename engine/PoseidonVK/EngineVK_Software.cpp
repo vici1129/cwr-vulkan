@@ -136,7 +136,7 @@ void EngineVK::SubmitSoftware(const std::vector<uint32_t>& indices)
     receiver.fogColor = {_fogColor.R(), _fogColor.G(), _fogColor.B(), 1};
     receiver.eyeCoef = _vk.EyeCoef();
     const bool atmosphere = _shadowWorld && _vk.AtmosphereEnabled();
-    if (_shadowWorld && (_shadowTuning.enabled || atmosphere || _vk.RTShadowsEnabled() || receiver.rtWater[0]) &&
+    if (_shadowWorld && (_shadowTuning.enabled || atmosphere || _vk.SeparateSunlight() || receiver.rtWater[0]) &&
         !(_softwareFlags & (DisableSun | NoZBuf | NoDropdown | IsLight | IsShadow | IsAlphaFog)) && GScene &&
         GScene->GetCamera())
     {
@@ -147,7 +147,8 @@ void EngineVK::SubmitSoftware(const std::vector<uint32_t>& indices)
         const auto& projection = camera->ProjectionNormal();
         receiver.shadowReceiver = {_shadowTuning.enabled ? 1.f : 0.f, projection(0, 0), projection(1, 1), 0};
         receiver.atmosphereSun[3] = atmosphere ? 1.f : 0.f;
-        receiver.rtSun[0] = _vk.RTShadowsEnabled() && !_softwareMesh->directSun.empty() ? 1.f : 0.f;
+        receiver.rtSun[0] = (_vk.RTShadowsEnabled() || (_vk.ContactShadowsEligible() && !_waterSurface)) &&
+                                   !_softwareMesh->directSun.empty() ? (_vk.RTShadowsEnabled() ? 1.f : 2.f) : 0.f;
     }
     if (receiver.rtWater[0] && receiver.shadowReceiver[1] <= 0)
         receiver.rtWater = {}; // unsupported software projection retains ordinary water

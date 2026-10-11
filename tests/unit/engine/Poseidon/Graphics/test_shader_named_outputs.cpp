@@ -151,7 +151,9 @@ TEST_CASE("Post-resolve RT corrections reject mixed MSAA coverage", "[Graphics][
 {
     using namespace RTCoverage;
     const auto root = std::filesystem::path(TESTS_ROOT_DIR).parent_path() / "engine" / "PoseidonVK" / "Shaders";
-    const auto sun = ReadTextFile(root / "rtao.comp");
+    const auto sun = ReadTextFile(root / "sunlight_depth.glsl");
+    REQUIRE(ReadTextFile(root / "rtao.comp").find("#include \"sunlight_depth.glsl\"") != std::string::npos);
+    REQUIRE(ReadTextFile(root / "contact_shadows.frag").find("#include \"sunlight_depth.glsl\"") != std::string::npos);
     const auto depth = ReadTextFile(root / "rtao_depth.glsl");
     const auto filter = ReadTextFile(root / "rtao_filter.frag");
     REQUIRE(sun.find("!rtSameDepth(viewZ(d),z)") != std::string::npos);

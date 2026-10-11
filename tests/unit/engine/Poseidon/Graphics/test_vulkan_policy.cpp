@@ -229,6 +229,15 @@ int main()
                   hdrContext.SetVolumetricFog("status").find("requested=on") != std::string::npos,
                   "invalid volumetric request preserves selection");
             Check(hdrContext.SetVolumetricFog("off").starts_with("OK"), "disable volumetric fog");
+            Check(hdrContext.SetContactShadows("status").find("requested=off active=off") != std::string::npos,
+                  "contact shadows default off without an RT capability request");
+            Check(hdrContext.SetContactShadows("on").starts_with("OK") && !hdrContext.ContactShadowsEnabled(),
+                  "contact enable waits for idle recreation");
+            Check(hdrContext.SetContactShadows("invalid").starts_with("INVALID") &&
+                  hdrContext.SetContactShadows("status").find("requested=on") != std::string::npos,
+                  "invalid contact command preserves selection");
+            Check(!hdrContext.RaySceneEnabled(), "contact does not request a ray tracing scene");
+            Check(hdrContext.SetContactShadows("off").starts_with("OK"), "disable contact shadows");
             ShapeLighting volume{};
             volume.fogParams = {100, 1000, 0, 0};
             Check(!VulkanContext::VolumetricSourceEligible(volume), "zero source needs no volume CSM");

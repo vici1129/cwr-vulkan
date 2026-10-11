@@ -181,6 +181,15 @@ class VulkanContext
     bool RTAOEnabled() const { return _rtaoEnabled && _rtaoAvailable; }
     std::string SetRTShadows(std::string_view mode);
     bool RTShadowsEnabled() const { return _rtShadowsEnabled && _rtaoAvailable; }
+    std::string SetContactShadows(std::string_view mode);
+    bool ContactShadowsEnabled() const { return _contactEnabled; }
+    bool ContactShadowsEligible() const
+    {
+        return _contactEnabled && _volumeFrame.atmosphereSun[3] >= .001f &&
+               std::max({_volumeFrame.atmosphereColor[0], _volumeFrame.atmosphereColor[1],
+                         _volumeFrame.atmosphereColor[2]}) > .00001f;
+    }
+    bool SeparateSunlight() const { return RTShadowsEnabled() || ContactShadowsEligible(); }
     std::string SetRTReflections(std::string_view mode);
     void FailRTReflections(std::string_view reason);
     bool RTReflectionsEnabled() const { return _rtReflectionsEnabled && _rtaoAvailable; }
@@ -242,6 +251,16 @@ class VulkanContext
     struct RTAOState;
     std::shared_ptr<RTAOState> _rtao;
     bool _rtShadowsEnabled = false, _rtShadowTargets = false;
+    bool _contactRequested = false, _contactEnabled = false, _contactDrew = false;
+    uint64_t _contactDraws = 0;
+    VkDescriptorSetLayout _contactSetLayout = VK_NULL_HANDLE;
+    VkDescriptorPool _contactPool = VK_NULL_HANDLE;
+    VkPipelineLayout _contactLayout = VK_NULL_HANDLE;
+    std::array<VkPipeline, 2> _contactPipelines{};
+    std::vector<VkDescriptorSet> _contactSets;
+    void CreateContactResources();
+    void DestroyContactResources() noexcept;
+    void DrawContactShadows(const std::array<float, 4>& projection, VkImageView rtSun = VK_NULL_HANDLE);
     bool _rtReflectionsEnabled = false, _rtWaterTargets = false;
     std::string _rtReflectionFailure;
     std::array<std::array<float, 4>, 8> _reflectionLighting{};
@@ -291,6 +310,8 @@ class VulkanContext
         double shaftsGpuMs = 0;
         uint64_t shaftsGpuSamples = 0;
         double volumeGpuMs = 0;
+        double contactGpuMs = 0;
+        uint64_t contactGpuSamples = 0;
         uint64_t volumeGpuSamples = 0;
         uint64_t bloomGpuSamples = 0;
         uint64_t taaGpuSamples = 0;
@@ -338,6 +359,7 @@ class VulkanContext
         bool bloomTimestamped = false;
         bool shaftsTimestamped = false;
         bool volumeTimestamped = false;
+        bool contactTimestamped = false;
         bool ssaoTimestamped = false;
         VkQueryPool csmQueries = VK_NULL_HANDLE;
         bool csmTimestamped = false;

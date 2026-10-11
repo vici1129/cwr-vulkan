@@ -1,5 +1,163 @@
 # Vulkan backend development
 
+## Optional screen-space contact shadows (2026-10-12)
+
+Built on `8b25bd1`, including the volumetric/MSAA follow-up below. Default **Off**:
+
+```sqf
+triContactShadows "on"
+triContactShadows "off"
+triContactShadows "status"
+```
+
+Vulkan only; **no `CWR_VK_RTAO=1` or hardware ray tracing requirement**. GL33
+returns `UNSUPPORTED` without changing rendering. There is no menu, persistent
+setting, new SDK, scene database, denoiser, or separate temporal history. Status
+reports requested/active state, whether the last world drew, cumulative draws,
+sunlight source, actual world extent and fixed ray parameters. Changes take
+effect at the next frame's ordinary resource recreation and reset world AA
+history. Independent MRT blending is required.
+
+### Implementation and tuning
+
+`VulkanContext_Contact.cpp` draws one full-resolution triangle using existing
+world depth and the separated-sunlight MRT. `contact_shadows.frag` reconstructs
+camera-space positions from the actual depth texture extent, pixel centers,
+projection and current projection jitter. The engine's current sunlight vector
+is transformed through the camera rotation; no guessed screen-space direction
+or output-resolution assumption is used. The existing atmosphere frame carries
+these inputs even with atmosphere/volumetric effects disabled.
+
+There are 16 deterministic uniform samples over a 1.2 m ray. The origin moves
+2 cm along a depth-derived normal and 1 cm toward the sun. A bounded 16–20 cm
+view-depth slab, a near-hit ramp, receiver-plane height confidence (fade from
+20 to 50 cm), and diminishing confidence along the ray suppress self-hits and
+detached silhouette bands. Contact fades at grazing receivers, within 3.5% of
+screen edges, and between 25 and 40 m from the camera. Off-screen samples stop
+the ray. These are gameplay-tuned heuristics, not geometric ray intersections:
+an initial thinner slab missed feet; longer/nonuniform steps produced separated
+pole marks, and raised tank hulls needed the receiver-plane confidence guard.
+
+Opaque/cutout raster depth includes animated soldiers without adding them to an
+RT scene. Receiver capture excludes water, blended surfaces and unsupported
+legacy lighting paths. The shared `sunlight_depth.glsl` retains the existing RT
+MSAA coherence guard: reject mixed background/depth/light samples instead of
+subtracting a full sample's sunlight from resolved foreground color.
+
+Only the extracted direct-sunlight contribution is subtracted. Contact-only
+capture preserves the original legacy CSM scene result, including its existing
+ambient/fog behavior, wherever no additional occlusion is found. Visibility is
+`min(CSM, RT, contact)`, not multiplied darkening: when RT sunlight runs, the
+contact triangle takes the componentwise maximum of its sunlight reduction and
+the existing raw RT reduction, replacing the RT sunlight composition triangle.
+RT still supplies hidden/off-screen casters and longer shadows. Without RT, the
+same pass runs independently, before AO, reflections, volumetrics and world AA;
+it does not darken local lights, emissive/ambient terms, scattering, sky or UI.
+
+No fullscreen contact draw or sunlight capture runs when the engine's current
+sun source is below 0.001 or sun color is negligible (including tested full
+overcast/night). While enabled, the shared sunlight attachment remains allocated
+and cleared even then. Off creates no contact pipelines/descriptors, requests no
+additional sunlight target and submits no contact draw. Enabling it without an
+existing sunlight MRT adds an 8-byte-per-sample world attachment: about 47.5 MiB
+at 1080p or 84.4 MiB at 1440p for three single-sample swapchain images, multiplied
+by MSAA sample count. No contact result image/history is allocated.
+
+### Gameplay evidence and regression checks
+
+Local muted developer launches used stock GOG 3.05 content, isolated profiles,
+Malden `02Infantry.Abel` and Everon `01TakeTheCar.Eden`. This is gameplay/render
+qualification, not a Steam launch or mission-completion claim. Frozen cameras
+were compared Off → On → Off; physical input also moved soldiers approximately
+10 m on Malden and 16 m on Everon. Checked feet, jeep wheels, tank tracks,
+buildings, walls/fences, poles, bushes and forest floor at noon, 06:00, full
+overcast and midnight; CSM/RT sunlight independently Off/On; AA Off, TAA, FSR
+Quality and MSAA 2/4/8. Volumetric fog, atmosphere, SSAO/RTAO and RT water
+reflections were exercised, plus 1281×721 resize and minimize/restore.
+
+Native-resolution crops below are from the final shader, identical frozen
+Off/On cameras with CSM and RT sunlight Off so the added short contact is visible.
+No brightness adjustment or enhancement was applied.
+
+| View | Off | On |
+|---|---|---|
+| Malden boots | ![Boots Off](evidence/contact-shadows/malden-feet-off.png) | ![Boots On](evidence/contact-shadows/malden-feet-on.png) |
+| Everon tracks | ![Tracks Off](evidence/contact-shadows/everon-tracks-off.png) | ![Tracks On](evidence/contact-shadows/everon-tracks-on.png) |
+
+Final executable SHA-256:
+`36bcb2609eb622b6572d09b60923ffb4c98891218fa8595b0bfea6c4218bb78a`.
+Local raw captures, command receipts, launch hashes and logs are under
+`build/shadow-live/` in the original `cwr-vulkan` checkout:
+
+- `contact-malden-final`: broad Malden matrix during tuning, 32,409 submitted /
+  32,408 presented, zero Vulkan validation errors/warnings. The final receiver
+  confidence adjustment was subsequently rechecked on Malden in
+  `contact-perf1080` (feet, village, vegetation, no RT opt-in).
+- `contact-everon-v2`: final shader, complete Everon AA/weather and tank/CSM/RT
+  pairs, forest fog and camera motion; 20,655 submitted/presented, zero errors
+  or warnings. Frozen tank-region Off-return differences were zero with CSM
+  Off, CSM On and RT On; full-overcast/night Off/On differences were also zero
+  in that region and status reported no contact draw.
+- `contact-combined1440`: final shader, all AA modes with CSM, RT sunlight,
+  RTAO and volumetrics enabled, walking, forest fog and odd resize/minimize;
+  34,478 submitted / 34,477 presented, zero errors/warnings.
+- `contact-baseline` versus `contact-perf1440`: pre-change `8b25bd1` executable
+  versus new executable with contact Off at 1281×721, CSM Off and On. The fixed
+  1040×240 terrain crop was pixel-identical in both cases. Whole frames were
+  **not** identical (NPC/cloud/UI changes and a few building pixels); this is
+  not a claim of full-frame cross-process bitwise equivalence.
+- `contact-gl33`: Vulkan-disabled build; all three commands returned unsupported.
+
+The system's stale Epic overlay manifest emitted a loader message; the Vulkan
+validation and synchronization-validation counters above remained zero. The
+policy test's deliberately injected teardown validation error is an expected
+driver-free test, not a live validation failure.
+
+Vulkan+FSR and GL33-only builds passed. Focused Vulkan policy/lifetime suite:
+417 checks; shader/shadow-math/Vulkan-shape suite: 931 assertions in 66 cases;
+GL33-only equivalent: 891 assertions in 65 cases. Added coverage includes
+default/deferred/invalid controls without a ray scene, shared MSAA sunlight
+policy, and projection/jitter round trips at native, scaled and odd extents.
+
+### Measured GPU cost
+
+RTX 4060 Ti, driver 617.14, VSync Off, AA Off, 100% scale, RT opt-in absent,
+validation disabled for timing. Fixed Malden village view
+`[7116,73,6085,-1,-0.1,-0.2]`, view distance 900, noon/clear/fog zero. Each state
+had 3 s warm-up and 8 s measurement; entries are medians of four 2 s profiling
+windows. Contact timestamps bracket the march/composition and are read after
+the existing frame fence (no new wait). Raw data: `contact-perf1080` and
+`contact-perf1440/contact-timing.json` (each run has its own JSON).
+
+| Actual world extent | CSM | Contact pass ms | GPU frame Off → On ms |
+|---|---|---:|---:|
+| 1920×1080 | Off | 0.512 | 1.201 → 1.680 |
+| 1920×1080 | On | 0.405 | 1.576 → 1.716 |
+| 2560×1440 | Off | 0.583 | 1.669 → 1.959 |
+| 2560×1440 | On | 0.451 | 1.730 → 1.914 |
+
+All measured steady-state windows reported zero allocations/frame. These are
+not locked-clock benchmarks: sampled graphics clocks rose from 795–1110 to
+1275–1665 MHz at 1080p, and 1245–1755 to 2010–2580 MHz at 1440p; memory clocks
+also changed. Consequently frame subtraction understates the isolated pass
+cost and the resolutions are not directly scaling-comparable. The contact
+timer excludes sunlight-MRT capture overhead; whole-frame timing includes it.
+1440p used a verified 2560×1440 world/output extent in an oversized window on
+the 1080p desktop, not a full-monitor 1440p visual inspection. MSAA, other GPUs
+and denser scenes can cost more; the table is not a universal FPS promise.
+
+### Remaining limitations
+
+Only the frontmost screen depth is known. Hidden/off-screen casters cannot cast
+contact shadows, and edge/distance fades deliberately lose them. Thin fences,
+foliage and subpixel geometry can alias or miss steps with AA Off; TAA/FSR use
+only the existing world history. Mixed MSAA pixels and grazing/raised surfaces
+are intentionally conservative and may lose detail. The final tuning removed
+the observed detached tank-front band and avoided broad dark halos in the
+tested views, but does not establish artifact-free motion for arbitrary assets,
+camera angles or mods. This is short contact reinforcement, not a replacement
+for CSM/RT or an attempt to synthesize full-length soldier/building shadows.
+
 ## Focused MSAA and volumetric CSM follow-up (2026-10-12)
 
 Built on `64a7c1c`. Four narrowly scoped corrections:

@@ -907,6 +907,10 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
     // water, then AO. Skipped timestamp intervals remain explicitly empty.
     for (int effect : {1, 2, 0})
     {
+        // Contact-only sunlight must also precede reflections and AO when the
+        // shared RT scene is used without hardware sunlight shadows.
+        if (effect != 1 && !_contactDrew)
+            DrawContactShadows(projection);
         const uint32_t rayStamp = 4 + effect * 4, filterStamp = rayStamp + 2;
         if (effect == 2 ? !(RTReflectionsEnabled() && _rtWaterTargets)
             : effect    ? !(RTShadowsEnabled() && _rtShadowTargets)
@@ -1000,6 +1004,13 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
                              VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_HOST_BIT, 0, 1, &ready, 0,
                              nullptr, 0, nullptr);
         stamp(filterStamp);
+        if (effect == 1 && ContactShadowsEligible())
+        {
+            DrawContactShadows(projection, target.view);
+            stamp(filterStamp + 1);
+            rt.sunDispatched = true;
+            continue;
+        }
         VkRenderPassBeginInfo pass{VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO};
         pass.renderPass = _ssaoPass;
         pass.framebuffer = _aaTargets[_image].ao;

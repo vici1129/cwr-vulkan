@@ -396,6 +396,7 @@ class Engine : public IGraphicsEngine
     virtual bool SetSSAO(bool, float, float, float, float) { return false; }
     virtual RString SetRTAO(RString) { return "UNSUPPORTED: RTAO requires Vulkan"; }
     virtual RString SetRTShadows(RString) { return "UNSUPPORTED: RT shadows require Vulkan"; }
+    virtual RString SetContactShadows(RString) { return "UNSUPPORTED: contact shadows require Vulkan"; }
     virtual RString SetRTReflections(RString) { return "UNSUPPORTED: RT water reflections require Vulkan"; }
     virtual bool SeparateSunlight() const { return false; }
     virtual void NextFrame();                             // swap frames - get ready for next frame

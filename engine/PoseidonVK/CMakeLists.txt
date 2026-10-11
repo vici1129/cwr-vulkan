@@ -98,7 +98,24 @@ foreach(kind rtao rtao_ms rtao_filter rtao_filter_ms rtshadow rtshadow_ms rtshad
         COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/generated/PoseidonVK/Shaders"
         COMMAND "${Vulkan_GLSLANG_VALIDATOR_EXECUTABLE}" -V --target-env vulkan1.2 ${defines}
             --vn "Cwr${kind}_${stage}" -o "${header}" "${CMAKE_CURRENT_SOURCE_DIR}/Shaders/${source}.${stage}"
-        DEPENDS "Shaders/${source}.${stage}" Shaders/rtao_depth.glsl Shaders/rtao_coverage.glsl Shaders/rtao_water.glsl Shaders/color_space.glsl VERBATIM)
+        DEPENDS "Shaders/${source}.${stage}" Shaders/rtao_depth.glsl Shaders/rtao_coverage.glsl Shaders/sunlight_depth.glsl Shaders/rtao_water.glsl Shaders/color_space.glsl VERBATIM)
+    list(APPEND VK_SHADER_HEADERS "${header}")
+endforeach()
+foreach(kind contact_shadows contact_shadows_ms contact_shadows_rt contact_shadows_rt_ms)
+    set(defines)
+    if(kind MATCHES "_ms$")
+        list(APPEND defines -DMULTISAMPLE_DEPTH=1)
+    endif()
+    if(kind MATCHES "_rt")
+        list(APPEND defines -DCONTACT_RT=1)
+    endif()
+    set(header "${CMAKE_CURRENT_BINARY_DIR}/generated/PoseidonVK/Shaders/${kind}.frag.hpp")
+    add_custom_command(OUTPUT "${header}"
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/generated/PoseidonVK/Shaders"
+        COMMAND "${Vulkan_GLSLANG_VALIDATOR_EXECUTABLE}" -V --target-env vulkan1.0 ${defines}
+            --vn "Cwr${kind}_frag" -o "${header}" "${CMAKE_CURRENT_SOURCE_DIR}/Shaders/contact_shadows.frag"
+        DEPENDS Shaders/contact_shadows.frag Shaders/rtao_depth.glsl Shaders/sunlight_depth.glsl
+            Shaders/rtao_coverage.glsl VERBATIM)
     list(APPEND VK_SHADER_HEADERS "${header}")
 endforeach()
 add_custom_target(PoseidonVKShaders DEPENDS ${VK_SHADER_HEADERS})
@@ -132,6 +149,7 @@ target_link_libraries(PoseidonVKPolicyTests PRIVATE Vulkan::Vulkan)
 add_test(NAME PoseidonVKPolicyTests COMMAND PoseidonVKPolicyTests)
 foreach(target PoseidonVK PoseidonVKPolicyTests)
     target_sources(${target} PRIVATE VulkanContext_RTAO.cpp)
+    target_sources(${target} PRIVATE VulkanContext_Contact.cpp)
     target_sources(${target} PRIVATE VulkanContext_FSR.cpp VulkanContext_HDR.cpp VulkanContext_Bloom.cpp VulkanContext_Atmosphere.cpp VulkanContext_Volumetric.cpp)
     if(TARGET CwrFsr3)
         target_link_libraries(${target} PRIVATE CwrFsr3)

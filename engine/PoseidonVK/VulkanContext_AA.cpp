@@ -144,6 +144,7 @@ void VulkanContext::CreateAAResources(VkFormat format)
     _bloomEnabled = _bloomRequested;
     _shaftsEnabled = _shaftsRequested;
     _volumeEnabled = _volumeRequested;
+    _contactEnabled = _contactRequested;
     _renderScale = _requestedScale;
     _worldSamples = AASamples(_aaMode);
     if (!(_aaSampleSupport & _worldSamples))
@@ -158,7 +159,7 @@ void VulkanContext::CreateAAResources(VkFormat format)
     // Even Off uses the completed-world boundary for tone mapping before UI.
 
     _rtWaterTargets = RTReflectionsEnabled();
-    _rtShadowTargets = RTShadowsEnabled() || _rtWaterTargets;
+    _rtShadowTargets = RTShadowsEnabled() || _rtWaterTargets || _contactEnabled;
     VkAttachmentDescription attachments[5]{};
     auto& color = attachments[0];
     color.format = format;
@@ -498,6 +499,7 @@ void VulkanContext::CreateAAResources(VkFormat format)
     CreateBloomResources();
     CreateSunShaftResources();
     CreateVolumetricResources();
+    CreateContactResources();
 }
 
 void VulkanContext::BeginAAWorld()
@@ -601,6 +603,7 @@ void VulkanContext::DrawAAPass(unsigned index, VkFramebuffer framebuffer, VkDesc
 
 void VulkanContext::FinishAAWorld(const std::array<float, 4>& projection)
 {
+    _contactDrew = false;
     if (RaySceneEnabled())
     {
         try
@@ -614,6 +617,10 @@ void VulkanContext::FinishAAWorld(const std::array<float, 4>& projection)
             FailRTReflections(error.what());
         }
     }
+    // The RT sunlight branch composes both visibilities before water/AO. If it
+    // did not run (including an empty RT scene), contact remains independent.
+    if (!_contactDrew)
+        DrawContactShadows(projection);
     if (!RTAOEnabled())
         DrawSSAO(projection);
     if (!_worldActive)
@@ -668,6 +675,7 @@ void VulkanContext::DestroyAAResources() noexcept
     DestroyBloomResources();
     DestroySunShaftResources();
     DestroyVolumetricResources();
+    DestroyContactResources();
     DestroyFSR();
     _worldActive = _worldPassOpen = false;
     _taaValid = _taaInitialized = false;

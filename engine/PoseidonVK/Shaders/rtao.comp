@@ -4,39 +4,12 @@
 #extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
 #extension GL_GOOGLE_include_directive : require
 #include "rtao_depth.glsl"
-#include "rtao_coverage.glsl"
 layout(local_size_x=8,local_size_y=8) in;
 layout(set=0,binding=1) uniform accelerationStructureEXT scene;
 layout(set=0,binding=2,rgba32f) uniform writeonly image2D resultAO;
 layout(set=0,binding=3,std430) buffer Counters { uint rays; uint hits; uint sunRays; uint sunHits; uint terrainHits; uint alphaHits; uint waterRays; uint waterHits; uint shadedHits; uint shadedTerrain; uint shadedAlpha; } counters;
 #ifdef SUN_SHADOW
-#ifdef MULTISAMPLE_DEPTH
-layout(set=0,binding=6) uniform sampler2DMS directLight;
-vec4 directAt(ivec2 p) {
-    // A post-resolve subtraction cannot apply one surface's full correction
-    // to a mixed pixel. Retain ordinary CSM at ambiguous MSAA edges.
-    int selected=0;
-    float closest=texelFetch(sceneDepth,p,0).r;
-    for(int i=1;i<textureSamples(sceneDepth);++i) {
-        float d=texelFetch(sceneDepth,p,i).r;
-        if(d<closest) { closest=d; selected=i; }
-    }
-    vec4 direct=texelFetch(directLight,p,selected);
-    float z=viewZ(closest);
-    for(int i=0;i<textureSamples(sceneDepth);++i) {
-        float d=texelFetch(sceneDepth,p,i).r;
-        // Tolerate small within-surface slopes, not silhouettes/background.
-        if(d<=0 || d>=.999999 || !rtSameDepth(viewZ(d),z)) return vec4(0);
-        vec4 other=texelFetch(directLight,p,i);
-        for(int channel=0;channel<4;++channel)
-            if(!rtSameLight(direct[channel],other[channel])) return vec4(0);
-    }
-    return direct;
-}
-#else
-layout(set=0,binding=6) uniform sampler2D directLight;
-vec4 directAt(ivec2 p) { return texelFetch(directLight,p,0); }
-#endif
+#include "sunlight_depth.glsl"
 #endif
 shared uint groupRays;
 shared uint groupHits;

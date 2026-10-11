@@ -40,6 +40,20 @@ TEST_CASE("RTAO instance coordinates and depth reconstruction agree with raster 
     const Vector3 reconstructed(clip[0]/clip[3]/projection(0,0)*z, -clip[1]/clip[3]/projection(1,1)*z,z);
     const auto result=camera.FastTransform(reconstructed);
     REQUIRE(result.Distance2(world)<.0001f);
+    // Contact rays operate at actual world input dimensions, including odd
+    // FSR/scale sizes. Remove jitter for reconstruction, reapply for lookup.
+    for (auto size : {std::array<float, 2>{1920, 1080}, {2560, 1440}, {1281, 721}, {1280, 720}})
+        for (float offset : {-.375f, 0.f, .375f})
+        {
+            const float jx = 2 * offset / size[0], jy = -2 * offset / size[1];
+            const float u = (clip[0] / clip[3] + jx) * .5f + .5f;
+            const float v = (clip[1] / clip[3] + jy) * .5f + .5f;
+            const Vector3 point((u * 2 - 1 - jx) / projection(0, 0) * z,
+                                -(v * 2 - 1 - jy) / projection(1, 1) * z, z);
+            REQUIRE(camera.FastTransform(point).Distance2(world) < .0001f);
+            REQUIRE((point.X() * projection(0, 0) / point.Z() + jx) * .5f + .5f == Catch::Approx(u));
+            REQUIRE((-point.Y() * projection(1, 1) / point.Z() + jy) * .5f + .5f == Catch::Approx(v));
+        }
 }
 #endif
 

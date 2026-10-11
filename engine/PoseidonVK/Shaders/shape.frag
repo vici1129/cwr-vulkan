@@ -51,21 +51,27 @@ void main() {
     } else if (outColor.a < draw.alphaCutoff) discard;
     vec3 base = outColor.rgb;
     float csm = sunlightVisibility(shadowWorld, fogVisibility);
-    bool separate = lighting.rtSun.x > .5 && directSun.a > .99 && draw.detailEnabled < 1.5;
-    if (separate) {
+    bool captureSun = lighting.rtSun.x > .5 && directSun.a > .99 && draw.detailEnabled < 1.5;
+    bool separate = captureSun && lighting.rtSun.x < 1.5;
+    if (captureSun) {
         // Derive the sunlight-only difference in linear HDR, not by multiplying
         // ambient/emissive/local lighting or already-composited fog.
         base = texel.rgb * legacyLightToLinear(draw.color.rgb * max(vertexColor.rgb-directSun.rgb,vec3(0)));
         if(draw.detailEnabled>.5) base *= legacyLightToLinear(vec3(WORLD_TEXTURE(detailTexture,texCoord*32).a*2));
+    }
+    if (separate) {
         csm = sunlightVisibility(shadowWorld, 1.0);
         outColor.rgb = base + max(outColor.rgb-base,vec3(0))*csm;
     } else outColor.rgb *= csm;
+    // Contact-only capture must not change legacy CSM shading where no ray
+    // hits. Preserve its original scene result, including ambient and fog.
+    vec3 contactBase = base*csm;
     // Keep the night-eye response in its calibrated perceptual domain.
     outColor.rgb = nightResponse(outColor.rgb);
     float visibility = clamp(fogVisibility, 0.0, 1.0);
 #ifdef RT_SUN
     // Alpha is existing CSM visibility. Later use min(CSM,RT), never CSM*RT.
-    outSun = separate ? vec4(max(outColor.rgb-nightResponse(base),vec3(0))*visibility/max(csm,.0001),csm) : vec4(0);
+    outSun = captureSun ? vec4(max(outColor.rgb-nightResponse(separate ? base : contactBase),vec3(0))*visibility/max(csm,.0001),csm) : vec4(0);
 #endif
     vec3 fogColor = toLinear(lighting.fogColor.rgb);
     if (lighting.atmosphereSun.w > 0.0 && visibility < 1.0) {
