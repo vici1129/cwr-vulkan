@@ -49,7 +49,7 @@ void main() {
         }
     }
     // Bounded detail restoration derived from current, not historical gradients.
-    result=clamp(result+.08*(current-toRGB(mean)),toRGB(vec3(0,0,0)),vec3(1));
+    result=max(result+.08*(current-toRGB(mean)),vec3(0));
     if (aa.control.w>.5)
         result=reactive || motion.w<.5 ? vec3(1,0,1) : vec3(.5+motion.x*80.,.5+motion.y*80.,.5);
     // Negative depth marks unreliable color too: when smoke/water moves away,

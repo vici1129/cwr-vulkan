@@ -85,6 +85,7 @@ TLVertexTable::TLVertexTable(const IAnimator* anim, const Shape& src, const Matr
 
 void TLVertexTable::ReleaseTables()
 {
+    hdrColor.clear();
     previousClip.clear();
     _clip.Clear();
     _posTrans.Clear();
@@ -121,6 +122,7 @@ int TLVertexTable::AddPos()
 
 void TLVertexTable::DoTransformPoints(const VertexTable& src, const Matrix4& posView, int beg, int end)
 {
+    hdrColor.clear();
     previousClip.clear();
     // this is the most common case
     // simple mesh with no decal polygons
@@ -145,6 +147,7 @@ void TLVertexTable::DoTransformPoints(const VertexTable& src, const Matrix4& pos
 
 void TLVertexTable::DoTransformPoints(const IAnimator* anim, const Shape& src, const Matrix4& posView)
 {
+    hdrColor.clear();
     previousClip.clear();
     int i;
     _orHints = src._orHints;
@@ -417,6 +420,13 @@ const float StartLights = 0.01; // NightEffect when lights start to be visible
 #define DP(a, b) ((a).X() * (b).X() + (a).Y() * (b).Y() + (a).Z() * (b).Z())
 #define SIZE2(x, y, z) (Square(x) + Square(y) + Square(z))
 
+void TLVertexTable::PreserveHDRColor(int vertex, ColorVal color)
+{
+    if (!GEngine || !GEngine->UsesHDRLighting()) return;
+    hdrColor.resize(NVertex());
+    hdrColor[vertex] = {color.R(), color.G(), color.B(), 1};
+}
+
 inline PackedColor PackedColor255(ColorVal color, int a = 255)
 {
     int r = toInt(color.R());
@@ -542,21 +552,25 @@ void TLVertexTable::DoMaterialLightingP(const TLMaterial& mat, const Matrix4& wo
                 _mm_prefetch((char*)(norm + 4), _MM_HINT_NTA);
                 Color color = ambient + diffuse * cosFi;
                 v->color = PackedColor255(color, fogValue);
+                PreserveHDRColor(end-i-1, color * (1.f/255));
 #elif __ICL
                 Coord cosFi = *norm * sunDirection;
                 saturateMax(cosFi, 0);
                 Color color = ambient + diffuse * cosFi;
                 v->color = PackedColor255(color, fogValue);
+                PreserveHDRColor(end-i-1, color * (1.f/255));
 #else
                 Coord cosFi = *norm * sunDirection;
                 if (cosFi > 0)
                 {
                     Color color = ambient + diffuse * cosFi;
                     v->color = PackedColor255(color, fogValue);
+                    PreserveHDRColor(end-i-1, color * (1.f/255));
                 }
                 else
                 {
                     v->color = packedAmbient;
+                    PreserveHDRColor(end-i-1, ambient * (1.f/255));
                 }
 #endif
                 v->specular = packedSpecular;
@@ -596,16 +610,19 @@ void TLVertexTable::DoMaterialLightingP(const TLMaterial& mat, const Matrix4& wo
                 saturateMax(cosFi, 0);
                 Color color = ambient + diffuse * cosFi;
                 v.color = PackedColorRGB(color, fog);
+                PreserveHDRColor(i, color);
 #else
                 Coord cosFi = sunDirection * mesh.Norm(i);
                 if (cosFi > 0)
                 {
                     Color color = ambient + diffuse * cosFi;
                     v.color = PackedColorRGB(color, fog);
+                    PreserveHDRColor(i, color);
                 }
                 else
                 {
                     v.color = PackedColorRGB(packedAmbient, fog);
+                    PreserveHDRColor(i, ambient);
                 }
 #endif
                 v.specular = specular;
@@ -639,6 +656,7 @@ void TLVertexTable::DoMaterialLightingP(const TLMaterial& mat, const Matrix4& wo
                 colorI += lights[index]->Apply(pos, norm);
             }
             // lighting with normal defined
+            PreserveHDRColor(i, colorI);
             // check if there are not some unsupported lighting flags
             int fog = fogValue;
             if (fogValue < 0)
@@ -699,6 +717,7 @@ void TLVertexTable::DoSkyLighting(const VertexTable& mesh, int spec)
 
         PoseidonAssert(spec & IsAlphaFog);
         v.color = PackedColorRGB(colorI * accom, 255);
+        PreserveHDRColor(i, colorI * accom);
         v.specular = PackedBlack;
         v.t0 = tex[i];
     }
@@ -756,6 +775,7 @@ void TLVertexTable::DoStarLighting(const Matrix4& worldToModel, const VertexTabl
         saturate(a, 0, 1);
         accom.SetA(a);
         v.color = PackedColor(accom);
+        PreserveHDRColor(i, accom);
         v.specular = PackedBlack;
         v.t0 = tex[i];
     }
@@ -797,6 +817,7 @@ void TLVertexTable::DoLineLighting(const VertexTable& mesh, int spec)
         saturate(a, 0, 1);
         lineColor.SetA(a);
         v.color = PackedColor(lineColor * accom);
+        PreserveHDRColor(i, lineColor * accom);
         v.specular = PackedBlack;
         v.t0 = tex[i];
     }
@@ -844,6 +865,7 @@ void TLVertexTable::DoCloudLighting(const VertexTable& mesh, int spec)
         {
             TLVertex& v = SetVertex(i);
             v.color = color;
+            PreserveHDRColor(i, colorI);
             v.specular = PackedBlack;
             v.t0 = tex[i];
         }
@@ -862,6 +884,7 @@ void TLVertexTable::DoCloudLighting(const VertexTable& mesh, int spec)
             int aInt = toIntFloor(a * 255);
             saturate(aInt, 0, 255);
             v.color = PackedColorRGB(color, aInt);
+            PreserveHDRColor(i, colorI);
             v.specular = PackedBlack;
             v.t0 = tex[i];
         }
@@ -923,6 +946,7 @@ void TLVertexTable::DoLightLighting(const VertexTable& mesh, int spec)
         int ai = toInt(a * 255);
         saturate(ai, 0, 255);
         v.color = PackedColorRGB(lColor, ai);
+        PreserveHDRColor(i, accom);
         v.specular = PackedBlack;
         v.t0 = tex[i];
     }
@@ -1003,6 +1027,7 @@ void TLVertexTable::DoLightingColorized(const LightList& lights,
         // alpha is assumed 1 - this is always true for normal lighting
         v.color = PackedColorRGB(colorI, 0xff);
         v.specular = PackedColorRGB(PackedBlack, 0xff - fog);
+        PreserveHDRColor(i, colorI);
         const UVPair& uv = tex[i];
         v.t0 = uv;
         v.t1.u = uv.u * 32;
@@ -1159,6 +1184,7 @@ void TLVertexTable::DoLighting(const IAnimator* matSource, const Matrix4& worldT
                 }
 
                 v.color = PackedColor(colorI);
+                PreserveHDRColor(i, colorI);
                 v.specular = PackedBlack;
                 v.t0 = tex[i];
             }

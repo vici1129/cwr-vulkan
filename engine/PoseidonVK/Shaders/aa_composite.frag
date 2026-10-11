@@ -1,11 +1,13 @@
 #version 450
+#extension GL_GOOGLE_include_directive : require
+#include "color_space.glsl"
 layout(set=0,binding=0) uniform sampler2D source;
 #ifdef MULTISAMPLE_DEPTH
 layout(set=1,binding=0) uniform sampler2DMS sceneDepth;
 #else
 layout(set=1,binding=0) uniform sampler2D sceneDepth;
 #endif
-layout(push_constant) uniform AA { vec4 metrics; vec4 outputMetrics; } aa;
+layout(push_constant) uniform AA { vec4 metrics; vec4 outputMetrics; vec4 colorControl; } aa;
 layout(location=0) in vec2 texCoord;
 layout(location=0) out vec4 outColor;
 void main() {
@@ -31,5 +33,6 @@ void main() {
 #endif
     }
     outColor = color / total;
+    outColor.rgb = toneMap(outColor.rgb, aa.colorControl.x);
     gl_FragDepth = depth;
 }

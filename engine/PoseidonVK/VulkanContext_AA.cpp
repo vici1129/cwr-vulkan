@@ -47,8 +47,8 @@ std::string VulkanContext::SetAntiAliasing(std::string_view name)
     if (IsFSR(mode))
     {
         if (!_fsrAvailable) return "UNSUPPORTED: FSR " + _fsrReason + "; previous mode retained";
-        if (_aaColorFormat != VK_FORMAT_B8G8R8A8_UNORM && _aaColorFormat != VK_FORMAT_R8G8B8A8_UNORM)
-            return "UNSUPPORTED: FSR requires the qualified UNORM scene path; previous mode retained";
+        if (_aaColorFormat != SceneFormat)
+            return "UNSUPPORTED: FSR requires linear FP16 scene color; previous mode retained";
         if (_requestedScale != 100) return "CONFLICT: FSR requires render scale 100; previous settings retained";
     }
     if (mode == AAMode::TAA && _physical)
@@ -152,8 +152,7 @@ void VulkanContext::CreateAAResources(VkFormat format)
         throw std::runtime_error("Vulkan AA: scaled drawable exceeds framebuffer limits");
     std::fprintf(stderr, "Vulkan AA: mode=%s scale=%d world=%ux%u samples=%u supported=%u\n", AAName(_aaMode),
                  _renderScale, _worldExtent.width, _worldExtent.height, _worldSamples, _aaSampleSupport);
-    if (_aaMode == AAMode::Off && _renderScale == 100)
-        return;
+    // Even Off uses the completed-world boundary for tone mapping before UI.
 
     VkAttachmentDescription attachments[3]{};
     auto& color = attachments[0];
@@ -359,7 +358,7 @@ void VulkanContext::CreateAAResources(VkFormat format)
     }
     if (IsFSR(_aaMode)) CreateFSR();
     const VkDescriptorSetLayout sets[]{_textureLayout, _textureLayout, _textureLayout, _textureLayout};
-    const VkPushConstantRange push{VK_SHADER_STAGE_FRAGMENT_BIT, 0, 8 * sizeof(float)};
+    const VkPushConstantRange push{VK_SHADER_STAGE_FRAGMENT_BIT, 0, 12 * sizeof(float)};
     VkPipelineLayoutCreateInfo layout{VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO};
     layout.setLayoutCount = 4;
     layout.pSetLayouts = sets;
@@ -529,7 +528,7 @@ void VulkanContext::DrawAAPass(unsigned index, VkFramebuffer framebuffer, VkDesc
     vkCmdSetScissor(command, 0, 1, &scissor);
     float push[]{1.f / _worldExtent.width,   1.f / _worldExtent.height, float(_worldExtent.width),
                        float(_worldExtent.height), 1.f / _extent.width,       1.f / _extent.height,
-                       float(_extent.width),       float(_extent.height)};
+                       float(_extent.width),       float(_extent.height), OutputPeak(), composite ? 1.f : 0.f, 0, 0};
     if (index == 5)
     {
         push[4]=_taaProjection[2]; push[5]=_taaProjection[3];

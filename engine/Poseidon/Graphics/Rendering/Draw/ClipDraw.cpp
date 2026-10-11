@@ -54,6 +54,7 @@ static int Interpolate(TLVertexTable& tlMesh, int in, int out, Coord t, const Ca
 {
     int nTIndex = tlMesh.AddPos(); // can change pointers to TransPos
     tlMesh.InterpolatePrevious(nTIndex, in, out, t);
+    tlMesh.InterpolateHDR(nTIndex, in, out, t);
     Vector3Val iPos = tlMesh.TransPosA(in);
     Vector3Val oPos = tlMesh.TransPosA(out);
     ClipFlags iClip = tlMesh.Clip(in);
@@ -84,6 +85,7 @@ static int Interpolate(TLVertexTable& tlMesh, int in, int out, Coord t)
 {
     int nTIndex = tlMesh.AddPos(); // can change pointers to TransPos
     tlMesh.InterpolatePrevious(nTIndex, in, out, t);
+    tlMesh.InterpolateHDR(nTIndex, in, out, t);
     const V3& iPos = tlMesh.TransPosA(in);
     const V3& oPos = tlMesh.TransPosA(out);
     ClipFlags iClip = tlMesh.Clip(in);

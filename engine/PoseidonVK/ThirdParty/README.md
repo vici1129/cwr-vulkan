@@ -16,7 +16,8 @@ contrast threshold 0.125 and dark threshold 0.0312. Retrieved from Intel's
 CMAA2 comparison sample (which includes NVIDIA's BSD license):
 https://github.com/GameTechDev/CMAA2/blob/master/Projects/CMAA2/FXAA/Fxaa3_11.h
 The sole local header adaptation, `CWR_FXAA_RGB_LUMA`, computes RGB luminance
-at the reference algorithm's existing sample sites. This avoids a separate
+at the reference algorithm's existing sample sites (now using a bounded,
+perceptual proxy for HDR edge detection, leaving color filtering linear). This avoids a separate
 luma image/pass and includes chromatic edges instead of using green as luma.
 The edge search and subpixel filter are unchanged. Neither reference's temporal
 or console paths are enabled.

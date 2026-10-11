@@ -212,6 +212,26 @@ int main()
         Check(ChooseFormat({{VK_FORMAT_UNDEFINED, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR}}).format == preferred.format,
               "undefined singleton permits choosing a concrete format");
         CheckThrows<std::runtime_error>([] { ChooseFormat({}); }, "empty format list must fail");
+        const VkSurfaceFormatKHR hdr{VK_FORMAT_A2B10G10R10_UNORM_PACK32, VK_COLOR_SPACE_HDR10_ST2084_EXT};
+        const VkSurfaceFormatKHR wrongHDR{VK_FORMAT_R16G16B16A16_SFLOAT, VK_COLOR_SPACE_HDR10_ST2084_EXT};
+        Check(IsHDR10(ChooseFormat({preferred, hdr}, true)), "HDR explicitly selects 10-bit PQ");
+        Check(!IsHDR10(ChooseFormat({hdr, preferred})), "HDR is opt-in even when listed first");
+        Check(!IsHDR10(ChooseFormat({preferred}, true)), "HDR request falls back to SDR");
+        Check(!IsHDR10(ChooseFormat({wrongHDR, preferred}, true)), "FP16 alone is not HDR10");
+        CheckThrows<std::runtime_error>([&] { ChooseFormat({hdr}); }, "never send SDR values to a PQ-only surface");
+        {
+            VulkanContext hdrContext;
+            Check(hdrContext.SetHDR("peak nan").starts_with("INVALID"), "reject nonfinite peak");
+            Check(hdrContext.SetHDR("white 600").starts_with("INVALID"), "bound reference white");
+            Check(hdrContext.SetHDR("peak 100").starts_with("INVALID"), "peak must cover white");
+            Check(hdrContext.SetHDR("peak 2000").starts_with("OK"), "accept TV peak");
+            Check(hdrContext.SetHDR("white 200").starts_with("OK"), "accept reference white");
+            Check(hdrContext.SetHDR("on").starts_with("OK"), "accept HDR request");
+            Check(hdrContext.SetHDR("status").find("active=SDR-sRGB") != std::string::npos,
+                  "requested HDR cannot claim negotiated HDR");
+            Check(hdrContext.SetHDR("status").find("physicalDisplay=unverified") != std::string::npos,
+                  "status never equates swapchain with verified physical output");
+        }
         Check(ChoosePresentMode({VK_PRESENT_MODE_FIFO_KHR, VK_PRESENT_MODE_MAILBOX_KHR}, 1) == VK_PRESENT_MODE_FIFO_KHR,
               "vsync default must be FIFO");
         Check(ChoosePresentMode({VK_PRESENT_MODE_FIFO_KHR, VK_PRESENT_MODE_MAILBOX_KHR}, 0) ==

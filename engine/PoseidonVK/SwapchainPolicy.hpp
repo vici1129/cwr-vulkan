@@ -25,16 +25,30 @@ inline uint32_t ChooseImageCount(const VkSurfaceCapabilitiesKHR& caps)
     return caps.maxImageCount ? std::min(desired, caps.maxImageCount) : desired;
 }
 
-inline VkSurfaceFormatKHR ChooseFormat(const std::vector<VkSurfaceFormatKHR>& formats)
+inline bool IsHDR10(VkSurfaceFormatKHR format)
+{
+    return format.colorSpace == VK_COLOR_SPACE_HDR10_ST2084_EXT &&
+           (format.format == VK_FORMAT_A2B10G10R10_UNORM_PACK32 || format.format == VK_FORMAT_A2R10G10B10_UNORM_PACK32);
+}
+
+inline VkSurfaceFormatKHR ChooseFormat(const std::vector<VkSurfaceFormatKHR>& formats, bool hdr = false)
 {
     if (formats.empty())
         throw std::runtime_error("Vulkan: surface has no formats");
-    if (formats.size() == 1 && formats[0].format == VK_FORMAT_UNDEFINED)
+    if (hdr)
+        for (const auto& format : formats)
+            if (IsHDR10(format)) return format;
+    if (formats.size() == 1 && formats[0].format == VK_FORMAT_UNDEFINED &&
+        formats[0].colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
         return {VK_FORMAT_B8G8R8A8_UNORM, formats[0].colorSpace};
     for (const auto& format : formats)
         if (format.format == VK_FORMAT_B8G8R8A8_UNORM && format.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
             return format;
-    return formats.front();
+    for (const auto& format : formats)
+        if (format.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR &&
+            (format.format == VK_FORMAT_R8G8B8A8_UNORM || format.format == VK_FORMAT_B8G8R8A8_SRGB ||
+             format.format == VK_FORMAT_R8G8B8A8_SRGB)) return format;
+    throw std::runtime_error("Vulkan: surface exposes no supported SDR presentation format");
 }
 
 inline VkPresentModeKHR ChoosePresentMode(const std::vector<VkPresentModeKHR>& modes, int interval)

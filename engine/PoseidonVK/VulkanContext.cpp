@@ -6,6 +6,7 @@
 #include <type_traits>
 #include <cstdlib>
 #include <numeric>
+#include <cmath>
 
 namespace Poseidon::vk
 {
@@ -97,6 +98,12 @@ void VulkanContext::CreateInstance(const char* const* extensions, uint32_t count
         [](uint32_t* n, VkExtensionProperties* p) { return vkEnumerateInstanceExtensionProperties(nullptr, n, p); },
         "enumerate instance extensions");
     std::vector<const char*> enabled(extensions, extensions + count);
+    if (HasExtension(available, VK_EXT_SWAPCHAIN_COLOR_SPACE_EXTENSION_NAME))
+    {
+        enabled.push_back(VK_EXT_SWAPCHAIN_COLOR_SPACE_EXTENSION_NAME);
+        _hdrColorSpace = true;
+    }
+    if (const char* hdr = std::getenv("CWR_VK_HDR")) _hdrRequested = std::strcmp(hdr, "1") == 0;
     for (const char* extension : enabled)
         if (!HasExtension(available, extension))
             throw std::runtime_error(std::string("Vulkan: missing SDL surface extension ") + extension);
@@ -286,6 +293,11 @@ void VulkanContext::CreateDevice(VkSurfaceKHR surface)
                                              { return vkEnumerateDeviceExtensionProperties(_physical, nullptr, n, p); },
                                              "enumerate selected device extensions");
     // The name is usable without opting the entire engine into beta Vulkan headers.
+    if (HasExtension(extensions, VK_EXT_HDR_METADATA_EXTENSION_NAME))
+    {
+        enabled.push_back(VK_EXT_HDR_METADATA_EXTENSION_NAME);
+        _hdrMetadataEnabled = true;
+    }
     if (HasExtension(extensions, "VK_KHR_portability_subset"))
         enabled.push_back("VK_KHR_portability_subset");
     VkDeviceCreateInfo info{VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO};
@@ -371,6 +383,8 @@ void VulkanContext::CreateDevice(VkSurfaceKHR surface)
 #endif
     _textureAnisotropy = TextureAnisotropy(features.samplerAnisotropy, properties.limits.maxSamplerAnisotropy);
     Check(vkCreateDevice(_physical, &info, nullptr, &_device), "create logical device");
+    if (_hdrMetadataEnabled)
+        _setHdrMetadata = reinterpret_cast<PFN_vkSetHdrMetadataEXT>(vkGetDeviceProcAddr(_device, "vkSetHdrMetadataEXT"));
     vkGetDeviceQueue(_device, _families.graphics, 0, &_graphics);
     vkGetDeviceQueue(_device, _families.present, 0, &_present);
     if (_debugNamesEnabled)
@@ -515,11 +529,22 @@ bool VulkanContext::RecreateSwapchain(uint32_t width, uint32_t height)
     auto modes = EnumerateList<VkPresentModeKHR>(
         [&](uint32_t* n, VkPresentModeKHR* p)
         { return vkGetPhysicalDeviceSurfacePresentModesKHR(_physical, _surface, n, p); }, "query present modes");
-    const auto format = ChooseFormat(formats);
+    auto format = ChooseFormat(formats, _hdrRequested && _hdrColorSpace);
+    _hdrActive = IsHDR10(format);
+    _hdrReason = _hdrActive ? "HDR10 surface negotiated; physical display unverified" :
+        _hdrRequested ? "SDR fallback: surface/OS/compositor does not expose HDR10" : "SDR requested";
+    VkFormatProperties sceneSupport{};
+    vkGetPhysicalDeviceFormatProperties(_physical, SceneFormat, &sceneSupport);
+    constexpr auto requiredScene = VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT | VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BLEND_BIT |
+                                   VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT | VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT;
+    if ((sceneSupport.optimalTilingFeatures & requiredScene) != requiredScene)
+        throw std::runtime_error("Vulkan HDR: FP16 sampled/blended scene format unavailable; use GL33");
     if (modes.empty())
         throw std::runtime_error("Vulkan: surface has no present modes");
     WaitIdle();
     const AAMode previousAA = _aaMode;
+    _hdrPeak = _requestedHDRPeak;
+    _hdrWhite = _requestedHDRWhite;
     const int previousScale = _renderScale;
     // Simple first-stage recreation: idle, release, rebuild. Partial failure is
     // terminal in EngineVK and Shutdown releases every successfully created object.
@@ -544,7 +569,19 @@ bool VulkanContext::RecreateSwapchain(uint32_t width, uint32_t height)
     info.compositeAlpha = ChooseCompositeAlpha(caps.supportedCompositeAlpha);
     info.presentMode = ChoosePresentMode(modes, _swapInterval);
     info.clipped = VK_TRUE;
-    Check(vkCreateSwapchainKHR(_device, &info, nullptr, &_swapchain), "create swapchain");
+    auto swapResult = vkCreateSwapchainKHR(_device, &info, nullptr, &_swapchain);
+    if (swapResult != VK_SUCCESS && _hdrActive)
+    {
+        format = ChooseFormat(formats);
+        _hdrActive = false;
+        _hdrReason = "SDR fallback: HDR10 swapchain creation failed, code=" + std::to_string(swapResult);
+        info.imageFormat = format.format;
+        info.imageColorSpace = format.colorSpace;
+        swapResult = vkCreateSwapchainKHR(_device, &info, nullptr, &_swapchain);
+    }
+    Check(swapResult, "create swapchain");
+    _outputFormat = format;
+    UpdateHDRMetadata();
     _extent = extent;
     Name(VK_OBJECT_TYPE_SWAPCHAIN_KHR, ObjectHandle(_swapchain), "PoseidonVK SDL swapchain");
     _images =
@@ -552,7 +589,7 @@ bool VulkanContext::RecreateSwapchain(uint32_t width, uint32_t height)
                                { return vkGetSwapchainImagesKHR(_device, _swapchain, n, p); }, "get swapchain images");
 
     VkAttachmentDescription attachment{};
-    attachment.format = format.format;
+    attachment.format = SceneFormat;
     attachment.samples = VK_SAMPLE_COUNT_1_BIT;
     attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -645,7 +682,7 @@ bool VulkanContext::RecreateSwapchain(uint32_t width, uint32_t height)
         _views.push_back(imageView);
         _depth.emplace_back();
         CreateDepthAttachment(_depth.back());
-        CreateSceneColor(_gammaTargets[i].color, format.format);
+        CreateSceneColor(_gammaTargets[i].color, SceneFormat);
         const VkImageView attachmentViews[] = {_gammaTargets[i].color.view, _depth.back().view};
         VkFramebufferCreateInfo framebuffer{VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO};
         framebuffer.renderPass = _renderPass;
@@ -668,8 +705,8 @@ bool VulkanContext::RecreateSwapchain(uint32_t width, uint32_t height)
         Name(VK_OBJECT_TYPE_SEMAPHORE, ObjectHandle(rendered), (prefix + " present").c_str());
     }
     CreateGammaPass(format.format);
-    CreateSSAOResources(format.format);
-    try { CreateAAResources(format.format); }
+    CreateSSAOResources(SceneFormat);
+    try { CreateAAResources(SceneFormat); }
     catch (const std::exception& error)
     {
         if (!IsFSR(_requestedAA)) throw;
@@ -679,9 +716,11 @@ bool VulkanContext::RecreateSwapchain(uint32_t width, uint32_t height)
         DestroyAAResources();
         _requestedAA = IsFSR(previousAA) ? AAMode::Off : previousAA;
         _requestedScale = previousScale;
-        CreateAAResources(format.format);
+        CreateAAResources(SceneFormat);
     }
     _recreate = false;
+    std::fprintf(stderr, "Vulkan HDR: %s; format=%d colorSpace=%d scene=RGBA16F peak=%.0f white=%.0f metadata=%s\n",
+        _hdrReason.c_str(), format.format, format.colorSpace, _hdrPeak, _hdrWhite, _setHdrMetadata ? "supported" : "unavailable");
     std::fprintf(stderr, "Vulkan: swapchain #%u ready: %ux%u, %zu images, format=%d, present mode=%d\n",
                  ++_swapchainGeneration, _extent.width, _extent.height, _images.size(), format.format,
                  info.presentMode);
@@ -835,6 +874,8 @@ void VulkanContext::Clear(float r, float g, float b, float a)
     FlushScreenBatch();
     if (!_frameOpen)
         return;
+    const auto linear = [](float c) { return c <= .04045f ? c / 12.92f : std::pow((c + .055f) / 1.055f, 2.4f); };
+    r = linear(r); g = linear(g); b = linear(b);
     _clearColor = {r, g, b, a};
     VkClearAttachment attachment{};
     attachment.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;

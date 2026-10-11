@@ -79,8 +79,10 @@ struct TextureImage
     VkImage image = VK_NULL_HANDLE;
     VkDeviceMemory memory = VK_NULL_HANDLE;
     VkImageView view = VK_NULL_HANDLE;
+    VkImageView colorView = VK_NULL_HANDLE; // sRGB decode before filtering, same bytes/alpha.
     VkDescriptorPool pool = VK_NULL_HANDLE;
     std::array<VkDescriptorSet, 8> descriptors{};
+    std::array<VkDescriptorSet, 8> dataDescriptors{};
     ~TextureImage();
     void Destroy() noexcept;
 };
@@ -145,6 +147,7 @@ class VulkanContext
     void DrawSSAO(const std::array<float, 4>& projection);
     std::string SetAntiAliasing(std::string_view mode);
     bool SetRenderScale(int percent);
+    std::string SetHDR(std::string_view mode);
     void BeginAAWorld();
     void FinishAAWorld(const std::array<float, 4>& projection);
     bool TemporalEnabled() const { return IsTemporal(_aaMode) && _worldActive; }
@@ -378,8 +381,17 @@ class VulkanContext
     void DrawAAPass(unsigned index, VkFramebuffer framebuffer, VkDescriptorSet source, VkExtent2D extent);
     std::vector<DepthAttachment> _depth;
     std::vector<VkImageView> _sampledDepthViews; // Depth only; attachment views retain stencil for shadows.
-    // Same format/extent as the swapchain: keep the existing blend/color-space
-    // behavior. Each acquired image owns its scene color and final-pass set.
+    // Linear FP16 world and native composition are independent of WSI encoding.
+    static constexpr VkFormat SceneFormat = VK_FORMAT_R16G16B16A16_SFLOAT;
+    bool _hdrRequested = false, _hdrActive = false, _hdrColorSpace = false;
+    bool _hdrMetadataEnabled = false;
+    VkSurfaceFormatKHR _outputFormat{};
+    float _hdrPeak = 1000, _hdrWhite = 203;
+    float _requestedHDRPeak = 1000, _requestedHDRWhite = 203;
+    std::string _hdrReason = "not requested";
+    PFN_vkSetHdrMetadataEXT _setHdrMetadata = nullptr;
+    float OutputPeak() const { return _hdrActive ? _hdrPeak / _hdrWhite : 1.f; }
+    void UpdateHDRMetadata();
     struct GammaTarget
     {
         DepthAttachment color;

@@ -82,6 +82,19 @@ class TLVertexTable
     // Optional sidecar: previous homogeneous clip positions, before perspective.
     // Empty outside temporal world drawing; does not change the legacy TL layout.
     std::vector<std::array<float, 4>> previousClip;
+    // Optional unclipped legacy lighting, before packed ARGB loses highlights.
+    // Alpha/coverage still comes from the original packed stream. GL33 ignores it.
+    std::vector<std::array<float, 4>> hdrColor;
+    void PreserveHDRColor(int vertex, ColorVal color);
+    void InterpolateHDR(int dst, int a, int b, float t)
+    {
+        if (hdrColor.empty()) return;
+        hdrColor.resize(NVertex());
+        if (hdrColor[a][3] == 0 || hdrColor[b][3] == 0) return;
+        for (int k = 0; k < 3; ++k)
+            hdrColor[dst][k] = hdrColor[a][k] * (1-t) + hdrColor[b][k] * t;
+        hdrColor[dst][3] = 1;
+    }
     void InterpolatePrevious(int dst, int a, int b, float t)
     {
         if (previousClip.empty()) return;

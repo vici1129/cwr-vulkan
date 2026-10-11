@@ -26,6 +26,8 @@ void TextureImage::Destroy() noexcept
             vkDestroyDescriptorPool(device, pool, nullptr);
         if (view)
             vkDestroyImageView(device, view, nullptr);
+        if (colorView)
+            vkDestroyImageView(device, colorView, nullptr);
         if (image)
             vkDestroyImage(device, image, nullptr);
         if (memory)
@@ -94,6 +96,7 @@ std::shared_ptr<TextureImage> VulkanContext::UploadTexture(std::span<const Textu
         VkImageCreateInfo image{VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO};
         image.imageType = VK_IMAGE_TYPE_2D;
         image.format = VK_FORMAT_R8G8B8A8_UNORM;
+        image.flags = VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT;
         image.extent = {mips[0].width, mips[0].height, 1};
         image.mipLevels = uint32_t(mips.size());
         image.arrayLayers = 1;
@@ -156,9 +159,11 @@ std::shared_ptr<TextureImage> VulkanContext::UploadTexture(std::span<const Textu
         view.subresourceRange = barrier.subresourceRange;
         view.subresourceRange.levelCount = TextureSampledMipCount(mips);
         Require(vkCreateImageView(_device, &view, nullptr, &texture->view), "create texture view");
-        const VkDescriptorPoolSize size{VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 8};
+        view.format = VK_FORMAT_R8G8B8A8_SRGB;
+        Require(vkCreateImageView(_device, &view, nullptr, &texture->colorView), "create sRGB texture view");
+        const VkDescriptorPoolSize size{VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 16};
         VkDescriptorPoolCreateInfo pool{VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO};
-        pool.maxSets = 8;
+        pool.maxSets = 16;
         pool.poolSizeCount = 1;
         pool.pPoolSizes = &size;
         Require(vkCreateDescriptorPool(_device, &pool, nullptr, &texture->pool), "create texture descriptor pool");
@@ -166,13 +171,14 @@ std::shared_ptr<TextureImage> VulkanContext::UploadTexture(std::span<const Textu
         set.descriptorPool = texture->pool;
         set.descriptorSetCount = 1;
         set.pSetLayouts = &_textureLayout;
-        for (unsigned i = 0; i < 8; ++i)
+        for (unsigned i = 0; i < 16; ++i)
         {
-            Require(vkAllocateDescriptorSets(_device, &set, &texture->descriptors[i]), "allocate texture descriptor");
-            const VkDescriptorImageInfo imageInfo{_textureSamplers[i], texture->view,
+            auto& descriptor = i < 8 ? texture->descriptors[i] : texture->dataDescriptors[i-8];
+            Require(vkAllocateDescriptorSets(_device, &set, &descriptor), "allocate texture descriptor");
+            const VkDescriptorImageInfo imageInfo{_textureSamplers[i % 8], i < 8 ? texture->colorView : texture->view,
                                                   VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
             VkWriteDescriptorSet write{VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET};
-            write.dstSet = texture->descriptors[i];
+            write.dstSet = descriptor;
             write.dstBinding = 0;
             write.descriptorCount = 1;
             write.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;

@@ -10,5 +10,6 @@ void main() {
     vec4 offset;
     SMAANeighborhoodBlendingVS(texCoord, offset);
     outColor = SMAANeighborhoodBlendingPS(texCoord, offset, source, weights);
+    if (aa.colorControl.y > .5) outColor.rgb = toneMap(outColor.rgb, aa.colorControl.x);
     gl_FragDepth = texture(sceneDepth,texCoord).r;
 }

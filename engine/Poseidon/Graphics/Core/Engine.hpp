@@ -384,6 +384,8 @@ class Engine : public IGraphicsEngine
     virtual void SetTemporalTerrain(bool) {}
     virtual void ResetTemporalHistory() {}
     virtual RString SetAntiAliasing(RString) { return "UNSUPPORTED: renderer has no AA selector"; }
+    virtual RString SetHDR(RString) { return "UNSUPPORTED: renderer has no HDR output"; }
+    virtual bool UsesHDRLighting() const { return false; }
     virtual bool SetWorldRenderScale(int) { return false; }
     virtual bool SetSSAO(bool, float, float, float, float) { return false; }
     virtual void NextFrame();                             // swap frames - get ready for next frame

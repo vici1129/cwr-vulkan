@@ -82,6 +82,8 @@ void EngineVK::SubmitSoftware(const std::vector<uint32_t>& indices)
         vertex.v = source.t0.v;
         vertex.color = source.color;
         _softwareVertices[index] = vk::ScreenGeometry(vertex, _width, _height);
+        if (index < _softwareMesh->hdrColor.size() && _softwareMesh->hdrColor[index][3] != 0)
+            std::copy_n(_softwareMesh->hdrColor[index].begin(), 3, _softwareVertices[index].color);
         if (index < _softwareMesh->previousClip.size())
             std::copy(_softwareMesh->previousClip[index].begin(), _softwareMesh->previousClip[index].end(),
                       _softwareVertices[index].previousClip);

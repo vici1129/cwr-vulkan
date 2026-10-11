@@ -55,12 +55,12 @@ void main() {
             (light.diffuse.rgb * cosine * inversesqrt(max(size2, 1e-8)) + light.ambient.rgb) * attenuation * cone :
             light.ambient.rgb * attenuation;
     }
-    vertexColor = vec4(clamp(color, 0.0, 1.0), 1.0);
+    vertexColor = vec4(max(color, vec3(0)), 1.0);
     // GL33 VSTransform: camera-relative half-vector, separate from diffuse.
     if (lighting.specular.w > 0.0 && lighting.ambient.w > 0.0) {
         vec3 viewDirection = normalize(-relativeWorld);
         vec3 halfVector = normalize(-lighting.sunDirection.xyz + viewDirection);
         float highlight = pow(max(dot(worldNormal, halfVector), 0.0), max(lighting.specular.w, 1.0));
-        specularColor = clamp(lighting.specular.rgb * highlight * lighting.ambient.w, 0.0, 1.0);
+        specularColor = max(lighting.specular.rgb * highlight * lighting.ambient.w, vec3(0));
     }
 }

@@ -17,9 +17,7 @@ void Require(VkResult result, const char* operation)
 
 void VulkanContext::CreateSceneColor(DepthAttachment& color, VkFormat format)
 {
-    // Using the swapchain format preserves its normalized precision and blend
-    // space. UNORM stays UNORM; an sRGB fallback is decoded when sampled and
-    // encoded once by the matching final attachment (no manual sRGB conversion).
+    // FP16 linear-light composition, independent of swapchain transfer function.
     constexpr auto usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
     VkImageFormatProperties supported{};
     Require(vkGetPhysicalDeviceImageFormatProperties(_physical, format, VK_IMAGE_TYPE_2D, VK_IMAGE_TILING_OPTIMAL,
@@ -122,7 +120,7 @@ void VulkanContext::CreateGammaPass(VkFormat format)
         framebuffer.layers = 1;
         Require(vkCreateFramebuffer(_device, &framebuffer, nullptr, &target.framebuffer), "create final framebuffer");
     }
-    const VkPushConstantRange push{VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(float)};
+    const VkPushConstantRange push{VK_SHADER_STAGE_FRAGMENT_BIT, 0, 4 * sizeof(float)};
     VkPipelineLayoutCreateInfo layout{VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO};
     layout.setLayoutCount = layout.pushConstantRangeCount = 1;
     layout.pSetLayouts = &_textureLayout;
@@ -213,7 +211,9 @@ void VulkanContext::DrawGammaPass()
     vkCmdSetScissor(command, 0, 1, &scissor);
     // Match GL33's small identity tolerance, including live settings changes.
     const float inverse = _gamma > 0.999f && _gamma < 1.001f ? 1.f : 1.f / _gamma;
-    vkCmdPushConstants(command, _gammaLayout, VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(inverse), &inverse);
+    const float output[]{inverse, _hdrActive ? 1.f : 0.f, _hdrWhite,
+        _outputFormat.format == VK_FORMAT_B8G8R8A8_SRGB || _outputFormat.format == VK_FORMAT_R8G8B8A8_SRGB ? 1.f : 0.f};
+    vkCmdPushConstants(command, _gammaLayout, VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(output), output);
     vkCmdDraw(command, 3, 1, 0, 0);
     vkCmdEndRenderPass(command);
 }

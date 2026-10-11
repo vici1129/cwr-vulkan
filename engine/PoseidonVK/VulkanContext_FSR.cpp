@@ -81,9 +81,10 @@ void VulkanContext::CreateFSR()
     FfxFsr3UpscalerContextDescription description{};
     description.maxRenderSize = {_worldExtent.width, _worldExtent.height};
     description.maxUpscaleSize = {_extent.width, _extent.height};
-    // LDR scene, finite normal depth, UV motion with jitter removed in the input
-    // pass. No auto exposure: this legacy display-referred scene has unit exposure.
-    description.flags = _validationEnabled ? FFX_FSR3UPSCALER_ENABLE_DEBUG_CHECKING : 0;
+    // Scene-linear FP16, fixed unit exposure/preExposure, no auto exposure.
+    // SDK null exposure defaults to 1; output stays HDR through reconstruction.
+    description.flags = FFX_FSR3UPSCALER_ENABLE_HIGH_DYNAMIC_RANGE |
+        (_validationEnabled ? FFX_FSR3UPSCALER_ENABLE_DEBUG_CHECKING : 0);
     description.fpMessage = [](FfxMsgType type, const wchar_t* message) {
         std::fprintf(stderr, "FSR SDK message %d: %ls\n", int(type), message);
     };

@@ -57,6 +57,10 @@ static GameValue TriAA(const GameState*, GameValuePar arg)
 {
     return GameValue(GEngine ? GEngine->SetAntiAliasing(RString(arg)) : RString("UNSUPPORTED: no renderer"));
 }
+static GameValue TriHDR(const GameState*, GameValuePar arg)
+{
+    return GameValue(GEngine ? GEngine->SetHDR(RString(arg)) : RString("UNSUPPORTED: no renderer"));
+}
 static GameValue TriRenderScale(const GameState*, GameValuePar arg)
 {
     const float value = arg;
@@ -3073,6 +3077,7 @@ INIT_MODULE(GameStateExtTest, 3)
     GGameState.NewFunction(GameFunction(GameString, "triSetView", TriSetView, GameArray));
     GGameState.NewFunction(GameFunction(GameBool, "triSSAO", TriSSAO, GameArray));
     GGameState.NewFunction(GameFunction(GameString, "triAA", TriAA, GameString));
+    GGameState.NewFunction(GameFunction(GameString, "triHDR", TriHDR, GameString));
     GGameState.NewFunction(GameFunction(GameBool, "triRenderScale", TriRenderScale, GameScalar));
     GGameState.NewFunction(GameFunction(GameString, "triSetPlayerFaceView", TriSetPlayerFaceView, GameArray));
     GGameState.NewFunction(GameFunction(GameString, "triSetRoleFaceView", TriSetRoleFaceView, GameArray));

@@ -1,5 +1,199 @@
 # Vulkan backend development
 
+## Linear HDR scene and optional HDR10 output (2026-10-11)
+
+Based on public main `4691b9a`. Vulkan remains opt-in (`--render vk`), and
+GL33 remains the default and retains its original lighting/transfer path.
+This is a legacy-lighting HDR extension, not a PBR conversion, automatic
+exposure system, bloom pass or graphics-menu change. No NGX integration or
+private files are included.
+
+### Color and lighting contract
+
+World color, AA intermediates/history and native composition use sampled,
+blendable `R16G16B16A16_SFLOAT`, independent of the swapchain format. Vulkan
+checks FP16 sampling, linear filtering and attachment/blend support. A device
+without that support reports an error with a GL33 fallback recommendation.
+Even Off/100% now has a completed-world composition pass. Depth/stencil,
+alpha test, alpha-to-coverage, blend factors and native-overlay ordering are
+unchanged; RGB blending and filtering now operate on linear values.
+
+Diffuse assets use sRGB image views, decoding **before** filtering. Raw UNORM
+views of the same storage remain available for water normals/detail data and
+AA lookup tables. Alpha is not transfer-encoded. Existing authored mip chains
+are retained; they have not been regenerated as linear-light mipmaps.
+
+The upper clamps on native vertex diffuse/emission/local-light sums and
+specular were removed. A Vulkan-only floating-point sidecar also captures
+software lighting before packed ARGB destroys its over-range RGB, including
+sky, clouds, sun/light sprites and colorized terrain. Clipping interpolates
+this sidecar; the original packed alpha/fog stream and GL33 stay intact.
+Specular and water contributions, fog, transparent/additive blending and
+reconstruction feed the floating-point scene instead of an 8-bit ceiling.
+This preserves real existing lighting headroom rather than scaling an LDR
+image to pretend it is HDR.
+
+The legacy light/material equations still produce empirical, display-referred
+coefficients. Their 0..1 range is decoded as sRGB; excess above legacy white
+extends linearly as light energy. Specular is converted separately and added
+in linear light. This keeps ordinary materials recognizable without applying
+a power curve to unbounded legacy coefficients. It does **not** make the
+old accumulation, attenuation or material model photometric. Intensities
+already baked/clipped into textures or supplied only as packed draw colors
+cannot be recovered. Existing day/night light-selection rules are retained.
+
+### Tone mapping, gamma and overlays
+
+Fixed unit exposure is used throughout. The neutral RGB-max shoulder is
+identity below 65% of output peak, continuously rolls off above that point,
+and scales RGB together to preserve hue. SDR peak is 1; HDR peak is configured
+nits/reference-white nits. There is no frame-dependent exposure. Shadow and
+midtone values below the shoulder are not deliberately crushed or lifted.
+The corrected linear filtering/blending and restored light energy still mean
+SDR is not pixel-identical to the previous renderer: sunlit surfaces can be
+brighter, with softer highlight compression, while legacy textures stay
+recognizable.
+
+World tone mapping runs **after** MSAA/FXAA/SMAA/TAA or FSR reconstruction and
+before native-resolution overlays. TAA no longer clamps history/output at 1.
+FXAA/SMAA use a bounded perceptual proxy for edge detection while filtering
+the original linear HDR samples. FSR 3.1.4 explicitly enables
+`FFX_FSR3UPSCALER_ENABLE_HIGH_DYNAMIC_RANGE`; input and reconstruction output
+are FP16. `preExposure=1` and the SDK's null-exposure default of 1 are used;
+automatic exposure and RCAS remain disabled. See AMD's
+[input/exposure contract](https://gpuopen.com/manuals/fidelityfx_sdk/techniques/super-resolution-upscaler/).
+Existing depth, motion, jitter and reactive/composition masks are retained.
+
+Native cockpit/weapon geometry uses the same tone curve; authored screen-space
+HUD, instruments, menus and text are bounded at reference white. Both blend
+into the display-linear native target, never into PQ codes. The existing
+gamma control runs once in its calibrated perceptual domain at final output;
+HDR values above reference white are left alone by gamma. Legacy night-eye
+processing also retains its perceptual-domain response. Final SDR uses one
+sRGB encode (including the sRGB-attachment fallback); HDR converts linear
+BT.709 to BT.2020 and then ST.2084/PQ with absolute nits.
+
+### Native HDR controls and negotiation
+
+Internal HDR is always active in Vulkan; HDR10 **presentation** is separately
+opt-in, default off. Startup `CWR_VK_HDR=1` requests it, or use:
+
+```sqf
+triHDR "on"
+triHDR "off"
+triHDR "status"
+triHDR "peak 1000"
+triHDR "white 203"
+```
+
+Default peak/reference white are 1000/203 nits. Peak accepts 100..10000,
+white 80..500, with white <= peak. These are display targets, not measured
+panel capabilities. Pending values are applied with metadata at a device-idle
+swapchain boundary. Commands are session-only; GL33 reports unsupported.
+
+When exposed, `VK_EXT_swapchain_colorspace` permits exact 10-bit
+`A2B10G10R10_UNORM_PACK32` or `A2R10G10B10_UNORM_PACK32` paired with
+`HDR10_ST2084_EXT`. An unavailable HDR pair, or failed HDR swapchain creation,
+falls back to an explicitly supported SDR/sRGB pair. We do not interpret a
+random surface format or FP16 buffer as HDR presentation. Optional
+`VK_EXT_hdr_metadata` submits BT.2020/D65 primaries, configured peak/MaxCLL
+and unknown MaxFALL (zero). See the Vulkan
+[color-space](https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_swapchain_colorspace.html)
+and [metadata](https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_hdr_metadata.html)
+contracts. Status distinguishes requested mode from actual format/color-space,
+metadata availability and fallback reason. It always labels physical display
+verification as unverified; the application cannot measure the panel.
+
+### Qualification and remaining limits
+
+Windows RelWithDebInfo Vulkan+FSR and Vulkan-disabled GL33 builds succeeded.
+The GL33 executable also passed a main-menu launch/normal-close check and
+returned `UNSUPPORTED` for `triHDR "on"`.
+Driver-free Vulkan policy/lifetime tests pass 343 checks (including their
+intentional teardown-error fixture). The focused shape/shadow/convention/
+shutdown tests pass 815 assertions in 75 cases in each build. New coverage
+includes HDR format opt-in/fallback, rejecting FP16-as-HDR, luminance argument
+validation, status semantics, final HDR/SDR/sRGB-attachment encoding constants
+and unclipped software-color interpolation.
+
+Windows RTX 4060 Ti stock-game checks include Infantry daytime streets,
+sunlit buildings, foliage/sky, coast, Shadow Killer night and NVG, native
+weapon/HUD, camera movement, resize and minimize/restore. All AA selections
+(Off, FXAA, SMAA, TAA, MSAA 2/4/8 and the four FSR modes), 150% SMAA,
+SSAO and CSM were exercised. Validation-enabled SDR runs completed with
+zero errors/warnings, including 27,228 submitted daytime frames and 33,800
+night frames. Windows exposes only SDR in this setup: requesting HDR falls
+back to SDR without changing internal HDR. Before/after captures used the
+public `4691b9a` FSR executable and isolated copies of the same profile.
+The existing gamma 1.0 and 1.6 profiles both start at brightness 1.6; an
+additional before/after check explicitly set neutral brightness 1.0.
+Final-build validation also covered a consumed smoke grenade over coastal
+water, fog, jeep cockpit/instruments and pause-menu text with FSR/SSAO/CSM
+(17,542 frames, zero validation errors/warnings). Time, position, invulnerability
+and temporary stock objects were controlled through the developer harness;
+these were representative live-render checks, not full mission playthroughs.
+Grenade retries did not produce a usable explosion capture; the headlight
+toggle/temporary damaged-jeep check likewise did not establish correct visible
+illumination. Explosion/muzzle-flash peaks and headlight quality therefore
+remain unqualified rather than being counted as passing visual checks.
+
+### GPU cost
+
+RTX 4060 Ti, Windows, 1920x1080, frozen Infantry street, 900 m view distance,
+CSM/SSAO off, gamma 1.0/brightness 1.6, validation off. The existing profiler's
+whole-command-buffer timestamps, last four rolling samples per 14-second
+mode interval, gave the following arithmetic means:
+
+| Mode | `4691b9a` GPU ms | HDR pipeline, SDR output GPU ms |
+| --- | ---: | ---: |
+| Off | 0.960 | 1.372 |
+| SMAA | 1.322 | 1.478 |
+| TAA | 1.407 | 1.474 |
+| FSR Quality | 1.684 | 1.674 |
+
+These are **observed run costs, not clock-normalized overhead** or FPS.
+Vsync was requested off, the existing profile cap was 240, and GPU clocks
+varied substantially (roughly 465..2565 MHz across baseline samples and
+690..2565 MHz after). No power/clock settings were changed. In particular,
+the near-equal FSR result does not establish zero HDR cost or a speedup.
+Off now pays an extra world-to-native composition; FP16 color storage and
+bandwidth are twice RGBA8 per pixel. AA/FSR already had world composition.
+Per-swap-image targets, temporal histories and selected MSAA/render scale
+multiply that storage; this milestone does not optimize their allocation.
+G14 HDR TAA+SSAO+CSM samples were about 4.9 ms at 1920x1080 game output
+upscaled by Gamescope to the 4K TV, not a native-4K benchmark or isolated
+HDR10 encoding-cost measurement.
+
+### G14 HDR signal-path evidence (not physical display qualification)
+
+On the ROG G14/Nobara, the RX 6700S/RADV ran the public Windows binary through
+a **direct developer Proton 11 + nested Gamescope Wayland** route, not a
+native Linux build or Steam launch qualification. The game negotiated
+format 64 / color space 1000104008 (10-bit HDR10/PQ), submitted metadata,
+ran FSR Quality and TAA with SSAO/CSM, and switched SDR/HDR live. It exited
+normally after 35,959 submitted/presented frames. Linux validation layers
+were not installed, so its zero error counter is not validation coverage.
+
+Beyond swapchain creation, KWin reported the attached TCL SMART TV at
+3840x2160/120 Hz, HDR/wide gamut enabled. Read-only DRM connector inspection
+confirmed HDMI-A-1 link Good, max bpc 10, BT2020_RGB and HDR_OUTPUT_METADATA
+EOTF 2 (PQ). This verifies the configured compositor/HDMI HDR signal path,
+**not** that the game's image was correct on the physical TV. Remote desktop
+captures were black and the user could not inspect the TV. Panel brightness,
+highlight separation, color accuracy, HUD luminance and actual visible HDR
+gameplay remain unverified. No Auto HDR/inverse-tone-map path was used.
+Do not call this physically qualified HDR output. No compositor/driver
+settings were changed to chase that missing visual verification.
+
+Local evidence remains under the development checkout's ignored
+`build/shadow-live/hdr-*` directories (captures, action logs, executable hash
+receipts, shutdown and timing logs). The final Windows Vulkan executable
+tested here has SHA-256 `93E3288CE931A1029D6D587D18389C7FB5EBAFC1F3C65C26B429DF5FD4C737B2`.
+The G14 run used the earlier milestone build
+`4A7EA6E7912D73688F95E46B1F931F16A6601E0505D6DA8C5CE156374C092059`;
+the final idle-boundary luminance-setting fix and software-light capture-loop
+cleanup were subsequently rebuilt/tested on Windows, not rerun on the G14.
+
 ## AMD FSR 3.1.4 temporal upscaling (2026-10-11)
 
 Optional public Vulkan implementation, based on `ecf8f5b`. The actual AMD
@@ -75,9 +269,10 @@ stays zero; no rigid motion is invented for unsupported dynamic geometry.
 The input pass copies normal nonlinear 0-near/1-far depth to R32F, avoiding
 SDK transitions of the engine's combined depth/stencil attachment. Near/far
 and vertical FOV derive from the actual world projection. View units are metres,
-frame delta is wall-clock milliseconds, and the display-referred UNORM LDR scene
-uses unit exposure/pre-exposure, with no HDR or automatic exposure flag.
-The sRGB scene fallback is explicitly unqualified/rejected. World texture mip
+frame delta is wall-clock milliseconds. The initial `4691b9a` integration used
+UNORM LDR; the HDR milestone above supersedes this with linear FP16 and the
+SDK HDR flag, retaining unit exposure/pre-exposure and no automatic exposure.
+World texture mip
 bias follows AMD's `log2(renderWidth/displayWidth)-1`; existing AA and overlays
 retain their prior bias. Optional RCAS sharpening is disabled.
 

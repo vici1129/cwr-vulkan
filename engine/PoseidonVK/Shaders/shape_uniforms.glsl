@@ -21,4 +21,5 @@ layout(set = 2, binding = 0, std140) uniform ShapeLighting {
     mat4 previousMVP;
     vec4 temporal;
     vec4 temporalExtent;
+    vec4 outputColor; // world=0/overlay=1, native geometry, display peak/white
 } lighting;

@@ -12,6 +12,7 @@ unsigned cascadeBindings = 0;
 unsigned finalDraws = 0, passBegins = 0, passEnds = 0;
 bool finalTriangleValid = true;
 float inverseGamma = 0;
+std::array<float, 4> outputEncoding{};
 VkRenderPassBeginInfo finalPass{};
 VkViewport finalViewport{};
 VkRect2D finalScissor{};
@@ -32,7 +33,13 @@ VKAPI_ATTR void VKAPI_CALL vkCmdBindVertexBuffers(VkCommandBuffer, uint32_t, uin
 VKAPI_ATTR void VKAPI_CALL vkCmdBindIndexBuffer(VkCommandBuffer, VkBuffer, VkDeviceSize, VkIndexType) { ++calls[4]; }
 VKAPI_ATTR void VKAPI_CALL vkCmdSetViewport(VkCommandBuffer, uint32_t, uint32_t, const VkViewport* value) { ++calls[5]; finalViewport = *value; }
 VKAPI_ATTR void VKAPI_CALL vkCmdSetScissor(VkCommandBuffer, uint32_t, uint32_t, const VkRect2D* value) { ++calls[6]; finalScissor = *value; }
-VKAPI_ATTR void VKAPI_CALL vkCmdPushConstants(VkCommandBuffer, VkPipelineLayout, VkShaderStageFlags, uint32_t, uint32_t size, const void* value) { ++calls[7]; if (size == sizeof(float)) std::memcpy(&inverseGamma, value, size); }
+VKAPI_ATTR void VKAPI_CALL vkCmdPushConstants(VkCommandBuffer, VkPipelineLayout, VkShaderStageFlags, uint32_t, uint32_t size, const void* value) {
+    ++calls[7];
+    if (size == sizeof(outputEncoding)) {
+        std::memcpy(outputEncoding.data(), value, size);
+        inverseGamma = outputEncoding[0];
+    }
+}
 VKAPI_ATTR void VKAPI_CALL vkCmdDrawIndexed(VkCommandBuffer, uint32_t, uint32_t, uint32_t, int32_t, uint32_t) { ++draws; }
 VKAPI_ATTR void VKAPI_CALL vkCmdBeginRenderPass(VkCommandBuffer, const VkRenderPassBeginInfo* pass, VkSubpassContents) { ++passBegins; finalPass = *pass; }
 VKAPI_ATTR void VKAPI_CALL vkCmdEndRenderPass(VkCommandBuffer) { ++passEnds; }
@@ -76,7 +83,9 @@ struct VulkanCommandStateTest
         mesh->vertices.size = mesh->indices.size = 4096;
         auto& frame = context._frames[0];
         frame.screenUniform.set = Handle<VkDescriptorSet>(30);
+        frame.screenUniform.value.outputColor = {1, 0, 1, 0};
         frame.nativeUniform = frame.screenUniform;
+        frame.nativeUniform.value.outputColor = {1, 1, 1, 0};
         frame.nativeUniform.offset = 256;
         std::array<float, 16> matrix{};
         std::array<float, 4> color{1, 1, 1, 1};
@@ -159,6 +168,27 @@ struct VulkanCommandStateTest
         ++checks;
         if (!finalTriangleValid || finalDraws != 4 || passBegins != 4 || passEnds != 4)
             throw std::runtime_error("each final composition must have exactly one complete render pass");
+        context.SetGamma(1);
+        context._hdrRequested = true;
+        context._hdrWhite = 203;
+        context._outputFormat = {VK_FORMAT_B8G8R8A8_UNORM, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR};
+        context.DrawGammaPass();
+        ++checks;
+        if (outputEncoding != std::array<float, 4>{1, 0, 203, 0} || context.OutputPeak() != 1)
+            throw std::runtime_error("HDR request with SDR fallback must retain SDR encoding and tone mapping");
+        context._outputFormat.format = VK_FORMAT_B8G8R8A8_SRGB;
+        context.DrawGammaPass();
+        ++checks;
+        if (outputEncoding[3] != 1)
+            throw std::runtime_error("sRGB surface requires attachment-aware encoding to avoid double transfer");
+        context._hdrActive = true;
+        context._hdrWhite = 200;
+        context._hdrPeak = 1000;
+        context._outputFormat = {VK_FORMAT_A2B10G10R10_UNORM_PACK32, VK_COLOR_SPACE_HDR10_ST2084_EXT};
+        context.DrawGammaPass();
+        ++checks;
+        if (outputEncoding != std::array<float, 4>{1, 1, 200, 0} || context.OutputPeak() != 5)
+            throw std::runtime_error("negotiated HDR must use PQ at configured reference white and peak ratio");
         return checks;
     }
 };

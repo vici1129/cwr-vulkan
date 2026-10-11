@@ -31,7 +31,8 @@ foreach(kind triangle shape screen shadow gamma ssao csm)
                 --vn "Cwr${kind}_${stage}" -o "${header}" "${CMAKE_CURRENT_SOURCE_DIR}/Shaders/${kind}.${stage}"
             DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/Shaders/${kind}.${stage}"
                 "${CMAKE_CURRENT_SOURCE_DIR}/Shaders/shape_uniforms.glsl"
-                "${CMAKE_CURRENT_SOURCE_DIR}/Shaders/shadow_sample.glsl" VERBATIM)
+                "${CMAKE_CURRENT_SOURCE_DIR}/Shaders/shadow_sample.glsl"
+                "${CMAKE_CURRENT_SOURCE_DIR}/Shaders/color_space.glsl" VERBATIM)
         list(APPEND VK_SHADER_HEADERS "${header}")
     endforeach()
 endforeach()
@@ -52,7 +53,7 @@ foreach(kind fxaa smaa_edge smaa_weight smaa_blend aa_composite aa_composite_ms 
         COMMAND "${Vulkan_GLSLANG_VALIDATOR_EXECUTABLE}" -V --target-env vulkan1.0 ${defines}
             --vn "Cwr${kind}_frag" -o "${header}" "${CMAKE_CURRENT_SOURCE_DIR}/Shaders/${source}.frag"
         DEPENDS "Shaders/${source}.frag" Shaders/smaa_common.glsl
-            Shaders/shape_uniforms.glsl Shaders/shadow_sample.glsl
+            Shaders/shape_uniforms.glsl Shaders/shadow_sample.glsl Shaders/color_space.glsl
             ThirdParty/SMAA/SMAA.hlsl ThirdParty/FXAA/Fxaa3_11.h VERBATIM)
     list(APPEND VK_SHADER_HEADERS "${header}")
 endforeach()
@@ -86,7 +87,7 @@ target_include_directories(PoseidonVKPolicyTests PRIVATE "${CMAKE_CURRENT_BINARY
 target_link_libraries(PoseidonVKPolicyTests PRIVATE Vulkan::Vulkan)
 add_test(NAME PoseidonVKPolicyTests COMMAND PoseidonVKPolicyTests)
 foreach(target PoseidonVK PoseidonVKPolicyTests)
-    target_sources(${target} PRIVATE VulkanContext_FSR.cpp)
+    target_sources(${target} PRIVATE VulkanContext_FSR.cpp VulkanContext_HDR.cpp)
     if(TARGET CwrFsr3)
         target_link_libraries(${target} PRIVATE CwrFsr3)
         target_compile_definitions(${target} PRIVATE CWR_FSR3=1)

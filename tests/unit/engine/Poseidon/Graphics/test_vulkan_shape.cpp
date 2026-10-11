@@ -57,6 +57,17 @@ TEST_CASE("CPU clipping interpolates previous homogeneous positions", "[Graphics
     REQUIRE(table.previousClip.empty());
 }
 
+TEST_CASE("HDR software lighting survives clipping and clears on reuse", "[Graphics][vulkan-shape]")
+{
+    TLVertexTable table;
+    table.AddPos(); table.AddPos(); table.AddPos();
+    table.hdrColor = {{{4,2,.5f,1}},{{8,4,1,1}}};
+    table.InterpolateHDR(2,0,1,.25f);
+    REQUIRE(table.hdrColor[2] == std::array<float,4>{5,2.5f,.625f,1});
+    table.ReleaseTables();
+    REQUIRE(table.hdrColor.empty());
+}
+
 TEST_CASE("Vulkan sky interpolation matches legacy packed RGB555 uploads", "[Graphics][vulkan-shape]")
 {
     REQUIRE(vk::InterpolatesRGB555(PacARGB1555));
@@ -243,7 +254,8 @@ TEST_CASE("Vulkan native normals use inverse transpose and materials use the eng
     REQUIRE(offsetof(vk::ShapeLighting, shadow) == 784);
     REQUIRE(offsetof(vk::ShapeLighting, previousMVP) == 1104);
     REQUIRE(offsetof(vk::ShapeLighting, temporal) == 1168);
-    REQUIRE(sizeof(vk::ShapeLighting) == 1200);
+    REQUIRE(offsetof(vk::ShapeLighting, outputColor) == 1200);
+    REQUIRE(sizeof(vk::ShapeLighting) == 1216);
 }
 
 TEST_CASE("Vulkan software shadow receivers reconstruct the native camera-relative coordinates", "[Graphics][vulkan-shape]")

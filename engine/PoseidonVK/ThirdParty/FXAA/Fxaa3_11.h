@@ -750,7 +750,7 @@ NOTE the other tuning knobs are now in the shader function inputs!
         // CWR: calculate RGB luma at the existing fetches, avoiding a luma copy.
         // The reference quality algorithm and search schedule are unchanged.
         #if defined(CWR_FXAA_RGB_LUMA)
-        FxaaFloat FxaaLuma(FxaaFloat4 rgba) { return dot(rgba.rgb, FxaaFloat3(0.299, 0.587, 0.114)); }
+        FxaaFloat FxaaLuma(FxaaFloat4 rgba) { return dot(toSRGB(toneMap(rgba.rgb, 1.0)), FxaaFloat3(0.299, 0.587, 0.114)); }
         #else
         FxaaFloat FxaaLuma(FxaaFloat4 rgba) { return rgba.x; }
         #endif

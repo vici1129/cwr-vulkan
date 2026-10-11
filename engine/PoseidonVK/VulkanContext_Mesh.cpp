@@ -341,6 +341,7 @@ void VulkanContext::DrawMesh(const std::shared_ptr<MeshBuffers>& mesh, uint32_t 
     if (lighting)
     {
         auto receiver = *lighting;
+        receiver.outputColor = {_worldActive ? 0.f : 1.f, screen ? 0.f : 1.f, OutputPeak(), 0};
         receiver.temporal[0] = TemporalEnabled() ? _taaJitter[0] : 0;
         receiver.temporal[1] = TemporalEnabled() ? _taaJitter[1] : 0;
         receiver.temporal[3] = TemporalEnabled() ?
@@ -361,6 +362,7 @@ void VulkanContext::DrawMesh(const std::shared_ptr<MeshBuffers>& mesh, uint32_t 
     else
     {
         ShapeLighting unlit;
+        unlit.outputColor = {_worldActive ? 0.f : 1.f, 0, OutputPeak(), 0};
         unlit.temporal = {TemporalEnabled() ? _taaJitter[0] : 0, TemporalEnabled() ? _taaJitter[1] : 0,
                           0, TemporalEnabled() ? (!depthWrite || !depthTest ? 2.f : blend ? 1.f : 0.f) : 0.f};
         if (TemporalEnabled()) unlit.temporalExtent = {1.f / _worldExtent.width, 1.f / _worldExtent.height,
@@ -390,7 +392,7 @@ void VulkanContext::DrawMesh(const std::shared_ptr<MeshBuffers>& mesh, uint32_t 
         if (_profile.enabled) ++_profile.stateCommands[0];
     }
     // Immutable descriptor handles identify both image version and sampler.
-    const std::array<VkDescriptorSet, 2> descriptors{sampled->descriptors[sampler], sampledDetail->descriptors[0]};
+    const std::array<VkDescriptorSet, 2> descriptors{sampled->descriptors[sampler], sampledDetail->dataDescriptors[0]};
     if (_commands.textures != descriptors)
     {
         vkCmdBindDescriptorSets(frame.command, VK_PIPELINE_BIND_POINT_GRAPHICS, _shapeLayout, 0, 2,
