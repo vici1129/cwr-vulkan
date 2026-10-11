@@ -152,7 +152,7 @@ void EngineVK::BeginMeshTL(const Shape& shape, int spec, bool dynamic)
     if (!buffer)
         throw std::logic_error("Vulkan Shape: mesh has no Vulkan vertex buffer");
     buffer->Update(shape, dynamic);
-    CaptureTemporalNative(shape);
+    CaptureTemporalNative(shape, dynamic);
     _activeShape = &shape;
 }
 

@@ -66,10 +66,13 @@ void EngineVK::BeginTemporalWorld()
     _temporalCameraType = cameraType;
     _previousNightVision = _nightVision;
 }
-void EngineVK::CaptureTemporalNative(const Shape& shape)
+void EngineVK::CaptureTemporalNative(const Shape& shape, bool dynamic)
 {
     _lighting.previousMVP = {};
     _lighting.temporal = {};
+    // A dynamic native buffer has no deformation sidecar. Do not retain its MVP
+    // either: the following frame must not treat it as immutable history.
+    if (dynamic) return;
     if (_vk.TemporalEnabled() && _temporalTerrain && _vk.TemporalHistoryValid())
     {
         Matrix4 projection = _previousProjection;

@@ -1,5 +1,214 @@
 # Vulkan backend development
 
+## Private NVIDIA DLSS experiment (2026-10-11)
+
+**Not a distributable feature.** An uncommitted, local Windows x64 experiment
+based on `008bc97` implements direct Vulkan NGX Super Resolution, not Streamline,
+an imitation upscaler, or a general upscaling framework. The public repository
+contains these findings and the independent native-dynamic-motion rejection fix
+only. NVIDIA SDK materials, integration sources and linked executables are not
+included in the public change. The public build still has the AA modes below.
+
+### Licensing and packaging gate
+
+The repository's [license](../LICENSE) is GPL-3.0-or-later with additional
+Section 7 terms; no NVIDIA linking exception was found. The inspected
+[NVIDIA RTX SDK license](https://github.com/NVIDIA/DLSS/blob/374959484e79a640feaba44c93ac8cfb0a03f5b5/LICENSE.txt)
+(March 14, 2024) imposes protective redistribution terms in section 2(c) and an
+open-source-license restriction in section 4(e). This leaves distribution of
+the combined application unresolved; obtaining SDK files from a public NVIDIA
+repository does not make them GPL-compatible. This is a release gate, not a
+legal determination. Resolve it with the relevant rights holders/legal review
+before publishing the integration or a linked build. Private experimentation
+does not establish redistribution permission.
+
+Packaging also needs an approved production runtime, the applicable notices,
+attribution/branding and release notification, and qualification of the actual
+runtime/model selected by the driver. Do not ship the developer DLL. No SDK
+download, installation, packaging or redistribution rule was added. Local SDK,
+test profiles, captures and executables remain under ignored `build/` paths.
+
+### Implemented locally
+
+The private build option is `CWR_PRIVATE_DLSS=ON`, with `CWR_DLSS_SDK` pointing
+to an externally supplied official SDK. It defaults OFF. GL33 does not search
+for or link NGX. Runtime use additionally requires `CWR_VK_DLSS=1` and an
+absolute `CWR_DLSS_RUNTIME` directory containing `nvngx_dlss.dll` at startup.
+Without this opt-in the original Vulkan 1.0 instance/device path is retained.
+The opted-in path checks Vulkan 1.1, NVIDIA support, the SDK's queried instance
+and device extensions, compute queue support, image formats, independent blend,
+storage-image write-without-format and buffer-device-address capabilities.
+Failed capability checks retain ordinary rendering and report their reason.
+
+Private developer commands, process-local and not persisted:
+
+```sqf
+triAA "dlaa"
+triAA "dlss-quality"
+triAA "dlss-balanced"
+triAA "dlss-performance"
+triAA "status"
+```
+
+Status distinguishes capability availability from successful inference and
+reports actual input/output dimensions, evaluation/reset counts and validation
+errors. NGX errors retain the operation and result code. Supersampling and DLSS
+are incompatible: both selection orders are rejected without silently altering
+the previous settings. Off, FXAA, SMAA, TAA and MSAA remain opt-in alternatives;
+there is no stacking, dynamic resolution, Frame Generation, Ray Reconstruction,
+Reflex or new menu. A failed feature creation/evaluation schedules an idle-safe
+return to Off rather than repeatedly submitting a broken NGX feature.
+
+The same completed-world boundary contains transparency, water, fog, projected
+shadows and CSM. SSAO executes before NGX. The reconstructed color and sampled
+world depth are composited into native-resolution attachments before cockpit,
+weapon, HUD and UI; final gamma still runs once afterward. Existing intro/map/
+options bypass behavior is retained, rather than claiming inference in those
+views. Resources and NGX features follow the existing idle/swapchain lifecycle.
+
+### Input contract and known quality limits
+
+Checked against NVIDIA's
+[Vulkan programming guide](https://github.com/NVIDIA/DLSS/blob/374959484e79a640feaba44c93ac8cfb0a03f5b5/doc/DLSS_Programming_Guide_Release.pdf):
+
+- Existing vectors are previous UV minus current UV, including projection
+  jitter. A dedicated RG32F input pass subtracts previous-minus-current jitter
+  and multiplies by the actual input dimensions: current-to-previous input
+  pixels, upper-left origin/Y downward. `MVLowRes` is enabled; `MVJittered` is
+  not. NGX handles dilation, not the engine's TAA dilation.
+- The positive-height Vulkan viewport turns positive projection jitter into
+  right/down geometry displacement. NGX receives the opposite sampling offset,
+  in input pixels. Halton(2,3) uses `ceil(8 * outputArea / inputArea)` phases;
+  existing TAA keeps its eight phases. Reduced-resolution texture mip bias is
+  `log2(inputWidth/outputWidth)-1`, confined to the DLSS world draws.
+- Native depth is 0 near/1 far, not inverted or linearized. The legacy UNORM
+  display-referred LDR scene uses no HDR flag, unit exposure, and gamma after
+  reconstruction. The private path rejects the unqualified sRGB scene fallback.
+- Existing camera/load/resize/mode history invalidation drives NGX reset. Each
+  successful inference is counted; an initialized SDK alone is not a pass.
+- Software TL retains real previous post-deformation vertices. Dynamic native
+  buffers have no such sidecar: they now reject motion and do not store an MVP
+  for use as immutable history on the following frame. This small independent
+  correctness fix also applies to existing TAA; no new animation system is added.
+- Current SDK models do not consume `BiasCurrentColor` as a usable rejection
+  mask. The experiment does not pretend otherwise: unsupported/reactive coverage
+  rejects the reconstructed output, samples current input spatially, and guards
+  the following disocclusion. Remaining color is bounded by the current 3x3
+  neighborhood. This does **not** mask NGX's internal history. Sky without motion,
+  smoke/water and uncertain deformation/coverage can therefore remain spatially
+  filtered, softer or shimmering, especially with low-resolution Performance.
+
+### Actual SDK and driver qualification
+
+Hardware: RTX 4060 Ti, driver 617.14, Windows, native desktop 1920x1080.
+Official NVIDIA/DLSS checkout: `374959484e79a640feaba44c93ac8cfb0a03f5b5`;
+the tested developer runtime identifies itself as 310.9.1. SDK quality enums
+select native DLAA, MaxQuality, Balanced and MaxPerf; optimal dimensions come
+from NGX, not hard-coded ratios. The experiment explicitly requests supported
+transformer preset K for all four modes.
+
+An existing global NVIDIA App SR override selected a different 310.9.0 runtime
+from the driver model cache and forced preset M for Performance despite K being
+requested. That combination executed inference but emitted four validation
+errors inside SDK-owned `nv.ngx.dlss.resource` clear/layout operations. It is
+**not qualified**. A temporary application-only NvAPI profile disabled that SR
+override during SDK qualification, leaving global settings unchanged. With the
+official 310.9.1 SDK runtime and K, all four modes executed real inference with
+zero Vulkan validation errors/warnings in the completed qualification runs.
+Initialization logs for other NGX libraries are SDK discovery behavior; the
+application creates/evaluates only the SuperSampling feature.
+
+The owned temporary test profile was removed and absence of an application
+profile verified; the original global values (override enabled, latest preset)
+were unchanged. Future use inherits the user's driver overrides again.
+A release must resolve/qualify this driver
+interaction, not silently change global NVIDIA settings.
+
+### Gameplay evidence and scope
+
+Isolated stock-game profiles, muted direct developer launches (not Steam
+qualification), executable hashes and logs are retained locally under
+`build/shadow-live/dlss-*`. Sixty-frame motion captures include moving soldiers,
+village houses/foliage/fences and disocclusions in all four new modes; native
+1080p SMAA and TAA comparisons are also retained. Separate runs drove the HMMWV
+about 59 m and raised the Cobra from ground level to about 55 m with spinning
+rotors, including native cockpit views. SSAO/CSM were enabled for these gameplay
+checks. Water/fog, smoke, projected shadows, camera changes and resize/minimize/
+restore were exercised. The final infantry, car and Cobra runs respectively
+closed after 59,408, 6,403 and 3,775 submitted frames with zero validation
+errors/warnings.
+
+Inspection found intact native HUD/cockpit and no obvious long soldier/vehicle
+trails in the sampled sequences. DLAA softens edges relative to SMAA; TAA and
+DLAA both reduce native edge roughness. Performance is visibly softer in foliage
+and rotor silhouettes. Thin/reactive coverage remains a quality limitation,
+not an asserted temporal-AA success. These sequences are not deterministic
+frame-matched replays, so they do not establish a numerical image-quality
+ranking or absence of all ghosting/jitter artifacts. Broader content and longer
+motion-sequence qualification remain required.
+
+The ordinary single-mission Save/Load path was also tested with DLAA, not just
+a scripted teleport. After saving at `[8089.76,5153.36]`, movement reached
+`[8090.20,5152.07]`; Load restored the saved position and increased NGX reset
+count from 2 to 3. The first post-load inference succeeded, the captured scene
+was intact, and `dlss-load-final` closed after 13,902 frames with zero validation
+errors/warnings. The earlier save attempt timed out normally during an
+interruption; it was not counted as a successful load test.
+
+### GPU workload, not display-paced FPS
+
+Validation-disabled measurements used the frozen stock infantry village,
+900 m view distance, projected shadows on, SSAO/CSM off, scale 100, and automatic
+GPU clocks. Each cell averages the last four two-second timestamp windows after
+a mode switch/warmup. `frame` is GPU command-buffer workload; `resolve` includes
+motion conversion, real NGX inference and the output guard, not NGX alone.
+These values exclude acquire/present pacing and CPU recording. The process ran
+at roughly 160 FPS / 6.2 ms CPU frame cadence in this light scene; that is not
+the measured GPU cost and not evidence of a DLSS FPS improvement.
+
+| Mode | 1080p input | 1080p frame / resolve ms | 1440p input | 1440p frame / resolve ms |
+| --- | --- | --- | --- | --- |
+| Off | 1920x1080 | 1.043 / n/a | 2560x1440 | 1.134 / n/a |
+| SMAA | 1920x1080 | 1.297 / n/a | 2560x1440 | 1.525 / n/a |
+| TAA | 1920x1080 | 1.531 / 0.350 | 2560x1440 | 1.714 / 0.436 |
+| DLAA | 1920x1080 | 1.943 / 1.351 | 2560x1440 | 2.624 / 1.889 |
+| DLSS Quality | 1280x720 | 1.907 / 1.397 | 1707x960 | 2.303 / 1.740 |
+| DLSS Balanced | 1114x626 | 1.901 / 1.408 | 1485x835 | 2.249 / 1.712 |
+| DLSS Performance | 960x540 | 1.896 / 1.416 | 1280x720 | 2.188 / 1.672 |
+
+Outputs are the full requested 1920x1080 and 2560x1440 Vulkan drawables.
+The 1440p test used an oversized window on the 1080p desktop, not a physical
+1440p monitor; actual attachment dimensions were verified in runtime status.
+Window captures were clipped outside the physical desktop: 1440p visual
+inspection covers the visible portion, not a full-monitor 1440p presentation.
+At 1440p all four NGX modes sampled 2850 MHz graphics / 9201 MHz memory clocks.
+At 1080p NGX sampled 1740-2025 MHz / 9201 MHz, while Off/SMAA/TAA used much lower
+automatic clocks. These are observed workloads, **not clock-normalized kernel
+benchmarks**. In this low-cost world, inference outweighs raster savings;
+reduced input dimensions alone do not promise higher FPS. Local evidence:
+`dlss-perf-1080/dlss-timing.json`, `dlss-perf-1440/dlss-timing.json` and their
+profiler logs under `build/shadow-live/`.
+
+### Regression results
+
+- Private NGX-enabled Vulkan, NGX-disabled Vulkan and GL33 builds completed.
+  Each relevant Poseidon test binary passed 74 cases / 812 assertions for
+  `[vulkan-shape],[ShadowMath],[Conventions],[ShutdownOrder]`. The private Vulkan
+  policy binary passed 319 driver-free checks with NGX both enabled and disabled;
+  its intentional teardown-error fixture is not a live validation failure.
+- The compiled-OFF Vulkan run retained API 1.0 and exercised Off, FXAA, SMAA,
+  TAA, MSAA 2/4/8 and SMAA at 150% (2880x1620 world / 1920x1080 display).
+  It closed after 2,145 frames with zero validation errors/warnings.
+- The linked private build with an absent runtime reported the exact missing
+  directory/DLL requirement, retained Off, accepted TAA, retained API 1.0 and
+  closed after 425 frames with zero validation errors/warnings.
+- GL33 stock infantry rendered and closed normally; DLAA/status returned the
+  existing unsupported-selector response. No NGX dependency is linked there.
+- Supersampling conflicts were tested in both orders in the NGX-enabled run;
+  the previously selected mode/scale survived rejection.
+- No non-NVIDIA adapter or older Vulkan loader was available for physical
+  testing. Those rejection paths were reviewed, not claimed as hardware passes.
+
 ## Optional anti-aliasing and world render scale (2026-10-11)
 
 Off (default), FXAA, SMAA 1x, TAA and MSAA 2x/4x/8x are implemented.
@@ -83,6 +292,8 @@ hooks. GL33 ignores these hooks; no save format or stock asset changes are neede
 - Native immutable Vulkan meshes retain their actual previous MVP, keyed by
   full object path and Shape lifetime (including LOD). This path is not claimed
   to animate vertices: stock animated vehicles/soldiers use the software path.
+  Native dynamic meshes explicitly reject motion and do not retain an MVP;
+  transform-only history is not valid deformation history.
 - Software TL captures the actual post-animation, pre-clipping vertex positions
   in `FaceArray::Draw`. Previous homogeneous clip positions are retained by
   path, Shape and indexed topology; this includes soldier pose, turret, wheels,

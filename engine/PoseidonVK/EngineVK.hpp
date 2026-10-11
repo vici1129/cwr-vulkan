@@ -168,7 +168,7 @@ class EngineVK final : public Engine
     std::array<float, 2> _previousJitter{};
     std::array<float, 16> _previousSoftwareProjection{};
     void BeginTemporalWorld();
-    void CaptureTemporalNative(const Shape&);
+    void CaptureTemporalNative(const Shape&, bool dynamic);
     ShadowMapTuning _shadowTuning;
     float _shadowSunFactor = 0;
     bool _shadowWorld = false;
