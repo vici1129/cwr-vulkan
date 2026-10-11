@@ -40,6 +40,10 @@ class EngineVK final : public Engine
     bool SetWorldRenderScale(int percent) override { return _vk.SetRenderScale(percent); }
     RString SetHDR(RString mode) override { return _vk.SetHDR(static_cast<const char*>(mode)).c_str(); }
     RString SetBloom(RString mode) override { return _vk.SetBloom(static_cast<const char*>(mode)).c_str(); }
+    RString SetAtmosphere(RString mode) override { return _vk.SetAtmosphere(static_cast<const char*>(mode)).c_str(); }
+    RString SetSunShafts(RString mode) override { return _vk.SetSunShafts(static_cast<const char*>(mode)).c_str(); }
+    void SetSunVisibility(float visibility) override { _vk.SetSunVisibility(visibility); }
+    void UpdateAtmosphere();
     bool UsesHDRLighting() const override { return true; }
     bool SetSSAO(bool enabled, float strength, float radius, float bias, float fade) override;
     bool InitDrawDone() override { return _vk.FrameOpen(); }

@@ -142,6 +142,7 @@ void VulkanContext::CreateAAResources(VkFormat format)
                        properties.limits.sampledImageDepthSampleCounts;
     _aaMode = _requestedAA;
     _bloomEnabled = _bloomRequested;
+    _shaftsEnabled = _shaftsRequested;
     _renderScale = _requestedScale;
     _worldSamples = AASamples(_aaMode);
     if (!(_aaSampleSupport & _worldSamples))
@@ -312,7 +313,7 @@ void VulkanContext::CreateAAResources(VkFormat format)
         }
         framebuffer(_worldPass, views, temporal || _worldSamples != VK_SAMPLE_COUNT_1_BIT ? 3 : 2, target.scene);
         framebuffer(_ssaoPass, &target.color.view, 1, target.ao);
-        if ((_renderScale != 100 || _bloomEnabled) && (_aaMode == AAMode::FXAA || _aaMode == AAMode::SMAA))
+        if ((_renderScale != 100 || _bloomEnabled || _shaftsEnabled) && (_aaMode == AAMode::FXAA || _aaMode == AAMode::SMAA))
         {
             CreateAAImage(target.filtered, format, colorUsage, VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_ASPECT_COLOR_BIT);
             descriptor(target.filtered.view, false, target.filteredSet);
@@ -416,7 +417,7 @@ void VulkanContext::CreateAAResources(VkFormat format)
             const VkPipelineColorBlendAttachmentState maskOutputs[]{output, output, output, output};
             if (i == 6) { blend.attachmentCount = 4; blend.pAttachments = maskOutputs; }
             VkPipelineDepthStencilStateCreateInfo ds{VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO};
-            const bool composite = i == 4 || (!_bloomEnabled && _renderScale == 100 && (i == 0 || i == 3));
+            const bool composite = i == 4 || (!_bloomEnabled && !_shaftsEnabled && _renderScale == 100 && (i == 0 || i == 3));
             ds.depthTestEnable = ds.depthWriteEnable = composite;
             ds.depthCompareOp = VK_COMPARE_OP_ALWAYS;
             const VkDynamicState states[]{VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR};
@@ -451,6 +452,7 @@ void VulkanContext::CreateAAResources(VkFormat format)
         vkDestroyShaderModule(_device, vertex, nullptr);
     }
     CreateBloomResources();
+    CreateSunShaftResources();
 }
 
 void VulkanContext::BeginAAWorld()
@@ -510,7 +512,7 @@ void VulkanContext::DrawAAPass(unsigned index, VkFramebuffer framebuffer, VkDesc
 {
     auto command = _frames[_frame].command;
     const auto& target = _aaTargets[_image];
-    const bool composite = index == 4 || (!_bloomEnabled && _renderScale == 100 && (index == 0 || index == 3));
+    const bool composite = index == 4 || (!_bloomEnabled && !_shaftsEnabled && _renderScale == 100 && (index == 0 || index == 3));
     VkClearValue clear{};
     VkRenderPassBeginInfo pass{VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO};
     pass.renderPass = composite ? _resumePass : index == 6 ? _fsrMaskPass : index == 5 ? _taaPass : (index == 1 || index == 2) ? _aaDataPass : _aaPass;
@@ -577,7 +579,7 @@ void VulkanContext::FinishAAWorld(const std::array<float, 4>& projection)
         _taaIndex = 1-_taaIndex;
         _taaValid = true;
     }
-    const auto destination = !_bloomEnabled && _renderScale == 100 ? _framebuffers[_image] : target.filterFB;
+    const auto destination = !_bloomEnabled && !_shaftsEnabled && _renderScale == 100 ? _framebuffers[_image] : target.filterFB;
     if (_aaMode == AAMode::FXAA)
     {
         DrawAAPass(0, destination, source, _worldExtent);
@@ -590,8 +592,9 @@ void VulkanContext::FinishAAWorld(const std::array<float, 4>& projection)
         DrawAAPass(3, destination, source, _worldExtent);
         source = target.filteredSet;
     }
+    if (_shaftsEnabled) source = DrawSunShafts(source);
     if (_bloomEnabled) DrawBloom(source);
-    if (_bloomEnabled || _renderScale != 100 || (_aaMode != AAMode::FXAA && _aaMode != AAMode::SMAA))
+    if (_bloomEnabled || _shaftsEnabled || _renderScale != 100 || (_aaMode != AAMode::FXAA && _aaMode != AAMode::SMAA))
         DrawAAPass(4, _framebuffers[_image], source, _extent);
     _worldActive = false;
 }
@@ -599,6 +602,7 @@ void VulkanContext::FinishAAWorld(const std::array<float, 4>& projection)
 void VulkanContext::DestroyAAResources() noexcept
 {
     DestroyBloomResources();
+    DestroySunShaftResources();
     DestroyFSR();
     _worldActive = _worldPassOpen = false;
     _taaValid = _taaInitialized = false;

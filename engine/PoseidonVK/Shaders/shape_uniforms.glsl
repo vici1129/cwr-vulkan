@@ -22,4 +22,6 @@ layout(set = 2, binding = 0, std140) uniform ShapeLighting {
     vec4 temporal;
     vec4 temporalExtent;
     vec4 outputColor; // world=0/overlay=1, native geometry, display peak/white
+    vec4 atmosphereSun; // direction towards sun, daylight/clear-air weight
+    vec4 atmosphereColor; // engine sun color, camera altitude density
 } lighting;

@@ -43,7 +43,23 @@ void main() {
     float luminance = max(dot(perceptual, lighting.eyeCoef.rgb), 0.0);
     float nightBlend = clamp(luminance + lighting.eyeCoef.a, 0.0, 1.0);
     outColor.rgb = toLinear(mix(vec3(luminance), perceptual, nightBlend));
-    outColor.rgb = mix(toLinear(lighting.fogColor.rgb), outColor.rgb, clamp(fogVisibility, 0.0, 1.0));
+    float visibility = clamp(fogVisibility, 0.0, 1.0);
+    vec3 fogColor = toLinear(lighting.fogColor.rgb);
+    if (lighting.atmosphereSun.w > 0.0 && visibility < 1.0) {
+        // Tint the in-scattered light of the EXISTING fog. Preserve its original
+        // transmittance, mission ranges and full-fog horizon endpoint.
+        vec3 ray = shadowWorld / max(length(shadowWorld), 0.001);
+        float mu = dot(ray, lighting.atmosphereSun.xyz);
+        float forward = pow(max(mu, 0.0), 8.0);
+        float luma = dot(fogColor, vec3(.2126,.7152,.0722));
+        vec3 sun = toLinear(lighting.atmosphereColor.rgb);
+        sun /= max(dot(sun, vec3(.2126,.7152,.0722)), .01);
+        vec3 scatter = mix(fogColor * vec3(.78,.94,1.16), luma * sun * 1.3, forward * .65);
+        float density = lighting.atmosphereColor.w * exp(-max(shadowWorld.y,0.0) / 2400.0);
+        float weight = lighting.atmosphereSun.w * density * smoothstep(0.0,.35,visibility);
+        fogColor = mix(fogColor, scatter, weight);
+    }
+    outColor.rgb = mix(fogColor, outColor.rgb, visibility);
     // World tone mapping follows reconstruction; cockpit geometry uses the same
     // curve. Authored 2D UI remains bounded at reference white.
     if (lighting.outputColor.x > .5)

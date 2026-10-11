@@ -149,6 +149,13 @@ class VulkanContext
     bool SetRenderScale(int percent);
     std::string SetHDR(std::string_view mode);
     std::string SetBloom(std::string_view mode);
+    std::string SetAtmosphere(std::string_view mode);
+    std::string SetSunShafts(std::string_view mode);
+    bool AtmosphereEnabled() const { return _atmosphereEnabled; }
+    void SetAtmosphereFrame(const std::array<float, 4>& sun, const std::array<float, 4>& color,
+                            const std::array<float, 4>& screenSun)
+    { _atmosphereSun = sun; _atmosphereColor = color; _screenSun = screenSun; _sunVisibility = 0; }
+    void SetSunVisibility(float visibility) { _sunVisibility = std::clamp(visibility, 0.f, 1.f); }
     void BeginAAWorld();
     void FinishAAWorld(const std::array<float, 4>& projection);
     bool TemporalEnabled() const { return IsTemporal(_aaMode) && _worldActive; }
@@ -206,6 +213,8 @@ class VulkanContext
         uint64_t gpuSamples = 0;
         double taaGpuMs = 0;
         double bloomGpuMs = 0;
+        double shaftsGpuMs = 0;
+        uint64_t shaftsGpuSamples = 0;
         uint64_t bloomGpuSamples = 0;
         uint64_t taaGpuSamples = 0;
         uint64_t ssaoPasses = 0, ssaoGpuSamples = 0;
@@ -250,6 +259,7 @@ class VulkanContext
         bool frameTimestamped = false;
         bool taaTimestamped = false;
         bool bloomTimestamped = false;
+        bool shaftsTimestamped = false;
         bool ssaoTimestamped = false;
         VkQueryPool csmQueries = VK_NULL_HANDLE;
         bool csmTimestamped = false;
@@ -367,6 +377,20 @@ class VulkanContext
     void CreateBloomResources();
     void DestroyBloomResources() noexcept;
     void DrawBloom(VkDescriptorSet source);
+    bool _atmosphereEnabled = false;
+    bool _shaftsRequested = false, _shaftsEnabled = false;
+    std::array<float, 4> _atmosphereSun{}, _atmosphereColor{}, _screenSun{};
+    float _sunVisibility = 0, _shaftVisibility = 0;
+    double _shaftLastTime = 0;
+    struct ShaftTarget { TemporalTarget mask, radial, composite; };
+    std::vector<ShaftTarget> _shaftTargets;
+    VkExtent2D _shaftExtent{}, _shaftCompositeExtent{};
+    VkDescriptorPool _shaftPool = VK_NULL_HANDLE;
+    VkPipelineLayout _shaftLayout = VK_NULL_HANDLE;
+    VkPipeline _shaftPipeline = VK_NULL_HANDLE;
+    void CreateSunShaftResources();
+    void DestroySunShaftResources() noexcept;
+    VkDescriptorSet DrawSunShafts(VkDescriptorSet source);
     VkRenderPass _taaPass = VK_NULL_HANDLE;
     bool _taaValid = false, _motionDebug = false, _taaInitialized = false;
     unsigned _taaIndex = 0, _taaFrame = 0;

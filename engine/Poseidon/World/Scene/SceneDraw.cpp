@@ -232,6 +232,7 @@ void Scene::DrawFlares(bool primary, bool allowSecondary)
     }
     float vis = GetLandscape()->SkyThrough();
     float night = MainLight()->NightEffect();
+    if (primary) GEngine->SetSunVisibility(0);
 
     Vector3Val cPos = GetCamera()->Position();
 
@@ -262,6 +263,11 @@ void Scene::DrawFlares(bool primary, bool allowSecondary)
         }
         if (visLand > 0)
         {
+            // The optional depth-based shafts use terrain visibility here and
+            // resolve foliage/building coverage from their sampled sun aperture.
+            // The coarse CPU occlusion sphere below intentionally stays the
+            // original flare policy; its solid foliage bounds hide leaf holes.
+            if (primary) GEngine->SetSunVisibility(visLand);
             float a = visLand * 0.25;
             // check against occlusion buffer
             float occ = GetOcclusions()->TestSphereWSpace(sunPos, sunRadius);

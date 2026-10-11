@@ -1,5 +1,172 @@
 # Vulkan backend development
 
+## Opt-in atmospheric perspective and sunlight shafts (2026-10-11)
+
+Based on public `main` **e340399**. Both effects default **Off**, independently,
+with process-local developer controls only:
+
+```sqf
+triAtmosphere "on"
+triAtmosphere "off"
+triAtmosphere "status"
+triSunShafts "on"
+triSunShafts "off"
+triSunShafts "status"
+```
+
+Other arguments are rejected without changing state. Shaft status distinguishes
+requested enablement from allocated resources; `visibility` is the CPU terrain
+visibility, not a GPU readback of the visible sun aperture. Active resources do
+not mean shafts are contributing at night or with a covered/off-screen sun.
+GL33 returns `UNSUPPORTED` and its renderer is unchanged. No NGX/private files,
+stock assets, weather scripts or graphics menus are changed.
+
+### Existing atmosphere and the analytical change
+
+Inspection covered `Scene::ResetFog`, `FogExponential`/`Fog8`, sky texture color
+lookup, `MainLightChanged`, `LightSun`, `SkyThrough`, distance culling, native
+shape fog and software-transformed terrain, and the flare visibility path.
+The stock sky texture and eye-adjusted sky lighting still establish the fog
+color. Mission/weather fog ranges, far clipping, tactical visibility, LODs and
+both native and software fog **transmittance are unchanged**.
+
+Atmosphere changes the in-scattered RGB in that same fog mix. A broad cool
+air component and a restrained forward component derived from the actual sun
+color/direction replace part of its uniform color. The existing distance fog
+factor supplies distance dependence. Camera altitude and upward ray height
+reduce the contribution; daylight, sky transmission and short weather-limited
+visibility fade it away. Full fog returns to exactly the original fog color,
+keeping the horizon/culling boundary matched to the sky. There is no second fog
+pass or added extinction. Native objects and software terrain share this color
+calculation; alpha-fog particles keep their existing alpha fade. NVG disables
+the enhancement. Clear/sunset views gain color separation without making hills
+disappear earlier; dense fog and night retain the game's original response.
+
+### Screen-space shafts and composition
+
+The existing sun direction and camera projection locate the source. The existing
+flare terrain/horizon intersection supplies terrain visibility. Object coverage
+uses sampled world depth: the coarse CPU occlusion sphere treats tree bounds
+as solid and cannot represent leaf holes. Flare rendering itself is unchanged.
+
+Two quarter-width/quarter-height FP16 targets hold an area-filtered sky-opening
+mask and its 48-sample radial integration. A filtered sun aperture shuts down
+scattering behind covered discs. Five-tap spatial reconstruction plus current
+world-depth coverage composites the result into a separate FP16 world image.
+MSAA depth coverage is averaged over its samples. Sun elevation, weather,
+visibility and an 8%-of-screen border fade bound the contribution. A short
+120 ms scalar terrain-visibility fade avoids a hard terrain transition; there
+is **no image history, stochastic sampling, volumetric grid or extra geometry**.
+
+The conservative receiver rule only adds scattering to visible sky openings.
+Solid walls, terrain and foreground objects receive no beam overlay. This
+produces modest soft sunlight around foliage/building silhouettes, not dramatic
+shafts across dark ground or inside rooms. It deliberately avoids the common
+screen-space artifact of painting rays over unrelated foreground geometry.
+Fully covered sun apertures contribute nothing even if the CPU terrain test
+says visible. Thin leaves/edges and partial sun coverage remain approximations.
+Clouds and transparent smoke without depth writes have no separate occlusion
+mask; cloud suppression uses the existing weather transmission. Off-screen
+sources contribute nothing. Arbitrary mods and unusual cropped world views are
+not qualified.
+
+Atmosphere is part of world shading before AA. Shafts execute **after** world
+AA/TAA/FSR reconstruction and SSAO, **before** bloom and SDR/HDR10 tone mapping.
+They never feed TAA/FSR history or reactive masks. Native TAA's current jittered
+lattice and FSR's unjittered reconstruction use their respective depth alignment.
+Cockpit/weapon geometry, HUD, maps and menus remain downstream at native
+resolution. Water, CSM and projected shadows retain their existing paths.
+
+Resources follow acquired-image ownership and the existing idle swapchain/AA
+recreation, including partial-creation cleanup. Off allocates no shaft targets.
+On uses two quarter-resolution targets and one world reconstruction-sized color
+target per acquired image (about 17.8 MiB at native 1080p or 31.6 MiB at 1440p).
+No new steady-frame allocation or wait is introduced. The existing profiler
+reports `Vulkan SunShafts: gpu_ms=...` for all three passes, using fence-retired
+timestamps. Fog's extra arithmetic is in the existing world shader, so its cost
+is assessed with paired whole-frame GPU intervals.
+
+### Verification and limits
+
+Windows RelWithDebInfo Vulkan+FSR and Vulkan-disabled builds pass. The driver-free
+policy/lifetime tests pass **370 checks**, including defaults, independent
+toggles, invalid arguments and requested/active semantics. Their intentional
+mock teardown error is expected. Focused shape/fog/layout, shadow, conventions
+and AA tests pass **841 assertions in 70 cases in each build**. The two new
+std140 vectors have explicit size/offset assertions. Previously known unrelated
+PAA/DDS failures remain outside this milestone; no all-green full-suite claim.
+The Vulkan-disabled executable also started its stock menu, returned
+`UNSUPPORTED` for both controls and status queries, and closed normally.
+
+Stock Malden Infantry/Ambush and Ground Attack assets were used with isolated
+profiles. Assisted placement, pinned comparison cameras and time/weather changes
+provided matched SDR views. Sunset hills show warmer forward haze and cooler
+off-axis distances; clear views retain hill detail and the stock horizon.
+Canopy Off/On captures show a restrained warm lift through/around openings,
+with dark tree and building silhouettes preserved. Overcast/heavy-fog/night
+comparisons check suppression rather than forced universal haze.
+
+Live infantry movement, mouse look, native weapon/HUD, NVG, map/pause and
+resize/minimize/restore were exercised. All nine AA choices (Off, FXAA, SMAA,
+MSAA 2/4/8, TAA, FSR Native/Quality) ran with atmosphere, shafts, bloom, SSAO
+and CSM. A stock Cobra was entered with developer assistance and flown using
+bounded controls to about 43 m altitude and 71 km/h during the recorded check,
+with cockpit and external views. These are rendering checks, not mission wins.
+The initial two infantry runs and successful flight run exited normally with
+14,516, 35,218 and 6,332 submissions and **zero core/synchronization validation
+errors or warnings**. The infantry recreation run had one out-of-date presentation.
+An incorrect mission-path launch and an unsupported diagnostic script expression
+were corrected and are not counted as successful gameplay runs. An initial
+below-terrain coast camera and a misplaced scripted cockpit comparison are not
+valid image evidence.
+
+The final formatted build repeated all nine AA modes in the town/canopy scene,
+compared shafts Off/On in the northern Malden forest, and checked a correctly
+placed coastal camera with visible water and distant land. Atmosphere also ran
+with CSM and SSAO disabled. This run closed normally with **30,741 submissions
+and presentations, zero validation errors and zero warnings**. The final Windows
+Vulkan+FSR executable SHA-256 is
+`39c78bba06c4ce40502e00b10a07bb97ca53d5f43698e10a79868c3270c3be5c`.
+
+### GPU measurements
+
+RTX 4060 Ti, Windows driver 617.14, validation disabled, SDR, TAA at native
+resolution with bloom, SSAO and CSM enabled. A pinned Malden town/canopy view at
+17:00, clear weather, no mission fog and 1,500 m view distance was used for both
+resolutions. Eight configurations in mirrored order tested neither effect,
+atmosphere only, shafts only and both, twice each. Each segment had 4 s warm-up
+and 10 s measurement, using fence-retired GPU timestamps and 2 s report intervals.
+The table gives medians across the two segments' interval averages, in ms:
+
+| Output | Neither: frame | Atmosphere: frame | Shafts: frame | Both: frame | Shafts passes | Both vs neither |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| 1920 x 1080 | 2.022 | 2.010 | 2.048 | 2.113 | 0.210 | +0.091 |
+| 2560 x 1440 | 2.178 | 2.186 | 2.358 | 2.373 | 0.265 | +0.195 |
+
+Atmosphere-only differences (-0.011 / +0.008 ms) are within measurement noise,
+not evidence of a speedup or zero cost. Shafts timings cover mask, radial and
+composite passes, not the entire toggle's resource/AA-path changes. GPU clocks
+were not locked: at 1080p the baseline used roughly 1,485-1,590 MHz core /
+5,001 MHz memory; shafts increased these to roughly 1,605-1,740 / 9,201 MHz.
+Thus whole-frame differences are observed dynamic-clock results, not additive
+fixed-clock penalties or a portable FPS guarantee. Both timing runs closed
+normally (18,219 / 22,576 submissions).
+
+### G14 HDR signal check
+
+The G14/RADV + Gamescope/Proton signal-path check ran the final shader code with
+TAA, FSR Native/Quality, bloom, SSAO and CSM, toggled SDR/HDR and exited normally
+(2,813 submissions). The application negotiated format 64 / color space
+1000104008, submitted HDR metadata, and HDMI-A-1 reported BT2020_RGB and PQ
+EOTF 2. This was not a validation-layer run or a native Linux/Steam qualification.
+**Physical TV brightness, color and appearance remain unverified.** No remote
+capture is presented as physical display evidence.
+
+Ignored local receipts, captures and timing data are in the original game
+workspace's `build/shadow-live/atmosphere-*`; build/test and G14 receipts are in
+the isolated public worktree's `build/`. Private work in the original checkout
+was preserved.
+
 ## Opt-in HDR bloom (2026-10-11)
 
 Based on public main `dd773be`. Bloom defaults **Off**, is session-scoped and

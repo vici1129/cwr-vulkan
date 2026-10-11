@@ -386,6 +386,9 @@ class Engine : public IGraphicsEngine
     virtual RString SetAntiAliasing(RString) { return "UNSUPPORTED: renderer has no AA selector"; }
     virtual RString SetHDR(RString) { return "UNSUPPORTED: renderer has no HDR output"; }
     virtual RString SetBloom(RString) { return "UNSUPPORTED: renderer has no HDR bloom"; }
+    virtual RString SetAtmosphere(RString) { return "UNSUPPORTED: renderer has no atmospheric perspective"; }
+    virtual RString SetSunShafts(RString) { return "UNSUPPORTED: renderer has no sunlight shafts"; }
+    virtual void SetSunVisibility(float) {}
     virtual bool UsesHDRLighting() const { return false; }
     virtual bool SetWorldRenderScale(int) { return false; }
     virtual bool SetSSAO(bool, float, float, float, float) { return false; }

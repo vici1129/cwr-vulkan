@@ -114,7 +114,8 @@ void EngineVK::SubmitSoftware(const std::vector<uint32_t>& indices)
     receiver.temporal[3] = _temporalTerrain ? -1.f : 0.f; // certified stationary surface overlay
     receiver.fogColor = {_fogColor.R(), _fogColor.G(), _fogColor.B(), 1};
     receiver.eyeCoef = _vk.EyeCoef();
-    if (_shadowWorld && _shadowTuning.enabled &&
+    const bool atmosphere = _shadowWorld && _vk.AtmosphereEnabled();
+    if (_shadowWorld && (_shadowTuning.enabled || atmosphere) &&
         !(_softwareFlags & (DisableSun | NoZBuf | NoDropdown | IsLight | IsShadow | IsAlphaFog)) &&
         GScene && GScene->GetCamera())
     {
@@ -123,12 +124,13 @@ void EngineVK::SubmitSoftware(const std::vector<uint32_t>& indices)
         rotation.SetPosition(VZero);
         vk::ShapeWorld(receiver, rotation);
         const auto& projection = camera->ProjectionNormal();
-        receiver.shadowReceiver = {1, projection(0, 0), projection(1, 1), 0};
+        receiver.shadowReceiver = {_shadowTuning.enabled ? 1.f : 0.f, projection(0, 0), projection(1, 1), 0};
+        receiver.atmosphereSun[3] = atmosphere ? 1.f : 0.f;
     }
     _vk.DrawMesh(mesh.buffers, 0, indices.size(), false, {}, {1, 1, 1, 1}, image,
                  vk::ShapeSampler(render::SplitLegacy(_softwareFlags)), cutoff, blend, true,
                  (_softwareFlags & NoZBuf) == 0, nullptr, {}, 1, {0, -1, 0}, mesh.vertexOffset, mesh.indexOffset,
-                 (_softwareFlags & NoZWrite) == 0, receiver.shadowReceiver[0] || _temporalTerrain ? &receiver : nullptr,
+                 (_softwareFlags & NoZWrite) == 0, receiver.shadowReceiver[0] || receiver.atmosphereSun[3] || _temporalTerrain ? &receiver : nullptr,
                  shadow, !shadow && (_softwareFlags & IsLight) != 0);
 }
 void EngineVK::EndMesh(TLVertexTable& mesh)

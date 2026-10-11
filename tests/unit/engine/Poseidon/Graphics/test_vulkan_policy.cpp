@@ -221,6 +221,23 @@ int main()
         CheckThrows<std::runtime_error>([&] { ChooseFormat({hdr}); }, "never send SDR values to a PQ-only surface");
         {
             VulkanContext hdrContext;
+            Check(!hdrContext.AtmosphereEnabled(), "atmosphere defaults off");
+            Check(hdrContext.SetAtmosphere("on").starts_with("OK") && hdrContext.AtmosphereEnabled(),
+                  "enable atmospheric perspective independently");
+            Check(hdrContext.SetAtmosphere("invalid").starts_with("INVALID") && hdrContext.AtmosphereEnabled(),
+                  "invalid atmosphere request preserves state");
+            Check(hdrContext.SetAtmosphere("status").find("enabled=on") != std::string::npos,
+                  "atmosphere status reports enablement");
+            Check(hdrContext.SetAtmosphere("off").starts_with("OK") && !hdrContext.AtmosphereEnabled(),
+                  "disable atmospheric perspective");
+            Check(hdrContext.SetSunShafts("status").find("requested=off active=off") != std::string::npos,
+                  "shafts default off without targets");
+            Check(hdrContext.SetSunShafts("on").starts_with("OK"), "request shafts");
+            Check(hdrContext.SetSunShafts("status").find("requested=on active=off") != std::string::npos,
+                  "shaft request does not claim allocated resources");
+            Check(hdrContext.SetSunShafts("strength 1").starts_with("INVALID"), "shafts have no tuning interface");
+            Check(!hdrContext.AtmosphereEnabled(), "shafts do not force atmosphere on");
+            Check(hdrContext.SetSunShafts("off").starts_with("OK"), "disable shafts");
             Check(hdrContext.SetBloom("status").find("requested=off active=off") != std::string::npos,
                   "bloom defaults off without allocated targets");
             for (const auto value : {"strength nan", "strength inf", "strength -1", "strength .31", "threshold 0", "threshold 33", "threshold 4junk", "unknown"})

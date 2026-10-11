@@ -255,7 +255,9 @@ TEST_CASE("Vulkan native normals use inverse transpose and materials use the eng
     REQUIRE(offsetof(vk::ShapeLighting, previousMVP) == 1104);
     REQUIRE(offsetof(vk::ShapeLighting, temporal) == 1168);
     REQUIRE(offsetof(vk::ShapeLighting, outputColor) == 1200);
-    REQUIRE(sizeof(vk::ShapeLighting) == 1216);
+    REQUIRE(sizeof(vk::ShapeLighting) == 1248);
+    REQUIRE(offsetof(vk::ShapeLighting, atmosphereSun) == 1216);
+    REQUIRE(offsetof(vk::ShapeLighting, atmosphereColor) == 1232);
 }
 
 TEST_CASE("Vulkan software shadow receivers reconstruct the native camera-relative coordinates", "[Graphics][vulkan-shape]")

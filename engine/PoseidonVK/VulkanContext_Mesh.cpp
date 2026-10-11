@@ -341,6 +341,13 @@ void VulkanContext::DrawMesh(const std::shared_ptr<MeshBuffers>& mesh, uint32_t 
     if (lighting)
     {
         auto receiver = *lighting;
+        if (_worldActive && _atmosphereEnabled && !shadow && depthTest &&
+            (screen ? receiver.atmosphereSun[3] > 0 : receiver.fogParams[2] > .5f))
+        {
+            receiver.atmosphereSun = _atmosphereSun;
+            receiver.atmosphereColor = _atmosphereColor;
+        }
+        else receiver.atmosphereSun = {};
         receiver.outputColor = {_worldActive ? 0.f : 1.f, screen ? 0.f : 1.f, OutputPeak(), 0};
         receiver.temporal[0] = TemporalEnabled() ? _taaJitter[0] : 0;
         receiver.temporal[1] = TemporalEnabled() ? _taaJitter[1] : 0;
