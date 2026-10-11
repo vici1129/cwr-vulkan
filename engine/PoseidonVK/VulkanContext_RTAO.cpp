@@ -4,6 +4,10 @@
 #include <PoseidonVK/Shaders/rtao_ms.comp.hpp>
 #include <PoseidonVK/Shaders/rtao_filter.frag.hpp>
 #include <PoseidonVK/Shaders/rtao_filter_ms.frag.hpp>
+#include <PoseidonVK/Shaders/rtshadow.comp.hpp>
+#include <PoseidonVK/Shaders/rtshadow_ms.comp.hpp>
+#include <PoseidonVK/Shaders/rtshadow_filter.frag.hpp>
+#include <PoseidonVK/Shaders/rtshadow_filter_ms.frag.hpp>
 #include <algorithm>
 #include <cstring>
 #include <cmath>
@@ -101,8 +105,9 @@ struct Push
     std::array<float, 4> projection;
     std::array<float, 4> settings{2.f, .035f, .85f, 60.f};
     std::array<float, 4> jitter{};
+    std::array<float, 4> sun{};
 };
-static_assert(sizeof(Push) == 112);
+static_assert(sizeof(Push) == 128);
 void BuildBarrier(VkCommandBuffer command, VkPipelineStageFlags destination)
 {
     VkMemoryBarrier barrier{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
@@ -123,7 +128,7 @@ struct VulkanContext::RTAOState
     uint32_t alignment = 256;
     VkDescriptorSetLayout setLayout = VK_NULL_HANDLE;
     VkPipelineLayout layout = VK_NULL_HANDLE;
-    std::array<VkPipeline, 2> compute{}, filter{};
+    std::array<VkPipeline, 4> compute{}, filter{};
     struct Slot
     {
         std::shared_ptr<Acceleration> tlas;
@@ -132,9 +137,11 @@ struct VulkanContext::RTAOState
         std::vector<std::shared_ptr<BLAS>> retained;
         std::vector<VkAccelerationStructureInstanceKHR> previous;
         DepthAttachment ao;
+        DepthAttachment sunlight;
         VkExtent2D extent{};
         VkDescriptorPool pool = VK_NULL_HANDLE;
         VkDescriptorSet set = VK_NULL_HANDLE;
+        VkDescriptorSet sunSet = VK_NULL_HANDLE;
         VkQueryPool queries = VK_NULL_HANDLE;
         bool pending = false;
         uint32_t built = 0, tlasBuilt = 0;
@@ -148,7 +155,67 @@ struct VulkanContext::RTAOState
     uint32_t lastRays = 0, lastHits = 0, instanceCount = 0, triangleCount = 0;
     double blasMs = 0, tlasMs = 0, rayMs = 0, filterMs = 0, frameMs = 0;
     bool worldDispatched = false;
+    uint64_t totalSunRays = 0, totalSunHits = 0;
+    uint32_t lastSunRays = 0, lastSunHits = 0;
+    uint32_t lastTerrainHits = 0, lastAlphaHits = 0;
+    double sunRayMs = 0, sunFilterMs = 0;
+    bool sunDispatched = false;
 };
+
+std::string VulkanContext::SetRTShadows(std::string_view mode)
+{
+    if (mode == "status")
+    {
+        std::ostringstream out;
+        out << "RTShadows=" << (RTShadowsEnabled() ? "on" : "off") << " capability=" << _rtaoReason
+            << " terrainPatches=" << _rtTerrain << " foliageInstances=" << _rtFoliage;
+        if (_rtao)
+            out << " lastCompletedRays=" << _rtao->lastSunRays << " lastCompletedHits=" << _rtao->lastSunHits
+                << " totalRays=" << _rtao->totalSunRays
+                << " rayQueriesExecuted=" << (_rtao->totalSunRays ? "yes" : "no")
+                << " lastWorldDispatch=" << (_rtao->sunDispatched ? "yes" : "no")
+                << " lastTerrainHits=" << _rtao->lastTerrainHits << " lastAlphaHits=" << _rtao->lastAlphaHits;
+        if (_rtao && _rtao->timingSamples)
+            out << " lastGPUms(rays/compose)=" << _rtao->sunRayMs << '/' << _rtao->sunFilterMs;
+        else
+            out << " GPUtimings=unavailable";
+        if (!_rtao)
+            out << " totalRays=0 rayQueriesExecuted=no lastWorldDispatch=no";
+        out << "; shared " << SetRTAO("status")
+            << "; sunlight-only native opaque/cutout and terrain receivers, CSM fallback retained";
+        return out.str();
+    }
+    if (mode != "on" && mode != "off")
+        return "INVALID: triRTShadows on, off, status";
+    if (mode == "on" && !_rtaoAvailable)
+        return "UNSUPPORTED: " + _rtaoReason;
+    if (mode == "on")
+    {
+        VkPhysicalDeviceFeatures features{};
+        vkGetPhysicalDeviceFeatures(_physical, &features);
+        if (!features.independentBlend)
+            return "UNSUPPORTED: RT sunlight requires independent MRT blending";
+    }
+    if (_rtShadowsEnabled != (mode == "on"))
+    {
+        _rtShadowsEnabled = mode == "on";
+        _recreate = true;
+        ResetTemporalHistory();
+    }
+    if (!_rtShadowsEnabled)
+    {
+        _rtTerrain = _rtFoliage = 0;
+        if (_rtao)
+            _rtao->sunDispatched = false;
+        if (_rtao && !RTAOEnabled())
+        {
+            _rtao->scene.clear();
+            _rtao->instanceCount = _rtao->triangleCount = 0;
+        }
+    }
+    return _rtShadowsEnabled ? "OK: RT sunlight shadows enabled (next frame), CSM fallback retained"
+                             : "OK: RT sunlight shadows off";
+}
 
 void VulkanContext::InitRTAO()
 {
@@ -224,8 +291,8 @@ std::string VulkanContext::SetRTAO(std::string_view mode)
         }
         else
             out << " BLAS=0 TLAS=0 instances=0 completedPasses=0 rayQueriesExecuted=no";
-        out << "; static visual LOD0 within 80m, opaque and alpha-tested building walls; excludes terrain casters, "
-               "animation, damage, foliage cards, blends and proxies";
+        out << "; shared static LOD0 scene radius=" << (RTShadowsEnabled() ? 160 : 80)
+            << "m; AO mask excludes terrain/foliage; all rays exclude animation, damage, alpha blending and proxies";
         return out.str();
     }
     if (mode != "on" && mode != "off")
@@ -236,8 +303,11 @@ std::string VulkanContext::SetRTAO(std::string_view mode)
     ResetTemporalHistory();
     if (!_rtaoEnabled && _rtao)
     {
-        _rtao->scene.clear();
-        _rtao->instanceCount = 0;
+        if (!RTShadowsEnabled())
+        {
+            _rtao->scene.clear();
+            _rtao->instanceCount = _rtao->triangleCount = 0;
+        }
         _rtao->worldDispatched = false;
     }
     return _rtaoEnabled ? "OK: RTAO enabled; SSAO suspended; status reports completed GPU rays"
@@ -246,7 +316,7 @@ std::string VulkanContext::SetRTAO(std::string_view mode)
 
 void VulkanContext::SetRTAOScene(std::vector<RTAOInstance> instances, const std::array<float, 16>& camera)
 {
-    if (!RTAOEnabled() || !_rtao)
+    if (!RaySceneEnabled() || !_rtao)
         return;
     if (instances.size() > 1024)
         instances.resize(1024);
@@ -257,7 +327,7 @@ void VulkanContext::SetRTAOScene(std::vector<RTAOInstance> instances, const std:
 void VulkanContext::PrepareRTAOAlpha(const std::shared_ptr<TextureImage>& image, uint32_t width, uint32_t height,
                                      const void* rgba)
 {
-    if (!RTAOEnabled() || !image || image->rayAlpha.buffer)
+    if (!RaySceneEnabled() || !image || image->rayAlpha.buffer)
         return;
     Require(CreateHostVisibleBuffer(_physical, _device, VkDeviceSize(width) * height * 4,
                                     VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
@@ -281,13 +351,19 @@ void VulkanContext::RetireRTAO()
         rt.lastHits = counts[1];
         rt.totalRays += counts[0];
         rt.totalHits += counts[1];
+        rt.lastSunRays = counts[2];
+        rt.lastSunHits = counts[3];
+        rt.totalSunRays += counts[2];
+        rt.totalSunHits += counts[3];
+        rt.lastTerrainHits = counts[4];
+        rt.lastAlphaHits = counts[5];
         ++rt.completed;
         rt.blasBuilds += slot.built;
         rt.tlasBuilds += slot.tlasBuilt;
         if (slot.queries)
         {
-            uint64_t stamps[8]{};
-            if (vkGetQueryPoolResults(_device, slot.queries, 0, 8, sizeof(stamps), stamps, sizeof(uint64_t),
+            uint64_t stamps[12]{};
+            if (vkGetQueryPoolResults(_device, slot.queries, 0, 12, sizeof(stamps), stamps, sizeof(uint64_t),
                                       VK_QUERY_RESULT_64_BIT) == VK_SUCCESS)
             {
                 const uint64_t mask = _timestampBits == 64 ? UINT64_MAX : (uint64_t(1) << _timestampBits) - 1;
@@ -296,6 +372,8 @@ void VulkanContext::RetireRTAO()
                 rt.tlasMs = ms(2);
                 rt.rayMs = ms(4);
                 rt.filterMs = ms(6);
+                rt.sunRayMs = ms(8);
+                rt.sunFilterMs = ms(10);
                 ++rt.timingSamples;
                 uint64_t frame[2]{};
                 if (_frames[_frame].frameQueries &&
@@ -308,6 +386,12 @@ void VulkanContext::RetireRTAO()
                                  "built=%u/%u instances=%u triangles=%u rays=%u hits=%u\n",
                                  rt.blasMs, rt.tlasMs, rt.rayMs, rt.filterMs, rt.frameMs, slot.built, slot.tlasBuilt,
                                  rt.instanceCount, rt.triangleCount, rt.lastRays, rt.lastHits);
+                if (rt.completed % 120 == 0)
+                    std::fprintf(stderr,
+                                 "Vulkan RT sunlight GPU: rays=%.4f compose=%.4f frame=%.4f ms; rays=%u hits=%u "
+                                 "terrain=%u foliage=%u\n",
+                                 rt.sunRayMs, rt.sunFilterMs, rt.frameMs, rt.lastSunRays, rt.lastSunHits, _rtTerrain,
+                                 _rtFoliage);
             }
         }
         slot.pending = false;
@@ -317,7 +401,7 @@ void VulkanContext::RetireRTAO()
 
 void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
 {
-    if (!_frameOpen || !_worldActive || !RTAOEnabled() || !_rtao)
+    if (!_frameOpen || !_worldActive || !RaySceneEnabled() || !_rtao)
         return;
     auto& rt = *_rtao;
     auto& slot = rt.slots[_frame];
@@ -326,20 +410,22 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
     // No stale scene: empty coverage leaves lighting untouched and executes no rays.
     rt.instanceCount = rt.triangleCount = 0;
     rt.worldDispatched = false;
+    rt.sunDispatched = false;
     if (rt.scene.empty())
         return;
     const VkExtent2D half{(_worldExtent.width + 1) / 2, (_worldExtent.height + 1) / 2};
     if (!rt.layout)
     {
-        VkDescriptorSetLayoutBinding bindings[6]{};
+        VkDescriptorSetLayoutBinding bindings[7]{};
         const VkDescriptorType types[]{
             VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR,
             VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,          VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-            VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER};
-        for (uint32_t i = 0; i < 6; ++i)
+            VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+            VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER};
+        for (uint32_t i = 0; i < 7; ++i)
             bindings[i] = {i, types[i], 1, VK_SHADER_STAGE_COMPUTE_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, nullptr};
         VkDescriptorSetLayoutCreateInfo set{VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO};
-        set.bindingCount = 6;
+        set.bindingCount = 7;
         set.pBindings = bindings;
         Require(vkCreateDescriptorSetLayout(_device, &set, nullptr, &rt.setLayout), "create descriptors");
         const VkPushConstantRange push{VK_SHADER_STAGE_COMPUTE_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(Push)};
@@ -361,10 +447,12 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
             Require(vkCreateShaderModule(_device, &info, nullptr, &module), "create shader");
             return module;
         };
-        for (int i = 0; i < 2; ++i)
+        for (int i = 0; i < 4; ++i)
         {
-            auto module =
-                i ? shader(Cwrrtao_ms_comp, sizeof(Cwrrtao_ms_comp)) : shader(Cwrrtao_comp, sizeof(Cwrrtao_comp));
+            const uint32_t* codes[]{Cwrrtao_comp, Cwrrtao_ms_comp, Cwrrtshadow_comp, Cwrrtshadow_ms_comp};
+            const size_t sizes[]{sizeof(Cwrrtao_comp), sizeof(Cwrrtao_ms_comp), sizeof(Cwrrtshadow_comp),
+                                 sizeof(Cwrrtshadow_ms_comp)};
+            auto module = shader(codes[i], sizes[i]);
             VkComputePipelineCreateInfo info{VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO};
             info.layout = rt.layout;
             info.stage = {VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO};
@@ -383,10 +471,14 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
         shader.pCode = Cwrgamma_vert;
         VkShaderModule vertex = VK_NULL_HANDLE;
         Require(vkCreateShaderModule(_device, &shader, nullptr, &vertex), "create fullscreen vertex");
-        for (int i = 0; i < 2; ++i)
+        for (int i = 0; i < 4; ++i)
         {
-            shader.codeSize = i ? sizeof(Cwrrtao_filter_ms_frag) : sizeof(Cwrrtao_filter_frag);
-            shader.pCode = i ? Cwrrtao_filter_ms_frag : Cwrrtao_filter_frag;
+            const uint32_t* codes[]{Cwrrtao_filter_frag, Cwrrtao_filter_ms_frag, Cwrrtshadow_filter_frag,
+                                    Cwrrtshadow_filter_ms_frag};
+            const size_t sizes[]{sizeof(Cwrrtao_filter_frag), sizeof(Cwrrtao_filter_ms_frag),
+                                 sizeof(Cwrrtshadow_filter_frag), sizeof(Cwrrtshadow_filter_ms_frag)};
+            shader.codeSize = sizes[i];
+            shader.pCode = codes[i];
             VkShaderModule fragment = VK_NULL_HANDLE;
             Require(vkCreateShaderModule(_device, &shader, nullptr, &fragment), "create filter shader");
             VkPipelineShaderStageCreateInfo stages[2]{};
@@ -415,6 +507,12 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
             output.srcColorBlendFactor = VK_BLEND_FACTOR_ZERO;
             output.dstColorBlendFactor = VK_BLEND_FACTOR_SRC_COLOR;
             output.colorBlendOp = output.alphaBlendOp = VK_BLEND_OP_ADD;
+            if (i >= 2)
+            {
+                output.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
+                output.dstColorBlendFactor = VK_BLEND_FACTOR_ONE;
+                output.colorBlendOp = VK_BLEND_OP_REVERSE_SUBTRACT;
+            }
             output.srcAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
             output.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
             output.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT;
@@ -449,12 +547,12 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
     }
     if (!slot.pool)
     {
-        VkDescriptorPoolSize sizes[]{{VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 2},
-                                     {VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR, 1},
-                                     {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1},
-                                     {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 2}};
+        VkDescriptorPoolSize sizes[]{{VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 6},
+                                     {VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR, 2},
+                                     {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 2},
+                                     {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 4}};
         VkDescriptorPoolCreateInfo pool{VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO};
-        pool.maxSets = 1;
+        pool.maxSets = 2;
         pool.poolSizeCount = 4;
         pool.pPoolSizes = sizes;
         Require(vkCreateDescriptorPool(_device, &pool, nullptr, &slot.pool), "create descriptor pool");
@@ -463,9 +561,14 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
         allocate.descriptorSetCount = 1;
         allocate.pSetLayouts = &rt.setLayout;
         Require(vkAllocateDescriptorSets(_device, &allocate, &slot.set), "allocate descriptors");
+        Require(vkAllocateDescriptorSets(_device, &allocate, &slot.sunSet), "allocate sun descriptors");
         CreateAAImage(slot.ao, VK_FORMAT_R32G32B32A32_SFLOAT, VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
                       VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_ASPECT_COLOR_BIT, half);
         slot.extent = half;
+        if (_rtShadowTargets)
+            CreateAAImage(slot.sunlight, VK_FORMAT_R32G32B32A32_SFLOAT,
+                          VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_SAMPLE_COUNT_1_BIT,
+                          VK_IMAGE_ASPECT_COLOR_BIT, _worldExtent);
     }
     auto buffer = [&](VkDeviceSize size, VkBufferUsageFlags usage, bool host = false)
     {
@@ -474,15 +577,15 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
         return result;
     };
     if (!slot.counters)
-        slot.counters = buffer(8, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, true);
+        slot.counters = buffer(24, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, true);
     if (!slot.materials)
         slot.materials = buffer(1024 * sizeof(uint64_t), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, true);
-    std::memset(slot.counters->buffer.mapped, 0, 8);
+    std::memset(slot.counters->buffer.mapped, 0, 24);
     if (!slot.queries && _timestampBits && _profile.enabled)
     {
         VkQueryPoolCreateInfo info{VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO};
         info.queryType = VK_QUERY_TYPE_TIMESTAMP;
-        info.queryCount = 8;
+        info.queryCount = 12;
         Require(vkCreateQueryPool(_device, &info, nullptr, &slot.queries), "create GPU timestamps");
     }
     FlushScreenBatch();
@@ -490,7 +593,7 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
     _worldPassOpen = false;
     _commands = {};
     if (slot.queries)
-        vkCmdResetQueryPool(command, slot.queries, 0, 8);
+        vkCmdResetQueryPool(command, slot.queries, 0, 12);
     auto stamp = [&](uint32_t i)
     {
         if (slot.queries)
@@ -499,10 +602,11 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
     // Depth render-pass dependencies were originally fragment-only. Explicitly
     // include the compute reader; host uploads are made available at submission.
     VkMemoryBarrier depthBarrier{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
-    depthBarrier.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+    depthBarrier.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
     depthBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
     vkCmdPipelineBarrier(command,
-                         VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT,
+                         VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT |
+                             VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
                          VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, 1, &depthBarrier, 0, nullptr, 0, nullptr);
     auto allocateAS = [&](Acceleration& as, VkAccelerationStructureTypeKHR type, VkDeviceSize size)
     {
@@ -608,8 +712,8 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
         cached->used = rt.serial;
         VkAccelerationStructureInstanceKHR instance{};
         instance.transform = entry.transform;
-        instance.mask = 255;
-        instance.instanceCustomIndex = uint32_t(instances.size());
+        instance.mask = entry.mask;
+        instance.instanceCustomIndex = uint32_t(instances.size()) | (entry.kind << 20);
         instance.flags = VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR;
         instance.accelerationStructureReference = cached->address;
         static_cast<uint64_t*>(slot.materials->buffer.mapped)[instances.size()] =
@@ -665,84 +769,113 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
     // Cache only local working geometry. Frame slots keep evicted entries alive
     // until every TLAS that references them has completed and been replaced.
     std::erase_if(rt.cache, [&](const auto& item) { return !item || item->used + 120 < rt.serial; });
-    VkDescriptorImageInfo images[3]{
-        {_aaSampler, _aaTargets[_image].sampledDepth, VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL},
-        {VK_NULL_HANDLE, slot.ao.view, VK_IMAGE_LAYOUT_GENERAL},
-        {_aaSampler, slot.ao.view, VK_IMAGE_LAYOUT_GENERAL}};
-    VkDescriptorBufferInfo counter{slot.counters->buffer.buffer, 0, 8};
-    VkDescriptorBufferInfo materialBuffer{slot.materials->buffer.buffer, 0, VK_WHOLE_SIZE};
-    VkWriteDescriptorSetAccelerationStructureKHR as{VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR};
-    as.accelerationStructureCount = 1;
-    as.pAccelerationStructures = &slot.tlas->handle;
-    VkWriteDescriptorSet writes[6]{};
-    for (uint32_t i = 0; i < 6; ++i)
+    // Both effects consume this frame slot's single shared TLAS. Sun first,
+    // then optional AO; skipped timestamp intervals remain explicitly empty.
+    for (int effect : {1, 0})
     {
-        writes[i].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        writes[i].dstSet = slot.set;
-        writes[i].dstBinding = i;
-        writes[i].descriptorCount = 1;
+        const uint32_t rayStamp = effect ? 8 : 4, filterStamp = effect ? 10 : 6;
+        if (effect ? !(RTShadowsEnabled() && _rtShadowTargets) : !RTAOEnabled())
+        {
+            stamp(rayStamp);
+            stamp(rayStamp + 1);
+            stamp(filterStamp);
+            stamp(filterStamp + 1);
+            continue;
+        }
+        const auto set = effect ? slot.sunSet : slot.set;
+        auto& target = effect ? slot.sunlight : slot.ao;
+        const auto dispatchExtent = effect ? _worldExtent : half;
+        VkDescriptorImageInfo images[3]{
+            {_aaSampler, _aaTargets[_image].sampledDepth, VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL},
+            {VK_NULL_HANDLE, target.view, VK_IMAGE_LAYOUT_GENERAL},
+            {_aaSampler, target.view, VK_IMAGE_LAYOUT_GENERAL}};
+        VkDescriptorImageInfo direct{
+            _aaSampler, _rtShadowTargets ? _aaTargets[_image].sunlight.view : _aaTargets[_image].color.view,
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
+        VkDescriptorBufferInfo counter{slot.counters->buffer.buffer, 0, 24};
+        VkDescriptorBufferInfo materialBuffer{slot.materials->buffer.buffer, 0, VK_WHOLE_SIZE};
+        VkWriteDescriptorSetAccelerationStructureKHR as{
+            VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR};
+        as.accelerationStructureCount = 1;
+        as.pAccelerationStructures = &slot.tlas->handle;
+        VkWriteDescriptorSet writes[7]{};
+        for (uint32_t i = 0; i < 7; ++i)
+        {
+            writes[i].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            writes[i].dstSet = set;
+            writes[i].dstBinding = i;
+            writes[i].descriptorCount = 1;
+        }
+        writes[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        writes[0].pImageInfo = &images[0];
+        writes[1].descriptorType = VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
+        writes[1].pNext = &as;
+        writes[2].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+        writes[2].pImageInfo = &images[1];
+        writes[3].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        writes[3].pBufferInfo = &counter;
+        writes[4].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        writes[4].pImageInfo = &images[2];
+        writes[5].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        writes[5].pBufferInfo = &materialBuffer;
+        writes[6].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        writes[6].pImageInfo = &direct;
+        vkUpdateDescriptorSets(_device, 7, writes, 0, nullptr);
+        VkImageMemoryBarrier image{VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER};
+        image.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        image.newLayout = VK_IMAGE_LAYOUT_GENERAL;
+        image.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+        image.srcQueueFamilyIndex = image.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        image.image = target.image;
+        image.subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
+        vkCmdPipelineBarrier(command, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, 0,
+                             nullptr, 0, nullptr, 1, &image);
+        const int ms = (_worldSamples != VK_SAMPLE_COUNT_1_BIT) + effect * 2;
+        Push push;
+        push.camera = rt.camera;
+        push.projection = projection;
+        push.sun = _rtSun;
+        if (effect)
+            push.settings[3] = 50.f;
+        if (IsTemporal(_aaMode))
+        {
+            push.jitter[0] = _taaJitter[0];
+            push.jitter[1] = _taaJitter[1];
+        }
+        vkCmdBindPipeline(command, VK_PIPELINE_BIND_POINT_COMPUTE, rt.compute[ms]);
+        vkCmdBindDescriptorSets(command, VK_PIPELINE_BIND_POINT_COMPUTE, rt.layout, 0, 1, &set, 0, nullptr);
+        vkCmdPushConstants(command, rt.layout, VK_SHADER_STAGE_COMPUTE_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0,
+                           sizeof(push), &push);
+        stamp(rayStamp);
+        vkCmdDispatch(command, (dispatchExtent.width + 7) / 8, (dispatchExtent.height + 7) / 8, 1);
+        stamp(rayStamp + 1);
+        VkMemoryBarrier ready{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
+        ready.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+        ready.dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_HOST_READ_BIT;
+        vkCmdPipelineBarrier(command, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+                             VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_HOST_BIT, 0, 1, &ready, 0,
+                             nullptr, 0, nullptr);
+        stamp(filterStamp);
+        VkRenderPassBeginInfo pass{VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO};
+        pass.renderPass = _ssaoPass;
+        pass.framebuffer = _aaTargets[_image].ao;
+        pass.renderArea.extent = _worldExtent;
+        vkCmdBeginRenderPass(command, &pass, VK_SUBPASS_CONTENTS_INLINE);
+        vkCmdBindPipeline(command, VK_PIPELINE_BIND_POINT_GRAPHICS, rt.filter[ms]);
+        vkCmdBindDescriptorSets(command, VK_PIPELINE_BIND_POINT_GRAPHICS, rt.layout, 0, 1, &set, 0, nullptr);
+        const VkViewport viewport{0, 0, float(_worldExtent.width), float(_worldExtent.height), 0, 1};
+        const VkRect2D scissor{{0, 0}, _worldExtent};
+        vkCmdSetViewport(command, 0, 1, &viewport);
+        vkCmdSetScissor(command, 0, 1, &scissor);
+        vkCmdDraw(command, 3, 1, 0, 0);
+        vkCmdEndRenderPass(command);
+        stamp(filterStamp + 1);
+        if (effect)
+            rt.sunDispatched = true;
+        else
+            rt.worldDispatched = true;
     }
-    writes[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    writes[0].pImageInfo = &images[0];
-    writes[1].descriptorType = VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
-    writes[1].pNext = &as;
-    writes[2].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-    writes[2].pImageInfo = &images[1];
-    writes[3].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-    writes[3].pBufferInfo = &counter;
-    writes[4].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    writes[4].pImageInfo = &images[2];
-    writes[5].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-    writes[5].pBufferInfo = &materialBuffer;
-    vkUpdateDescriptorSets(_device, 6, writes, 0, nullptr);
-    VkImageMemoryBarrier image{VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER};
-    image.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    image.newLayout = VK_IMAGE_LAYOUT_GENERAL;
-    image.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
-    image.srcQueueFamilyIndex = image.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-    image.image = slot.ao.image;
-    image.subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
-    vkCmdPipelineBarrier(command, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, 0,
-                         nullptr, 0, nullptr, 1, &image);
-    const int ms = _worldSamples != VK_SAMPLE_COUNT_1_BIT;
-    Push push;
-    push.camera = rt.camera;
-    push.projection = projection;
-    if (IsTemporal(_aaMode))
-    {
-        push.jitter[0] = _taaJitter[0];
-        push.jitter[1] = _taaJitter[1];
-    }
-    vkCmdBindPipeline(command, VK_PIPELINE_BIND_POINT_COMPUTE, rt.compute[ms]);
-    vkCmdBindDescriptorSets(command, VK_PIPELINE_BIND_POINT_COMPUTE, rt.layout, 0, 1, &slot.set, 0, nullptr);
-    vkCmdPushConstants(command, rt.layout, VK_SHADER_STAGE_COMPUTE_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(push),
-                       &push);
-    stamp(4);
-    vkCmdDispatch(command, (half.width + 7) / 8, (half.height + 7) / 8, 1);
-    stamp(5);
-    VkMemoryBarrier ready{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
-    ready.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
-    ready.dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_HOST_READ_BIT;
-    vkCmdPipelineBarrier(command, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
-                         VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_HOST_BIT, 0, 1, &ready, 0, nullptr,
-                         0, nullptr);
-    stamp(6);
-    VkRenderPassBeginInfo pass{VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO};
-    pass.renderPass = _ssaoPass;
-    pass.framebuffer = _aaTargets[_image].ao;
-    pass.renderArea.extent = _worldExtent;
-    vkCmdBeginRenderPass(command, &pass, VK_SUBPASS_CONTENTS_INLINE);
-    vkCmdBindPipeline(command, VK_PIPELINE_BIND_POINT_GRAPHICS, rt.filter[ms]);
-    vkCmdBindDescriptorSets(command, VK_PIPELINE_BIND_POINT_GRAPHICS, rt.layout, 0, 1, &slot.set, 0, nullptr);
-    const VkViewport viewport{0, 0, float(_worldExtent.width), float(_worldExtent.height), 0, 1};
-    const VkRect2D scissor{{0, 0}, _worldExtent};
-    vkCmdSetViewport(command, 0, 1, &viewport);
-    vkCmdSetScissor(command, 0, 1, &scissor);
-    vkCmdDraw(command, 3, 1, 0, 0);
-    vkCmdEndRenderPass(command);
-    stamp(7);
     slot.pending = true;
-    rt.worldDispatched = true;
 }
 
 void VulkanContext::DestroyRTAOTargets() noexcept
@@ -755,6 +888,14 @@ void VulkanContext::DestroyRTAOTargets() noexcept
             vkDestroyDescriptorPool(_device, slot.pool, nullptr);
         slot.pool = VK_NULL_HANDLE;
         slot.set = VK_NULL_HANDLE;
+        slot.sunSet = VK_NULL_HANDLE;
+        if (slot.sunlight.view)
+            vkDestroyImageView(_device, slot.sunlight.view, nullptr);
+        if (slot.sunlight.image)
+            vkDestroyImage(_device, slot.sunlight.image, nullptr);
+        if (slot.sunlight.memory)
+            vkFreeMemory(_device, slot.sunlight.memory, nullptr);
+        slot.sunlight = {};
         if (slot.ao.view)
             vkDestroyImageView(_device, slot.ao.view, nullptr);
         if (slot.ao.image)

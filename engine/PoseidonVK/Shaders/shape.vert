@@ -10,6 +10,7 @@ layout(location = 2) out float fogVisibility;
 layout(location = 3) out vec3 specularColor;
 layout(location = 4) out vec3 shadowWorld;
 layout(location = 5) out vec4 previousClip;
+layout(location = 6) out vec4 directSun;
 layout(push_constant) uniform ShapeDraw { mat4 mvp; vec4 color; float alphaCutoff; float reserved; float detailEnabled; float shadow; } draw;
 void main() {
     gl_Position = draw.mvp * vec4(position, 1.0);
@@ -17,6 +18,7 @@ void main() {
     previousClip = lighting.temporal.z > 0.5 ? lighting.previousMVP * vec4(position, 1.0) : vec4(0);
     texCoord = uv;
     specularColor = vec3(0.0);
+    directSun = vec4(0);
     vec3 relativeWorld = (lighting.world * vec4(position, 1.0)).xyz;
     shadowWorld = relativeWorld;
     float distance = length(relativeWorld);
@@ -32,6 +34,7 @@ void main() {
     }
     vec3 worldNormal = normalize(lighting.normalMatrix * normal);
     float NdotL = max(0.0, dot(worldNormal, -lighting.sunDirection.xyz));
+    directSun = vec4((lighting.diffuse.rgb * NdotL + lighting.rtSun.yzw) * lighting.ambient.w, 1);
     vec3 color = lighting.emissive.rgb +
         (lighting.ambient.rgb + lighting.diffuse.rgb * NdotL) * lighting.ambient.w;
     // Engine-selected point/reflector lights, matching GL33's falloff/cone.

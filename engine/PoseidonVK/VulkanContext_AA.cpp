@@ -156,7 +156,8 @@ void VulkanContext::CreateAAResources(VkFormat format)
                  _renderScale, _worldExtent.width, _worldExtent.height, _worldSamples, _aaSampleSupport);
     // Even Off uses the completed-world boundary for tone mapping before UI.
 
-    VkAttachmentDescription attachments[3]{};
+    _rtShadowTargets = RTShadowsEnabled();
+    VkAttachmentDescription attachments[4]{};
     auto& color = attachments[0];
     color.format = format;
     color.samples = _worldSamples;
@@ -196,6 +197,23 @@ void VulkanContext::CreateAAResources(VkFormat format)
     }
     subpass.pDepthStencilAttachment = &depthRef;
     subpass.pResolveAttachments = _worldSamples != VK_SAMPLE_COUNT_1_BIT ? &resolveRef : nullptr;
+    const uint32_t baseAttachments = temporal || _worldSamples != VK_SAMPLE_COUNT_1_BIT ? 3 : 2;
+    const VkAttachmentReference sunRefs[]{
+        colorRef,
+        {temporal ? 2u : VK_ATTACHMENT_UNUSED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL},
+        {baseAttachments, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL}};
+    const VkAttachmentReference sunResolves[]{resolveRef,
+                                              {VK_ATTACHMENT_UNUSED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL},
+                                              {VK_ATTACHMENT_UNUSED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL}};
+    if (_rtShadowTargets)
+    {
+        attachments[baseAttachments] = color;
+        attachments[baseAttachments].format = VK_FORMAT_R16G16B16A16_SFLOAT;
+        subpass.colorAttachmentCount = 3;
+        subpass.pColorAttachments = sunRefs;
+        if (_worldSamples != VK_SAMPLE_COUNT_1_BIT)
+            subpass.pResolveAttachments = sunResolves;
+    }
     VkSubpassDependency dependencies[2]{};
     dependencies[0].srcSubpass = VK_SUBPASS_EXTERNAL;
     dependencies[0].dstSubpass = 0;
@@ -212,7 +230,7 @@ void VulkanContext::CreateAAResources(VkFormat format)
     dependencies[1].dstSubpass = VK_SUBPASS_EXTERNAL;
     dependencies[1].dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
     VkRenderPassCreateInfo pass{VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO};
-    pass.attachmentCount = temporal || _worldSamples != VK_SAMPLE_COUNT_1_BIT ? 3 : 2;
+    pass.attachmentCount = baseAttachments + (_rtShadowTargets ? 1 : 0);
     pass.pAttachments = attachments;
     pass.subpassCount = 1;
     pass.pSubpasses = &subpass;
@@ -226,6 +244,11 @@ void VulkanContext::CreateAAResources(VkFormat format)
     {
         attachments[2].loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
         attachments[2].initialLayout = attachments[2].finalLayout;
+    }
+    if (_rtShadowTargets)
+    {
+        attachments[baseAttachments].loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
+        attachments[baseAttachments].initialLayout = attachments[baseAttachments].finalLayout;
     }
     Require(vkCreateRenderPass(_device, &pass, nullptr, &_worldResume), "create world resume");
     // SMAA's discard in edge detection requires a zero-cleared intermediate.
@@ -299,7 +322,7 @@ void VulkanContext::CreateAAResources(VkFormat format)
         Require(vkCreateImageView(_device, &view, nullptr, &target.sampledDepth), "create sampled world depth");
         descriptor(target.color.view, false, target.colorSet);
         descriptor(target.sampledDepth, true, target.depthSet);
-        VkImageView views[]{target.color.view, target.depth.view, target.color.view};
+        VkImageView views[]{target.color.view, target.depth.view, target.color.view, VK_NULL_HANDLE};
         if (temporal)
         {
             CreateAAImage(target.motion, VK_FORMAT_R16G16B16A16_SFLOAT, colorUsage, VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_ASPECT_COLOR_BIT);
@@ -311,7 +334,13 @@ void VulkanContext::CreateAAResources(VkFormat format)
             CreateAAImage(target.multisample, format, colorUsage, _worldSamples, VK_IMAGE_ASPECT_COLOR_BIT);
             views[0] = target.multisample.view;
         }
-        framebuffer(_worldPass, views, temporal || _worldSamples != VK_SAMPLE_COUNT_1_BIT ? 3 : 2, target.scene);
+        if (_rtShadowTargets)
+        {
+            CreateAAImage(target.sunlight, VK_FORMAT_R16G16B16A16_SFLOAT, colorUsage, _worldSamples,
+                          VK_IMAGE_ASPECT_COLOR_BIT);
+            views[baseAttachments] = target.sunlight.view;
+        }
+        framebuffer(_worldPass, views, baseAttachments + (_rtShadowTargets ? 1 : 0), target.scene);
         framebuffer(_ssaoPass, &target.color.view, 1, target.ao);
         if ((_renderScale != 100 || _bloomEnabled || _shaftsEnabled) && (_aaMode == AAMode::FXAA || _aaMode == AAMode::SMAA))
         {
@@ -496,14 +525,16 @@ void VulkanContext::BeginAAWorld()
     if (IsFSR(_aaMode)) JitterFSR();
     _worldActive = _worldPassOpen = true;
     _commands = {};
-    VkClearValue clears[3]{};
+    VkClearValue clears[4]{};
     std::copy(_clearColor.begin(), _clearColor.end(), clears[0].color.float32);
     clears[1].depthStencil.depth = 1;
     VkRenderPassBeginInfo pass{VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO};
     pass.renderPass = _worldPass;
     pass.framebuffer = SceneFramebuffer();
     pass.renderArea.extent = _worldExtent;
-    pass.clearValueCount = IsTemporal(_aaMode) ? 3 : 2;
+    pass.clearValueCount = _rtShadowTargets ? (IsTemporal(_aaMode) || _worldSamples != VK_SAMPLE_COUNT_1_BIT ? 4 : 3)
+                           : IsTemporal(_aaMode) ? 3
+                                                 : 2;
     pass.pClearValues = clears;
     vkCmdBeginRenderPass(command, &pass, VK_SUBPASS_CONTENTS_INLINE);
 }
@@ -552,8 +583,10 @@ void VulkanContext::DrawAAPass(unsigned index, VkFramebuffer framebuffer, VkDesc
 
 void VulkanContext::FinishAAWorld(const std::array<float, 4>& projection)
 {
-    if (RTAOEnabled()) DrawRTAO(projection);
-    else DrawSSAO(projection);
+    if (RaySceneEnabled())
+        DrawRTAO(projection);
+    if (!RTAOEnabled())
+        DrawSSAO(projection);
     if (!_worldActive)
         return;
     FlushScreenBatch();
@@ -638,8 +671,8 @@ void VulkanContext::DestroyAAResources() noexcept
                 vkDestroyFramebuffer(_device, fb, nullptr);
         if (target.sampledDepth)
             vkDestroyImageView(_device, target.sampledDepth, nullptr);
-        for (auto* image :
-             {&target.color, &target.depth, &target.multisample, &target.edges, &target.weights, &target.filtered, &target.motion})
+        for (auto* image : {&target.color, &target.depth, &target.multisample, &target.edges, &target.weights,
+                            &target.filtered, &target.motion, &target.sunlight})
         {
             if (image->view)
                 vkDestroyImageView(_device, image->view, nullptr);

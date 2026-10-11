@@ -1,6 +1,227 @@
 # Vulkan backend development
 
+## First hardware ray-query sunlight shadows (2026-10-12)
+
+Built on public RTAO commit **c87d79b**, retaining the subsequent CPU-only
+transform-header fix **555f6d6**. Default **Off**, independently of RTAO/SSAO.
+Reuse the existing startup capability opt-in `CWR_VK_RTAO=1`, then:
+
+```sqf
+triRTShadows "on"
+triRTShadows "off"
+triRTShadows "status"
+```
+
+No new menu, persisted setting, SDK, NGX code or ray-tracing pipeline. The same
+Vulkan 1.2 ray-query/AS capability checks and initialization serve both effects;
+sunlight additionally requires independent attachment blending. Missing opt-in
+or capabilities returns `UNSUPPORTED` with the reason without changing AO/CSM.
+GL33 returns `UNSUPPORTED: RT shadows require Vulkan`. Ordinary non-opt-in Vulkan
+keeps its existing device path. Public changes contain no private NVIDIA files.
+
+### One scene, actual casters, bounded coverage
+
+The existing RTAO collector, immutable mesh buffers, world transforms, alpha
+data, BLAS cache and two frame-slot TLAS allocations are shared. There is no
+second AS system or scene database. RT sunlight expands the existing spatial
+bucket search to **160 m**, independent of screen visibility. Unchanged mesh
+subsets reuse BLAS; unchanged instance lists reuse TLAS. RTAO-only retains its
+80 m neighborhood. Additional sunlight-only geometry has a separate instance
+mask, so AO does not suddenly treat terrain or foliage cards as new occluders.
+
+- Buildings, rigid walls, signs, posts and eligible static object sections use
+  their existing visual LOD0 vertices and indices. Building cutouts keep real
+  windows/doorway alpha holes. Object animation, damage, proxies, surface fitting,
+  hidden objects and genuinely alpha-blended effects remain excluded as casters.
+- Static alpha-tested foliage/fence sections reuse the same UV/decoded texture
+  alpha candidate test already used for building windows. Explicit cutout
+  sections are eligible even when their texture contains intermediate alpha;
+  they are **tested**, not promoted to opaque rectangles. Base-mip point/bilinear
+  alpha and sampler wrapping/cutoff are preserved. Dynamic textures, wind/deforming
+  meshes and animated objects are not represented by invented rigid geometry.
+- Terrain uses bounded **16x16-cell patches** sampled from the landscape's actual
+  subdivided `SurfaceY` height lattice and matching cell diagonal. Immutable
+  native-layout buffers/BLAS are cached while the sampled heights are unchanged.
+  Moving outside a patch neighborhood prunes that CPU cache; landscape/grid
+  changes invalidate it. No whole-island heightfield is built. Collection reserves
+  room for terrain (800 object/subset instances, 1,024 total instance safeguard).
+  Rendering's distant/coarse terrain LOD can still differ from this height lattice.
+
+`status` reports shared live/cached BLAS, TLAS and instance/triangle counts,
+terrain patches, extended alpha instances, completed GPU ray/hit counts and
+terrain/alpha hit counters. `rayQueriesExecuted` means **completed GPU rays**, not
+extension initialization. It is a lifetime flag; last-completed samples may
+precede an Off toggle. `lastWorldDispatch` distinguishes dispatch from capability
+availability; a nighttime dispatch can finish with zero actual rays. The
+`foliageInstances` field counts additional alpha-tested subsets, including fences,
+not a botanical census. Off stops sunlight work but reusable AS allocations can
+remain cached. AO and sunlight have separate execution counters and selections.
+
+### Sunlight-only hybrid, not whole-frame darkening
+
+An opt-in FP16 world attachment records only direct sunlight and existing CSM
+visibility. Native material lighting separates directional diffuse, forced
+diffuse and sun specular from ambient, emissive and engine-selected local lights.
+Software terrain retains its actual CPU-calculated colorized sun contribution in
+a small clipping-interpolated sidecar. Unsupported software lighting has no such
+record and stays on the old shadow path. GL33 never requests this sidecar.
+
+The record accounts for the existing legacy-to-linear lighting conversion,
+night-eye response and fog transmittance. The already-added fog/atmosphere color
+is not multiplied. The completed-world pass subtracts **only lost sunlight** in
+linear HDR, preserves alpha, and precedes AO, TAA/FSR reconstruction, bloom and
+tone mapping. Translucent/effect draws conservatively invalidate the record;
+native overlays, sky, water and unclassified receivers do not receive the new
+post-lighting correction. No clamp to SDR is introduced.
+
+One deterministic hardware visibility ray is sent toward the engine's actual
+sun direction for each qualifying world-resolution pixel within 50 m. The depth
+reconstruction removes temporal projection jitter and estimates a surface normal
+from nearer depth derivatives. The origin uses a 2.5 cm normal offset plus 1.5 cm
+toward the sun, a 1 cm minimum distance and a **100 m** ray length. Coverage fades
+from 40 to 50 m. Night/daylight weighting follows the engine; fully night scenes
+execute zero rays. Full-resolution hard shadows require no stochastic denoiser
+or extra spatial blur; existing TAA/FSR motion reconstruction stabilizes edges.
+MSAA selects the sunlight sample matching the nearest depth sample.
+
+The combined visibility is **min(CSM, RT)**, not a product. Thus two shadow
+systems do not independently multiply/darken the sunlight. CSM retains distant
+and unsupported animated-caster coverage, and RT can add missing nearby detail.
+This conservative first hybrid **cannot remove an already over-broad CSM shadow**
+or promise fully ray-traced silhouettes. With RT enabled CSM is also applied to
+the separated sunlight for supported receivers, so ambient remains brighter
+inside some old CSM shadows. This is intentional, not loss of the sun shadow.
+At very low angles the existing CSM direction clamp can disagree with the actual
+sun direction used by rays; retaining both can leave a broad/doubled silhouette.
+
+### RTX 4060 Ti observations
+
+Windows, RTX 4060 Ti 8 GB, driver 617.14, isolated stock GOG data/profile and muted
+developer launches. Malden Infantry/Houdan comparisons used noon/clear weather,
+900 m visibility and camera `[7116,73,6085,-1,-0.1,-0.2]` (engine X/up/Z).
+The useful scene contained **49 BLAS, two TLAS, 262 instances, 28,955 instanced
+triangles**, including **nine terrain patches and 160 extended alpha subsets**.
+The native 1080p view traced about **1.190 million sunlight rays/frame**, with
+**186,265 hits**, including about **114,245 alpha-subset hits**. Sloped terrain
+views recorded actual terrain intersections (for example 1,982 hits near
+`[6800,129.035,6100]`), rather than merely reporting allocated terrain BLAS.
+RTAO retained approximately 36,273 hits in its original village comparison.
+
+CSM-only versus hybrid captures show sharp sign silhouettes, tighter building
+contacts and detailed leaf/fence gaps instead of solid-card shadows. Ground views
+looking away from the house retain shadows from off-screen geometry. The fixed
+ray is free of stochastic noise; hard silhouette aliasing without AA and residual
+coarse CSM edges remain visible. No gross acne, detached contact band or broad
+opaque foliage-card shadow was observed in sampled views. This is not a claim of
+complete caster coverage or flicker-free rendering in all content.
+
+The comparisons include CSM disabled with RT enabled; this is **local RT plus any
+remaining legacy projected-shadow fallback**, not a falsely labelled fully RT
+renderer. No reliable shadow coverage was disabled in the production hybrid.
+Noon, low sunlight, overcast/night commands, a 20-step moving-camera sequence,
+eight terrain neighborhoods, actual infantry movement and Jeep driver-camera
+movement were exercised. Night Off/hybrid captures matched with zero traced
+rays. TAA, FSR Native/Quality, MSAA2/4, SMAA, RTAO and SSAO, atmosphere, shafts,
+bloom, resize to 1280x720/1600x900 and minimize/restore were exercised. HDR10
+requested the existing SDR fallback: internal FP16 lighting was tested, but
+**physical HDR output was not available**.
+
+The main validation session closed normally after **30,634 submitted frames**,
+with **zero core/synchronization validation errors and warnings**. Earlier
+qualification closed after 16,699 frames with the same zero findings. Preexisting
+loader messages about missing external overlay manifests are not counted as
+engine validation success/failure. The final Everon Heavy Metal run traversed
+four neighborhoods, including the forest at X/Z `[6300,5500]`: **18 BLAS, 127
+instances, 64,760 triangles, nine terrain patches and 76 alpha subsets** in that
+view. About 501,173 hits from 1.271 million rays included 486,737 alpha-subset
+hits; the forest floor showed resolved foliage gaps/contact shadows. It repeated
+MSAA4 and FSR Quality with RTAO plus actual overcast skies, then closed after
+**6,455 frames with zero core/sync findings**. These are sampled visual checks,
+not a fixed-clock forest benchmark.
+
+Vulkan-without-FSR executed both effects with TAA and closed after **1,599 frames**
+with zero validation findings. The ordinary no-opt-in Vulkan 1.0 run rejected RT
+enablement, kept zero AS/rays, and closed after **3,277 frames**, also zero
+findings. GL33-only menu startup returned the Vulkan-required reply and closed
+normally. All smoke sessions use the isolated developer profile, not Steam-route
+qualification.
+
+### GPU measurements
+
+Validation disabled, fixed Houdan view above, VSync off, AO/AA off for the first
+three modes, atmosphere/shafts/bloom disabled. Each window warms three seconds,
+then collects eight seconds; baseline modes repeat in reverse order. GPU clocks
+are automatic, so whole-frame differences are not fixed-clock incremental cost.
+Ray/composition and shared AS build costs are directly timestamped, not inferred
+from FPS. Complete-frame values cover the entire submitted GPU command workload,
+not CPU collection/recording, presentation or display pacing.
+
+| Output | Mode | Sun ray ms | Sun composition ms | Complete GPU frame ms |
+| --- | --- | --- | --- | --- |
+| 1920x1080 | CSM only | n/a | n/a | 1.677 |
+| 1920x1080 | Local RT + legacy fallback | 0.464 | 0.083 | 1.833 |
+| 1920x1080 | Hybrid | 0.352 | 0.060 | 1.869 |
+| 1920x1080 | Hybrid + RTAO + TAA | 0.295 | 0.042 | 2.091 |
+| 1920x1080 | Hybrid + RTAO + FSR Native | 0.293 | 0.038 | 2.533 |
+| 1920x1080 | Hybrid + RTAO + FSR Quality (1280x720 input) | 0.154 | 0.025 | 1.969 |
+| 2560x1440 | CSM only | n/a | n/a | 1.729 |
+| 2560x1440 | Local RT + legacy fallback | 0.515 | 0.085 | 1.917 |
+| 2560x1440 | Hybrid | 0.496 | 0.075 | 2.103 |
+| 2560x1440 | Hybrid + RTAO + TAA | 0.497 | 0.074 | 3.077 |
+| 2560x1440 | Hybrid + RTAO + FSR Native | 0.498 | 0.073 | 4.302 |
+| 2560x1440 | Hybrid + RTAO + FSR Quality (1706x960 input) | 0.238 | 0.030 | 2.543 |
+
+The 1080p cold build of 49 BLAS cost **0.545 ms GPU**; initial TLAS builds cost
+**0.215 / 0.231 ms** for the two frame slots. Frozen scenes executed no further
+build commands (empty intervals below 0.001 ms). Changed membership/transforms
+rebuild the shared slot TLAS; there is no deforming geometry refit. Performance
+evidence is kept separately from validation runs.
+The 1440p cold BLAS batch cost **0.513 ms**, with **0.157 / 0.165 ms** initial
+TLAS builds. Later frozen scenes again had zero builds. Observed graphics clocks
+ranged from 1,020 to 2,850 MHz at 1080p and 1,620 to 2,850 MHz at 1440p; this
+explains why resolution and whole-frame timings do not scale proportionally.
+The "composition" column is a fullscreen sunlight subtraction, not a hidden
+multi-ray filter. RTAO costs are additional in the AO-enabled rows and included
+in their complete frame values.
+
+### Remaining limits and evidence
+
+The fixed 50 m receiver / 100 m ray reach cannot replace island-scale CSM. Dense
+areas can hit the instance safeguard, with CSM still providing fallback. Proxy
+doors, destructed geometry, infantry/vehicles and animated vegetation are not RT
+casters. They retain existing raster shadows; moving cameras do not imply those
+objects have BLAS. Alpha is sampled at the decoded base mip rather than a full
+ray-differential material system. Depth normals and centimetre offsets can miss
+thin contacts, and actual terrain samples can disagree with coarse raster LOD.
+Transparent foregrounds deliberately suppress the correction instead of
+shadowing the surface behind them through an unreliable depth match.
+
+Local raw images, actions, launch hashes, validation logs and timestamp samples
+are under ignored `build/shadow-live/rtshadow-*` in the developer checkout. No
+proprietary game data, captures or external SDK binaries are committed.
+The `rtshadow-perf1080` and `rtshadow-perf1440` directories contain
+`rtshadow-perf.json` with individual samples and clock readings. Their measured
+executable SHA256 values respectively are
+`54E37B03BA93D34DAEBAE6DD70773F428FD7495F7A2F98B153C9A481B91E317F` and
+`F34407E433613BEDC584FCCFC2B580183F736871181FD3E163EBEB0A7E0ED8B3`.
+Between those builds only formatting, status wording, preserving the shared
+scene on AO-disable, and additional assertions changed; GPU shaders are identical.
+
+Vulkan+FSR, Vulkan without FSR and GL33-only RelWithDebInfo builds pass. The focused filter
+`[vulkan-shape],[vulkan],[vulkan-aa],[ShadowMath],[render-flags],[render-descriptor]`
+passes **989 assertions / 75 cases** with Vulkan and **985 / 74** without Vulkan.
+Policy/lifetime checks pass **382 guards**, including sunlight default-Off,
+independence, rejected unsupported enablement and no false ray-execution status.
+The isolated no-PCH GL33 compiler check rejects a deliberately forced Vulkan
+include, then successfully compiles the CPU shape tests with that same rejecting
+header sentinel in place. All four AO/sun single/MSAA ray-query SPIR-V variants
+validate for Vulkan 1.2. No unsupported physical GPU was available; rejection
+tests do not constitute hardware qualification on non-RTX devices.
+
 ## First hardware ray-query ambient occlusion (2026-10-11)
+
+The following records the original AO milestone. Its AO geometry mask remains
+unchanged; the sunlight section above describes the later shared-scene extension.
 
 Based on public `main` **2bd25ff**. RTAO defaults **Off**. Opt into the Vulkan
 device capabilities at process startup with `CWR_VK_RTAO=1`, then use:

@@ -169,7 +169,8 @@ void VulkanContext::DrawSSAO(const std::array<float, 4>& projection)
     const double start = _profile.enabled ? ProfileClock() : 0;
     auto& frame = _frames[_frame];
     const auto command = frame.command;
-    vkCmdEndRenderPass(command);
+    if (!_worldActive || _worldPassOpen)
+        vkCmdEndRenderPass(command);
     if (_worldActive) _worldPassOpen = false;
     if (frame.ssaoQueries)
     {

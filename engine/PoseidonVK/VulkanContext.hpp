@@ -107,6 +107,8 @@ struct RTAOInstance
     std::vector<RTAORange> ranges;
     VkTransformMatrixKHR transform{}; // existing model-to-world, row major
     bool index16 = true;
+    uint32_t mask = 1; // bit 1: original AO objects; bit 2: shadow-only foliage/terrain
+    uint32_t kind = 0; // GPU hit accounting: 0 object, 1 alpha extension, 2 terrain
 };
 // Backend-private Vulkan ownership. SDL owns the window; this owns its surface.
 struct ShadowAlphaBatch
@@ -164,6 +166,15 @@ class VulkanContext
     void DrawSSAO(const std::array<float, 4>& projection);
     std::string SetRTAO(std::string_view mode);
     bool RTAOEnabled() const { return _rtaoEnabled && _rtaoAvailable; }
+    std::string SetRTShadows(std::string_view mode);
+    bool RTShadowsEnabled() const { return _rtShadowsEnabled && _rtaoAvailable; }
+    bool RaySceneEnabled() const { return RTAOEnabled() || RTShadowsEnabled(); }
+    void SetRTSun(const std::array<float, 4>& sun) { _rtSun = sun; }
+    void SetRTCoverage(uint32_t terrain, uint32_t foliage)
+    {
+        _rtTerrain = terrain;
+        _rtFoliage = foliage;
+    }
     void SetRTAOScene(std::vector<RTAOInstance> instances, const std::array<float, 16>& camera);
     void PrepareRTAOAlpha(const std::shared_ptr<TextureImage>& image, uint32_t width, uint32_t height, const void* rgba);
     std::string SetAntiAliasing(std::string_view mode);
@@ -202,6 +213,9 @@ class VulkanContext
   private:
     struct RTAOState;
     std::shared_ptr<RTAOState> _rtao;
+    bool _rtShadowsEnabled = false, _rtShadowTargets = false;
+    std::array<float, 4> _rtSun{};
+    uint32_t _rtTerrain = 0, _rtFoliage = 0;
     bool _rtaoRequested = false, _rtaoAvailable = false, _rtaoEnabled = false;
     std::string _rtaoReason = "restart with CWR_VK_RTAO=1 to opt into Vulkan ray-query capabilities";
     void InitRTAO();
@@ -362,7 +376,7 @@ class VulkanContext
     };
     struct AATarget
     {
-        DepthAttachment color, depth, multisample, edges, weights, filtered, motion;
+        DepthAttachment color, depth, multisample, edges, weights, filtered, motion, sunlight;
         VkDescriptorSet motionSet = VK_NULL_HANDLE;
         VkImageView sampledDepth = VK_NULL_HANDLE;
         VkDescriptorSet colorSet = VK_NULL_HANDLE, depthSet = VK_NULL_HANDLE;

@@ -94,10 +94,13 @@ TEST_CASE("HDR software lighting survives clipping and clears on reuse", "[Graph
     TLVertexTable table;
     table.AddPos(); table.AddPos(); table.AddPos();
     table.hdrColor = {{{4,2,.5f,1}},{{8,4,1,1}}};
+    table.directSun = {{{2, 1, .25f, 1}}, {{4, 2, .5f, 1}}};
     table.InterpolateHDR(2,0,1,.25f);
     REQUIRE(table.hdrColor[2] == std::array<float,4>{5,2.5f,.625f,1});
+    REQUIRE(table.directSun[2] == std::array<float, 4>{2.5f, 1.25f, .3125f, 1});
     table.ReleaseTables();
     REQUIRE(table.hdrColor.empty());
+    REQUIRE(table.directSun.empty());
 }
 
 TEST_CASE("Vulkan sky interpolation matches legacy packed RGB555 uploads", "[Graphics][vulkan-shape]")
@@ -279,6 +282,12 @@ TEST_CASE("Vulkan native normals use inverse transpose and materials use the eng
     REQUIRE(lighting.ambient[2] == Catch::Approx(sun.Ambient().B() * 0.5f + 0.18f));
     REQUIRE(lighting.emissive[0] == Catch::Approx(0.1f));
     REQUIRE(lighting.ambient[3] == 1);
+    REQUIRE(lighting.rtSun[0] == 0); // Material setup never enables the opt-in effect.
+    REQUIRE(lighting.rtSun[1] == Catch::Approx(0.02f));
+    REQUIRE(lighting.rtSun[2] == Catch::Approx(0.08f));
+    REQUIRE(lighting.rtSun[3] == Catch::Approx(0.18f));
+    // Forced diffuse belongs to sunlight, but ambient/emissive remain separate.
+    REQUIRE(lighting.ambient[2] - lighting.rtSun[3] == Catch::Approx(sun.Ambient().B() * 0.5f));
     vk::ShapeMaterial(lighting, material, sun, false);
     REQUIRE(lighting.ambient[3] == 0);
     REQUIRE(lighting.emissive[0] == Catch::Approx(0.1f));
@@ -287,7 +296,8 @@ TEST_CASE("Vulkan native normals use inverse transpose and materials use the eng
     REQUIRE(offsetof(vk::ShapeLighting, previousMVP) == 1104);
     REQUIRE(offsetof(vk::ShapeLighting, temporal) == 1168);
     REQUIRE(offsetof(vk::ShapeLighting, outputColor) == 1200);
-    REQUIRE(sizeof(vk::ShapeLighting) == 1248);
+    REQUIRE(sizeof(vk::ShapeLighting) == 1264);
+    REQUIRE(offsetof(vk::ShapeLighting, rtSun) == 1248);
     REQUIRE(offsetof(vk::ShapeLighting, atmosphereSun) == 1216);
     REQUIRE(offsetof(vk::ShapeLighting, atmosphereColor) == 1232);
 }

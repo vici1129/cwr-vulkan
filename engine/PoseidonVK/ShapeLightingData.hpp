@@ -29,5 +29,6 @@ struct alignas(16) ShapeLighting
     std::array<float, 4> temporalExtent{}; // inverse width/height
     std::array<float, 4> outputColor{};
     std::array<float, 4> atmosphereSun{}, atmosphereColor{};
+    std::array<float, 4> rtSun{}; // direct-only sunlight capture, no GL33 dependency
 };
 } // namespace Poseidon::vk

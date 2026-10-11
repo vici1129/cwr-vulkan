@@ -12,6 +12,7 @@ struct ScreenVertex
     float position[4], uv[2], color[4];
     float fog = 1;
     float previousClip[4]{};
+    float directSun[4]{};
 };
 struct ScreenState
 {

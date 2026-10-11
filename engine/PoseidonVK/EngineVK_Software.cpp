@@ -87,6 +87,8 @@ void EngineVK::SubmitSoftware(const std::vector<uint32_t>& indices)
         if (index < _softwareMesh->previousClip.size())
             std::copy(_softwareMesh->previousClip[index].begin(), _softwareMesh->previousClip[index].end(),
                       _softwareVertices[index].previousClip);
+        if (index < _softwareMesh->directSun.size())
+            std::copy_n(_softwareMesh->directSun[index].begin(), 4, _softwareVertices[index].directSun);
         // TL already contains the scene Fog8 visibility in specular.a. Alpha
         // fog is already in color.a; it must not also get an RGB fog mix.
         _softwareVertices[index].fog =
@@ -115,9 +117,9 @@ void EngineVK::SubmitSoftware(const std::vector<uint32_t>& indices)
     receiver.fogColor = {_fogColor.R(), _fogColor.G(), _fogColor.B(), 1};
     receiver.eyeCoef = _vk.EyeCoef();
     const bool atmosphere = _shadowWorld && _vk.AtmosphereEnabled();
-    if (_shadowWorld && (_shadowTuning.enabled || atmosphere) &&
-        !(_softwareFlags & (DisableSun | NoZBuf | NoDropdown | IsLight | IsShadow | IsAlphaFog)) &&
-        GScene && GScene->GetCamera())
+    if (_shadowWorld && (_shadowTuning.enabled || atmosphere || _vk.RTShadowsEnabled()) &&
+        !(_softwareFlags & (DisableSun | NoZBuf | NoDropdown | IsLight | IsShadow | IsAlphaFog)) && GScene &&
+        GScene->GetCamera())
     {
         const auto* camera = GScene->GetCamera();
         Matrix4 rotation = camera->Transform();
@@ -126,12 +128,15 @@ void EngineVK::SubmitSoftware(const std::vector<uint32_t>& indices)
         const auto& projection = camera->ProjectionNormal();
         receiver.shadowReceiver = {_shadowTuning.enabled ? 1.f : 0.f, projection(0, 0), projection(1, 1), 0};
         receiver.atmosphereSun[3] = atmosphere ? 1.f : 0.f;
+        receiver.rtSun[0] = _vk.RTShadowsEnabled() && !_softwareMesh->directSun.empty() ? 1.f : 0.f;
     }
-    _vk.DrawMesh(mesh.buffers, 0, indices.size(), false, {}, {1, 1, 1, 1}, image,
-                 vk::ShapeSampler(render::SplitLegacy(_softwareFlags)), cutoff, blend, true,
-                 (_softwareFlags & NoZBuf) == 0, nullptr, {}, 1, {0, -1, 0}, mesh.vertexOffset, mesh.indexOffset,
-                 (_softwareFlags & NoZWrite) == 0, receiver.shadowReceiver[0] || receiver.atmosphereSun[3] || _temporalTerrain ? &receiver : nullptr,
-                 shadow, !shadow && (_softwareFlags & IsLight) != 0);
+    _vk.DrawMesh(
+        mesh.buffers, 0, indices.size(), false, {}, {1, 1, 1, 1}, image,
+        vk::ShapeSampler(render::SplitLegacy(_softwareFlags)), cutoff, blend, true, (_softwareFlags & NoZBuf) == 0,
+        nullptr, {}, 1, {0, -1, 0}, mesh.vertexOffset, mesh.indexOffset, (_softwareFlags & NoZWrite) == 0,
+        receiver.shadowReceiver[0] || receiver.atmosphereSun[3] || receiver.rtSun[0] || _temporalTerrain ? &receiver
+                                                                                                         : nullptr,
+        shadow, !shadow && (_softwareFlags & IsLight) != 0);
 }
 void EngineVK::EndMesh(TLVertexTable& mesh)
 {

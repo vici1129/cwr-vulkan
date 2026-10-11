@@ -5,6 +5,9 @@
 #include <stdexcept>
 #include <PoseidonVK/Shaders/shape.vert.hpp>
 #include <PoseidonVK/Shaders/shape.frag.hpp>
+#include <PoseidonVK/Shaders/shape_sun.frag.hpp>
+#include <PoseidonVK/Shaders/shape_sun_temporal.frag.hpp>
+#include <PoseidonVK/Shaders/shadow_sun.frag.hpp>
 #include <PoseidonVK/Shaders/shape_temporal.frag.hpp>
 #include <PoseidonVK/Shaders/screen.vert.hpp>
 #include <PoseidonVK/Shaders/shadow.frag.hpp>
@@ -178,6 +181,16 @@ void VulkanContext::CreateShapePipeline(bool translucent, bool screen, bool dept
         Require(vkCreateShaderModule(_device, &shader, nullptr, &vertex), "create vertex shader");
         shader.codeSize = shadow ? sizeof(Cwrshadow_frag) : TemporalEnabled() ? sizeof(Cwrshape_temporal_frag) : sizeof(Cwrshape_frag);
         shader.pCode = shadow ? Cwrshadow_frag : TemporalEnabled() ? Cwrshape_temporal_frag : Cwrshape_frag;
+        if (_worldActive && _rtShadowTargets && !shadow)
+        {
+            shader.pCode = TemporalEnabled() ? Cwrshape_sun_temporal_frag : Cwrshape_sun_frag;
+            shader.codeSize = TemporalEnabled() ? sizeof(Cwrshape_sun_temporal_frag) : sizeof(Cwrshape_sun_frag);
+        }
+        if (_worldActive && _rtShadowTargets && shadow)
+        {
+            shader.pCode = Cwrshadow_sun_frag;
+            shader.codeSize = sizeof(Cwrshadow_sun_frag);
+        }
         Require(vkCreateShaderModule(_device, &shader, nullptr, &fragment), "create fragment shader");
         VkPipelineShaderStageCreateInfo stages[2]{};
         stages[0].sType = stages[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -197,11 +210,12 @@ void VulkanContext::CreateShapePipeline(bool translucent, bool screen, bool dept
             {1, 0, VK_FORMAT_R32G32_SFLOAT, 4 * sizeof(float)},
             {2, 0, VK_FORMAT_R32G32B32A32_SFLOAT, 6 * sizeof(float)},
             {3, 0, VK_FORMAT_R32_SFLOAT, 10 * sizeof(float)},
-            {4, 0, VK_FORMAT_R32G32B32A32_SFLOAT, 11 * sizeof(float)}};
+            {4, 0, VK_FORMAT_R32G32B32A32_SFLOAT, 11 * sizeof(float)},
+            {5, 0, VK_FORMAT_R32G32B32A32_SFLOAT, 15 * sizeof(float)}};
         VkPipelineVertexInputStateCreateInfo input{VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO};
         input.vertexBindingDescriptionCount = 1;
         input.pVertexBindingDescriptions = screen ? &screenBinding : &binding;
-        input.vertexAttributeDescriptionCount = screen ? 5 : 3;
+        input.vertexAttributeDescriptionCount = screen ? 6 : 3;
         input.pVertexAttributeDescriptions = screen ? screenAttributes : attributes;
         VkPipelineInputAssemblyStateCreateInfo assembly{VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO};
         assembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
@@ -243,12 +257,22 @@ void VulkanContext::CreateShapePipeline(bool translucent, bool screen, bool dept
         VkPipelineColorBlendStateCreateInfo blend{VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO};
         blend.attachmentCount = 1;
         blend.pAttachments = &attachment;
-        VkPipelineColorBlendAttachmentState temporalAttachments[]{attachment, {}};
+        VkPipelineColorBlendAttachmentState temporalAttachments[]{attachment, {}, {}};
         if (TemporalEnabled())
         {
             // Projected shadows only modulate color; keep the receiving surface's motion.
             temporalAttachments[1].colorWriteMask = shadow ? 0 : 15;
             blend.attachmentCount = 2;
+            blend.pAttachments = temporalAttachments;
+        }
+        if (_worldActive && _rtShadowTargets)
+        {
+            // Unsupported translucent draws invalidate the sunlight record;
+            // projected legacy shadows retain the conservative CSM-only path.
+            if (shadow)
+                temporalAttachments[2] = attachment;
+            temporalAttachments[2].colorWriteMask = shadow ? 7 : 15;
+            blend.attachmentCount = 3;
             blend.pAttachments = temporalAttachments;
         }
         const VkDynamicState states[] = {VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR};
@@ -344,6 +368,8 @@ void VulkanContext::DrawMesh(const std::shared_ptr<MeshBuffers>& mesh, uint32_t 
     if (lighting)
     {
         auto receiver = *lighting;
+        if (!_worldActive || !_rtShadowTargets || shadow || blend || !depthTest || !depthWrite)
+            receiver.rtSun[0] = 0;
         if (_worldActive && _atmosphereEnabled && !shadow && depthTest &&
             (screen ? receiver.atmosphereSun[3] > 0 : receiver.fogParams[2] > .5f))
         {

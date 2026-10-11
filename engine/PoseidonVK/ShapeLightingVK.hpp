@@ -22,6 +22,10 @@ inline void ShapeMaterial(ShapeLighting& out, const TLMaterial& material, const 
     const auto diffuse = sun.Diffuse() * material.diffuse;
     out.ambient = {ambient.R(), ambient.G(), ambient.B(), enabled ? 1.f : 0.f};
     out.diffuse = {diffuse.R(), diffuse.G(), diffuse.B(), 0};
+    const auto forced = sun.Diffuse() * material.forcedDiffuse;
+    out.rtSun[1] = forced.R();
+    out.rtSun[2] = forced.G();
+    out.rtSun[3] = forced.B();
     out.emissive = {material.emmisive.R(), material.emmisive.G(), material.emmisive.B(), 0};
     const auto specular = sun.Diffuse() * material.specular;
     out.specular = {specular.R(), specular.G(), specular.B(), float(material.specularPower)};

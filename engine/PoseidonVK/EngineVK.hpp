@@ -48,6 +48,16 @@ class EngineVK final : public Engine
     bool SetSSAO(bool enabled, float strength, float radius, float bias, float fade) override;
     RString SetRTAO(RString mode) override { return _vk.SetRTAO(static_cast<const char*>(mode)).c_str(); }
     void CollectRTAOScene();
+    struct RTTerrainPatch
+    {
+        std::vector<float> heights;
+        std::shared_ptr<vk::MeshBuffers> mesh;
+    };
+    std::map<std::pair<int, int>, RTTerrainPatch> _rtTerrainPatches;
+    const void* _rtLandscape = nullptr;
+    float _rtTerrainGrid = 0;
+    RString SetRTShadows(RString mode) override { return _vk.SetRTShadows(static_cast<const char*>(mode)).c_str(); }
+    bool SeparateSunlight() const override { return _vk.RTShadowsEnabled(); }
     bool InitDrawDone() override { return _vk.FrameOpen(); }
     bool IsAbleToDraw() override { return !_failed && !_paused && IsOpen(); }
     void Clear(bool clearZ = true, bool clear = true, PackedColor color = PackedColor(0)) override;

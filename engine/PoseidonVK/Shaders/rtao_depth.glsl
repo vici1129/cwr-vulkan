@@ -17,6 +17,7 @@ layout(push_constant) uniform Parameters {
     vec4 projection;
     vec4 settings; // radius, bias, strength, fade distance
     vec4 jitter;
+    vec4 sun;
 } ao;
 float viewZ(float d) { return ao.projection.w/(d-ao.projection.z); }
 vec3 positionAt(ivec2 p) {

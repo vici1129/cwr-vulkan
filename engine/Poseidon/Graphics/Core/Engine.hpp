@@ -393,6 +393,8 @@ class Engine : public IGraphicsEngine
     virtual bool SetWorldRenderScale(int) { return false; }
     virtual bool SetSSAO(bool, float, float, float, float) { return false; }
     virtual RString SetRTAO(RString) { return "UNSUPPORTED: RTAO requires Vulkan"; }
+    virtual RString SetRTShadows(RString) { return "UNSUPPORTED: RT shadows require Vulkan"; }
+    virtual bool SeparateSunlight() const { return false; }
     virtual void NextFrame();                             // swap frames - get ready for next frame
     virtual bool InitDrawDone() { return true; }
     void Pause() override = 0;   // stop and prepare everything for GDI

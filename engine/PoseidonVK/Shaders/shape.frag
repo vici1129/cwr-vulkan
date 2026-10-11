@@ -10,6 +10,10 @@ layout(location = 2) in float fogVisibility;
 layout(location = 3) in vec3 specularColor;
 layout(location = 4) in vec3 shadowWorld;
 layout(location = 5) in vec4 previousClip;
+layout(location = 6) in vec4 directSun;
+#ifdef RT_SUN
+layout(location = 2) out vec4 outSun;
+#endif
 #ifdef TEMPORAL
 layout(location = 1) out vec4 motion;
 #define WORLD_TEXTURE(s, uv) texture(s, uv, lighting.temporalExtent.z)
@@ -19,6 +23,11 @@ layout(location = 1) out vec4 motion;
 layout(set = 0, binding = 0) uniform sampler2D diffuseTexture;
 layout(set = 1, binding = 0) uniform sampler2D detailTexture;
 layout(push_constant) uniform ShapeDraw { mat4 mvp; vec4 color; float alphaCutoff; float reserved; float detailEnabled; vec4 lightDirection; } draw;
+vec3 nightResponse(vec3 color) {
+    vec3 perceptual=toSRGB(color);
+    float luminance=max(dot(perceptual,lighting.eyeCoef.rgb),0.0);
+    return toLinear(mix(vec3(luminance),perceptual,clamp(luminance+lighting.eyeCoef.a,0.0,1.0)));
+}
 void main() {
     vec4 texel = WORLD_TEXTURE(diffuseTexture, texCoord);
     outColor = vec4(texel.rgb * legacyLightToLinear(draw.color.rgb * vertexColor.rgb),
@@ -37,13 +46,24 @@ void main() {
         outColor.a = draw.alphaCutoff > 0.0 ?
             clamp((outColor.a-draw.alphaCutoff)/max(fwidth(outColor.a),1.0/255.0)+0.5,0.0,1.0) : 1.0;
     } else if (outColor.a < draw.alphaCutoff) discard;
-    outColor.rgb *= sunlightVisibility(shadowWorld, fogVisibility);
+    vec3 base = outColor.rgb;
+    float csm = sunlightVisibility(shadowWorld, fogVisibility);
+    bool separate = lighting.rtSun.x > .5 && directSun.a > .99 && draw.detailEnabled < 1.5;
+    if (separate) {
+        // Derive the sunlight-only difference in linear HDR, not by multiplying
+        // ambient/emissive/local lighting or already-composited fog.
+        base = texel.rgb * legacyLightToLinear(draw.color.rgb * max(vertexColor.rgb-directSun.rgb,vec3(0)));
+        if(draw.detailEnabled>.5) base *= legacyLightToLinear(vec3(WORLD_TEXTURE(detailTexture,texCoord*32).a*2));
+        csm = sunlightVisibility(shadowWorld, 1.0);
+        outColor.rgb = base + max(outColor.rgb-base,vec3(0))*csm;
+    } else outColor.rgb *= csm;
     // Keep the night-eye response in its calibrated perceptual domain.
-    vec3 perceptual = toSRGB(outColor.rgb);
-    float luminance = max(dot(perceptual, lighting.eyeCoef.rgb), 0.0);
-    float nightBlend = clamp(luminance + lighting.eyeCoef.a, 0.0, 1.0);
-    outColor.rgb = toLinear(mix(vec3(luminance), perceptual, nightBlend));
+    outColor.rgb = nightResponse(outColor.rgb);
     float visibility = clamp(fogVisibility, 0.0, 1.0);
+#ifdef RT_SUN
+    // Alpha is existing CSM visibility. Later use min(CSM,RT), never CSM*RT.
+    outSun = separate ? vec4(max(outColor.rgb-nightResponse(base),vec3(0))*visibility/max(csm,.0001),csm) : vec4(0);
+#endif
     vec3 fogColor = toLinear(lighting.fogColor.rgb);
     if (lighting.atmosphereSun.w > 0.0 && visibility < 1.0) {
         // Tint the in-scattered light of the EXISTING fog. Preserve its original

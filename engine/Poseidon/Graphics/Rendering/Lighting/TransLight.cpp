@@ -86,6 +86,7 @@ TLVertexTable::TLVertexTable(const IAnimator* anim, const Shape& src, const Matr
 void TLVertexTable::ReleaseTables()
 {
     hdrColor.clear();
+    directSun.clear();
     previousClip.clear();
     _clip.Clear();
     _posTrans.Clear();
@@ -123,6 +124,7 @@ int TLVertexTable::AddPos()
 void TLVertexTable::DoTransformPoints(const VertexTable& src, const Matrix4& posView, int beg, int end)
 {
     hdrColor.clear();
+    directSun.clear();
     previousClip.clear();
     // this is the most common case
     // simple mesh with no decal polygons
@@ -148,6 +150,7 @@ void TLVertexTable::DoTransformPoints(const VertexTable& src, const Matrix4& pos
 void TLVertexTable::DoTransformPoints(const IAnimator* anim, const Shape& src, const Matrix4& posView)
 {
     hdrColor.clear();
+    directSun.clear();
     previousClip.clear();
     int i;
     _orHints = src._orHints;
@@ -1017,6 +1020,12 @@ void TLVertexTable::DoLightingColorized(const LightList& lights,
         PoseidonAssert(index >= 0 && index < 256);
         Color colorize = colors[index];
         colorI = colorI * colorize * 2;
+        if (GEngine && GEngine->SeparateSunlight() && !(spec & (DisableSun | IsWater | IsLight)))
+        {
+            const Color direct = sun->DiffusePrecalc() * cosFi * colorize * 2;
+            directSun.resize(NVertex());
+            directSun[i] = {direct.R(), direct.G(), direct.B(), 1};
+        }
         // check if there are not some unsupported lighting flags
         int fog = GScene->Fog8(dist2);
         if (spec & IsWater)

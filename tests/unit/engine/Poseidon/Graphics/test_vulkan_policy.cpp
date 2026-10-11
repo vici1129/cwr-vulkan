@@ -383,6 +383,13 @@ int main()
         Check(!context.SSAOEnabled(), "SSAO must be disabled by default");
         Check(context.SetSSAO(true, 0.7f, 1.2f, 0.03f, 80), "valid SSAO controls are accepted");
         Check(!context.RTAOEnabled(), "RTAO defaults off");
+        Check(!context.RTShadowsEnabled(), "RT sunlight defaults off independently of AO");
+        Check(context.SetRTShadows("on").starts_with("UNSUPPORTED:"), "RT sunlight rejects missing capabilities");
+        Check(context.SSAOEnabled() && !context.RTAOEnabled(), "RT shadow rejection preserves AO selection");
+        Check(context.SetRTShadows("invalid").starts_with("INVALID:"), "RT sunlight validates controls");
+        Check(context.SetRTShadows("off").starts_with("OK:"), "RT sunlight off is always safe");
+        Check(context.SetRTShadows("status").find("totalRays=0 rayQueriesExecuted=no") != std::string::npos,
+              "RT sunlight status never equates initialization with ray execution");
         Check(context.SetRTAO("on").starts_with("UNSUPPORTED:"), "RTAO rejects missing device capabilities");
         Check(context.SSAOEnabled(), "unsupported RTAO leaves SSAO intact");
         Check(context.SetRTAO("status").find("rayQueriesExecuted=no") != std::string::npos,

@@ -5,6 +5,10 @@ layout(set=0,binding=4) uniform sampler2D rawAO;
 layout(location=0) in vec2 texCoord;
 layout(location=0) out vec4 outColor;
 void main() {
+#ifdef SUN_SHADOW
+    // Full-resolution deterministic visibility needs no stochastic denoiser.
+    outColor=vec4(texelFetch(rawAO,ivec2(gl_FragCoord.xy),0).rgb,0);
+#else
     ivec2 full=clamp(ivec2(texCoord*depthSize()),ivec2(0),depthSize()-1);
     float d=depthAt(full);
     outColor=vec4(1);
@@ -19,4 +23,5 @@ void main() {
         sum+=sampleAO.r*w; weight+=w;
     }
     outColor=vec4(vec3(weight>.001?sum/weight:1),1);
+#endif
 }

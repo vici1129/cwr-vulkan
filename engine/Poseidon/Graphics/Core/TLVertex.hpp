@@ -85,9 +85,18 @@ class TLVertexTable
     // Optional unclipped legacy lighting, before packed ARGB loses highlights.
     // Alpha/coverage still comes from the original packed stream. GL33 ignores it.
     std::vector<std::array<float, 4>> hdrColor;
+    // Optional Vulkan sunlight sidecar. Terrain uses its real CPU lighting,
+    // including colorization; unsupported software lighting leaves this empty.
+    std::vector<std::array<float, 4>> directSun;
     void PreserveHDRColor(int vertex, ColorVal color);
     void InterpolateHDR(int dst, int a, int b, float t)
     {
+        if (!directSun.empty())
+        {
+            directSun.resize(NVertex());
+            for (int k = 0; k < 4; ++k)
+                directSun[dst][k] = directSun[a][k] * (1 - t) + directSun[b][k] * t;
+        }
         if (hdrColor.empty()) return;
         hdrColor.resize(NVertex());
         if (hdrColor[a][3] == 0 || hdrColor[b][3] == 0) return;
