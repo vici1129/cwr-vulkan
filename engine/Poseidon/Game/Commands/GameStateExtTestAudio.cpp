@@ -85,6 +85,10 @@ static GameValue TriSunShafts(const GameState*, GameValuePar arg)
 {
     return GameValue(GEngine ? GEngine->SetSunShafts(RString(arg)) : RString("UNSUPPORTED: no renderer"));
 }
+static GameValue TriVolumetricFog(const GameState*, GameValuePar arg)
+{
+    return GameValue(GEngine ? GEngine->SetVolumetricFog(RString(arg)) : RString("UNSUPPORTED: no renderer"));
+}
 static GameValue TriRenderScale(const GameState*, GameValuePar arg)
 {
     const float value = arg;
@@ -3105,6 +3109,7 @@ INIT_MODULE(GameStateExtTest, 3)
     GGameState.NewFunction(GameFunction(GameString, "triBloom", TriBloom, GameString));
     GGameState.NewFunction(GameFunction(GameString, "triAtmosphere", TriAtmosphere, GameString));
     GGameState.NewFunction(GameFunction(GameString, "triSunShafts", TriSunShafts, GameString));
+    GGameState.NewFunction(GameFunction(GameString, "triVolumetricFog", TriVolumetricFog, GameString));
     GGameState.NewFunction(GameFunction(GameString, "triRTAO", TriRTAO, GameString));
     GGameState.NewFunction(GameFunction(GameString, "triRTShadows", TriRTShadows, GameString));
     GGameState.NewFunction(GameFunction(GameString, "triRTReflections", TriRTReflections, GameString));

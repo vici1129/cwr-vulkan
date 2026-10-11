@@ -31,7 +31,7 @@ namespace Poseidon
 static int g_lastShadowProxyVerts = 0;
 void Scene::PrepareEarlyShadowMaps()
 {
-    if (!GEngine->ShadowMapsEnabled() || !GEngine->ShadowMapsBeforeWorld())
+    if (!GEngine->NeedsSunShadowDepth() || !GEngine->ShadowMapsBeforeWorld())
         return;
     PrepareObjectsForDrawing();
     _objectsPreparedEarly = true;

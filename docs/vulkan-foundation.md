@@ -1,5 +1,175 @@
 # Vulkan backend development
 
+## First CSM volumetric sunlight and fog (2026-10-12)
+
+Built on public `35f7658`, default **Off**, Vulkan only. Process-local commands:
+
+```sqf
+triVolumetricFog "on"
+triVolumetricFog "off"
+triVolumetricFog "status"
+```
+
+No ray-tracing device, startup opt-in, SDK, persistent setting or menu is required.
+GL33 returns unsupported. Status separates the request, allocated resources and
+last scattering draw, and reports completed recording count, sunlight weight,
+fog interval, CSM reach and actual half-resolution dimensions. Changes use the
+existing idle/recreation boundary and invalidate world temporal history.
+
+### Rendering and integration
+
+`EngineVK::UpdateAtmosphere` supplies the camera basis, direction toward the sun,
+eye-adapted engine diffuse sunlight, fog color and original fog interval. Source
+strength follows `NightEffect`, `SkyThrough` squared and a smooth low-sun elevation
+fade; night vision disables it. No fog or mission visibility values are written.
+The homogeneous scattering density is `1 / (fogEnd - fogStart)`. The legacy
+clear-distance offset remains a visibility control, not an empty sphere of air:
+scattering can occur between the viewer and nearby trees. Analytic Beer-Lambert
+segment weights and a Henyey-Greenstein phase function (`g=0.55`) approximate
+single scattering. Added luminance is bounded to 30% of the original fog-color
+luminance, scaling RGB together to retain the sun hue. The existing fog color,
+transmittance and lighting calculation remain in their original shaders; there
+is no second fog blend or additional attenuation of scene color.
+
+One FP16 target per swapchain image is half the **world input** dimensions, rounded
+up. Each pixel marches 48 spatially jittered samples, bounded by the nearest depth
+in its 2x2 footprint and 400 metres. MSAA variants take the nearest covered sample.
+Every sample uses current camera-relative CSM matrices, sphere/frustum tier
+selection, four depth comparisons and cascade transition bands. Unknown coverage
+contributes no sunlight rather than assuming open sky. The volumetric comparison
+uses a small air-sample bias, independently of the surface receiver's darkness
+and larger bias. Spatial noise breaks coherent march bands without a separate
+volumetric history, denoiser or full-resolution fallback march.
+
+A four-tap joint bilateral upsample uses stored view depth and the full-resolution
+world depth. Unmatched silhouette samples contribute zero instead of background
+light leaking over foreground geometry. Additive RGB blending preserves scene
+alpha and writes the existing resolved FP16 world color in its LOAD pass. This
+runs after world/AO/RT composition and before TAA or FSR, spatial AA, bloom and
+tone mapping. TAA/FSR therefore reconstruct the completed scattering with their
+existing history rejection. Cockpit, weapon, HUD, map and UI remain after this
+boundary. There is no change to the RT scene, ray-query shaders or AA algorithms.
+
+`NeedsSunShadowDepth` defaults to the existing surface-CSM selection. Vulkan can
+also request depth for volumetrics while preserving that surface selection and
+projected shadows. The existing caster collection provides buildings, objects,
+cutout foliage and other supported casters. It previously contained no terrain:
+while volumetrics is active, Vulkan appends a two-sided landscape patch sampled
+from `SurfaceY`. Its radius is `min(CSM far + 100m, 600m)` and cell size is at least
+8m (or the coarser current terrain grid). World vertices are cached until the
+camera crosses a cell or the landscape/grid/radius changes, then translated into
+the existing camera-relative depth stream. No second shadow-map system is added.
+
+When a volumetric draw runs, the existing screen-space sun-shaft draws are
+suppressed. Their requested setting survives; status reports
+`suppressed=volumetric-fog`. With volumetrics Off, their original behavior resumes.
+Off allocates no volumetric images, submits no volume draws and requests no extra
+CSM or terrain work. Resources use the existing idle swapchain teardown and
+frame-fenced uniform allocator. Profiling adds two queries to the existing frame
+query pool, read after its fence, with no synchronous GPU wait.
+
+### Gameplay and regression evidence
+
+Tests used isolated stock GOG 3.05 missions and profiles, muted direct developer
+launches, RTX 4060 Ti / driver 617.14. These are renderer qualification runs, not
+Steam launch qualification or completed missions. Local screenshots, executable
+hashes, evaluator actions and logs are under `build/shadow-live/volume-*` in the
+original checkout; no stock mission or asset was edited.
+
+- Malden `02Infantry.Abel`: frozen Off/On village, hillside and forest comparisons;
+  dawn, noon, sunset, overcast and night; camera translation/rotation; Off, FXAA,
+  SMAA, TAA, MSAA 2/4/8 and FSR Native/Quality/Balanced/Performance. FSR dispatches
+  and actual reduced input dimensions were verified. Combined RTAO, RT sunlight,
+  water-reflection, atmosphere, bloom and sun-shaft selections were exercised,
+  including a shoreline view. Resize to 1280x720 and minimize/restore passed.
+  `volume-malden-v3` closed after 14,818 submitted / 14,817 presented frames with
+  zero core/synchronization validation errors or warnings; one presentation was
+  interrupted by recreation.
+- Everon `05HeavyMetal.Eden`: the forest at camera `[6750,86,5360]`, direction
+  `[1,.03,0]`, July 5 at 06:00, fog `.65`, shows distinct warm shafts through the
+  trunks. Foreground trunks remain dark and occlude the light. Off/On/Off with AA
+  Off restored the 1600x900 world-image comparison region exactly (zero differing
+  pixels); HUD/window chrome were excluded. Translation/rotation sequences with
+  AA Off and TAA showed no obvious long trails in the inspected frames. Assisted
+  placement followed by physical forward input moved the player about 25m through
+  the real forest with live simulation and visible scattering. Noon, overcast,
+  night, sunset and dawn were also compared. `volume-everon-v3` closed after 29,536
+  frames with zero validation findings, without ray-tracing startup opt-in.
+- Night reported no CSM/scattering and its tested Malden Off/On image region was
+  identical. Full overcast reported zero source weight and no scattering draws.
+  Temporally reconstructed comparison images are not generally pixel-identical
+  across toggle/reset boundaries; only the specific stable comparisons above are
+  claimed as exact matches.
+- The final binary's `volume-final-validation` run covered a 2560x1440 drawable,
+  FSR Quality with RT effects/bloom, resize/minimize/restore to 1281x721, SMAA at
+  150% (1922x1082 world / 961x541 volume), MSAA 4x and returning to volume Off.
+  It closed after 23,942 submitted / 23,941 presented frames with zero validation
+  findings. A stable AA-Off comparison of both shaft selections versus volume
+  alone was identical in the 1600x850 world-image region excluding the HUD;
+  status confirmed screen-space shafts were suppressed. The GL33-only build
+  also rendered stock infantry, returned unsupported for all three volume
+  commands and closed normally (`volume-gl33`).
+- Vulkan and GL33-only RelWithDebInfo builds passed. Focused
+  `[vulkan-shape],[ShadowMath],[Conventions],[ShutdownOrder]` suites passed 76 cases /
+  831 assertions with Vulkan and 75 / 827 with GL33 only. The driver-free Vulkan
+  policy/lifetime suite passed 394 checks, including default-Off, deferred
+  enablement and invalid-command state preservation. Its deliberate mock teardown
+  error is separate from live validation.
+
+### Actual GPU cost
+
+Validation-disabled, VSync off, AA Off, scale 100, fixed Malden forest camera
+`[6800,79,5500,1,.05,0]`, July 5 at 06:00, fog `.6`, view/object/shadow ranges
+900/600/250m. Each result is the median of four existing two-second profiling
+windows, after three seconds of warmup. The new interval includes both marching
+and depth-aware composition, not just the half-resolution draw.
+
+| Output | Half target | Volume GPU ms (surface CSM Off / On) | CSM depth GPU ms with volume On |
+| --- | --- | ---: | ---: |
+| 1920x1080 | 960x540 | 0.813 / 0.779 | 0.505 / 0.490 |
+| 2560x1440 | 1280x720 | 1.391 / 1.393 | 0.489 / 0.488 |
+
+CSM depth is additional work when surface CSM was Off. When surface CSM was
+already On, its maps are shared, with the terrain patch added. Whole-command-
+buffer GPU measurements for context:
+
+| Surface CSM | Volumetrics | 1080p frame GPU ms | 1440p frame GPU ms |
+| --- | --- | ---: | ---: |
+| Off | Off | 1.489 | 1.581 |
+| Off | On | 1.937 | 2.930 |
+| On | Off | 1.655 (repeat 1.637) | 1.841 (repeat 1.843) |
+| On | On | 1.970 | 3.090 |
+
+Automatic GPU clocks changed: 1080p volume-On sampled 2700–2820MHz graphics /
+9201MHz memory, versus 915–1605 / 5001MHz with volume Off; 1440p sampled 2850 /
+9201MHz On and 1665–2205 / 9201MHz Off. These are actual observed workloads,
+not clock-normalized kernel benchmarks or end-to-end FPS deltas. In particular,
+subtracting whole-frame times understates the added work when clocks rise.
+All measured windows reported zero new steady-state transient allocations.
+CPU caster collection/terrain translation and acquire/present pacing are not
+included in these GPU intervals. The 1440p drawable was an oversized window on
+the 1080p desktop; actual 2560x1440 attachments were confirmed in status, but
+this does not claim a full-monitor 1440p visual inspection. Raw data is retained
+in `volume-perf1080/volume-timing.json` and `volume-perf1440/volume-timing.json`.
+
+### Scope and limitations
+
+This is a bounded sunlight source term, not a participating-media simulation or
+replacement fog model. Clear weather gives weaker haze; dense fog gives stronger
+shafts without changing how far geometry is visible. The cap deliberately keeps
+the legacy atmosphere dominant. CSM caster LOD, alpha cutoff, coverage and depth
+precision limit the result; remote occluders outside the existing shadow range
+are not reconstructed. The tested profile's CSM reach was 250m even though the
+march cap is 400m. The terrain patch is coarse and bounded, and its addition can
+also improve terrain occlusion for existing surface CSM when both are enabled.
+
+Thin foliage can shimmer with AA Off. Half-resolution depth rejection may lose
+some light on subpixel geometry. Transparent surfaces use the opaque depth behind
+them; there is no separate fog-depth or transparency volume. TAA/FSR uses surface
+motion, not dedicated participating-media motion, so arbitrary fast motion and
+all disocclusions are not guaranteed artifact-free. This milestone adds no clouds,
+local-light volumes, multiple scattering, GI, RT requirement or new AA mode.
+
 ## First hardware water reflections (2026-10-12)
 
 Built on public **eebe9bcb**, default **Off**. Startup still uses

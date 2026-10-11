@@ -12,6 +12,8 @@ void EngineVK::UpdateAtmosphere()
     const auto* camera = GScene->GetCamera();
     const auto* light = GScene->MainLight();
     const auto* land = GScene->GetLandscape();
+    vk::ShapeLighting volume{};
+    _vk.SetVolumetricFrame(volume);
     if (!light || !land || _nightVision)
     {
         _vk.SetAtmosphereFrame({}, {}, {});
@@ -21,6 +23,16 @@ void EngineVK::UpdateAtmosphere()
     const auto color = light->SunColor();
     const float daylight = std::clamp(1.f - light->NightEffect(), 0.f, 1.f);
     const float clear = std::clamp(land->SkyThrough(), 0.f, 1.f);
+    // Camera-relative CSM matrices consume world-oriented metres. No translation.
+    const auto right = camera->DirectionAside(), up = camera->DirectionUp(), forward = camera->Direction();
+    volume.world = {right.X(),   right.Y(),   right.Z(),   0, up.X(), up.Y(), up.Z(), 0,
+                    forward.X(), forward.Y(), forward.Z(), 0, 0,      0,      0,      1};
+    volume.atmosphereSun = {sun.X(), sun.Y(), sun.Z(), daylight * clear * clear * std::clamp(sun.Y() / .08f, 0.f, 1.f)};
+    const auto energy = light->Diffuse() * GetAccomodateEye();
+    volume.atmosphereColor = {energy.R(), energy.G(), energy.B(), 0};
+    volume.fogColor = {_fogColor.R(), _fogColor.G(), _fogColor.B(), 0};
+    volume.fogParams = {GScene->GetFogMinRange(), GScene->GetFogMaxRange(), 0, 0};
+    _vk.SetVolumetricFrame(volume);
     const float range = GScene->GetFogMaxRange();
     // Mission visibility is read, never extended or shortened. Dense weather
     // gets the original fog color; it must not become a bright shaft source.

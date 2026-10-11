@@ -389,6 +389,7 @@ class Engine : public IGraphicsEngine
     virtual RString SetBloom(RString) { return "UNSUPPORTED: renderer has no HDR bloom"; }
     virtual RString SetAtmosphere(RString) { return "UNSUPPORTED: renderer has no atmospheric perspective"; }
     virtual RString SetSunShafts(RString) { return "UNSUPPORTED: renderer has no sunlight shafts"; }
+    virtual RString SetVolumetricFog(RString) { return "UNSUPPORTED: renderer has no volumetric fog"; }
     virtual void SetSunVisibility(float) {}
     virtual bool UsesHDRLighting() const { return false; }
     virtual bool SetWorldRenderScale(int) { return false; }
@@ -819,6 +820,7 @@ class Engine : public IGraphicsEngine
     /// scene render a depth pass from the sun and the lit shaders sample it.
     virtual void SetShadowMapsEnabled(bool /*enabled*/) {}
     virtual bool ShadowMapsEnabled() const { return false; }
+    virtual bool NeedsSunShadowDepth() const { return ShadowMapsEnabled(); }
     // Explicit backends need this frame's maps before submitting world receivers.
     virtual bool ShadowMapsBeforeWorld() const { return false; }
 

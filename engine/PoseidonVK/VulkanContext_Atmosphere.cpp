@@ -36,6 +36,7 @@ std::string VulkanContext::SetSunShafts(std::string_view mode)
     if (mode == "status")
         return std::string("requested=") + (_shaftsRequested ? "on" : "off") +
                " active=" + (_shaftsEnabled && !_shaftTargets.empty() ? "on" : "off") +
+               " suppressed=" + (_volumeDrew ? "volumetric-fog" : "no") +
                " visibility=" + std::to_string(_sunVisibility) + " weight=" + std::to_string(_screenSun[2]) +
                " sun=" + std::to_string(_screenSun[0]) + "," + std::to_string(_screenSun[1]) +
                " resolution=quarter samples=48 receivers=sky-openings history=none";

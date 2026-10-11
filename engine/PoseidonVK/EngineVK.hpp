@@ -43,6 +43,7 @@ class EngineVK final : public Engine
     RString SetBloom(RString mode) override { return _vk.SetBloom(static_cast<const char*>(mode)).c_str(); }
     RString SetAtmosphere(RString mode) override { return _vk.SetAtmosphere(static_cast<const char*>(mode)).c_str(); }
     RString SetSunShafts(RString mode) override { return _vk.SetSunShafts(static_cast<const char*>(mode)).c_str(); }
+    RString SetVolumetricFog(RString mode) override { return _vk.SetVolumetricFog(static_cast<const char*>(mode)).c_str(); }
     void SetSunVisibility(float visibility) override { _vk.SetSunVisibility(visibility); }
     void UpdateAtmosphere();
     bool UsesHDRLighting() const override { return true; }
@@ -141,6 +142,7 @@ class EngineVK final : public Engine
     bool SupportsProjectedShadows() const override { return true; }
     void SetShadowMapsEnabled(bool enabled) override;
     bool ShadowMapsEnabled() const override { return _shadowTuning.enabled; }
+    bool NeedsSunShadowDepth() const override { return _shadowTuning.enabled || _vk.VolumetricFogEnabled(); }
     bool ShadowMapsBeforeWorld() const override { return true; }
     ShadowMapTuning GetShadowMapTuning() const override { return _shadowTuning; }
     void SetShadowMapTuning(const ShadowMapTuning& tuning) override;
@@ -198,6 +200,10 @@ class EngineVK final : public Engine
     void BeginTemporalWorld();
     void CaptureTemporalNative(const Shape&, bool dynamic);
     ShadowMapTuning _shadowTuning;
+    std::vector<float> _volumeCasters;
+    std::vector<float> _volumeTerrain;
+    const void* _volumeLandscape = nullptr;
+    std::array<float, 4> _volumeTerrainKey{};
     float _shadowSunFactor = 0;
     bool _shadowWorld = false;
     std::array<float, 4> _worldProjection{};

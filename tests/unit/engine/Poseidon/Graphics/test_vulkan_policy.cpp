@@ -221,6 +221,14 @@ int main()
         CheckThrows<std::runtime_error>([&] { ChooseFormat({hdr}); }, "never send SDR values to a PQ-only surface");
         {
             VulkanContext hdrContext;
+            Check(hdrContext.SetVolumetricFog("status").find("requested=off active=off") != std::string::npos,
+                  "volumetric fog defaults off");
+            Check(hdrContext.SetVolumetricFog("on").starts_with("OK") && !hdrContext.VolumetricFogEnabled(),
+                  "volumetrics wait for the idle resource boundary");
+            Check(hdrContext.SetVolumetricFog("invalid").starts_with("INVALID") &&
+                  hdrContext.SetVolumetricFog("status").find("requested=on") != std::string::npos,
+                  "invalid volumetric request preserves selection");
+            Check(hdrContext.SetVolumetricFog("off").starts_with("OK"), "disable volumetric fog");
             Check(!hdrContext.AtmosphereEnabled(), "atmosphere defaults off");
             Check(hdrContext.SetAtmosphere("on").starts_with("OK") && hdrContext.AtmosphereEnabled(),
                   "enable atmospheric perspective independently");

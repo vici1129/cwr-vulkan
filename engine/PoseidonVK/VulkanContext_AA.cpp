@@ -143,6 +143,7 @@ void VulkanContext::CreateAAResources(VkFormat format)
     _aaMode = _requestedAA;
     _bloomEnabled = _bloomRequested;
     _shaftsEnabled = _shaftsRequested;
+    _volumeEnabled = _volumeRequested;
     _renderScale = _requestedScale;
     _worldSamples = AASamples(_aaMode);
     if (!(_aaSampleSupport & _worldSamples))
@@ -496,6 +497,7 @@ void VulkanContext::CreateAAResources(VkFormat format)
     }
     CreateBloomResources();
     CreateSunShaftResources();
+    CreateVolumetricResources();
 }
 
 void VulkanContext::BeginAAWorld()
@@ -621,6 +623,7 @@ void VulkanContext::FinishAAWorld(const std::array<float, 4>& projection)
     if (_worldPassOpen)
         vkCmdEndRenderPass(command);
     _worldPassOpen = false;
+    DrawVolumetricFog(projection);
     auto& target = _aaTargets[_image];
     VkDescriptorSet source = target.colorSet;
     if (IsFSR(_aaMode)) source = DispatchFSR(projection);
@@ -653,7 +656,7 @@ void VulkanContext::FinishAAWorld(const std::array<float, 4>& projection)
         DrawAAPass(3, destination, source, _worldExtent);
         source = target.filteredSet;
     }
-    if (_shaftsEnabled) source = DrawSunShafts(source);
+    if (_shaftsEnabled && !_volumeDrew) source = DrawSunShafts(source);
     if (_bloomEnabled) DrawBloom(source);
     if (_bloomEnabled || _shaftsEnabled || _renderScale != 100 || (_aaMode != AAMode::FXAA && _aaMode != AAMode::SMAA))
         DrawAAPass(4, _framebuffers[_image], source, _extent);
@@ -664,6 +667,7 @@ void VulkanContext::DestroyAAResources() noexcept
 {
     DestroyBloomResources();
     DestroySunShaftResources();
+    DestroyVolumetricResources();
     DestroyFSR();
     _worldActive = _worldPassOpen = false;
     _taaValid = _taaInitialized = false;

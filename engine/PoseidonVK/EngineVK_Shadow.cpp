@@ -1,4 +1,7 @@
 #include <PoseidonVK/EngineVK.hpp>
+#include <Poseidon/World/Scene/Scene.hpp>
+#include <Poseidon/World/Scene/Camera/Camera.hpp>
+#include <Poseidon/World/Terrain/Landscape.hpp>
 #include <algorithm>
 #include <cmath>
 
@@ -39,7 +42,7 @@ void EngineVK::SetShadowMapSunFactor(float factor)
 void EngineVK::RenderShadowDepthScene(const float* matrices, const float* splits, const float* forward, int count,
                                       int omniCount, int resolution, const ShadowCasterSet& casters)
 {
-    if (!_vk.FrameOpen() || !_shadowTuning.enabled)
+    if (!_vk.FrameOpen() || !NeedsSunShadowDepth())
         return;
     if (!matrices || !splits || !forward || count < 1 || count > 4 || casters.solidVertexCount < 0 ||
         casters.alphaVertexCount < 0 || casters.alphaBatchCount < 0)
@@ -66,7 +69,52 @@ void EngineVK::RenderShadowDepthScene(const float* matrices, const float* splits
                      float(std::clamp(omniCount, 0, count))};
     state.strength = {1.f - _shadowSunFactor * (1.f - _shadowTuning.darkness), 1.f / resolution, 0, 0};
     _vk.SetShadowState(state);
-    _vk.RenderShadowDepth(matrices, count, resolution, {casters.solidXYZ, size_t(casters.solidVertexCount) * 3},
+    std::span<const float> solid{casters.solidXYZ, size_t(casters.solidVertexCount) * 3};
+    if (_vk.VolumetricFogEnabled() && GScene && GScene->GetLandscape())
+    {
+        // The object CSM collection has no landscape triangles. A bounded patch
+        // supplies valley/ridge occlusion using the existing terrain surface.
+        // Kept in the Vulkan path and allocated only for this optional effect.
+        auto* land = GScene->GetLandscape();
+        const auto position = GScene->GetCamera()->Position();
+        const float radius = std::min(600.f, splits[count - 1] + 100.f);
+        const float grid = std::max(8.f, land->GetTerrainGrid());
+        const int cx = int(std::floor(position.X() / grid)), cz = int(std::floor(position.Z() / grid));
+        const int cells = int(std::ceil(radius / grid));
+        const std::array<float, 4> key{float(cx), float(cz), grid, float(cells)};
+        if (_volumeLandscape != land || _volumeTerrainKey != key)
+        {
+            _volumeTerrain.clear();
+            auto vertex = [&](float x, float z) { return std::array<float, 3>{x, land->SurfaceY(x, z), z}; };
+            auto triangle = [&](const auto& a, const auto& b, const auto& c)
+            {
+                // Both sides: the ordinary solid CSM pipeline culls front faces.
+                for (const auto* v : {&a, &b, &c, &c, &b, &a})
+                    _volumeTerrain.insert(_volumeTerrain.end(), v->begin(), v->end());
+            };
+            for (int z = cz - cells; z < cz + cells; ++z)
+                for (int x = cx - cells; x < cx + cells; ++x)
+                {
+                    const auto a = vertex(x * grid, z * grid), b = vertex((x + 1) * grid, z * grid);
+                    const auto c = vertex(x * grid, (z + 1) * grid), d = vertex((x + 1) * grid, (z + 1) * grid);
+                    triangle(a, b, c);
+                    triangle(b, d, c);
+                }
+            _volumeLandscape = land;
+            _volumeTerrainKey = key;
+        }
+        _volumeCasters.assign(solid.begin(), solid.end());
+        const size_t offset = _volumeCasters.size();
+        _volumeCasters.resize(offset + _volumeTerrain.size());
+        for (size_t i = 0; i < _volumeTerrain.size(); i += 3)
+        {
+            _volumeCasters[offset + i] = _volumeTerrain[i] - position.X();
+            _volumeCasters[offset + i + 1] = _volumeTerrain[i + 1] - position.Y();
+            _volumeCasters[offset + i + 2] = _volumeTerrain[i + 2] - position.Z();
+        }
+        solid = _volumeCasters;
+    }
+    _vk.RenderShadowDepth(matrices, count, resolution, solid,
                           {casters.alphaXYZUV, size_t(casters.alphaVertexCount) * 5}, batches);
 }
 } // namespace Poseidon

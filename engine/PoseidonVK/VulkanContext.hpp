@@ -188,6 +188,9 @@ class VulkanContext
     std::string SetBloom(std::string_view mode);
     std::string SetAtmosphere(std::string_view mode);
     std::string SetSunShafts(std::string_view mode);
+    std::string SetVolumetricFog(std::string_view mode);
+    bool VolumetricFogEnabled() const { return _volumeEnabled; }
+    void SetVolumetricFrame(const ShapeLighting& frame) { _volumeFrame = frame; }
     bool AtmosphereEnabled() const { return _atmosphereEnabled; }
     void SetAtmosphereFrame(const std::array<float, 4>& sun, const std::array<float, 4>& color,
                             const std::array<float, 4>& screenSun)
@@ -267,6 +270,8 @@ class VulkanContext
         double bloomGpuMs = 0;
         double shaftsGpuMs = 0;
         uint64_t shaftsGpuSamples = 0;
+        double volumeGpuMs = 0;
+        uint64_t volumeGpuSamples = 0;
         uint64_t bloomGpuSamples = 0;
         uint64_t taaGpuSamples = 0;
         uint64_t ssaoPasses = 0, ssaoGpuSamples = 0;
@@ -312,6 +317,7 @@ class VulkanContext
         bool taaTimestamped = false;
         bool bloomTimestamped = false;
         bool shaftsTimestamped = false;
+        bool volumeTimestamped = false;
         bool ssaoTimestamped = false;
         VkQueryPool csmQueries = VK_NULL_HANDLE;
         bool csmTimestamped = false;
@@ -443,6 +449,17 @@ class VulkanContext
     void CreateSunShaftResources();
     void DestroySunShaftResources() noexcept;
     VkDescriptorSet DrawSunShafts(VkDescriptorSet source);
+    bool _volumeRequested = false, _volumeEnabled = false, _volumeDrew = false;
+    uint64_t _volumeDraws = 0;
+    ShapeLighting _volumeFrame{};
+    std::vector<TemporalTarget> _volumeTargets;
+    VkExtent2D _volumeExtent{};
+    VkDescriptorPool _volumePool = VK_NULL_HANDLE;
+    VkPipelineLayout _volumeLayout = VK_NULL_HANDLE;
+    std::array<VkPipeline, 2> _volumePipelines{};
+    void CreateVolumetricResources();
+    void DestroyVolumetricResources() noexcept;
+    void DrawVolumetricFog(const std::array<float, 4>& projection);
     VkRenderPass _taaPass = VK_NULL_HANDLE;
     bool _taaValid = false, _motionDebug = false, _taaInitialized = false;
     unsigned _taaIndex = 0, _taaFrame = 0;
