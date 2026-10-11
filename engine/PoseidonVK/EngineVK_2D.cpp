@@ -12,6 +12,16 @@ namespace Poseidon
 void EngineVK::DrawDecal(Vector3Par screen, float rhw, float sizeX, float sizeY, PackedColor color, const MipInfo& mip,
                          int flags)
 {
+    DrawDecalColor(screen, rhw, sizeX, sizeY, color, mip, flags, nullptr);
+}
+void EngineVK::DrawLightDecal(Vector3Par screen, float rhw, float sizeX, float sizeY, ColorVal color,
+                              const MipInfo& mip, int flags)
+{
+    DrawDecalColor(screen, rhw, sizeX, sizeY, PackedColor(color), mip, flags, &color);
+}
+void EngineVK::DrawDecalColor(Vector3Par screen, float rhw, float sizeX, float sizeY, PackedColor color,
+                             const MipInfo& mip, int flags, const Color* light)
+{
     if (sizeX <= 0 || sizeY <= 0)
         return; // Empty billboard.
     // Object/Scene has already projected, lit and colored this billboard.
@@ -32,7 +42,7 @@ void EngineVK::DrawDecal(Vector3Par screen, float rhw, float sizeX, float sizeY,
         vertices[i].color = flags & IsAlphaFog ? color : PackedColor(color | 0xff000000);
     }
     const float fog = flags & (FogDisabled | NoDropdown | IsAlphaFog | IsLight) ? 1.f : 1.f - float(color >> 24) / 255;
-    SubmitScreen(mip, vertices, 4, Rect2DAbs(0, 0, _width, _height), flags & ~prepared, fog);
+    SubmitScreen(mip, vertices, 4, Rect2DAbs(0, 0, _width, _height), flags & ~prepared, fog, light);
 }
 
 void EngineVK::DrawLine(int begin, int end)
@@ -148,7 +158,7 @@ void EngineVK::DrawPoly(const MipInfo& mip, const Vertex2DAbs* vertices, int n, 
     SubmitScreen(mip, vertices, n, clip, flags);
 }
 void EngineVK::SubmitScreen(const MipInfo& mip, const Vertex2DAbs* vertices, int n, const Rect2DAbs& clip, int flags,
-                            float fog)
+                            float fog, const Color* light)
 {
     const int allowed = NoZBuf | NoZWrite | IsAlpha | IsTransparent | IsAlphaFog | ClampU | ClampV | NoClamp |
                         PointSampling | BestMipmap | FogDisabled | IsLight;
@@ -170,6 +180,11 @@ void EngineVK::SubmitScreen(const MipInfo& mip, const Vertex2DAbs* vertices, int
     {
         _screenVertices.push_back(vk::ScreenGeometry(vertices[i], _width, _height));
         _screenVertices.back().fog = fog;
+        if (light)
+        {
+            auto& color = _screenVertices.back().color;
+            color[0] = light->R(); color[1] = light->G(); color[2] = light->B();
+        }
     }
     std::shared_ptr<vk::TextureImage> image;
     auto alpha = AlphaStats::Opaque;

@@ -1,5 +1,138 @@
 # Vulkan backend development
 
+## Opt-in HDR bloom (2026-10-11)
+
+Based on public main `dd773be`. Bloom defaults **Off**, is session-scoped and
+Vulkan-only. GL33 remains the default renderer. No private NGX files, new
+lens flares, exposure adaptation or graphics-menu changes are included.
+
+```sqf
+triBloom "on"
+triBloom "off"
+triBloom "status"
+triBloom "threshold 1.25"
+triBloom "strength 0.15"
+```
+
+Threshold (1..32 linear reference-white units) and strength (0..0.3) are
+optional developer tuning. Defaults are 1.25 and 0.15. A 25% soft knee begins
+at 0.9375 and selects peak RGB, retaining saturated orange/red sources without
+changing their hue. This is deliberately restrained: a reference-white texel
+only contributes a tiny knee value, not its entire color. There is no global
+brightness multiplier or invented emission. Status distinguishes requested
+from active resources and reports level count, extent and composition domain.
+
+### Implementation and source-light corrections
+
+The completed linear FP16 world feeds four reduced-resolution levels, starting
+at half the native drawable size, down to 1/16. Extraction and normalized
+13-tap downsampling share the first pass; subsequent levels downsample the
+extracted energy. Three normalized tent upsampling passes mix neighboring
+octaves (65% coarse contribution). Separate down/up targets avoid feedback.
+The seven passes process about 0.66 native-frame pixels in total; there is no
+full-resolution Gaussian blur. No upper RGB clamp or LDR intermediate is used.
+The existing final world composition adds one bloom sample, scaled by strength,
+**before** the unchanged SDR/HDR tone mapper. Alpha, scene depth and stencil
+are not blurred. Gamma, reference white, BT.2020/PQ and metadata are unchanged.
+
+MSAA resolve, FXAA, SMAA, TAA and FSR finish before extraction. FXAA/SMAA at
+100% use an intermediate only when bloom is enabled; Off retains their fused
+AA/composition path. Supersampling still performs the existing area resolve.
+FSR's HDR flag, unit pre-exposure/null exposure and FP16 reconstruction contract
+are unchanged; bloom reads reconstructed output, never feeds its history or
+reactive input back into FSR/TAA. SSAO, CSM, projected shadows, sky/fog and water
+remain upstream. Native cockpit/weapon geometry, instruments, HUD, menus and
+text remain downstream and do not seed bloom. First-person weapon-only flashes
+therefore do not bloom; their world lighting can still contribute.
+
+Inspection found a remaining float-to-packed-color loss in emissive billboard
+submission. `DrawLightDecal` retains computed RGB for Vulkan while keeping the
+original packed alpha/fog and GL33 draw. Existing primary light-source sprites
+(`Flare0`, including headlights/fire lights) previously drew after world tone
+mapping and were treated like UI. Vulkan now draws these sources before world
+AA/composition, preserving their calculated RGB. Their authored texture, size,
+visibility and alpha remain unchanged. Secondary lens-flare ghosts keep the
+old downstream path; no new flare effect is added. Native muzzle materials,
+sun lighting, explosion/local-light equations and headlight attenuation already
+retain floating-point sums and were not boosted. Packed particle colors and
+intensity baked into legacy textures still limit available energy.
+The source-color/order corrections apply to Vulkan even with bloom Off; Off
+disables the pyramid, not those HDR correctness fixes.
+
+Resources use the existing acquired-image ownership and idle swapchain/AA
+recreation. Off allocates no bloom images or descriptors. On/off, AA/output
+changes and resize recreate/destroy all seven images per swapchain image, pool,
+framebuffers and pipeline together. No temporal bloom history is retained.
+The existing GPU profiler also reports `Vulkan Bloom: pyramid_gpu_ms=...` using
+two additional timestamps read after the normal frame fence. This timing covers
+the pyramid, not the extra sample in the existing final composition.
+
+### Verification and cost
+
+Windows RelWithDebInfo Vulkan+FSR and Vulkan-disabled GL33 builds succeeded.
+The GL33-only executable also opened/closed its menu normally and returned
+`UNSUPPORTED` for `triBloom "on"`.
+Driver-free policy/lifetime/command tests pass 359 checks, including bloom
+argument validation, requested/active semantics and seven closed reduced-size
+passes. Focused shape/shadow/convention tests pass 420 assertions in 31 cases
+in both builds. A broader `[Graphics]` run is **not all-green**: both builds have
+13 failures in untouched PAA/DDS tests (12 PAA writes use `/tmp`, plus a DDS
+cache-size assertion); this is not claimed as a passing full suite.
+
+Stock Infantry daylight buildings/foliage/sky/sun and stock Shadow Killer night
+were exercised with isolated profiles. Frozen SDR Off/On captures show mild,
+localized light-source softening, not a cinematic halo: the tested headlight
+difference was only one 8-bit code value around the lamp cores; sun differences
+were also small. Fire tuning comparisons retained orange color and unchanged
+text/background outside the source. Ordinary surfaces remain recognizable.
+Real M16/HK shots consumed ammunition, but brief muzzle captures were not
+reliable enough to claim a matched flash improvement. Thrown hand grenades
+were observed exploding with FSR Quality; a frozen Off/On explosion comparison
+also showed only a small (one code value) change around the bright particles.
+Coastal water/fog with FSR Native, NVG, cockpit instruments and pause-menu text
+were checked. These are practical staged stock-game checks, not an exhaustive
+mission playthrough or temporal-image-quality certification.
+The legacy headlight cone geometry remains visibly coarse with either setting;
+bloom does not repair or replace it. Settings were not lowered further to make
+the daytime sky or white buildings glow. Legacy sources near reference white
+can produce little or no visible bloom; this is preferable to inventing energy.
+
+All nine AA selections (Off, FXAA, SMAA, MSAA 2/4/8, TAA, FSR Native/Quality),
+150% SMAA, SSAO/CSM, bloom toggles and resize/minimize/restore completed under
+Windows synchronization validation with zero errors/warnings. Captures and
+profiler receipts are local ignored evidence in `build/shadow-live/bloom-*`.
+The final effects session completed 54,351 frames and a normal close with zero
+validation errors/warnings. Two earlier sessions ended on invalid test-script
+commands (`triSetSSAO` and `moveOut`), not Vulkan failures; both are retained in
+the evidence rather than counted as successful normal-close tests.
+
+RTX 4060 Ti, frozen Infantry street, gamma 1 / legacy brightness 1.6, TAA at
+100%, SSAO/CSM enabled, VSync off, validation off: four alternating Off/On
+windows per resolution, five seconds settling then six two-second reports per
+window. 1440p used an oversized drawable on the 1080p desktop.
+
+| Drawable | Off whole GPU frame | On whole GPU frame | Raw On minus Off | Bloom pyramid |
+|---|---:|---:|---:|---:|
+| 1920x1080 | 1.718 ms | 1.705 ms | -0.013 ms (clock noise) | 0.128 ms |
+| 2560x1440 | 1.906 ms | 1.936 ms | +0.030 ms (clock-dependent) | 0.151 ms |
+
+These are not fixed-clock incremental whole-frame costs: enabling bloom raised
+GPU clocks (1080p roughly 1.5 to 1.6 GHz, memory also changed; 1440p roughly
+2.35 to 2.67 GHz). The negative number is **not a speedup**. The timestamped
+pyramid is the meaningful directly measured added work; the composition sample
+and extra FXAA/SMAA intermediate are outside that isolated measurement. No GPU
+power/clock settings were changed. Off has no pyramid work.
+
+G14/Nobara + Gamescope/Proton 11 + attached 4K TV: bloom with TAA, FSR Native
+and Quality, SSAO/CSM and SDR/HDR toggling completed. The application negotiated
+10-bit HDR10/PQ BT.2020 (`format=64`, `colorSpace=1000104008`) and submitted HDR
+metadata. Independently, the active HDMI DRM connector reported a good link,
+`max bpc=10`, BT2020_RGB and PQ EOTF 2 metadata; KWin reported
+3840x2160/120 Hz, 10-bit HDR.
+This verifies the software/connector signal path, not panel light output.
+**Physical TV image, brightness and blooming-zone behavior remain unverified.**
+That run did not enable Vulkan validation; validation claims above are Windows.
+
 ## Linear HDR scene and optional HDR10 output (2026-10-11)
 
 Based on public main `4691b9a`. Vulkan remains opt-in (`--render vk`), and

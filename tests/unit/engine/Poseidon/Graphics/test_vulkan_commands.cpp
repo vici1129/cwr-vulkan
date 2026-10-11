@@ -189,6 +189,19 @@ struct VulkanCommandStateTest
         ++checks;
         if (outputEncoding != std::array<float, 4>{1, 1, 200, 0} || context.OutputPeak() != 5)
             throw std::runtime_error("negotiated HDR must use PQ at configured reference white and peak ratio");
+        context._image = 0;
+        context._worldExtent = {1920, 1080};
+        context._bloomTargets.resize(1);
+        for (unsigned i = 0; i < context.BloomLevels; ++i)
+            context._bloomExtents[i] = {960u >> i, 540u >> i};
+        const auto beforeDraws = finalDraws, beforeBegins = passBegins, beforeEnds = passEnds;
+        calls = {};
+        context.DrawBloom(Handle<VkDescriptorSet>(70));
+        expect({7,7,0,0,0,7,7,7}, "four downsample and three upsample passes require no geometry uploads");
+        ++checks;
+        if (finalDraws-beforeDraws != 7 || passBegins-beforeBegins != 7 || passEnds-beforeEnds != 7 ||
+            finalViewport.width != 960 || finalViewport.height != 540 || outputEncoding[3] != 2)
+            throw std::runtime_error("bloom finishes at half resolution with every pass closed before composition");
         return checks;
     }
 };

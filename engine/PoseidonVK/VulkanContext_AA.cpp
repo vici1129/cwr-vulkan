@@ -141,6 +141,7 @@ void VulkanContext::CreateAAResources(VkFormat format)
                        properties.limits.framebufferStencilSampleCounts &
                        properties.limits.sampledImageDepthSampleCounts;
     _aaMode = _requestedAA;
+    _bloomEnabled = _bloomRequested;
     _renderScale = _requestedScale;
     _worldSamples = AASamples(_aaMode);
     if (!(_aaSampleSupport & _worldSamples))
@@ -311,7 +312,7 @@ void VulkanContext::CreateAAResources(VkFormat format)
         }
         framebuffer(_worldPass, views, temporal || _worldSamples != VK_SAMPLE_COUNT_1_BIT ? 3 : 2, target.scene);
         framebuffer(_ssaoPass, &target.color.view, 1, target.ao);
-        if (_renderScale != 100 && (_aaMode == AAMode::FXAA || _aaMode == AAMode::SMAA))
+        if ((_renderScale != 100 || _bloomEnabled) && (_aaMode == AAMode::FXAA || _aaMode == AAMode::SMAA))
         {
             CreateAAImage(target.filtered, format, colorUsage, VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_ASPECT_COLOR_BIT);
             descriptor(target.filtered.view, false, target.filteredSet);
@@ -415,7 +416,7 @@ void VulkanContext::CreateAAResources(VkFormat format)
             const VkPipelineColorBlendAttachmentState maskOutputs[]{output, output, output, output};
             if (i == 6) { blend.attachmentCount = 4; blend.pAttachments = maskOutputs; }
             VkPipelineDepthStencilStateCreateInfo ds{VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO};
-            const bool composite = i == 4 || (_renderScale == 100 && (i == 0 || i == 3));
+            const bool composite = i == 4 || (!_bloomEnabled && _renderScale == 100 && (i == 0 || i == 3));
             ds.depthTestEnable = ds.depthWriteEnable = composite;
             ds.depthCompareOp = VK_COMPARE_OP_ALWAYS;
             const VkDynamicState states[]{VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR};
@@ -449,6 +450,7 @@ void VulkanContext::CreateAAResources(VkFormat format)
         vkDestroyShaderModule(_device, fragment, nullptr);
         vkDestroyShaderModule(_device, vertex, nullptr);
     }
+    CreateBloomResources();
 }
 
 void VulkanContext::BeginAAWorld()
@@ -508,7 +510,7 @@ void VulkanContext::DrawAAPass(unsigned index, VkFramebuffer framebuffer, VkDesc
 {
     auto command = _frames[_frame].command;
     const auto& target = _aaTargets[_image];
-    const bool composite = index == 4 || (_renderScale == 100 && (index == 0 || index == 3));
+    const bool composite = index == 4 || (!_bloomEnabled && _renderScale == 100 && (index == 0 || index == 3));
     VkClearValue clear{};
     VkRenderPassBeginInfo pass{VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO};
     pass.renderPass = composite ? _resumePass : index == 6 ? _fsrMaskPass : index == 5 ? _taaPass : (index == 1 || index == 2) ? _aaDataPass : _aaPass;
@@ -520,7 +522,8 @@ void VulkanContext::DrawAAPass(unsigned index, VkFramebuffer framebuffer, VkDesc
     vkCmdBindPipeline(command, VK_PIPELINE_BIND_POINT_GRAPHICS, _aaPipelines[index]);
     const VkDescriptorSet sets[]{source, index == 3 ? target.weightsSet : target.depthSet,
                                  index == 5 ? target.motionSet : index == 2 ? _smaaAreaSet : target.depthSet,
-                                 index == 5 ? _taaHistory[1-_taaIndex].set : index == 2 ? _smaaSearchSet : source};
+                                 index == 5 ? _taaHistory[1-_taaIndex].set : index == 2 ? _smaaSearchSet :
+                                 index == 4 && _bloomEnabled ? _bloomTargets[_image].up[0].set : source};
     vkCmdBindDescriptorSets(command, VK_PIPELINE_BIND_POINT_GRAPHICS, _aaLayout, 0, 4, sets, 0, nullptr);
     const VkViewport viewport{0, 0, float(extent.width), float(extent.height), 0, 1};
     const VkRect2D scissor{{0, 0}, extent};
@@ -528,7 +531,8 @@ void VulkanContext::DrawAAPass(unsigned index, VkFramebuffer framebuffer, VkDesc
     vkCmdSetScissor(command, 0, 1, &scissor);
     float push[]{1.f / _worldExtent.width,   1.f / _worldExtent.height, float(_worldExtent.width),
                        float(_worldExtent.height), 1.f / _extent.width,       1.f / _extent.height,
-                       float(_extent.width),       float(_extent.height), OutputPeak(), composite ? 1.f : 0.f, 0, 0};
+                       float(_extent.width),       float(_extent.height), OutputPeak(), composite ? 1.f : 0.f,
+                       _bloomEnabled ? _bloomStrength : 0.f, 0};
     if (index == 5)
     {
         push[4]=_taaProjection[2]; push[5]=_taaProjection[3];
@@ -573,7 +577,7 @@ void VulkanContext::FinishAAWorld(const std::array<float, 4>& projection)
         _taaIndex = 1-_taaIndex;
         _taaValid = true;
     }
-    const auto destination = _renderScale == 100 ? _framebuffers[_image] : target.filterFB;
+    const auto destination = !_bloomEnabled && _renderScale == 100 ? _framebuffers[_image] : target.filterFB;
     if (_aaMode == AAMode::FXAA)
     {
         DrawAAPass(0, destination, source, _worldExtent);
@@ -586,13 +590,15 @@ void VulkanContext::FinishAAWorld(const std::array<float, 4>& projection)
         DrawAAPass(3, destination, source, _worldExtent);
         source = target.filteredSet;
     }
-    if (_renderScale != 100 || (_aaMode != AAMode::FXAA && _aaMode != AAMode::SMAA))
+    if (_bloomEnabled) DrawBloom(source);
+    if (_bloomEnabled || _renderScale != 100 || (_aaMode != AAMode::FXAA && _aaMode != AAMode::SMAA))
         DrawAAPass(4, _framebuffers[_image], source, _extent);
     _worldActive = false;
 }
 
 void VulkanContext::DestroyAAResources() noexcept
 {
+    DestroyBloomResources();
     DestroyFSR();
     _worldActive = _worldPassOpen = false;
     _taaValid = _taaInitialized = false;

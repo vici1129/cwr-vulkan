@@ -221,6 +221,16 @@ int main()
         CheckThrows<std::runtime_error>([&] { ChooseFormat({hdr}); }, "never send SDR values to a PQ-only surface");
         {
             VulkanContext hdrContext;
+            Check(hdrContext.SetBloom("status").find("requested=off active=off") != std::string::npos,
+                  "bloom defaults off without allocated targets");
+            for (const auto value : {"strength nan", "strength inf", "strength -1", "strength .31", "threshold 0", "threshold 33", "threshold 4junk", "unknown"})
+                Check(hdrContext.SetBloom(value).starts_with("INVALID"), "reject invalid bloom tuning");
+            Check(hdrContext.SetBloom("threshold 4").starts_with("OK"), "accept linear bloom threshold");
+            Check(hdrContext.SetBloom("strength 0").starts_with("OK"), "accept zero contribution");
+            Check(hdrContext.SetBloom("on").starts_with("OK"), "request bloom enable");
+            Check(hdrContext.SetBloom("status").find("requested=on active=off") != std::string::npos,
+                  "request alone must not claim active bloom resources");
+            Check(hdrContext.SetBloom("off").starts_with("OK"), "request bloom disable");
             Check(hdrContext.SetHDR("peak nan").starts_with("INVALID"), "reject nonfinite peak");
             Check(hdrContext.SetHDR("white 600").starts_with("INVALID"), "bound reference white");
             Check(hdrContext.SetHDR("peak 100").starts_with("INVALID"), "peak must cover white");

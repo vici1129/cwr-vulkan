@@ -1146,7 +1146,10 @@ void Object::DrawDecal(int forceLOD, ClipFlags clipFlags, const FrameBase& pos)
         {
             return;
         }
-        GEngine->DrawDecal(posp, rhw, sizeX, sizeY, color, mip, special);
+        if (mat == MSShining || render::Has(specT.backend, render::Backend::IsLight))
+            GEngine->DrawLightDecal(posp, rhw, sizeX, sizeY, colorI, mip, special);
+        else
+            GEngine->DrawDecal(posp, rhw, sizeX, sizeY, color, mip, special);
     }
     Deanimate(forceLOD);
 }

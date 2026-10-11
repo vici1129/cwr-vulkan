@@ -2,6 +2,7 @@
 #extension GL_GOOGLE_include_directive : require
 #include "color_space.glsl"
 layout(set=0,binding=0) uniform sampler2D source;
+layout(set=3,binding=0) uniform sampler2D bloom;
 #ifdef MULTISAMPLE_DEPTH
 layout(set=1,binding=0) uniform sampler2DMS sceneDepth;
 #else
@@ -33,6 +34,7 @@ void main() {
 #endif
     }
     outColor = color / total;
+    if (aa.colorControl.z > 0.) outColor.rgb += texture(bloom, texCoord).rgb * aa.colorControl.z;
     outColor.rgb = toneMap(outColor.rgb, aa.colorControl.x);
     gl_FragDepth = depth;
 }

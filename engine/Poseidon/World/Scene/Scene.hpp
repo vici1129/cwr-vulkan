@@ -351,8 +351,8 @@ class Scene
     void ObjectsDrawn();               // release all temporary information
 
     // light color and position
-    void DrawFlare(ColorVal color, Vector3Par pos, bool secondary = true);
-    void DrawFlares();
+    void DrawFlare(ColorVal color, Vector3Par pos, bool secondary = true, bool primary = true);
+    void DrawFlares(bool primary = true, bool secondary = true);
 
     void DrawRainLevel(float alpha, float yDensity, float xOffset, float yOffset, float z);
     void DrawRain();

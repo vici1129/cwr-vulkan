@@ -39,6 +39,7 @@ class EngineVK final : public Engine
     RString SetAntiAliasing(RString mode) override { return _vk.SetAntiAliasing(static_cast<const char*>(mode)).c_str(); }
     bool SetWorldRenderScale(int percent) override { return _vk.SetRenderScale(percent); }
     RString SetHDR(RString mode) override { return _vk.SetHDR(static_cast<const char*>(mode)).c_str(); }
+    RString SetBloom(RString mode) override { return _vk.SetBloom(static_cast<const char*>(mode)).c_str(); }
     bool UsesHDRLighting() const override { return true; }
     bool SetSSAO(bool enabled, float strength, float radius, float bias, float fade) override;
     bool InitDrawDone() override { return _vk.FrameOpen(); }
@@ -92,6 +93,7 @@ class EngineVK final : public Engine
     void DrawPolygon(const VertexIndex*, int) override;
     void DrawSection(const FaceArray&, Offset, Offset) override;
     void DrawDecal(Vector3Par, float, float, float, PackedColor, const MipInfo&, int) override;
+    void DrawLightDecal(Vector3Par, float, float, float, ColorVal, const MipInfo&, int) override;
     void Draw2D(const Draw2DPars&, const Rect2DAbs&, const Rect2DAbs&) override;
     void DrawPoly(const MipInfo&, const Vertex2DAbs*, int, const Rect2DAbs&, int) override;
     void DrawPoly(const MipInfo&, const Vertex2DPixel*, int, const Rect2DPixel&, int) override;
@@ -202,7 +204,8 @@ class EngineVK final : public Engine
     std::vector<vk::ScreenVertex> _screenVertices;
     void FlushQueues() override { _vk.FlushScreenBatch(); }
     void SubmitSoftware(const std::vector<uint32_t>& indices);
-    void SubmitScreen(const MipInfo&, const Vertex2DAbs*, int, const Rect2DAbs&, int, float fog = 1);
+    void SubmitScreen(const MipInfo&, const Vertex2DAbs*, int, const Rect2DAbs&, int, float fog = 1, const Color* light = nullptr);
+    void DrawDecalColor(Vector3Par, float, float, float, PackedColor, const MipInfo&, int, const Color*);
     void StopAfterFailure(const std::exception& error);
     [[noreturn]] static void Unsupported(const char* feature);
 };

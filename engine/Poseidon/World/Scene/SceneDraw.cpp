@@ -146,7 +146,7 @@ void Scene::EndObjects()
     // sort by screen size
 }
 
-void Scene::DrawFlare(ColorVal color, Vector3Par lightPos, bool secondary)
+void Scene::DrawFlare(ColorVal color, Vector3Par lightPos, bool secondary, bool primary)
 {
     Color lightColor = color * GEngine->GetAccomodateEye();
     float oldA = lightColor.A();
@@ -184,9 +184,9 @@ void Scene::DrawFlare(ColorVal color, Vector3Par lightPos, bool secondary)
         Vector3 center(0.5f * w, 0.5f * h, 1);
         const int special = NoZBuf | IsLight | ClampU | ClampV | IsAlphaFog;
         // Flare0 is handled specially
+        if (primary)
         {
             lightColor.SetA(oldA * a * 2);
-            PackedColor color = PackedColor(lightColor);
             Texture* texture = Preloaded(PreloadedTexture(Flare0));
             if (texture)
             {
@@ -194,7 +194,9 @@ void Scene::DrawFlare(ColorVal color, Vector3Par lightPos, bool secondary)
                 if (mip.IsOK())
                 {
                     float sizeCoef = texture->AWidth() * (1.0f / 64);
-                    GEngine->DrawDecal(lightPos, 1, sizeX * sizeCoef, sizeY * sizeCoef, color, mip, special);
+                    // Source sprite retains the light's actual RGB headroom.
+                    // Secondary optical ghosts below keep their legacy path.
+                    GEngine->DrawLightDecal(lightPos, 1, sizeX * sizeCoef, sizeY * sizeCoef, lightColor, mip, special);
                 }
             }
         }
@@ -222,7 +224,7 @@ void Scene::DrawFlare(ColorVal color, Vector3Par lightPos, bool secondary)
     }
 }
 
-void Scene::DrawFlares()
+void Scene::DrawFlares(bool primary, bool allowSecondary)
 {
     if (!GetLandscape())
     {
@@ -287,12 +289,12 @@ void Scene::DrawFlares()
                 {
                     saturateMin(a, 1);
                     lightColor.SetA(a);
-                    DrawFlare(lightColor, GetCamera()->Position() - lightDir, secondary);
+                    DrawFlare(lightColor, GetCamera()->Position() - lightDir, secondary && allowSecondary, primary);
                 }
             }
         }
     }
-    if (night >= 0.2)
+    if (primary && night >= 0.2)
     {
         // draw flares from active lights
         Vector3Val camPos = GetCamera()->Position();
@@ -383,6 +385,12 @@ void Scene::ObjectsDrawn()
     // release all references
     DrawRain();
 
+    // In the HDR renderer, existing source sprites belong to the world light
+    // image, before AA/bloom/tone mapping and cockpit occlusion. Do not feed
+    // the secondary lens-flare ghosts into bloom or change GL33 ordering.
+    const bool hdrSources = GEngine->UsesHDRLighting();
+    if (hdrSources) DrawFlares(true, false);
+
     // All world alpha effects are complete; infantry optics (unlike vehicle
     // interiors) do not clear depth, so exclude the entire cockpit pass here.
     GEngine->FinishWorldEffects();
@@ -392,7 +400,7 @@ void Scene::ObjectsDrawn()
     _drawMergers.Resize(0);
     // keep drawObjects for next frame
 
-    DrawFlares();
+    DrawFlares(!hdrSources, true);
     _aLights.Resize(0);
 }
 

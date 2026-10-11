@@ -148,6 +148,7 @@ class VulkanContext
     std::string SetAntiAliasing(std::string_view mode);
     bool SetRenderScale(int percent);
     std::string SetHDR(std::string_view mode);
+    std::string SetBloom(std::string_view mode);
     void BeginAAWorld();
     void FinishAAWorld(const std::array<float, 4>& projection);
     bool TemporalEnabled() const { return IsTemporal(_aaMode) && _worldActive; }
@@ -204,6 +205,8 @@ class VulkanContext
         double gpuMs = 0;
         uint64_t gpuSamples = 0;
         double taaGpuMs = 0;
+        double bloomGpuMs = 0;
+        uint64_t bloomGpuSamples = 0;
         uint64_t taaGpuSamples = 0;
         uint64_t ssaoPasses = 0, ssaoGpuSamples = 0;
         double csmGpuMs = 0;
@@ -246,6 +249,7 @@ class VulkanContext
         VkQueryPool frameQueries = VK_NULL_HANDLE;
         bool frameTimestamped = false;
         bool taaTimestamped = false;
+        bool bloomTimestamped = false;
         bool ssaoTimestamped = false;
         VkQueryPool csmQueries = VK_NULL_HANDLE;
         bool csmTimestamped = false;
@@ -347,6 +351,22 @@ class VulkanContext
         VkFramebuffer framebuffer = VK_NULL_HANDLE;
     };
     std::array<TemporalTarget, 2> _taaHistory{};
+    static constexpr unsigned BloomLevels = 4;
+    struct BloomTarget
+    {
+        std::array<TemporalTarget, BloomLevels> down;
+        std::array<TemporalTarget, BloomLevels - 1> up;
+    };
+    bool _bloomEnabled = false, _bloomRequested = false;
+    float _bloomThreshold = 1.25f, _bloomStrength = .15f;
+    std::array<VkExtent2D, BloomLevels> _bloomExtents{};
+    std::vector<BloomTarget> _bloomTargets;
+    VkDescriptorPool _bloomPool = VK_NULL_HANDLE;
+    VkPipelineLayout _bloomLayout = VK_NULL_HANDLE;
+    VkPipeline _bloomPipeline = VK_NULL_HANDLE;
+    void CreateBloomResources();
+    void DestroyBloomResources() noexcept;
+    void DrawBloom(VkDescriptorSet source);
     VkRenderPass _taaPass = VK_NULL_HANDLE;
     bool _taaValid = false, _motionDebug = false, _taaInitialized = false;
     unsigned _taaIndex = 0, _taaFrame = 0;

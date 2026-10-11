@@ -437,7 +437,7 @@ void VulkanContext::CreateFrameResources()
             queries.queryType = VK_QUERY_TYPE_TIMESTAMP;
             queries.queryCount = 2;
             Check(vkCreateQueryPool(_device, &queries, nullptr, &frame.ssaoQueries), "create AO timestamps");
-            queries.queryCount = 4;
+            queries.queryCount = 6;
             Check(vkCreateQueryPool(_device, &queries, nullptr, &frame.frameQueries), "create frame GPU timestamps");
             queries.queryCount = 2;
             Check(vkCreateQueryPool(_device, &queries, nullptr, &frame.csmQueries), "create CSM timestamps");
@@ -789,6 +789,18 @@ bool VulkanContext::BeginFrame(uint32_t width, uint32_t height)
         }
         frame.taaTimestamped = false;
     }
+    if (frame.bloomTimestamped)
+    {
+        uint64_t stamps[2]{};
+        if (vkGetQueryPoolResults(_device, frame.frameQueries, 4, 2, sizeof(stamps), stamps,
+                                 sizeof(uint64_t), VK_QUERY_RESULT_64_BIT) == VK_SUCCESS)
+        {
+            const uint64_t mask = _timestampBits == 64 ? UINT64_MAX : (uint64_t(1) << _timestampBits) - 1;
+            _profile.bloomGpuMs += double((stamps[1]-stamps[0]) & mask)*_timestampPeriod/1e6;
+            ++_profile.bloomGpuSamples;
+        }
+        frame.bloomTimestamped = false;
+    }
     if (frame.ssaoTimestamped)
     {
         uint64_t stamps[2]{};
@@ -851,7 +863,7 @@ bool VulkanContext::BeginFrame(uint32_t width, uint32_t height)
     Check(vkBeginCommandBuffer(frame.command, &commands), "begin frame command buffer");
     if (frame.frameQueries)
     {
-        vkCmdResetQueryPool(frame.command, frame.frameQueries, 0, 4);
+        vkCmdResetQueryPool(frame.command, frame.frameQueries, 0, 6);
         vkCmdWriteTimestamp(frame.command, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, frame.frameQueries, 0);
     }
     VkClearValue clears[2]{};
@@ -1033,6 +1045,10 @@ void VulkanContext::ReportProfile()
         _profile.stateCommands[4] / frames, _profile.stateCommands[5] / frames,
         _profile.stateCommands[6] / frames, _profile.stateCommands[7] / frames);
     const double last = _profile.lastEnd;
+    if (_profile.bloomGpuSamples)
+        std::fprintf(stderr, "Vulkan Bloom: pyramid_gpu_ms=%.4f samples=%llu output=%ux%u\n",
+            _profile.bloomGpuMs / _profile.bloomGpuSamples,
+            static_cast<unsigned long long>(_profile.bloomGpuSamples), _extent.width, _extent.height);
     std::fprintf(stderr, "Vulkan GPU: aa=%s scale=%d frame_ms=%.4f samples=%llu\n", AAName(_aaMode), _renderScale,
         _profile.gpuSamples ? _profile.gpuMs/_profile.gpuSamples : -1.,
         static_cast<unsigned long long>(_profile.gpuSamples));

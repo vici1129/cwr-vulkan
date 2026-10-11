@@ -385,6 +385,7 @@ class Engine : public IGraphicsEngine
     virtual void ResetTemporalHistory() {}
     virtual RString SetAntiAliasing(RString) { return "UNSUPPORTED: renderer has no AA selector"; }
     virtual RString SetHDR(RString) { return "UNSUPPORTED: renderer has no HDR output"; }
+    virtual RString SetBloom(RString) { return "UNSUPPORTED: renderer has no HDR bloom"; }
     virtual bool UsesHDRLighting() const { return false; }
     virtual bool SetWorldRenderScale(int) { return false; }
     virtual bool SetSSAO(bool, float, float, float, float) { return false; }
@@ -550,6 +551,11 @@ class Engine : public IGraphicsEngine
     }
     void DrawDecal(Vector3Par pos, float rhw, float sizeX, float sizeY, PackedColor col, const MipInfo& mip,
                    int specFlags) override = 0; // 3D rectangle
+    // Preserve computed light-sprite RGB before legacy ARGB packing. Other
+    // backends retain exactly their existing packed path, including fog alpha.
+    virtual void DrawLightDecal(Vector3Par pos, float rhw, float sizeX, float sizeY, ColorVal color,
+                                const MipInfo& mip, int flags)
+    { DrawDecal(pos, rhw, sizeX, sizeY, PackedColor(color), mip, flags); }
     void Draw2D(const Draw2DPars& pars, const Rect2DAbs& rect,
                 const Rect2DAbs& clip = Rect2DClipAbs) override = 0; // 2D rectangle
     virtual void Draw2D(const Draw2DPars& pars, const Rect2DPixel& rect, const Rect2DPixel& clip = Rect2DClipPixel)
