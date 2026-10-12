@@ -40,7 +40,9 @@ protected:
 	virtual void Prepare( const Matrix4 &worldToModel ) = 0;
 	virtual void SetMaterial( const TLMaterial &mat ) = 0;
 	virtual Color Apply( Vector3Par pos, Vector3Par normal ) = 0;
-	virtual float Brightness() const = 0;
+    // Optional Vulkan separation after Prepare/SetMaterial. Ambient stays in Apply.
+    virtual Color ApplyDirect(Vector3Par, Vector3Par) const { return HBlack; }
+    virtual float Brightness() const = 0;
 	virtual float SortBrightness() const;
 	virtual Color GetObjectColor() const = 0;
 	virtual void ToDraw( ClipFlags clipFlags=ClipAll, bool dimmed=false )= 0;
@@ -162,8 +164,9 @@ class LightPositionedColored: public LightPositioned
 	protected:
 	Color _ambientPrecalc;
 	Color _diffusePrecalc;
+    Color _forcedPrecalc;
 
-	Color _ambient;
+    Color _ambient;
 	Color _diffuse;
 
 	public:
@@ -258,7 +261,8 @@ class LightReflector: public LightPositionedColored
 	float FlareIntensity( Vector3Par camPos, Vector3Par camDir ) const override;
 	
 	Color Apply( Vector3Par point, Vector3Par normal ) override;
-	void GetDescription(LightDescription &desc) const override;
+    Color ApplyDirect(Vector3Par point, Vector3Par normal) const override;
+    void GetDescription(LightDescription &desc) const override;
 	void ToDraw( ClipFlags clipFlags=ClipAll, bool dimmed=false ) override;
 };
 

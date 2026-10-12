@@ -9,6 +9,9 @@
 #include <Poseidon/World/Simulation/FrameInv.hpp>
 #include <Poseidon/Graphics/Rendering/Primitives/Poly.hpp>
 #include <Poseidon/Graphics/Shadow/ShadowMath.hpp>
+#include <Poseidon/World/Terrain/Landscape.hpp>
+#include <Poseidon/World/World.hpp>
+#include <set>
 
 #include <chrono>
 #include <cstring>
@@ -31,14 +34,17 @@ namespace Poseidon
 static int g_lastShadowProxyVerts = 0;
 void Scene::PrepareEarlyShadowMaps()
 {
-    if (!GEngine->NeedsSunShadowDepth() || !GEngine->ShadowMapsBeforeWorld())
+    const int localLights = GEngine->PrepareLocalShadows();
+    if ((!GEngine->NeedsSunShadowDepth() || !GEngine->ShadowMapsBeforeWorld()) && !localLights)
         return;
     PrepareObjectsForDrawing();
     _objectsPreparedEarly = true;
     const float sun = floatMax(0.0f, floatMin(1.0f, 1.0f - _mainLight->NightEffect()));
     GEngine->SetShadowMapSunFactor(sun);
-    if (sun > 0.01f)
+    if (sun > 0.01f && GEngine->NeedsSunShadowDepth() && GEngine->ShadowMapsBeforeWorld())
         RenderShadowMapDepthPass(_drawMergers.Size());
+    for (int i = 0; i < localLights; ++i)
+        RenderShadowMapDepthPass(_drawMergers.Size(), i);
 }
 } // namespace Poseidon
 int LastShadowProxyVertCount()
@@ -83,7 +89,7 @@ constexpr size_t kStaticCasterCacheCap = 1024;
 // Scene.cpp stays under the file-size limit.  Collects the visible casters
 // (solid + alpha-cutout per texture, camera-relative) plus their proxies, builds
 // the tiered omni+frustum cascades, and renders them.  Off by default.
-void Scene::RenderShadowMapDepthPass(int nDraw)
+void Scene::RenderShadowMapDepthPass(int nDraw, int localLight)
 {
     namespace sm = Poseidon::shadow;
     extern bool gPerfDumpShadowsOnce;
@@ -100,7 +106,8 @@ void Scene::RenderShadowMapDepthPass(int nDraw)
     smVerts.clear();
     smAlphaVerts.clear();
     smAlphaBatches.clear();
-    g_lastShadowProxyVerts = 0;
+    if (localLight < 0)
+        g_lastShadowProxyVerts = 0;
     for (auto& kv : s_alphaByTex)
     {
         kv.second.clear();
@@ -267,15 +274,67 @@ void Scene::RenderShadowMapDepthPass(int nDraw)
         }
     };
 
-    for (int i = 0; i < nDraw; i++)
+    // Local lights also need nearby casters outside the observer's draw list.
+    // Reuse landscape spatial buckets and the live entity lists; never append
+    // to the world's draw queues or build a second persistent scene cache.
+    SortObjectList localCasters;
+    if (localLight >= 0 && GetLandscape())
     {
-        SortObject* oi = _drawMergers[i];
+        LightDescription light{};
+        GEngine->LocalShadowLight(localLight)->GetDescription(light);
+        std::set<Object*> seen;
+        auto add = [&](Object* object)
+        {
+            if (!object || !seen.insert(object).second || !object->GetShape())
+                return;
+            auto* shape = object->GetShape();
+            if (!GEngine->LocalShadowCaster(localLight, object->PositionModelToWorld(shape->BoundingCenter()),
+                                            shape->BoundingSphere() * object->Scale()) ||
+                (object->GetObjSpecial() & (IsHidden | IsHiddenProxy | NoShadow | ShadowDisabled | IsLight)))
+                return;
+            Ref<SortObject> entry = new SortObject;
+            entry->object = object;
+            entry->shape = shape;
+            // Observer movement must not change caster LOD under a stationary light.
+            entry->distance2 = object->Position().Distance2(light.pos);
+            int level = LevelFromDistance2(shape, entry->distance2, object->Scale(), object->Direction(), light.dir);
+            if (level == LOD_INVISIBLE)
+                level = 0;
+            entry->drawLOD = entry->shadowLOD = level;
+            localCasters.Add(entry);
+        };
+        for (int i = 0; i < nDraw; ++i)
+            add(_drawMergers[i]->object);
+        int x0, x1, z0, z1;
+        ObjRadiusRectangle(x0, x1, z0, z1, light.pos, light.pos, std::min(160.f, light.startAtten * 10.f));
+        for (int z = z0; z <= z1; ++z)
+            for (int x = x0; x <= x1; ++x)
+            {
+                const auto& objects = GetLandscape()->GetObjects(z, x);
+                for (int i = 0; i < objects.Size(); ++i)
+                    add(objects[i]);
+            }
+        if (GWorld)
+        {
+            for (int i = 0; i < GWorld->NVehicles(); ++i)
+                add(GWorld->GetVehicle(i));
+            for (int i = 0; i < GWorld->NFastVehicles(); ++i)
+                add(GWorld->GetFastVehicle(i));
+        }
+    }
+    const int casterCount = localLight >= 0 ? localCasters.Size() : nDraw;
+    for (int i = 0; i < casterCount; i++)
+    {
+        SortObject* oi = localLight >= 0 ? localCasters[i] : _drawMergers[i];
         if (!oi->object || !oi->shape)
         {
             continue;
         }
         // Beyond the shadow range nothing samples this caster's depth.
-        if (oi->distance2 > smCasterMaxDist2)
+        if (localLight >= 0
+                ? !GEngine->LocalShadowCaster(localLight, oi->object->PositionModelToWorld(oi->shape->BoundingCenter()),
+                                              oi->shape->BoundingSphere() * oi->object->Scale())
+                : oi->distance2 > smCasterMaxDist2)
         {
             continue;
         }
@@ -303,7 +362,7 @@ void Scene::RenderShadowMapDepthPass(int nDraw)
         // 250 battle soldiers at the 744-vert LOD dominated the collection (4 ms
         // CPU/frame). Never select finer than the draw LOD, and keep the screen
         // LOD untouched near the camera where the silhouette is texel-resolved.
-        if (smCap.casterLodBias > 1.0f)
+        if (localLight < 0 && smCap.casterLodBias > 1.0f)
         {
             const float biased2 = oi->distance2 * Square(smCap.casterLodBias);
             int coarse = LevelFromDistance2(oi->shape, biased2, oi->object->Scale(), oi->object->Direction(),
@@ -320,7 +379,7 @@ void Scene::RenderShadowMapDepthPass(int nDraw)
             continue;
         }
         censusCasters++;
-        if (oi->object->Static())
+        if (oi->object->Static() && localLight < 0)
         {
             StaticCasterCache& e = s_staticCasterCache[oi->object];
             if (e.obj != oi->object || e.geomLOD != geomLOD || (e.pos - oi->object->Position()).SquareSize() != 0 ||
@@ -337,6 +396,8 @@ void Scene::RenderShadowMapDepthPass(int nDraw)
         }
         else
         {
+            if (localLight >= 0)
+                oi->object->Animate(geomLOD);
             collectShape(s, fb);
         }
 
@@ -361,9 +422,9 @@ void Scene::RenderShadowMapDepthPass(int nDraw)
             {
                 continue;
             }
-            const float pdist2 = ptrans.Position().Distance2(camPos);
-            int plevel =
-                LevelFromDistance2(pshape, pdist2, ptrans.Scale(), ptrans.Direction(), GetCamera()->Direction());
+            const float pdist2 = localLight >= 0 ? oi->distance2 : ptrans.Position().Distance2(camPos);
+            int plevel = LevelFromDistance2(pshape, pdist2, ptrans.Scale(), ptrans.Direction(),
+                                            localLight >= 0 ? obj->Direction() : GetCamera()->Direction());
             if (plevel == LOD_INVISIBLE)
             {
                 continue;
@@ -374,11 +435,19 @@ void Scene::RenderShadowMapDepthPass(int nDraw)
                 continue;
             }
             FrameWithInverse pframe(ptrans, pinv);
+            if (localLight >= 0)
+                proxy->Animate(plevel);
             collectShape(ps, pframe);
+            if (localLight >= 0)
+                proxy->Deanimate(plevel);
         }
-        g_lastShadowProxyVerts += static_cast<int>((smVerts.size() - solidBeforeProxy) / 3);
+        if (localLight >= 0)
+            obj->Deanimate(geomLOD);
+        if (localLight < 0)
+            g_lastShadowProxyVerts += static_cast<int>((smVerts.size() - solidBeforeProxy) / 3);
     }
-    gSmDepthCachedCasters = censusCached;
+    if (localLight < 0)
+        gSmDepthCachedCasters = censusCached;
     // Flatten the per-texture alpha buckets into one buffer + batch ranges.
     for (auto& kv : s_alphaByTex)
     {
@@ -392,6 +461,18 @@ void Scene::RenderShadowMapDepthPass(int nDraw)
         batch.vertexCount = static_cast<int>(kv.second.size() / 5);
         smAlphaVerts.insert(smAlphaVerts.end(), kv.second.begin(), kv.second.end());
         smAlphaBatches.push_back(batch);
+    }
+    if (localLight >= 0)
+    {
+        Engine::ShadowCasterSet casters;
+        casters.solidXYZ = smVerts.data();
+        casters.solidVertexCount = int(smVerts.size() / 3);
+        casters.alphaXYZUV = smAlphaVerts.data();
+        casters.alphaVertexCount = int(smAlphaVerts.size() / 5);
+        casters.alphaBatches = smAlphaBatches.data();
+        casters.alphaBatchCount = int(smAlphaBatches.size());
+        GEngine->RenderLocalShadowDepth(localLight, casters);
+        return;
     }
     // Cascaded shadow maps fit in camera-relative space, snapped to a world grid
     // (ShadowMath::BuildShadowCascadesTiered, proven by [ShadowMath] unit tests), so

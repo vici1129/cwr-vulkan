@@ -87,6 +87,7 @@ void TLVertexTable::ReleaseTables()
 {
     hdrColor.clear();
     directSun.clear();
+    directLocal.clear();
     previousClip.clear();
     _clip.Clear();
     _posTrans.Clear();
@@ -125,6 +126,7 @@ void TLVertexTable::DoTransformPoints(const VertexTable& src, const Matrix4& pos
 {
     hdrColor.clear();
     directSun.clear();
+    directLocal.clear();
     previousClip.clear();
     // this is the most common case
     // simple mesh with no decal polygons
@@ -151,6 +153,7 @@ void TLVertexTable::DoTransformPoints(const IAnimator* anim, const Shape& src, c
 {
     hdrColor.clear();
     directSun.clear();
+    directLocal.clear();
     previousClip.clear();
     int i;
     _orHints = src._orHints;
@@ -502,6 +505,10 @@ void TLVertexTable::DoMaterialLightingP(const TLMaterial& mat, const Matrix4& wo
     // check for special case: no lights
     bool someLights = (addLightsFactor >= StartLights && lights.Size() > 0);
     // assume dammage value is constant over whole object
+    // A later material section may reuse vertices without any local light.
+    if (!directLocal.empty())
+        for (int i = beg; i < end; ++i)
+            directLocal[i] = {};
     Vector3 sunDirection = worldToModel.Rotate(sun->Direction());
     sunDirection.Normalize();
 
@@ -637,6 +644,9 @@ void TLVertexTable::DoMaterialLightingP(const TLMaterial& mat, const Matrix4& wo
     else
     {
         const UVPair* tex = mesh._tex.Data();
+        const bool separateLocal = GEngine->LocalShadowLight(0) && !(spec & (IsShadow | IsLight | IsAlphaFog));
+        if (separateLocal)
+            directLocal.resize(NVertex());
         for (int i = beg; i < end; i++)
         {
             TLVertex& v = SetVertex(i);
@@ -654,9 +664,20 @@ void TLVertexTable::DoMaterialLightingP(const TLMaterial& mat, const Matrix4& wo
 
             Vector3Val norm = mesh.Norm(i);
             Vector3Val pos = mesh.Pos(i);
+            if (separateLocal)
+                directLocal[i] = {};
             for (int index = 0; index < lights.Size(); index++)
             {
                 colorI += lights[index]->Apply(pos, norm);
+                if (separateLocal)
+                    for (int slot = 0; slot < 2; ++slot)
+                        if (lights[index] == GEngine->LocalShadowLight(slot))
+                        {
+                            const Color direct = lights[index]->ApplyDirect(pos, norm);
+                            directLocal[i][slot * 3] = direct.R();
+                            directLocal[i][slot * 3 + 1] = direct.G();
+                            directLocal[i][slot * 3 + 2] = direct.B();
+                        }
             }
             // lighting with normal defined
             PreserveHDRColor(i, colorI);
@@ -1020,6 +1041,21 @@ void TLVertexTable::DoLightingColorized(const LightList& lights,
         PoseidonAssert(index >= 0 && index < 256);
         Color colorize = colors[index];
         colorI = colorI * colorize * 2;
+        if (someLights && GEngine->LocalShadowLight(0) && !(spec & (DisableSun | IsWater | IsLight)))
+        {
+            directLocal.resize(NVertex());
+            directLocal[i] = {};
+            for (int slot = 0; slot < 2; ++slot)
+                for (int li = 0; li < lights.Size(); ++li)
+                    if (lights[li] == GEngine->LocalShadowLight(slot))
+                    {
+                        const Color direct = lights[li]->ApplyDirect(mesh.Pos(i), normal) * colorize * 2;
+                        directLocal[i][slot * 3] = direct.R();
+                        directLocal[i][slot * 3 + 1] = direct.G();
+                        directLocal[i][slot * 3 + 2] = direct.B();
+                        break;
+                    }
+        }
         if (GEngine && GEngine->SeparateSunlight() && !(spec & (DisableSun | IsWater | IsLight)))
         {
             const Color direct = sun->DiffusePrecalc() * cosFi * colorize * 2;

@@ -12,6 +12,33 @@ layout(location = 3) in vec3 specularColor;
 layout(location = 4) in vec3 shadowWorld;
 layout(location = 5) in vec4 previousClip;
 layout(location = 6) in vec4 directSun;
+layout(location = 7) in vec3 localDirect0;
+layout(location = 8) in vec3 localDirect1;
+layout(set = 3, binding = 6) uniform sampler2DArray localDepth0;
+layout(set = 3, binding = 7) uniform sampler2DArray localDepth1;
+
+float localVisibility(int slot, sampler2DArray map) {
+    vec4 clip = lighting.localShadowVP[slot] * vec4(shadowWorld, 1);
+    if (clip.w <= .1) return 1.0;
+    vec3 p = clip.xyz / clip.w;
+    vec2 uv = vec2(p.x, -p.y) * .5 + .5;
+    if (p.z <= 0 || p.z >= 1 || any(lessThan(uv,vec2(0))) || any(greaterThan(uv,vec2(1)))) return 1.0;
+    // Receiver-plane PCF correction keeps sloping terrain attached without a
+    // large constant perspective-depth bias. Bound corrections at silhouettes.
+    vec3 dx=dFdx(vec3(uv,p.z)), dy=dFdy(vec3(uv,p.z));
+    float det=dx.x*dy.y-dx.y*dy.x;
+    vec2 gradient=abs(det)>1e-12 ? vec2(dy.y*dx.z-dx.y*dy.z,dx.x*dy.z-dy.x*dx.z)/det : vec2(0);
+    float texel=1.0/lighting.localShadowControl.y;
+    float bias=max(2e-7, .006/(clip.w*clip.w));
+    float visibility=0;
+    for(int y=-1;y<=1;++y) for(int x=-1;x<=1;++x) {
+        vec2 offset=vec2(x,y)*texel;
+        float correction=clamp(dot(gradient,offset),-bias*4,bias*4);
+        visibility += p.z+correction-bias <= texture(map,vec3(uv+offset,0)).r ? 1.0 : 0.0;
+    }
+    float range=lighting.localShadowControl[2+slot];
+    return mix(visibility/9.0,1.0,smoothstep(range*.8,range,clip.w));
+}
 #ifdef RT_SUN
 layout(location = 2) out vec4 outSun;
 #endif
@@ -34,7 +61,12 @@ vec3 nightResponse(vec3 color) {
 }
 void main() {
     vec4 texel = WORLD_TEXTURE(diffuseTexture, texCoord);
-    outColor = vec4(texel.rgb * legacyLightToLinear(draw.color.rgb * vertexColor.rgb),
+    vec3 litColor = vertexColor.rgb;
+    int localMask = int(lighting.localShadowControl.x);
+    if ((localMask & 1) != 0) litColor -= localDirect0 * (1.0-localVisibility(0,localDepth0));
+    if ((localMask & 2) != 0) litColor -= localDirect1 * (1.0-localVisibility(1,localDepth1));
+    if (localMask != 0) litColor = max(litColor,vec3(0));
+    outColor = vec4(texel.rgb * legacyLightToLinear(draw.color.rgb * litColor),
                     texel.a * draw.color.a * vertexColor.a);
     // Match GL33 TGDetail's 32x UV and PSDetail's alpha modulation.
     if (draw.detailEnabled > 1.5) {
@@ -57,7 +89,7 @@ void main() {
     if (captureSun) {
         // Derive the sunlight-only difference in linear HDR, not by multiplying
         // ambient/emissive/local lighting or already-composited fog.
-        base = texel.rgb * legacyLightToLinear(draw.color.rgb * max(vertexColor.rgb-directSun.rgb,vec3(0)));
+        base = texel.rgb * legacyLightToLinear(draw.color.rgb * max(litColor-directSun.rgb,vec3(0)));
         if(draw.detailEnabled>.5) base *= legacyLightToLinear(vec3(WORLD_TEXTURE(detailTexture,texCoord*32).a*2));
     }
     if (separate) {

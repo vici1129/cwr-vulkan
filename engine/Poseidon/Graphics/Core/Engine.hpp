@@ -28,6 +28,7 @@
 
 namespace Poseidon
 {
+class Light;
 
 // Per-frame draw-call counter — incremented at the GL emission seams,
 // consumed + reset by World::Simulate's FrameProfiler EndFrame.
@@ -398,6 +399,10 @@ class Engine : public IGraphicsEngine
     virtual RString SetRTShadows(RString) { return "UNSUPPORTED: RT shadows require Vulkan"; }
     virtual RString SetContactShadows(RString) { return "UNSUPPORTED: contact shadows require Vulkan"; }
     virtual RString SetSoftShadows(RString) { return "UNSUPPORTED: soft shadows require Vulkan"; }
+    virtual RString SetLocalShadows(RString) { return "UNSUPPORTED: local shadows require Vulkan"; }
+    virtual int PrepareLocalShadows() { return 0; }
+    virtual Light* LocalShadowLight(int) const { return nullptr; }
+    virtual bool LocalShadowCaster(int, Vector3Par, float) const { return false; }
     virtual RString SetRTReflections(RString) { return "UNSUPPORTED: RT water reflections require Vulkan"; }
     virtual RString SetWaterRefraction(RString) { return "UNSUPPORTED: water refraction requires Vulkan"; }
     virtual RString SetCloudShadows(RString) { return "UNSUPPORTED: cloud shadows require Vulkan"; }
@@ -859,6 +864,7 @@ class Engine : public IGraphicsEngine
         const ShadowCasterBatch* alphaBatches = nullptr;
         int alphaBatchCount = 0;
     };
+    virtual void RenderLocalShadowDepth(int, const ShadowCasterSet&) {}
 
     /// Render the caster set from the light into the cascade depth array —
     /// `numCascades` column-major light view-projections back-to-back in

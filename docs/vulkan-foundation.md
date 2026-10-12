@@ -1,5 +1,175 @@
 # Vulkan backend development
 
+## Optional shadowed local spotlights (2026-10-12)
+
+Built from public main `3d8e28e` in an isolated worktree; the dirty private
+DLSS/NGX checkout was not edited. Default **Off**, Vulkan only, process-local:
+
+```sqf
+triLocalShadows "on"
+triLocalShadows "off"
+triLocalShadows "status"
+```
+
+No RT requirement, menu, persistent setting, asset or dependency. GL33 returns
+`UNSUPPORTED`. CSM, contact shadows, RT sunlight and weather controls remain
+independent. Status reports the completed active-light count, fixed limits,
+submitted caster vertices and selected engine light positions/directions.
+`depthGPUms` is the sum of the two depth passes, read after the ordinary frame
+fence; it requires `CWR_VK_PROFILE=1`, otherwise zero is not a measurement.
+
+### Engine integration and bounds
+
+The scene's existing active `LightReflector`/`LightDescription` objects supply
+position, direction, color, attenuation distance and cone description. No lights
+are synthesized. Among relevant, enabled spotlights, at most two are selected
+using brightness/distance, scene insertion order for ties and a 30% incumbent
+score advantage. A retained pair keeps its slot order. Conservative camera/cone
+bounds keep off-screen headlights that illuminate visible ground; daytime,
+disabled/out-of-range lights and empty selections skip the depth passes.
+Ordinary point lights remain unshadowed.
+
+Each selected light uses a light-anchored, camera-relative perspective map:
+1024 squared D32, 0.1 m near plane, far plane limited to the smaller of the
+engine's attenuation cutoff and 160 m. Shadow visibility fades out over the
+last 20% of that range. The original vertex-light cone/falloff equations stay
+unchanged; the depth frustum conservatively encloses that cone. Camera motion
+does not recenter the map. Object caster LOD distance is measured from the light.
+
+The existing CSM solid/cutout depth pass, streaming buffers, texture-alpha
+classification and proxy traversal are reused. Local variants use no culling,
+constant/slope depth bias 1/1, and fragment 3x3 PCF with bounded receiver-plane
+depth correction and approximately 6 cm receiver bias. Alpha cutouts use the
+existing 0.5 threshold. Terrain comes from a bounded `SurfaceY` patch at the
+engine terrain grid (minimum 3.125 m). Landscape spatial buckets and existing
+vehicle/entity lists also include nearby off-screen casters, filtered against
+each light's range/cone. Existing `Animate`/`Deanimate` supplies available live
+poses; there is no new animation system or persistent local-caster cache.
+
+Two maps per fence-owned frame slot consume 16 MiB of depth storage with two
+frames in flight, allocated only after an eligible light renders. They reuse
+CSM render-pass infrastructure but not CSM images, matrices, settings or counters.
+The existing weather descriptor set carries the two extra samplers, preserving
+the four-set device limit. Descriptor variants are keyed by CSM/local-map mask
+so already-recorded draws are not retroactively updated.
+
+### Preserve lighting, separate only the selected contribution
+
+`shape.vert` still evaluates the original engine-selected local lights. It
+additionally exports the two selected direct contributions. `shape.frag` removes
+only their occluded portion before HDR conversion, night-eye response and fog.
+Unoccluded samples therefore retain the original colors, brightness and cone
+attenuation. Ambient, other local lights, sunlight, emissive and fog terms are
+not multiplied by spotlight visibility.
+
+CPU-lit terrain, roads and animated/material shapes carry the corresponding
+prepared direct contributions through `TLVertexTable`, CPU clipping and the
+screen-vertex path. `LightReflector::ApplyDirect` matches the prepared cone and
+attenuation, including material forced-diffuse but excluding actual ambient.
+The original `Apply` result is unchanged. Disabled rendering has no selected
+contributions or shadow sampling. Emissive flares, UI, overlays and unsupported
+software projections retain their existing path.
+
+### Measurements
+
+RTX 4060 Ti 8 GiB, driver 617.14, i7-12700F; stock nighttime Malden street,
+Jeep headlights and a Ural caster. AA Off, 100% scale, VSync and validation Off,
+existing 240 FPS cap not reached. Final-build 12-second samples per state,
+Off/On after three-second warmups, for both stationary and moving scenes.
+Values below are medians of the existing two-second profiler intervals; depth timestamps were sampled
+separately. Both actual swapchain/world extents were verified in the logs.
+
+| Resolution / scene | GPU frame Off / On (ms) | Two depth maps (ms) | Recorded frame interval Off / On (ms) |
+| --- | --- | --- | --- |
+| 1920x1080, stationary | 1.767 / 2.205 | 0.283 | 6.189 / 7.158 |
+| 1920x1080, moving/turning | 1.861 / 2.293 | 0.299 | 6.188 / 7.046 |
+| 2560x1440, stationary | 1.887 / 2.269 | 0.213 | 6.188 / 6.758 |
+| 2560x1440, moving/turning | 1.979 / 2.272 | 0.211 | 6.191 / 6.731 |
+
+Moving samples repeatedly translate/turn the actual Jeep and turn the Ural in
+a controlled, paused-simulation sweep. Logged headlight transforms confirm the
+engine lights move too; this is not a driving-FPS benchmark. Separate live
+keyboard driving checks exercise simulation. GPU clocks were not locked, so
+the depth-pass difference between resolutions is not a resolution-speedup claim.
+Typical submissions were approximately 38k-48k vertices per light, with zero
+new steady Vulkan streaming allocations/frame in these runs. CPU collection
+still costs time; dense modded scenes can cost more. Raw evidence is under
+ignored `build/shadow-live/local-shadow-release-perf1080` and
+`local-shadow-release-perf1440` (executable SHA-256 begins `E20C08C89443`). Earlier
+repeated Off/On/Off/On trials, before the final bias/section guard refinements,
+showed approximately 0.4-0.5 ms GPU overhead too (`local-shadow-perf1080b`,
+`local-shadow-perf1440`). These are short controlled samples, not a universal
+frame-rate or dense-battle guarantee.
+
+### Verification and limitations
+
+Native Windows development builds, stock **Steal the Car / Malden** and
+**Heavy Metal / Everon**, actual mission geometry and simulation. These were
+direct diagnostic launches with copied profiles and muted audio, not Steam
+release qualification or mission-completion tests. Developer commands placed
+stock vehicles/units and set nighttime/weather; frozen matched views supplement
+live driving/turning and existing animation, rather than replacing them.
+
+- Malden: Jeep headlights, Ural, soldier, building/wall/fence and cutout foliage.
+  The soldier's silhouette appears on the truck; the truck blocks light on the
+  building and vegetation behind it. Unobstructed illumination is retained.
+- Everon: stock UH60 spotlights over terrain with truck, soldier and the
+  mission's moving Abrams tanks. Distinct vehicle and human silhouettes fall
+  onto the ground. A modest bias increase removed observed slope speckling.
+  Turning/moving light and caster transforms move those silhouettes. Multiple
+  nearby tank lights remain bounded to two selected sources; turning the UH60
+  lights off allows the tank lights to replace them. No dedicated standalone
+  searchlight class was found in the stock config; arbitrary mod searchlights
+  are not qualified.
+- AA Off, TAA, FSR Quality and 4x MSAA: final-build matched pairs and movement
+  checks. Day/night transitions, camera-out-of-range and return, no eligible
+  lights, fog/overcast, atmosphere, cloud shadows and volumetric clouds exercised.
+  At 19:00 both local maps, soft CSM, RT sunlight rays and CSM volumetric
+  scattering were active together. At night sunlight rays/scattering naturally
+  stop while the local maps continue.
+- Final validation runs `local-shadow-release-malden` (15,132 frames) and
+  `local-shadow-everon-bias` (8,506 frames): normal shutdown, equal submitted /
+  presented counts, **zero core/synchronization errors or warnings**. Earlier
+  malformed developer-script trials exited test mode and are not counted as
+  successful runtime checks. No hardware fault/resource-exhaustion injection.
+- Focused Vulkan suite: 1,038 assertions / 65 cases; GL33-only build: 998 /
+  64; driver-free Vulkan policy/lifetime suite: 457 checks. Projection/camera
+  translation, cone/direct/ambient separation, forced diffuse, clipping and
+  default-Off/control independence are covered. The policy suite's intentional
+  synthetic teardown error is separate from real Vulkan validation.
+- GL33-only nighttime runtime: the new command returns `UNSUPPORTED`, world
+  pixels stay identical across the command (only the timed help overlay fades).
+  Everon Off -> On -> Off is pixel-identical on return; Malden's return differs
+  only in the timed action-menu overlay. This is not a claim of cross-renderer
+  pixel parity. Private NGX files, stock assets and original profiles are intact.
+
+Raw, unretouched 1920x1080 client captures (window border retained):
+
+| Scene | Off | On |
+| --- | --- | --- |
+| Malden: soldier onto vehicle; vehicle onto building/foliage | [Off](evidence/local-shadows/malden-off.png) | [On](evidence/local-shadows/malden-on.png) |
+| Everon: UH60 spotlights, truck/soldier/tank onto terrain | [Off](evidence/local-shadows/everon-off.png) | [On](evidence/local-shadows/everon-on.png) |
+
+For the Malden pair: Jeep near `[7210,7897,0]`, Ural `[7208,7923,0]`, soldier
+`[7210,7916,0]`; developer camera `[7215,174,7910,-.18,-.18,.96]`.
+For Everon: UH60 `[6620,5280,12]`, engine reflector lights On, vehicle direction/up
+`[[0,1,-.2],[0,.2,1]]`; Ural `[6616,5325,0]`, soldier `[6618,5318,0]`, camera
+`[6627,84,5302,-.25,-.25,.93]`. Vehicle/actor coordinates use script x/z/AGL;
+camera coordinates use engine x/absolute-y/z. Both use July 5, 1985, 00:00,
+clear weather, zero fog, AA Off and CSM Off for these comparisons. No synthetic
+light or altered game asset is used. Local receipts include build hashes and
+the complete developer-command log.
+
+Limits: two important spotlights, not every nearby light; 160 m maximum shadow
+coverage; fixed small PCF rather than area-light penumbrae. Legacy local ambient
+is deliberately preserved, so shallow-angle ground shadows can be subtle.
+Stock translucent light-cone meshes remain emissive and are **not** volumetrically
+occluded by this feature. Transparent particles/glass, procedural effects,
+model `NoShadow`/`CastShadow` exclusions and proxies opted out by their parent
+do not gain new caster support. Terrain triangulation/LOD and cutout alpha are
+the existing geometry approximations. No cubemaps, clustered lighting, RT local
+rays, general shadow manager, animation framework or mod-wide caster guarantee.
+
 ## Optional volumetric clouds (2026-10-12)
 
 Built from main `33b7499` (including `02bd402`) in an isolated worktree, without

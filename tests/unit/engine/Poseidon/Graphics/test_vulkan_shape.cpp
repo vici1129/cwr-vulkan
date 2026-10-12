@@ -11,9 +11,79 @@
 #include <PoseidonVK/TextureInterpolationVK.hpp>
 #include <catch2/catch_approx.hpp>
 #include <limits>
+#include <PoseidonVK/LocalShadowVK.hpp>
 #include <Poseidon/Graphics/Core/TLVertex.hpp>
 
 using namespace Poseidon;
+
+TEST_CASE("Spotlight direct separation preserves the prepared cone and excludes ambient",
+          "[Graphics][vulkan-shape][local-shadows]")
+{
+    LightReflector light(nullptr, Color(.8f, .6f, .4f), HBlack, .2f);
+    light.SetPosition(VZero);
+    light.Prepare(MIdentity);
+    TLMaterial material;
+    material.diffuse = Color(.7f, .5f, .3f);
+    material.forcedDiffuse = Color(.2f, .1f, .05f);
+    material.ambient = Color(.4f, .3f, .2f);
+    for (float distance : {1.f, 100.f, 300.f, 2001.f})
+        for (float angle : {0.f, .16f, .20f, .25f, 3.f})
+            for (float sign : {-1.f, 1.f})
+            {
+                const Vector3 point(std::sin(angle) * distance, 0, std::cos(angle) * distance);
+                const Vector3 normal(0, 0, sign);
+                light.SetAmbient(HBlack);
+                light.SetMaterial(material);
+                const auto total = light.Apply(point, normal), direct = light.ApplyDirect(point, normal);
+                REQUIRE(direct.R() == Catch::Approx(total.R()).margin(1e-6f));
+                REQUIRE(direct.G() == Catch::Approx(total.G()).margin(1e-6f));
+                REQUIRE(direct.B() == Catch::Approx(total.B()).margin(1e-6f));
+                light.SetAmbient(Color(.3f, .2f, .1f));
+                light.SetMaterial(material);
+                REQUIRE(light.ApplyDirect(point, normal).R() == Catch::Approx(direct.R()).margin(1e-6f));
+                REQUIRE(light.Apply(point, normal).R() + 1e-6f >= direct.R());
+            }
+}
+
+TEST_CASE("Local spotlight projection is light anchored and has perspective depth",
+          "[Graphics][vulkan-shape][local-shadows]")
+{
+    auto project = [](const auto& m, std::array<float, 3> p)
+    {
+        std::array<float, 4> out{};
+        for (int r = 0; r < 4; ++r)
+            out[r] = m[r] * p[0] + m[4 + r] * p[1] + m[8 + r] * p[2] + m[12 + r];
+        for (int r = 0; r < 3; ++r)
+            out[r] /= out[3];
+        return out;
+    };
+    const auto m = vk::LocalShadowMatrix({2, 3, 4}, {0, 0, 1}, .3f, 160);
+    REQUIRE(project(m, {2, 3, 4.1f})[2] == Catch::Approx(0).margin(.00002));
+    REQUIRE(project(m, {2, 3, 164})[2] == Catch::Approx(1));
+    REQUIRE(project(m, {2, 3, 14})[0] == Catch::Approx(0));
+    REQUIRE(project(m, {2 + 10 * std::tan(.3f), 3, 14})[0] == Catch::Approx(1));
+    const auto moved = vk::LocalShadowMatrix({-18, 8, 34}, {0, 0, 1}, .3f, 160);
+    const auto a = project(m, {4, 4, 54}), b = project(moved, {-16, 9, 84});
+    for (int i = 0; i < 4; ++i)
+        REQUIRE(a[i] == Catch::Approx(b[i]));
+    const auto vertical = vk::LocalShadowMatrix({0, 0, 0}, {0, 1, 0}, .3f, 160);
+    REQUIRE(project(vertical, {0, 10, 0})[0] == Catch::Approx(0));
+    REQUIRE(project(vertical, {0, 10, 0})[1] == Catch::Approx(0));
+}
+
+TEST_CASE("Clipping preserves the two selected local contributions independently",
+          "[Graphics][vulkan-shape][local-shadows]")
+{
+    TLVertexTable table;
+    table.AddPos();
+    table.AddPos();
+    table.AddPos();
+    table.directLocal = {{{2, 4, 6, 0, 0, 0}}, {{10, 12, 14, 4, 8, 12}}};
+    table.InterpolateHDR(2, 0, 1, .25f);
+    REQUIRE(table.directLocal[2] == std::array<float, 6>{4, 6, 8, 1, 2, 3});
+    table.ReleaseTables();
+    REQUIRE(table.directLocal.empty());
+}
 
 #if CWR_HAS_VULKAN
 TEST_CASE("RTAO instance coordinates and depth reconstruction agree with raster geometry", "[Graphics][vulkan-shape][rtao]")
@@ -310,7 +380,9 @@ TEST_CASE("Vulkan native normals use inverse transpose and materials use the eng
     REQUIRE(offsetof(vk::ShapeLighting, previousMVP) == 1104);
     REQUIRE(offsetof(vk::ShapeLighting, temporal) == 1168);
     REQUIRE(offsetof(vk::ShapeLighting, outputColor) == 1200);
-    REQUIRE(sizeof(vk::ShapeLighting) == 1280);
+    REQUIRE(sizeof(vk::ShapeLighting) == 1424);
+    REQUIRE(offsetof(vk::ShapeLighting, localShadowMatrices) == 1280);
+    REQUIRE(offsetof(vk::ShapeLighting, localShadowControl) == 1408);
     REQUIRE(offsetof(vk::ShapeLighting, rtWater) == 1264);
     REQUIRE(lighting.rtWater == std::array<float, 4>{});
     REQUIRE(offsetof(vk::ShapeLighting, rtSun) == 1248);

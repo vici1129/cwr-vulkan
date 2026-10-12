@@ -239,6 +239,16 @@ int main()
             Check(!hdrContext.RaySceneEnabled(), "contact does not request a ray tracing scene");
             Check(hdrContext.SetContactShadows("off").starts_with("OK"), "disable contact shadows");
             Check(!hdrContext.SoftShadowsEnabled(), "soft CSM defaults off");
+            Check(!hdrContext.LocalShadowsEnabled(), "local shadows default off");
+            Check(hdrContext.SetLocalShadows("on").starts_with("OK") && hdrContext.LocalShadowsEnabled(),
+                  "local shadows enable without RT or sunlight");
+            Check(hdrContext.SetLocalShadows("invalid").starts_with("INVALID") && hdrContext.LocalShadowsEnabled(),
+                  "invalid local-shadow control preserves state");
+            Check(!hdrContext.RaySceneEnabled() && !hdrContext.SoftShadowsEnabled(), "local shadows are independent");
+            Check(hdrContext.SetLocalShadows("status").find("active=0") != std::string::npos,
+                  "no local depth pass is fabricated by enabling shadows");
+            Check(hdrContext.SetLocalShadows("off").starts_with("OK") && !hdrContext.LocalShadowsEnabled(),
+                  "local shadows can be disabled");
             Check(hdrContext.SetSoftShadows("on").starts_with("OK") && hdrContext.SoftShadowsEnabled(),
                   "soft CSM does not require hardware RT");
             Check(!hdrContext.SoftShadowsEligible(), "soft CSM skips absent sunlight");

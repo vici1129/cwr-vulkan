@@ -88,9 +88,18 @@ class TLVertexTable
     // Optional Vulkan sunlight sidecar. Terrain uses its real CPU lighting,
     // including colorization; unsupported software lighting leaves this empty.
     std::vector<std::array<float, 4>> directSun;
+    // Two Vulkan-selected spotlight contributions, in the same unclamped legacy
+    // lighting domain as hdrColor. Kept through CPU clipping; empty when Off.
+    std::vector<std::array<float, 6>> directLocal;
     void PreserveHDRColor(int vertex, ColorVal color);
     void InterpolateHDR(int dst, int a, int b, float t)
     {
+        if (!directLocal.empty())
+        {
+            directLocal.resize(NVertex());
+            for (int k = 0; k < 6; ++k)
+                directLocal[dst][k] = directLocal[a][k] * (1 - t) + directLocal[b][k] * t;
+        }
         if (!directSun.empty())
         {
             directSun.resize(NVertex());

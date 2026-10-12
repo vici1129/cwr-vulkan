@@ -13,6 +13,7 @@ struct ScreenVertex
     float fog = 1;
     float previousClip[4]{};
     float directSun[4]{};
+    float directLocal[6]{};
 };
 struct ScreenState
 {

@@ -377,6 +377,7 @@ void LightPositionedColored::SetMaterial(const TLMaterial& mat)
 {
     _ambientPrecalc = _ambient * mat.ambient + _diffuse * mat.forcedDiffuse;
     _diffusePrecalc = _diffuse * mat.diffuse;
+    _forcedPrecalc = _diffuse * mat.forcedDiffuse;
 }
 
 LightPoint::LightPoint(ColorVal color, ColorVal ambient) : base(color, ambient), _startAtten(50) {}
@@ -578,6 +579,23 @@ Color LightReflector::Apply(Vector3Par point, Vector3Par normal)
     {
         return _ambientPrecalc * atten;
     }
+}
+
+Color LightReflector::ApplyDirect(Vector3Par point, Vector3Par normal) const
+{
+    const auto relative = point - _modelPos;
+    const float size2 = relative.SquareSize(), start2 = Square(_startAtten);
+    const float inside = relative * _modelDir;
+    if (size2 >= start2 * 100 || inside <= 0 || inside * inside < size2 * (MIN_INSIDE * MIN_INSIDE))
+        return HBlack;
+    const float inverse = InvSqrt(floatMax(size2, 1e-8f));
+    const float attenuation = size2 >= start2 ? start2 * inverse * inverse : 1.f;
+    const float cosine = relative * normal;
+    if (cosine <= 0)
+        return _forcedPrecalc * attenuation;
+    const float cone = floatMin(1.f, (inside * inside - size2 * (MIN_INSIDE * MIN_INSIDE)) /
+                                         floatMax(size2 * (MAX_INSIDE * MAX_INSIDE - MIN_INSIDE * MIN_INSIDE), 1e-8f));
+    return (_forcedPrecalc + _diffusePrecalc * (cosine * inverse)) * (attenuation * cone);
 }
 
 void LightReflector::GetDescription(LightDescription& desc) const

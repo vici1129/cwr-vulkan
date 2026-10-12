@@ -346,7 +346,7 @@ class Scene
     // Shadow-map depth pass (off by default): collect the visible casters and render
     // the cascade depth maps from the sun.  Lives in SceneShadowPass.cpp to keep
     // Scene.cpp under the file-size limit.  Called from Pass2 when shadow maps are on.
-    void RenderShadowMapDepthPass(int nDraw);
+    void RenderShadowMapDepthPass(int nDraw, int localLight = -1);
     void DrawObjectsAndShadowsPass3(); // last draw cockpits
     void ObjectsDrawn();               // release all temporary information
 

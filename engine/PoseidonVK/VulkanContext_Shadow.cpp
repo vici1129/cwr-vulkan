@@ -7,6 +7,26 @@
 
 namespace Poseidon::vk
 {
+std::string VulkanContext::SetLocalShadows(std::string_view mode)
+{
+    const unsigned active = _localShadowsEnabled ? _localShadowLastMask : 0;
+    if (mode == "status")
+        return std::string("requested=") + (_localShadowsEnabled ? "on" : "off") +
+               " active=" + std::to_string((active & 1) + ((active >> 1) & 1)) +
+               " max=2 resolution=1024 range=160m filter=3x3-PCF RT=not-required depthGPUms=" +
+               std::to_string(_localShadowGpuMs) +
+               " vertices=" + std::to_string(active & 1 ? _localShadowVertices[0] : 0) + "," +
+               std::to_string(active & 2 ? _localShadowVertices[1] : 0);
+    if (mode != "on" && mode != "off")
+        return "INVALID: triLocalShadows on, off, status";
+    if (_localShadowsEnabled != (mode == "on"))
+    {
+        FlushScreenBatch();
+        _localShadowsEnabled = mode == "on";
+        ResetTemporalHistory();
+    }
+    return "OK: local shadows " + std::string(mode);
+}
 namespace
 {
 void Require(VkResult result, const char* operation)
@@ -192,12 +212,18 @@ void VulkanContext::CreateShadowResources()
         pipeline.pDynamicState = &dynamic;
         pipeline.layout = _csmLayout;
         pipeline.renderPass = _csmPass;
-        for (int alpha = 0; alpha < 2; ++alpha)
+        for (int variant = 0; variant < 4; ++variant)
         {
+            const int alpha = variant & 1;
             binding.stride = alpha ? 20 : 12;
             attributes[1].offset = alpha ? 12 : 0;
             raster.cullMode = alpha ? VK_CULL_MODE_NONE : VK_CULL_MODE_FRONT_BIT;
-            Require(vkCreateGraphicsPipelines(_device, VK_NULL_HANDLE, 1, &pipeline, nullptr, &_csmPipelines[alpha]),
+            if (variant >= 2)
+                raster.cullMode = VK_CULL_MODE_NONE;
+            raster.depthBiasEnable = variant >= 2;
+            raster.depthBiasConstantFactor = variant >= 2 ? 1.f : 0.f;
+            raster.depthBiasSlopeFactor = variant >= 2 ? 1.f : 0.f;
+            Require(vkCreateGraphicsPipelines(_device, VK_NULL_HANDLE, 1, &pipeline, nullptr, &_csmPipelines[variant]),
                     "create depth pipeline");
         }
     }
@@ -272,19 +298,22 @@ void VulkanContext::CreateShadowTarget(Frame::ShadowTarget& target, int resoluti
 void VulkanContext::RenderShadowDepth(const float* matrices, int count, int resolution, std::span<const float> solid,
                                       std::span<const float> alpha, std::span<const ShadowAlphaBatch> batches,
                                       const std::shared_ptr<MeshBuffers>& terrain, uint32_t terrainVertices,
-                                      const std::array<float, 3>& terrainOffset)
+                                      const std::array<float, 3>& terrainOffset, int localSlot)
 {
     if (!_frameOpen)
         return;
-    if (_csmActive || _shadowPass || !matrices || count < 1 || count > 4 || resolution < 128 || resolution > 4096 ||
-        solid.size() % 9 || alpha.size() % 15 || terrainVertices % 3 ||
+    if (localSlot < -1 || localSlot > 1 || (localSlot >= 0 && count != 1) ||
+        (localSlot < 0 ? _csmActive : (_localShadowMask & (1u << localSlot)) != 0) || _shadowPass || !matrices ||
+        count < 1 || count > 4 || resolution < 128 || resolution > 4096 || solid.size() % 9 || alpha.size() % 15 ||
+        terrainVertices % 3 ||
         (terrainVertices && (!terrain || size_t(terrainVertices) * 3 * sizeof(float) > terrain->vertices.size)))
         throw std::invalid_argument("Vulkan invalid or repeated CSM depth pass");
     FlushScreenBatch();
     CreateShadowResources();
     CreateShadowFallback();
     auto& frame = _frames[_frame];
-    CreateShadowTarget(frame.shadow, resolution, count);
+    auto& target = localSlot < 0 ? frame.shadow : frame.localShadow[localSlot];
+    CreateShadowTarget(target, resolution, count);
     const uint32_t unusedIndex = 0;
     MeshSlice solidMesh, alphaMesh;
     // Reuse the existing fence-retired streaming pages. The index placeholder
@@ -306,7 +335,12 @@ void VulkanContext::RenderShadowDepth(const float* matrices, int count, int reso
     }
     const auto command = frame.command;
     vkCmdEndRenderPass(command);
-    if (frame.csmQueries)
+    if (localSlot >= 0 && frame.localShadowQueries)
+    {
+        vkCmdResetQueryPool(command, frame.localShadowQueries, localSlot * 2, 2);
+        vkCmdWriteTimestamp(command, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, frame.localShadowQueries, localSlot * 2);
+    }
+    if (frame.csmQueries && localSlot < 0)
     {
         vkCmdResetQueryPool(command, frame.csmQueries, 0, 2);
         vkCmdWriteTimestamp(command, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, frame.csmQueries, 0);
@@ -323,7 +357,7 @@ void VulkanContext::RenderShadowDepth(const float* matrices, int count, int reso
     pass.pClearValues = &clear;
     for (int c = 0; c < count; ++c)
     {
-        pass.framebuffer = frame.shadow.framebuffers[c];
+        pass.framebuffer = target.framebuffers[c];
         vkCmdBeginRenderPass(command, &pass, VK_SUBPASS_CONTENTS_INLINE);
         vkCmdSetViewport(command, 0, 1, &viewport);
         vkCmdSetScissor(command, 0, 1, &scissor);
@@ -334,7 +368,8 @@ void VulkanContext::RenderShadowDepth(const float* matrices, int count, int reso
             const auto& mesh = cutout ? alphaMesh : solidMesh;
             if (!mesh.buffers)
                 continue;
-            vkCmdBindPipeline(command, VK_PIPELINE_BIND_POINT_GRAPHICS, _csmPipelines[cutout]);
+            vkCmdBindPipeline(command, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                              _csmPipelines[cutout + (localSlot >= 0 ? 2 : 0)]);
             vkCmdBindVertexBuffers(command, 0, 1, &mesh.buffers->vertices.buffer, &mesh.vertexOffset);
             push[16] = cutout ? 0.5f : 0.f; // GL33 caster threshold.
             vkCmdPushConstants(command, _csmLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0,
@@ -370,15 +405,25 @@ void VulkanContext::RenderShadowDepth(const float* matrices, int count, int reso
         }
         vkCmdEndRenderPass(command);
     }
-    if (frame.csmQueries)
+    if (frame.csmQueries && localSlot < 0)
     {
         vkCmdWriteTimestamp(command, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, frame.csmQueries, 1);
         frame.csmTimestamped = true;
     }
-    if (_profile.enabled)
+    if (_profile.enabled && localSlot < 0)
     {
         ++_profile.csmPasses;
         _profile.csmVertices += solid.size() / 3 + alpha.size() / 5 + terrainVertices;
+    }
+    if (localSlot >= 0)
+    {
+        _localShadowVertices[localSlot] = uint32_t(solid.size() / 3 + alpha.size() / 5);
+        if (frame.localShadowQueries)
+        {
+            vkCmdWriteTimestamp(command, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, frame.localShadowQueries,
+                                localSlot * 2 + 1);
+            frame.localShadowTimestampMask |= 1u << localSlot;
+        }
     }
     pass.renderPass = ResumePass();
     pass.framebuffer = SceneFramebuffer();
@@ -386,7 +431,10 @@ void VulkanContext::RenderShadowDepth(const float* matrices, int count, int reso
     pass.clearValueCount = 0;
     pass.pClearValues = nullptr;
     vkCmdBeginRenderPass(command, &pass, VK_SUBPASS_CONTENTS_INLINE);
-    _csmActive = true;
+    if (localSlot < 0)
+        _csmActive = true;
+    else
+        _localShadowMask |= 1u << localSlot;
 }
 
 void VulkanContext::DestroyShadowTarget(Frame::ShadowTarget& target) noexcept
@@ -411,7 +459,11 @@ void VulkanContext::DestroyShadowTarget(Frame::ShadowTarget& target) noexcept
 void VulkanContext::DestroyShadowResources() noexcept
 {
     for (auto& frame : _frames)
+    {
         DestroyShadowTarget(frame.shadow);
+        for (auto& target : frame.localShadow)
+            DestroyShadowTarget(target);
+    }
     for (auto pipeline : _csmPipelines)
         if (pipeline)
             vkDestroyPipeline(_device, pipeline, nullptr);

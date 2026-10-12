@@ -66,25 +66,25 @@ void VulkanContext::CreateWeatherLayout()
 {
     if (_weatherLayout)
         return;
-    VkDescriptorSetLayoutBinding bindings[6]{};
-    for (unsigned i = 0; i < 6; ++i)
+    VkDescriptorSetLayoutBinding bindings[8]{};
+    for (unsigned i = 0; i < 8; ++i)
         bindings[i] = {i, i ? VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER : VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1,
                        VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT, nullptr};
     VkDescriptorSetLayoutCreateInfo layout{VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO};
-    layout.bindingCount = 6;
+    layout.bindingCount = 8;
     layout.pBindings = bindings;
     Require(vkCreateDescriptorSetLayout(_device, &layout, nullptr, &_weatherLayout));
 }
 VkDescriptorSet VulkanContext::PrepareWeather()
 {
     CreateWeatherLayout();
-    auto& slot = _weatherSlots[_frame * 2 + (_csmActive ? 1 : 0)];
+    auto& slot = _weatherSlots[_frame * 8 + (_csmActive ? 1 : 0) + _localShadowMask * 2];
     if (slot.prepared)
         return slot.set;
     if (!slot.pool)
     {
         const VkDescriptorPoolSize sizes[]{{VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1},
-                                           {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 5}};
+                                           {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 7}};
         VkDescriptorPoolCreateInfo pool{VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO};
         pool.maxSets = 1;
         pool.poolSizeCount = 2;
@@ -106,9 +106,9 @@ VkDescriptorSet VulkanContext::PrepareWeather()
     CreateShadowFallback();
     UploadMappedBuffer(slot.uniform, &_weatherLighting, sizeof(_weatherLighting));
     const VkDescriptorBufferInfo buffer{slot.uniform.buffer, 0, sizeof(WeatherLighting)};
-    VkDescriptorImageInfo images[5]{};
-    VkWriteDescriptorSet writes[6]{};
-    for (unsigned i = 0; i < 6; ++i)
+    VkDescriptorImageInfo images[7]{};
+    VkWriteDescriptorSet writes[8]{};
+    for (unsigned i = 0; i < 8; ++i)
     {
         writes[i] = {VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET};
         writes[i].dstSet = slot.set;
@@ -124,7 +124,7 @@ VkDescriptorSet VulkanContext::PrepareWeather()
                              VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
             writes[i].pImageInfo = &images[i - 1];
         }
-        else
+        else if (i == 5)
         {
             // Share set 3 with CSM: retain Vulkan's four-set minimum even when disabled.
             images[4] = {_csmActive ? _csmSampler : _textureSamplers[0],
@@ -133,8 +133,17 @@ VkDescriptorSet VulkanContext::PrepareWeather()
                                     : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
             writes[i].pImageInfo = &images[4];
         }
+        else
+        {
+            const bool active = (_localShadowMask & (1u << (i - 6))) != 0;
+            images[i - 1] = {active ? _csmSampler : _textureSamplers[0],
+                             active ? _frames[_frame].localShadow[i - 6].view : _csmFallbackView,
+                             active ? VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL
+                                    : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
+            writes[i].pImageInfo = &images[i - 1];
+        }
     }
-    vkUpdateDescriptorSets(_device, 6, writes, 0, nullptr);
+    vkUpdateDescriptorSets(_device, 8, writes, 0, nullptr);
     slot.prepared = true;
     return slot.set;
 }

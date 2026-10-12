@@ -11,6 +11,8 @@ layout(location = 3) out vec3 specularColor;
 layout(location = 4) out vec3 shadowWorld;
 layout(location = 5) out vec4 previousClip;
 layout(location = 6) out vec4 directSun;
+layout(location = 7) out vec3 localDirect0;
+layout(location = 8) out vec3 localDirect1;
 layout(push_constant) uniform ShapeDraw { mat4 mvp; vec4 color; float alphaCutoff; float reserved; float detailEnabled; float shadow; } draw;
 void main() {
     gl_Position = draw.mvp * vec4(position, 1.0);
@@ -19,6 +21,7 @@ void main() {
     texCoord = uv;
     specularColor = vec3(0.0);
     directSun = vec4(0);
+    localDirect0 = localDirect1 = vec3(0);
     vec3 relativeWorld = (lighting.world * vec4(position, 1.0)).xyz;
     shadowWorld = relativeWorld;
     float distance = length(relativeWorld);
@@ -54,6 +57,9 @@ void main() {
         }
         float attenuation = size2 >= start2 ? start2 / max(size2, 1e-8) : 1.0;
         float cosine = dot(toLight, worldNormal);
+        vec3 direct = light.diffuse.rgb * max(cosine, 0.0) * inversesqrt(max(size2, 1e-8)) * attenuation * cone;
+        if (light.diffuse.w == 1.0) localDirect0 += direct;
+        if (light.diffuse.w == 2.0) localDirect1 += direct;
         color += cosine > 0.0 ?
             (light.diffuse.rgb * cosine * inversesqrt(max(size2, 1e-8)) + light.ambient.rgb) * attenuation * cone :
             light.ambient.rgb * attenuation;

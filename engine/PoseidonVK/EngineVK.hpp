@@ -8,6 +8,7 @@
 #include <PoseidonVK/ScreenGeometryVK.hpp>
 #include <Poseidon/Graphics/Core/ZBiasMath.hpp>
 #include <map>
+#include <Poseidon/Graphics/Rendering/Lighting/Lights.hpp>
 
 namespace Poseidon
 {
@@ -71,6 +72,11 @@ class EngineVK final : public Engine
     RString SetContactShadows(RString mode) override { return _vk.SetContactShadows(static_cast<const char*>(mode)).c_str(); }
     RString SetSoftShadows(RString mode) override { return _vk.SetSoftShadows(static_cast<const char*>(mode)).c_str(); }
     bool SeparateSunlight() const override { return _vk.SeparateSunlight(); }
+    RString SetLocalShadows(RString mode) override;
+    int PrepareLocalShadows() override;
+    Light* LocalShadowLight(int slot) const override;
+    bool LocalShadowCaster(int slot, Vector3Par position, float radius) const override;
+    void RenderLocalShadowDepth(int slot, const ShadowCasterSet& casters) override;
     RString SetRTReflections(RString mode) override
     {
         return _vk.SetRTReflections(static_cast<const char*>(mode)).c_str();
@@ -213,6 +219,9 @@ class EngineVK final : public Engine
     void BeginTemporalWorld();
     void CaptureTemporalNative(const Shape&, bool dynamic);
     ShadowMapTuning _shadowTuning;
+    std::array<Link<Light>, 2> _localShadowLights{};
+    std::array<LightDescription, 2> _localShadowDescriptions{};
+    int _localShadowCount = 0;
     std::vector<float> _volumeTerrain;
     std::shared_ptr<vk::MeshBuffers> _volumeTerrainMesh;
     const void* _volumeLandscape = nullptr;

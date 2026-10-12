@@ -499,6 +499,9 @@ void VulkanContext::CreateFrameResources()
             Check(vkCreateQueryPool(_device, &queries, nullptr, &frame.frameQueries), "create frame GPU timestamps");
             queries.queryCount = 2;
             Check(vkCreateQueryPool(_device, &queries, nullptr, &frame.csmQueries), "create CSM timestamps");
+            queries.queryCount = 4;
+            Check(vkCreateQueryPool(_device, &queries, nullptr, &frame.localShadowQueries),
+                  "create local shadow timestamps");
         }
         const auto prefix = "PoseidonVK frame " + std::to_string(i);
         Name(VK_OBJECT_TYPE_COMMAND_BUFFER, ObjectHandle(frame.command), (prefix + " commands").c_str());
@@ -962,8 +965,22 @@ bool VulkanContext::BeginFrame(uint32_t width, uint32_t height)
         frame.csmTimestamped = false;
     }
     frame.textures.clear();
-    _weatherSlots[_frame * 2].prepared = false;
-    _weatherSlots[_frame * 2 + 1].prepared = false;
+    _localShadowGpuMs = 0;
+    for (int slot = 0; slot < 2; ++slot)
+        if (frame.localShadowTimestampMask & (1u << slot))
+        {
+            uint64_t stamps[2]{};
+            if (vkGetQueryPoolResults(_device, frame.localShadowQueries, slot * 2, 2, sizeof(stamps), stamps,
+                                      sizeof(uint64_t), VK_QUERY_RESULT_64_BIT) == VK_SUCCESS)
+            {
+                const uint64_t mask = _timestampBits == 64 ? UINT64_MAX : (uint64_t(1) << _timestampBits) - 1;
+                _localShadowGpuMs += double((stamps[1] - stamps[0]) & mask) * _timestampPeriod / 1e6;
+            }
+        }
+    frame.localShadowTimestampMask = 0;
+    for (int i = 0; i < 8; ++i)
+        _weatherSlots[_frame * 8 + i].prepared = false;
+    ResetLocalShadows();
     // Only this frame's completed fence permits overwriting its mapped pages.
     frame.transientPage = 0;
     for (auto& page : frame.transientPages)
@@ -1295,6 +1312,8 @@ unsigned VulkanContext::Shutdown() noexcept
                 vkDestroyQueryPool(_device, frame.frameQueries, nullptr);
             if (frame.csmQueries)
                 vkDestroyQueryPool(_device, frame.csmQueries, nullptr);
+            if (frame.localShadowQueries)
+                vkDestroyQueryPool(_device, frame.localShadowQueries, nullptr);
             frame = {};
         }
         if (_pool)

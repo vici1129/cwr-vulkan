@@ -91,6 +91,8 @@ void EngineVK::SubmitSoftware(const std::vector<uint32_t>& indices)
                       _softwareVertices[index].previousClip);
         if (index < _softwareMesh->directSun.size())
             std::copy_n(_softwareMesh->directSun[index].begin(), 4, _softwareVertices[index].directSun);
+        if (index < _softwareMesh->directLocal.size())
+            std::copy_n(_softwareMesh->directLocal[index].begin(), 6, _softwareVertices[index].directLocal);
         // TL already contains the scene Fog8 visibility in specular.a. Alpha
         // fog is already in color.a; it must not also get an RGB fog mix.
         _softwareVertices[index].fog =
@@ -137,7 +139,9 @@ void EngineVK::SubmitSoftware(const std::vector<uint32_t>& indices)
     receiver.fogColor = {_fogColor.R(), _fogColor.G(), _fogColor.B(), 1};
     receiver.eyeCoef = _vk.EyeCoef();
     const bool atmosphere = _shadowWorld && _vk.AtmosphereEnabled();
-    if (_shadowWorld && (_shadowTuning.enabled || atmosphere || _vk.SeparateSunlight() || receiver.rtWater[0]) &&
+    const bool localShadows = _vk.LocalShadowsEnabled() && !_softwareMesh->directLocal.empty();
+    if (_shadowWorld &&
+        (_shadowTuning.enabled || atmosphere || _vk.SeparateSunlight() || receiver.rtWater[0] || localShadows) &&
         !(_softwareFlags & (DisableSun | NoZBuf | NoDropdown | IsLight | IsShadow | IsAlphaFog)) && GScene &&
         GScene->GetCamera())
     {
@@ -160,7 +164,7 @@ void EngineVK::SubmitSoftware(const std::vector<uint32_t>& indices)
                  (_softwareFlags & NoZBuf) == 0, nullptr, waterBump, 0, {0, -1, 0}, mesh.vertexOffset, mesh.indexOffset,
                  (_softwareFlags & NoZWrite) == 0,
                  receiver.shadowReceiver[0] || receiver.atmosphereSun[3] || receiver.rtSun[0] || receiver.rtWater[0] ||
-                         _temporalTerrain
+                         _temporalTerrain || localShadows
                      ? &receiver
                      : nullptr,
                  shadow, !shadow && (_softwareFlags & IsLight) != 0);

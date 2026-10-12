@@ -4,9 +4,182 @@
 #include <Poseidon/World/Terrain/Landscape.hpp>
 #include <algorithm>
 #include <cmath>
+#include <PoseidonVK/LocalShadowVK.hpp>
 
 namespace Poseidon
 {
+RString EngineVK::SetLocalShadows(RString mode)
+{
+    std::string status = _vk.SetLocalShadows(static_cast<const char*>(mode));
+    if (std::string_view(static_cast<const char*>(mode)) == "status")
+        for (int i = 0; i < _localShadowCount; ++i)
+        {
+            const auto& light = _localShadowDescriptions[i];
+            status += " light" + std::to_string(i) + "=" + std::to_string(light.pos.X()) + "," +
+                      std::to_string(light.pos.Y()) + "," + std::to_string(light.pos.Z()) +
+                      " dir=" + std::to_string(light.dir.X()) + "," + std::to_string(light.dir.Y()) + "," +
+                      std::to_string(light.dir.Z());
+        }
+    return status.c_str();
+}
+
+Light* EngineVK::LocalShadowLight(int slot) const
+{
+    return _vk.LocalShadowsEnabled() && slot >= 0 && slot < _localShadowCount
+               ? static_cast<Light*>(_localShadowLights[slot])
+               : nullptr;
+}
+
+int EngineVK::PrepareLocalShadows()
+{
+    if (!_vk.FrameOpen() || !_shadowWorld || !_vk.LocalShadowsEnabled() || !GScene || !GScene->GetCamera() ||
+        GScene->MainLight()->NightEffect() <= .001f)
+    {
+        _localShadowCount = 0;
+        return 0;
+    }
+    struct Candidate
+    {
+        Light* light;
+        LightDescription desc;
+        float score;
+        int order;
+    };
+    std::vector<Candidate> candidates;
+    const auto* camera = GScene->GetCamera();
+    const auto& active = GScene->ActiveLights();
+    // Scene insertion order is the deterministic tie breaker, not pointer order
+    // or the brightness sort used by the per-object material light lists.
+    for (int i = 0; i < GScene->NLights(); ++i)
+    {
+        auto* light = GScene->GetLight(i);
+        if (!light || !light->IsOn())
+            continue;
+        bool used = false;
+        for (int j = 0; j < active.Size(); ++j)
+            if (active[j] == light)
+                used = true;
+        if (!used)
+            continue;
+        LightDescription desc{};
+        light->GetDescription(desc);
+        if (desc.type != LTSpotLight || !std::isfinite(desc.phi) || !std::isfinite(desc.startAtten) ||
+            desc.startAtten <= .01f || desc.dir.SquareSize() < .5f || !std::isfinite(desc.dir.SquareSize()))
+            continue;
+        const float range = std::min(vk::LocalShadowMaxRange, desc.startAtten * 10.f);
+        const auto relative = desc.pos - camera->Position();
+        const float distance2 = relative.SquareSize();
+        if (!std::isfinite(distance2) || distance2 > Square(range + 80.f))
+            continue;
+        // Conservative cone bounding sphere against the camera frustum. This
+        // also keeps an off-screen headlight whose illuminated ground is visible.
+        const auto center = relative + desc.dir.Normalized() * (range * .5f);
+        const float radius = range * .55f;
+        const float z = center * camera->Direction();
+        if (z + radius <= camera->ClipNear() ||
+            std::abs(center * camera->DirectionAside()) >
+                std::max(z, 0.f) * camera->Left() + radius * (1 + camera->Left()) ||
+            std::abs(center * camera->DirectionUp()) > std::max(z, 0.f) * camera->Top() + radius * (1 + camera->Top()))
+            continue;
+        float score = std::max({desc.diffuse.R(), desc.diffuse.G(), desc.diffuse.B()}) * Square(desc.startAtten) /
+                      std::max(distance2, 25.f);
+        if (!std::isfinite(score) || score <= .001f)
+            continue;
+        for (int slot = 0; slot < _localShadowCount; ++slot)
+            if (_localShadowLights[slot] == light)
+                score *= 1.3f; // replacement hysteresis
+        candidates.push_back({light, desc, score, i});
+    }
+    std::stable_sort(candidates.begin(), candidates.end(), [](const auto& a, const auto& b)
+                     { return a.score != b.score ? a.score > b.score : a.order < b.order; });
+    if (candidates.size() > 2)
+        candidates.resize(2);
+    // Retain slot order as the observer crosses the two headlights' midpoint.
+    if (candidates.size() == 2 && _localShadowLights[0] == candidates[1].light)
+        std::swap(candidates[0], candidates[1]);
+    _localShadowCount = int(candidates.size());
+    for (int slot = 0; slot < 2; ++slot)
+    {
+        _localShadowLights[slot] = slot < _localShadowCount ? candidates[slot].light : nullptr;
+        if (slot < _localShadowCount)
+            _localShadowDescriptions[slot] = candidates[slot].desc;
+    }
+    return _localShadowCount;
+}
+
+bool EngineVK::LocalShadowCaster(int slot, Vector3Par position, float radius) const
+{
+    if (slot < 0 || slot >= _localShadowCount)
+        return false;
+    const auto& light = _localShadowDescriptions[slot];
+    const auto relative = position - light.pos;
+    const float range = std::min(vk::LocalShadowMaxRange, light.startAtten * 10.f);
+    if (relative.SquareSize() > Square(range + radius))
+        return false;
+    const float along = relative * light.dir.Normalized();
+    const float halfAngle = std::clamp(light.phi * .5f, .21f, .7f);
+    return along >= -radius && along <= range + radius &&
+           relative.SquareSize() - along * along <=
+               Square(std::max(along, 0.f) * std::tan(halfAngle) + radius / std::cos(halfAngle));
+}
+
+void EngineVK::RenderLocalShadowDepth(int slot, const ShadowCasterSet& casters)
+{
+    if (!_vk.LocalShadowsEnabled() || slot < 0 || slot >= _localShadowCount)
+        return;
+    const auto& light = _localShadowDescriptions[slot];
+    const auto camera = GScene->GetCamera()->Position();
+    const auto p = light.pos - camera, d = light.dir.Normalized();
+    const float range = std::min(vk::LocalShadowMaxRange, light.startAtten * 10.f);
+    const auto matrix = vk::LocalShadowMatrix({p.X(), p.Y(), p.Z()}, {d.X(), d.Y(), d.Z()},
+                                              std::clamp(light.phi * .5f, .21f, .7f), range);
+    _vk.SetLocalShadowMatrix(slot, matrix, range);
+    std::vector<vk::ShadowAlphaBatch> batches;
+    for (int i = 0; i < casters.alphaBatchCount; ++i)
+    {
+        const auto& batch = casters.alphaBatches[i];
+        auto* texture = dynamic_cast<TextureVK*>(batch.texture);
+        batches.push_back(
+            {texture ? texture->Image(_vk) : nullptr, uint32_t(batch.firstVertex), uint32_t(batch.vertexCount)});
+    }
+    std::vector<float> solid;
+    if (casters.solidVertexCount > 0)
+        solid.assign(casters.solidXYZ, casters.solidXYZ + size_t(casters.solidVertexCount) * 3);
+    // Sample the existing terrain surface only inside this light's bounded cone.
+    // No new terrain cache or animation path; the no-cull depth pipeline includes hills
+    // that face away from the observer and would be absent from the screen mesh.
+    if (auto* land = GScene->GetLandscape())
+    {
+        const float grid = std::max(3.125f, land->GetTerrainGrid());
+        const int x0 = int(std::floor((light.pos.X() - range) / grid)),
+                  x1 = int(std::ceil((light.pos.X() + range) / grid));
+        const int z0 = int(std::floor((light.pos.Z() - range) / grid)),
+                  z1 = int(std::ceil((light.pos.Z() + range) / grid));
+        auto vertex = [&](float x, float z) { return Vector3(x, land->SurfaceY(x, z), z); };
+        auto triangle = [&](Vector3Par a, Vector3Par b, Vector3Par c)
+        {
+            for (const auto* v : {&a, &b, &c})
+            {
+                const auto r = *v - camera;
+                solid.insert(solid.end(), {r.X(), r.Y(), r.Z()});
+            }
+        };
+        for (int z = z0; z < z1; ++z)
+            for (int x = x0; x < x1; ++x)
+            {
+                const auto center = vertex((x + .5f) * grid, (z + .5f) * grid);
+                if (!LocalShadowCaster(slot, center, grid * 2))
+                    continue;
+                const auto a = vertex(x * grid, z * grid), b = vertex((x + 1) * grid, z * grid);
+                const auto c = vertex(x * grid, (z + 1) * grid), e = vertex((x + 1) * grid, (z + 1) * grid);
+                triangle(a, b, c);
+                triangle(b, e, c);
+            }
+    }
+    _vk.RenderShadowDepth(matrix.data(), 1, vk::LocalShadowResolution, solid,
+                          {casters.alphaXYZUV, size_t(casters.alphaVertexCount) * 5}, batches, {}, 0, {}, slot);
+}
+
 void EngineVK::SetShadowMapsEnabled(bool enabled)
 {
     _vk.FlushScreenBatch();

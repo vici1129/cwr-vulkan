@@ -162,11 +162,22 @@ class VulkanContext
     void ClearDepth();
     void BeginShadowPass();
     void EndShadowPass();
-    void RenderShadowDepth(const float* matrices, int count, int resolution,
-                           std::span<const float> solid, std::span<const float> alpha,
-                           std::span<const ShadowAlphaBatch> batches,
+    void RenderShadowDepth(const float* matrices, int count, int resolution, std::span<const float> solid,
+                           std::span<const float> alpha, std::span<const ShadowAlphaBatch> batches,
                            const std::shared_ptr<MeshBuffers>& terrain = {}, uint32_t terrainVertices = 0,
-                           const std::array<float, 3>& terrainOffset = {});
+                           const std::array<float, 3>& terrainOffset = {}, int localSlot = -1);
+    std::string SetLocalShadows(std::string_view mode);
+    bool LocalShadowsEnabled() const { return _localShadowsEnabled; }
+    void ResetLocalShadows()
+    {
+        _localShadowLastMask = _localShadowMask;
+        _localShadowMask = 0;
+    }
+    void SetLocalShadowMatrix(int slot, const std::array<float, 16>& matrix, float range)
+    {
+        std::copy(matrix.begin(), matrix.end(), _localShadowMatrices.begin() + slot * 16);
+        _localShadowRanges[slot] = range;
+    }
     void SetShadowState(const ShadowLighting& state) { _csmState = state; }
     void ResetShadowState() { _csmActive = false; }
     void DrawDiagnosticTriangle(); // Explicit DrawTestPattern seam, never an automatic gameplay draw.
@@ -296,7 +307,7 @@ class VulkanContext
         bool prepared = false;
     };
     // Fallback and active-CSM snapshots per frame; never rewrite a bound set.
-    std::array<WeatherSlot, 4> _weatherSlots{};
+    std::array<WeatherSlot, 16> _weatherSlots{};
     void CreateWeatherLayout();
     VkDescriptorSet PrepareWeather();
     void DestroyWeather() noexcept;
@@ -399,6 +410,7 @@ class VulkanContext
             VkDescriptorSet set = VK_NULL_HANDLE;
             int resolution = 0, count = 0;
         } shadow;
+        std::array<ShadowTarget, 2> localShadow;
         struct TransientPage
         {
             std::shared_ptr<MeshBuffers> buffers;
@@ -420,6 +432,8 @@ class VulkanContext
         bool ssaoTimestamped = false;
         VkQueryPool csmQueries = VK_NULL_HANDLE;
         bool csmTimestamped = false;
+        VkQueryPool localShadowQueries = VK_NULL_HANDLE;
+        unsigned localShadowTimestampMask = 0;
         std::vector<std::shared_ptr<MeshBuffers>> meshes;
         std::vector<std::shared_ptr<TextureImage>> textures;
         std::vector<TransientPage> transientPages;
@@ -459,13 +473,20 @@ class VulkanContext
     VkDescriptorSetLayout _lightingLayout = VK_NULL_HANDLE;
     VkRenderPass _csmPass = VK_NULL_HANDLE;
     VkPipelineLayout _csmLayout = VK_NULL_HANDLE;
-    std::array<VkPipeline, 2> _csmPipelines{};
+    std::array<VkPipeline, 4> _csmPipelines{}; // sunlight solid/cutout, local solid/cutout
     VkSampler _csmSampler = VK_NULL_HANDLE;
     VkImageView _csmFallbackView = VK_NULL_HANDLE;
     VkDescriptorPool _csmFallbackPool = VK_NULL_HANDLE;
     VkDescriptorSet _csmFallbackSet = VK_NULL_HANDLE;
     ShadowLighting _csmState{};
     bool _csmActive = false;
+    bool _localShadowsEnabled = false;
+    unsigned _localShadowMask = 0;
+    unsigned _localShadowLastMask = 0;
+    double _localShadowGpuMs = 0;
+    std::array<uint32_t, 2> _localShadowVertices{};
+    std::array<float, 32> _localShadowMatrices{};
+    std::array<float, 2> _localShadowRanges{};
     void CreateShadowResources();
     void CreateShadowTarget(Frame::ShadowTarget& target, int resolution, int count);
     void DestroyShadowTarget(Frame::ShadowTarget& target) noexcept;

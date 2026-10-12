@@ -3138,6 +3138,10 @@ INIT_MODULE(GameStateExtTest, 3)
     GGameState.NewFunction(GameFunction(GameString, "triRTAO", TriRTAO, GameString));
     GGameState.NewFunction(GameFunction(GameString, "triRTShadows", TriRTShadows, GameString));
     GGameState.NewFunction(GameFunction(GameString, "triContactShadows", TriContactShadows, GameString));
+    GGameState.NewFunction(GameFunction(
+        GameString, "triLocalShadows", [](const GameState*, GameValuePar arg) -> GameValue
+        { return GameValue(GEngine ? GEngine->SetLocalShadows(RString(arg)) : RString("UNSUPPORTED: no renderer")); },
+        GameString));
     GGameState.NewFunction(GameFunction(GameString, "triSoftShadows", TriSoftShadows, GameString));
     GGameState.NewFunction(GameFunction(GameString, "triRTReflections", TriRTReflections, GameString));
     GGameState.NewFunction(GameFunction(GameString, "triWaterRefraction", TriWaterRefraction, GameString));

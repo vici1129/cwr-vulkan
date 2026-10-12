@@ -219,11 +219,13 @@ void VulkanContext::CreateShapePipeline(bool translucent, bool screen, bool dept
             {2, 0, VK_FORMAT_R32G32B32A32_SFLOAT, 6 * sizeof(float)},
             {3, 0, VK_FORMAT_R32_SFLOAT, 10 * sizeof(float)},
             {4, 0, VK_FORMAT_R32G32B32A32_SFLOAT, 11 * sizeof(float)},
-            {5, 0, VK_FORMAT_R32G32B32A32_SFLOAT, 15 * sizeof(float)}};
+            {5, 0, VK_FORMAT_R32G32B32A32_SFLOAT, 15 * sizeof(float)},
+            {6, 0, VK_FORMAT_R32G32B32_SFLOAT, 19 * sizeof(float)},
+            {7, 0, VK_FORMAT_R32G32B32_SFLOAT, 22 * sizeof(float)}};
         VkPipelineVertexInputStateCreateInfo input{VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO};
         input.vertexBindingDescriptionCount = 1;
         input.pVertexBindingDescriptions = screen ? &screenBinding : &binding;
-        input.vertexAttributeDescriptionCount = screen ? 6 : 3;
+        input.vertexAttributeDescriptionCount = screen ? 8 : 3;
         input.pVertexAttributeDescriptions = screen ? screenAttributes : attributes;
         VkPipelineInputAssemblyStateCreateInfo assembly{VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO};
         assembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
@@ -405,6 +407,14 @@ void VulkanContext::DrawMesh(const std::shared_ptr<MeshBuffers>& mesh, uint32_t 
         if (TemporalEnabled()) receiver.temporalExtent = {1.f / _worldExtent.width, 1.f / _worldExtent.height,
             IsFSR(_aaMode) ? std::log2(float(_worldExtent.width) / _extent.width) - 1.f : 0.f, 0};
         receiver.shadow = _csmActive ? _csmState : ShadowLighting{};
+        if (_worldActive && _localShadowsEnabled && !shadow && depthTest && (!screen || receiver.shadowReceiver[1] > 0))
+        {
+            receiver.localShadowMatrices = _localShadowMatrices;
+            receiver.localShadowControl = {float(_localShadowMask), 1024.f, _localShadowRanges[0],
+                                           _localShadowRanges[1]};
+        }
+        else
+            receiver.localShadowControl = {};
         // Surface-only opt-in. Volumetrics keep their existing CSM sampler;
         // water and unsupported sunlight receivers retain ordinary filtering.
         if (SoftShadowsEligible() && receiver.rtSun[0] > .5f && secondaryMode < 1.5f)

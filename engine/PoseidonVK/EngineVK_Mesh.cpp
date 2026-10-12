@@ -51,7 +51,11 @@ void EngineVK::SetMaterial(const TLMaterial& mat, const LightList& lights, const
             lights[i]->GetDescription(light);
             if (light.type != LTPoint && light.type != LTSpotLight)
                 continue;
-            vk::ShapeLight(_lighting.localLights[count++], light, mat, GScene->GetCamera()->Position(), night);
+            vk::ShapeLight(_lighting.localLights[count], light, mat, GScene->GetCamera()->Position(), night);
+            for (int slot = 0; slot < _localShadowCount; ++slot)
+                if (_vk.LocalShadowsEnabled() && lights[i].GetRef() == static_cast<Light*>(_localShadowLights[slot]))
+                    _lighting.localLights[count].diffuse[3] = float(slot + 1);
+            ++count;
         }
     _lighting.localCount[0] = float(count);
 }

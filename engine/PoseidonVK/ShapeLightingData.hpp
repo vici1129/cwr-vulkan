@@ -31,5 +31,7 @@ struct alignas(16) ShapeLighting
     std::array<float, 4> atmosphereSun{}, atmosphereColor{};
     std::array<float, 4> rtSun{}; // x: 1 sunlight separation, 2 contact capture preserving legacy CSM; yzw: forced sun
     std::array<float, 4> rtWater{}; // actual water draw, animated bump UV offset
+    std::array<float, 32> localShadowMatrices{};
+    std::array<float, 4> localShadowControl{}; // rendered slot mask, resolution, per-slot effective ranges
 };
 } // namespace Poseidon::vk
