@@ -1,5 +1,19 @@
 # Vulkan backend development
 
+## Early refraction allocation recovery (2026-10-12)
+
+The outer AA-resource recovery handler now disables requested water refraction
+through `FailWaterRefraction` before falling back from FSR, then uses the existing
+cleanup/retry loop. This covers extra world sunlight/water attachment allocations
+that precede the narrower `CreateWaterResources` guard. Existing RT-first recovery
+order and default-Off behavior are unchanged; genuine baseline failures still throw.
+Vulkan build, 444 policy checks and 2,050 focused assertions pass. A local host-only
+harness using the production retry-loop source reproduces the old escaping
+`std::bad_alloc` and passes seven before/after/retry cases, including preservation
+of FSR and terminal failure when baseline allocation also fails. Its allocator and
+cleanup are stubs: this is control-flow verification, not real GPU exhaustion or
+a new live Vulkan-validation run.
+
 ## Moving cloud shadows and weather-sky water reflections (2026-10-12)
 
 Built from main `f7e9507` in an isolated worktree, leaving the private DLSS/NGX
