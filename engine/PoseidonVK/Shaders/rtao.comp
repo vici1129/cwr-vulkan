@@ -7,7 +7,7 @@
 layout(local_size_x=8,local_size_y=8) in;
 layout(set=0,binding=1) uniform accelerationStructureEXT scene;
 layout(set=0,binding=2,rgba32f) uniform writeonly image2D resultAO;
-layout(set=0,binding=3,std430) buffer Counters { uint rays; uint hits; uint sunRays; uint sunHits; uint terrainHits; uint alphaHits; uint waterRays; uint waterHits; uint shadedHits; uint shadedTerrain; uint shadedAlpha; } counters;
+layout(set=0,binding=3,std430) buffer Counters { uint rays; uint hits; uint sunRays; uint sunHits; uint terrainHits; uint alphaHits; uint waterRays; uint waterHits; uint shadedHits; uint shadedTerrain; uint shadedAlpha; uint dynamicAO; uint dynamicSun; uint dynamicWater; uint dynamicShaded; } counters;
 #ifdef SUN_SHADOW
 #include "sunlight_depth.glsl"
 #endif
@@ -16,6 +16,8 @@ shared uint groupHits;
 shared uint terrainHits;
 shared uint alphaHits;
 shared uint shadedHits;
+shared uint dynamicHits;
+shared uint dynamicShaded;
 struct Material {
     uint64_t indices, vertices, alpha;
     uint first, index16, width, height, samplerFlags;
@@ -105,6 +107,7 @@ vec4 traceAO(ivec2 pixel) {
         uint kind=rayQueryGetIntersectionInstanceCustomIndexEXT(query,true)>>20;
         if(kind==2) atomicAdd(terrainHits,1);
         if(kind==1) atomicAdd(alphaHits,1);
+        if(kind==3) atomicAdd(dynamicHits,1);
     }
     float fade=1-smoothstep(40.0,50.0,cameraDistance);
     float rtVisibility=hit?1-fade*ao.sun.w:1;
@@ -134,6 +137,7 @@ vec4 traceAO(ivec2 pixel) {
             float distance=rayQueryGetIntersectionTEXT(query,true);
             occlusion+=1-smoothstep(0,ao.settings.x,distance);
             ++hitCount;
+            if((rayQueryGetIntersectionInstanceCustomIndexEXT(query,true)>>20)==3) atomicAdd(dynamicHits,1);
         }
     }
     atomicAdd(groupRays,4); atomicAdd(groupHits,hitCount);
@@ -142,7 +146,7 @@ vec4 traceAO(ivec2 pixel) {
 #endif
 }
 void main() {
-    if(gl_LocalInvocationIndex==0) { groupRays=0; groupHits=0; terrainHits=0; alphaHits=0; shadedHits=0; }
+    if(gl_LocalInvocationIndex==0) { groupRays=0; groupHits=0; terrainHits=0; alphaHits=0; shadedHits=0; dynamicHits=0; dynamicShaded=0; }
     barrier();
     ivec2 p=ivec2(gl_GlobalInvocationID.xy);
     if(all(lessThan(p,imageSize(resultAO))))
@@ -156,11 +160,14 @@ void main() {
 #ifdef WATER_REFLECTION
         atomicAdd(counters.waterRays,groupRays); atomicAdd(counters.waterHits,groupHits);
         atomicAdd(counters.shadedHits,shadedHits); atomicAdd(counters.shadedTerrain,terrainHits); atomicAdd(counters.shadedAlpha,alphaHits);
+        atomicAdd(counters.dynamicWater,dynamicHits); atomicAdd(counters.dynamicShaded,dynamicShaded);
 #elif defined(SUN_SHADOW)
         atomicAdd(counters.sunRays,groupRays); atomicAdd(counters.sunHits,groupHits);
         atomicAdd(counters.terrainHits,terrainHits); atomicAdd(counters.alphaHits,alphaHits);
+        atomicAdd(counters.dynamicSun,dynamicHits);
 #else
         atomicAdd(counters.rays,groupRays); atomicAdd(counters.hits,groupHits);
+        atomicAdd(counters.dynamicAO,dynamicHits);
 #endif
     }
 }

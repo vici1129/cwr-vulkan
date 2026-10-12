@@ -675,7 +675,8 @@ TEST_CASE("Vulkan Shape accepts opaque color but rejects unfinished render state
     REQUIRE(vk::SupportedShapeSpec(spec));
     spec.routing = render::Routing::IsOnSurface;
     REQUIRE(vk::SupportedShapeSpec(spec));
-    REQUIRE_NOTHROW(vk::RequireImmutableShape(false, false));
-    REQUIRE_THROWS_AS(vk::RequireImmutableShape(true, false), std::logic_error);
-    REQUIRE_THROWS_AS(vk::RequireImmutableShape(false, true), std::logic_error);
+    REQUIRE_FALSE(vk::NeedsShapeSnapshot(false, false));
+    REQUIRE(vk::NeedsShapeSnapshot(true, false));
+    REQUIRE(vk::NeedsShapeSnapshot(false, true));
+    REQUIRE(vk::NeedsShapeSnapshot(true, true));
 }

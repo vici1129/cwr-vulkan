@@ -118,6 +118,15 @@ struct RTAOInstance
     bool index16 = true;
     uint32_t mask = 1; // bit 1: original AO objects; bit 2: shadow-only foliage/terrain
     uint32_t kind = 0; // GPU hit accounting: 0 object, 1 alpha extension, 2 terrain
+    uint64_t dynamicId = 0, revision = 0;
+    bool dynamicGeometry = false; // writable geometry is exclusive to one fence slot
+};
+struct RTDynamicStats
+{
+    uint32_t selected = 0, captured = 0, fallback = 0, unsupported = 0, budget = 0, proxies = 0;
+    uint32_t vertices = 0, uploadedBytes = 0, instances = 0, transforms = 0, rebuilds = 0;
+    std::array<uint32_t, 4> hits{};
+    double collectionMs = 0, buildMs = 0;
 };
 // Backend-private Vulkan ownership. SDL owns the window; this owns its surface.
 struct ShadowAlphaBatch
@@ -247,6 +256,12 @@ class VulkanContext
         _rtFoliage = foliage;
     }
     void SetRTAOScene(std::vector<RTAOInstance> instances, const std::array<float, 16>& camera);
+    std::string SetRTDynamic(std::string_view mode);
+    bool RTDynamicEnabled() const { return _rtDynamicEnabled && _rtaoAvailable && RaySceneEnabled(); }
+    void BeginRTDynamic();
+    bool AddRTDynamic(RTAOInstance instance, const void* vertices, size_t vertexBytes, const void* indices,
+                      size_t indexBytes);
+    void SetRTDynamicStats(const RTDynamicStats& stats);
     void PrepareRTAOAlpha(const std::shared_ptr<TextureImage>& image, uint32_t width, uint32_t height, const void* rgba);
     std::string SetAntiAliasing(std::string_view mode);
     bool SetRenderScale(int percent);
@@ -331,6 +346,7 @@ class VulkanContext
     std::array<float, 4> _rtSun{};
     uint32_t _rtTerrain = 0, _rtFoliage = 0;
     bool _rtaoRequested = false, _rtaoAvailable = false, _rtaoEnabled = false;
+    bool _rtDynamicEnabled = false;
     std::string _rtaoReason = "restart with CWR_VK_RTAO=1 to opt into Vulkan ray-query capabilities";
     void InitRTAO();
     void RetireRTAO();

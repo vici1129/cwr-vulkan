@@ -1,5 +1,229 @@
 # Vulkan backend development
 
+## Optional dynamic ray-query geometry (2026-10-12)
+
+`triRTDynamic "on"`, `"off"`, `"status"` extends the **existing shared RT
+scene** used by `triRTAO`, `triRTShadows` and `triRTReflections`. Default **Off**;
+Vulkan, capable hardware and the existing startup opt-in `CWR_VK_RTAO=1` are
+required. Selecting dynamic geometry does not enable any of those effects.
+With all three effects disabled it performs no collection or uploads. Off
+restores the original static-only selection, instance budget and TLAS policy.
+GL33 has only the base engine's unsupported command/no-op capture hook.
+
+### Geometry, animation and ownership
+
+The collector scans the existing world vehicle/fast-vehicle lists, deduplicates
+by the engine's monotonic render identity, then selects nearby `Transport` and
+on-foot `Person` objects by distance. It does not maintain a second scene
+database. Hidden, destroyed and incompatible material/geometry cases are
+excluded. Collection uses the existing 80 m AO / 160 m sunlight-or-reflection
+coverage; the effects retain their original ray lengths and distance fades.
+
+`Object::Draw` supplies the actual graphical LOD, live animated `Shape`, and
+render transform **after Animate and before Deanimate**. This reuses wheel,
+turret, rotor and soldier deformation already performed by the engine. Nearby
+objects outside the raster view use the existing graphical-LOD selection and
+bounded Animate/Deanimate caster pattern, as the local-shadow collector does.
+No collision hull, view-pilot LOD or unanimated stand-in is substituted.
+
+Unmodified rigid meshes reuse existing raster `MeshBuffers` and cached BLAS
+where available. Other geometry is copied using the existing Shape extraction
+(positions, normals, UVs, triangle ranges). The same texture-alpha sampling,
+material descriptors and textured geometry-hit shading serve all three effects.
+Static scenery, terrain patches and foliage/alpha-extension instances retain
+their existing paths. Dynamic objects use one instance, not one per effect.
+
+Writable meshes and reusable BLAS/scratch/material/TLAS allocations belong to
+one existing frame-fence slot. Only after that slot's fence completes may its
+geometry be changed. Old mesh/BLAS references remain retained by in-flight
+slots. Identical geometry uploads nothing; normals/UV-only changes do not
+rebuild BLAS. Position/index or geometry-range/opacity-layout changes rebuild
+it; material-only changes update material data. Transform-only movement changes
+the shared TLAS without rebuilding the mesh BLAS. A BLAS bounds change also
+forces TLAS rebuilding even when instance transform bytes are unchanged.
+Removed/out-of-range objects disappear from the next scene; unused per-slot
+meshes and dynamic cache entries are retired, not traced at their last position.
+
+Live destruction exposed an older raster invariant: a formerly immutable
+`VertexBufferVK` could become dirty after damage. It now replaces changed data
+with a new shared snapshot, retaining the previous allocation for raster/BLAS
+users. Byte-identical restored data does not allocate another snapshot. Clean
+static buffers take the unchanged fast path; no GL33 buffer code changed.
+
+Hard limits are **32 selected objects, 12 people, 65,536 captured vertices,
+8,192 vertices/object, 2,048 scanned list entries/frame**, plus 16,384 faces and
+256 sections/object. Each deformed upload is capped at 256 KiB vertices and
+192 KiB indices; at most 32 dynamic BLAS builds can be recorded per frame.
+The original shared scene remains capped at 1,024 instances, reserving 32 only
+while dynamic coverage is active. Over-budget objects are excluded, not rendered
+with a stale pose. These limits intentionally trade distant/crowded coverage for
+bounded work, including in modded missions.
+
+`status` reports last-completed-frame instances, changed transforms, dynamic
+BLAS builds, selected/captured/off-screen cases, excluded proxies/materials,
+budget exclusions, vertices and actual upload bytes. GPU hit counts separately
+identify dynamic AO, sunlight, water intersections and textured water hits.
+CPU collection and shared build-recording times accompany the existing shared
+BLAS/TLAS/trace GPU timestamps. A stationary warmed scene correctly reports
+zero transform updates, uploads and rebuilds; GPU timing requires profiling.
+
+### Explicit exclusions
+
+- Seat/crew, weapon, equipment and other recursively rendered **proxies** are
+  not expanded. Mounted people are excluded rather than placed using an
+  incorrect independent body transform. A soldier body can therefore reflect
+  without its separately rendered rifle/backpack.
+- Blended glass, particle/effect sections, dynamic textures, light sprites,
+  no-shadow material sections and terrain-fitted models are excluded. Opaque
+  and alpha-cutout body sections remain eligible. Blurred translucent rotor
+  disks are not solid RT geometry.
+- Destroyed objects/wrecks and corpses are excluded once the engine identifies
+  them as destroyed. Supported live damage deformation uses the current pose;
+  excluded wrecks never retain their previous intact reflection.
+- Animated buildings/doors, vegetation animation and arbitrary non-transport,
+  non-person entities are not added. Huge/modded models can exceed the budget.
+  Existing half-resolution ray effects, conservative material exclusions and
+  distance/LOD changes can still produce missing detail or coverage popping.
+  There is no new denoiser, animation pipeline or rendering framework.
+
+The historical static-only RT limitations in the earlier milestone notes below
+are superseded only for the explicitly supported dynamic cases above.
+
+### Gameplay and matched evidence
+
+Direct muted diagnostic launches used copied profiles and stock **Steal the
+Car / Malden** and **Heavy Metal / Everon** gameplay. Developer commands placed
+stock objects, protected actors, selected cameras, and froze comparisons; this
+is not a mission-completion or Steam-release test. Jeep/Ural/M1 driving used
+bounded keyboard input, with position/direction changes checked. Helicopter
+airborne motion was developer-assisted and simulated; it is not claimed as an
+unassisted takeoff test. Walking used live AI simulation; standing, turning and
+crouching also exercised the engine's real animation selection.
+
+For the evidence below, CSM and legacy projected object/vehicle shadows were
+independently disabled (zero CSM passes and projected-shadow draw counters).
+The sunlight-only pairs additionally disable AO, contact shadows and RT water.
+Static RT shadows/reflections remain visible in the Off images. No generated,
+painted or composited evidence is used; these are original client captures with
+the window border retained.
+
+| Scene / isolated effect | Dynamic Off | Dynamic On |
+| --- | --- | --- |
+| Malden: vehicle and soldier water reflections | [Off](evidence/rt-dynamic/malden-water-off.png) | [On](evidence/rt-dynamic/malden-water-on.png) |
+| Everon: walking soldier, Jeep, truck and tanks; sunlight only | [Off](evidence/rt-dynamic/everon-sun-off.png) | [On](evidence/rt-dynamic/everon-sun-on.png) |
+| Everon: vehicle/body contact AO; RT sunlight and water Off | [Off](evidence/rt-dynamic/everon-ao-off.png) | [On](evidence/rt-dynamic/everon-ao-on.png) |
+| Everon coast: actual textured geometry hits | [Off](evidence/rt-dynamic/everon-water-off.png) | [On](evidence/rt-dynamic/everon-water-on.png) |
+
+The [crouched/turned body and its sunlight shadow](evidence/rt-dynamic/everon-crouch-on.png)
+replace the walking pose above. The [moved/turned coastal geometry](evidence/rt-dynamic/everon-water-moved-on.png)
+changes the reflection rather than leaving an old instance behind. The Everon
+water pair records 43,719 dynamic textured hits; the moved view records 29,046.
+The AO-only scene records 53,081 dynamic hits. These counters confirm actual
+ray intersections, not an inference from ordinary raster shading.
+
+Malden camera: `[3515,4,3240,1,-.12,.15]`; Jeep `[3535,3245,0]`, Ural
+`[3543,3247,0]`, soldier `[3538,3240,0]`. Everon land camera:
+`[6627,84,5302,-.25,-.25,.93]`, with actors near `[6618,5318,0]`.
+Everon water camera: `[5096,3,3785,.3,-.04,1]`, Jeep `[5102,3800,0]`, Ural
+`[5110,3810,0]`. Cameras use engine x/absolute-y/z; actor positions use script
+x/z/AGL. Clear weather, July 5 1985 09:00, AA Off for the published pairs.
+
+Verification includes AA Off/TAA/FSR Quality/MSAA4, independent RT toggles,
+range exit/return, deletion, destruction, camera relocation, and coexistence
+with CSM, soft/contact/local shadows, atmosphere, volumetric fog/clouds, cloud
+shadows, sky reflections and coastal refraction. Everon -> menu -> Malden in
+one process returned zero dynamic instances at the empty Malden coast, with
+no retained Everon objects. Validation runs `rt-dynamic-malden-5` (24,753
+submitted/presented frames) and `rt-dynamic-transitions` (26,939) exited normally
+with zero core/synchronization errors or warnings through shutdown.
+
+Earlier failed trials are not clean-pass evidence: one impact exposed the
+immutable-buffer exception fixed above; an unsupported developer `moveOut`
+command caused a test-mode script-error exit; initial seat-change attempts did
+not actually move the newly selected tank/helicopter. Those were corrected and
+retested. Raw actions, profiles, screenshots and executable SHA-256 receipts
+remain locally under `build/shadow-live/rt-dynamic-*`.
+
+### Measured costs and final checks
+
+Core i7-12700F, RTX 4060 Ti 8 GB, driver 617.14. Final timing runs
+`rt-dynamic-perf1080-final` and `rt-dynamic-perf1440-final` used native
+1920x1080 / 2560x1440, AA Off, VSync Off, all three RT effects On, CSM/projected
+shadows Off and **validation Off**. The existing frame cap was not reached.
+Each frozen/live scene ran Off -> On -> On -> Off, with 3 seconds of warm-up
+and 8 seconds sampled per segment (64 status samples per mode). Five nearby
+stock objects: Jeep, Ural, M1, helicopter and soldier. Live simulation continued
+between bounded developer position/velocity/turn commands; AI supplied soldier
+motion. Repeated paths and helicopter altitude resets prevented impacts from
+changing scenery between segments. This is an assisted gameplay workload,
+not a replay benchmark or five independently driven vehicles.
+
+Median milliseconds, **On**. Build recording and GPU intervals are for the
+shared scene, not an independently timed dynamic-only acceleration structure:
+
+| Resolution / scene | Dynamic CPU collection | Shared CPU build recording | GPU BLAS / TLAS | GPU AO / sun / water trace-shade |
+| --- | --- | --- | --- | --- |
+| 1080p frozen | 0.184 | 0.044 | <0.001 / <0.001 | 0.157 / 0.337 / 0.551 |
+| 1080p moving | 0.192 | 0.229 | 0.244 / 0.094 | 0.141 / 0.333 / 0.556 |
+| 1440p frozen | 0.182 | 0.044 | <0.001 / <0.001 | 0.194 / 0.590 / 0.903 |
+| 1440p moving | 0.206 | 0.229 | 0.199 / 0.075 | 0.194 / 0.588 / 0.911 |
+
+All frozen samples had five instances and **zero updates, BLAS builds or uploaded
+bytes** after warming both fence slots. Moving samples had five instances,
+3-4 changed transforms, 2-3 dynamic BLAS builds and 218,784-248,832 uploaded
+bytes/frame. These are actual per-frame counts, not a configured capacity.
+At Off, dynamic collection/upload/build counts are zero. Shared static BLAS/TLAS
+GPU intervals were below 0.001 ms in the matched warmed Off samples.
+
+Whole-frame interval medians, Off / On (existing two-second profiler intervals):
+
+| Resolution / scene | CPU frame ms | GPU frame ms |
+| --- | --- | --- |
+| 1080p frozen | 6.458 / 6.731 | 2.217 / 2.322 |
+| 1080p moving | 6.849 / 7.291 | 2.285 / 2.579 |
+| 1440p frozen | 6.570 / 6.859 | 3.315 / 3.395 |
+| 1440p moving | 6.893 / 7.404 | 3.321 / 3.688 |
+
+These are scene-dependent observations, not guaranteed FPS deltas. Clocks,
+simulation/LOD, ray visibility and CPU/GPU overlap vary; the two resolutions do
+not imply fixed BLAS cost scaling. Full-frame and pass medians cannot be added.
+The initial impact-contaminated timing trial is excluded from these tables.
+
+An additional live crowd added 24 Jeeps and 16 requested soldiers to the same
+scene. Both resolutions held **32 actual instances**, about 61,269 captured
+vertices and 6-7 reported budget exclusions. Over 32 samples, 1080p collection /
+build recording medians were **0.871 / 0.669 ms**, GPU BLAS/TLAS **0.517 / 0.207
+ms**; 1440p was **0.898 / 1.148 ms**, GPU BLAS/TLAS **0.396 / 0.138 ms**. The AI
+poses were not identical: 1080p observed 2-13 BLAS builds, 1440p 13, with at most
+510,784 uploaded bytes in either run. This supports retaining the conservative
+32-object/12-person/65,536-vertex bounds, not expanding them to every unit.
+Tuning reused fence-slot AS/scratch capacity, selected fast-build BLAS for
+deformation, suppressed redundant uploads/snapshots, and rate-limited dynamic
+build diagnostics instead of logging every rebuilt frame.
+
+Timing executable SHA-256 begins `22DA3DFD564E3BD6`. Its 1440p validation run
+`rt-dynamic-final-validation` repeated AA modes, moving transforms, range,
+removal/destruction and combined effects, including the impact regression:
+**normal exit 0, 7,229 submitted/presented frames, zero core/synchronization
+errors or warnings**. The no-opt-in Vulkan run rejected On with a restart
+instruction and exited cleanly (428 frames, zero validation messages).
+GL33-only startup rejected the command and exited 0; before/after world pixels
+were identical, with only the fading top-left weapon HUD changing. Malden
+Off -> On -> Off captures were pixel-identical on return at both resolutions;
+Everon return differences were confined to changing HUD/radio text.
+
+The final diagnostic correction counts only accepted uploads/off-screen poses,
+not rejected attempts. Executable SHA-256 `0E17518440DA6BD9...` repeated the
+32-instance crowd, live animation, lifecycle and effect-toggle checks in
+`rt-dynamic-final-counters`: **exit 0, 1,710 submitted/presented frames, zero
+core/synchronization errors or warnings**. Geometry/rendering policy is unchanged
+from the timing build; the focused suites were rerun after this correction.
+
+Both builds pass. Focused Vulkan tests: **1,146 assertions / 67 cases**;
+GL33-only: **1,106 / 66**; driver-free Vulkan policy/lifetime tests: **461 checks**.
+The latter's intentional synthetic teardown error is not a live validation
+failure. Original game assets/profiles and private DLSS/NGX work are untouched.
+
 ## Optional shadowed local spotlights (2026-10-12)
 
 Built from public main `3d8e28e` in an isolated worktree; the dirty private

@@ -76,10 +76,9 @@ inline unsigned ShapeSampler(const render::LegacySpec& spec)
     return point | ((spec.backend & render::Backend::ClampU) != render::Backend::None ? 1 : 0) |
            ((spec.backend & render::Backend::ClampV) != render::Backend::None ? 2 : 0);
 }
-inline void RequireImmutableShape(bool dynamic, bool dirty)
+inline bool NeedsShapeSnapshot(bool dynamic, bool dirty)
 {
-    if (dynamic || dirty)
-        throw std::logic_error("Vulkan Shape: immutable buffer was modified; dynamic mesh updates are unsupported");
+    return dynamic || dirty;
 }
 // Same position/negated-normal/UV layout and polygon fans as GL33's SVertex path.
 struct ShapeVertex

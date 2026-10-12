@@ -462,6 +462,7 @@ class Object: public NetworkObject, public FrameBase, public IAnimator
 
 	// Get/Set object type (see ObjectType)
 	ObjectType GetType() const {return _type;}
+	uint64_t RenderIdentity() const { return _renderIdentity.Get(); }
 	void SetType( ObjectType type ) {_type=type;}
 
 	// Get IPaths interface. May be nullptr when object does not implement it.

@@ -6,9 +6,240 @@
 #include <Poseidon/World/Terrain/Landscape.hpp>
 #include <Poseidon/Graphics/Core/MatrixConversion.hpp>
 #include <set>
+#include <Poseidon/World/World.hpp>
+#include <Poseidon/World/Entities/Infantry/Person.hpp>
+#include <Poseidon/AI/AIUnit.hpp>
+#include <Poseidon/World/Entities/Vehicles/Transport.hpp>
+#include <chrono>
 
 namespace Poseidon
 {
+namespace
+{
+constexpr size_t DynamicObjects = 32, DynamicPeople = 12, DynamicScan = 2048;
+constexpr uint32_t DynamicVertices = 65536, DynamicObjectVertices = 8192;
+double ElapsedRT(std::chrono::steady_clock::time_point start)
+{
+    return std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - start).count();
+}
+} // namespace
+
+RString EngineVK::SetRTDynamic(RString mode)
+{
+    const auto result = _vk.SetRTDynamic(static_cast<const char*>(mode));
+    if (!_vk.RTDynamicEnabled())
+        _rtDynamicCandidates.clear();
+    return result.c_str();
+}
+
+void EngineVK::BeginRTDynamic()
+{
+    _rtDynamicCandidates.clear();
+    _rtDynamicStats = {};
+    _vk.BeginRTDynamic();
+    if (!_vk.RTDynamicEnabled() || !GWorld || !GScene || !GScene->GetCamera())
+        return;
+    const auto start = std::chrono::steady_clock::now();
+    const auto camera = GScene->GetCamera()->Position();
+    const float radius = _vk.RTShadowsEnabled() || _vk.RTReflectionsEnabled() ? 160.f : 80.f;
+    std::set<uint64_t> seen;
+    size_t scanned = 0;
+    auto add = [&](Object* object)
+    {
+        if (!object || object->Static() || !object->GetShape() || !seen.insert(object->RenderIdentity()).second)
+            return;
+        const float distance2 = object->Position().Distance2(camera);
+        if (distance2 > Square(radius + object->GetRadius()) ||
+            object->GetObjSpecial() & (IsHidden | IsHiddenProxy | IsAlpha | IsTransparent | NoZBuf | NoZWrite))
+            return;
+        if ((!dynamic_cast<Transport*>(object) && !dynamic_cast<Person*>(object)) || object->IsDammageDestroyed())
+        {
+            ++_rtDynamicStats.unsupported;
+            return;
+        }
+        if (const auto* person = dynamic_cast<Person*>(object);
+            person && person->Brain() && person->Brain()->GetVehicleIn())
+        {
+            // Crew are rendered through seat proxies, not the person's world
+            // transform. Do not invent an independently positioned body.
+            ++_rtDynamicStats.unsupported;
+            return;
+        }
+        _rtDynamicCandidates.push_back({object, object->RenderIdentity(), distance2, false});
+    };
+    // Existing simulation lists only. The cap also bounds CPU work in modded battles.
+    for (int i = 0; i < GWorld->NVehicles() && scanned < DynamicScan; ++i, ++scanned)
+        add(GWorld->GetVehicle(i));
+    for (int i = 0; i < GWorld->NFastVehicles() && scanned < DynamicScan; ++i, ++scanned)
+        add(GWorld->GetFastVehicle(i));
+    if (size_t(GWorld->NVehicles() + GWorld->NFastVehicles()) > scanned)
+        ++_rtDynamicStats.budget;
+    std::sort(_rtDynamicCandidates.begin(), _rtDynamicCandidates.end(), [](const auto& a, const auto& b)
+              { return a.distance2 != b.distance2 ? a.distance2 < b.distance2 : a.id < b.id; });
+    size_t people = 0, count = 0;
+    std::erase_if(_rtDynamicCandidates,
+                  [&](const auto& candidate)
+                  {
+                      if (count >= DynamicObjects ||
+                          (dynamic_cast<Person*>(candidate.object) && ++people > DynamicPeople))
+                      {
+                          ++_rtDynamicStats.budget;
+                          return true;
+                      }
+                      ++count;
+                      return false;
+                  });
+    _rtDynamicStats.selected = uint32_t(_rtDynamicCandidates.size());
+    _rtDynamicStats.collectionMs += ElapsedRT(start);
+}
+
+void EngineVK::CaptureRayGeometry(Object& object, const Shape& shape, int level, const FrameBase& frame)
+{
+    if (!_vk.RTDynamicEnabled() || _rtDynamicCandidates.empty())
+        return;
+    auto found = std::find_if(_rtDynamicCandidates.begin(), _rtDynamicCandidates.end(),
+                              [&](const auto& item) { return item.object == &object && !item.captured; });
+    if (found == _rtDynamicCandidates.end() || !object.GetShape() || level < 0 ||
+        level >= object.GetShape()->NLevels() || object.GetShape()->Resolution(level) >= 1000)
+        return; // Never capture view-pilot, collision, memory or proxy geometry.
+    found->captured = true;
+    const auto start = std::chrono::steady_clock::now();
+    try
+    {
+        if (shape.NVertex() <= 0 || shape.NNorm() != shape.NVertex() ||
+            (shape.GetOrHints() & (ClipLandKeep | ClipLandOn)))
+        {
+            ++_rtDynamicStats.unsupported;
+        }
+        else if (shape.NVertex() > DynamicObjectVertices ||
+                 _rtDynamicStats.vertices + shape.NVertex() > DynamicVertices || shape.NFaces() > 16384 ||
+                 shape.NSections() > 256)
+        {
+            ++_rtDynamicStats.budget;
+        }
+        else
+        {
+            auto* rigid = !object.IsAnimated(level) && !shape.IsAnimated() && object.GetTotalDammage() == 0
+                              ? dynamic_cast<VertexBufferVK*>(shape.GetVertexBuffer())
+                              : nullptr;
+            if (rigid && rigid->bufferDirty)
+                rigid = nullptr;
+            auto geometry = rigid ? vk::ShapeGeometry{} : vk::ExtractShapeGeometry(shape);
+            vk::RTAOInstance instance;
+            instance.dynamicId = found->id;
+            instance.transform = vk::RayInstanceTransform(frame.Transform());
+            instance.index16 = sizeof(VertexIndex) == 2;
+            instance.dynamicGeometry = !rigid;
+            if (rigid)
+                instance.mesh = rigid->Buffers();
+            for (int s = 0; s < shape.NSections(); ++s)
+            {
+                const auto& section = shape.GetSection(s);
+                const int flags = section.properties.Special() | object.GetObjSpecial();
+                if (flags & (IsAlpha | IsAlphaFog | IsHidden | IsHiddenProxy | IsShadow | NoZBuf | NoZWrite |
+                             OnSurface | IsOnSurface | NoDropdown | IsLight | NoShadow | ShadowDisabled))
+                    continue;
+                auto* texture = section.properties.GetTexture();
+                auto* tex = dynamic_cast<TextureVK*>(texture);
+                const auto alpha = texture ? texture->GetAlphaClass() : AlphaStats::Opaque;
+                if ((tex && tex->IsDynamic()) || alpha == AlphaStats::Blend)
+                {
+                    ++_rtDynamicStats.unsupported;
+                    continue;
+                }
+                const auto range = rigid ? rigid->Sections()[s] : geometry.sections[s];
+                if (range.begin == range.end)
+                    continue;
+                vk::RTAORange material{range.begin, range.end - range.begin};
+                material.sampler = vk::ShapeSampler(render::SplitLegacy(flags));
+                if ((flags & IsTransparent) || alpha == AlphaStats::Cutout)
+                {
+                    if (!tex)
+                        continue;
+                    material.alpha = tex->Image(_vk);
+                    material.cutoff = flags & IsTransparent ? 192.f / 255 : .5f;
+                }
+                if (tex && (_vk.RTReflectionsEnabled() || material.alpha))
+                {
+                    const auto image = tex->Image(_vk);
+                    const auto& pixels = tex->Pixels();
+                    _vk.PrepareRTAOAlpha(image, pixels.width, pixels.height, pixels.rgba.data());
+                    if (_vk.RTReflectionsEnabled())
+                        material.color = image;
+                }
+                instance.ranges.push_back(std::move(material));
+            }
+            _rtDynamicStats.proxies += object.GetProxyCount(level);
+            if (!instance.ranges.empty())
+            {
+                if (_vk.AddRTDynamic(std::move(instance), geometry.vertices.data(),
+                                     geometry.vertices.size() * sizeof(vk::ShapeVertex), geometry.indices.data(),
+                                     geometry.indices.size() * sizeof(VertexIndex)))
+                {
+                    _rtDynamicStats.vertices += uint32_t(shape.NVertex());
+                    ++_rtDynamicStats.captured;
+                }
+            }
+            else
+                ++_rtDynamicStats.unsupported;
+        }
+    }
+    catch (const std::exception& error)
+    {
+        ++_rtDynamicStats.unsupported;
+        LOG_WARN(Graphics, "Dynamic RT geometry excluded: {}", error.what());
+    }
+    _rtDynamicStats.collectionMs += ElapsedRT(start);
+}
+
+void EngineVK::FinishRTDynamic()
+{
+    if (!_vk.RTDynamicEnabled())
+    {
+        _rtDynamicCandidates.clear();
+        return;
+    }
+    // Objects absent from the raster frustum still affect rays. Reuse Animate /
+    // Deanimate exactly as the existing local-light caster collector does.
+    for (auto& candidate : _rtDynamicCandidates)
+    {
+        if (candidate.captured)
+            continue;
+        auto* object = candidate.object;
+        auto* lod = object->GetShape();
+        if (!lod)
+            continue;
+        int level = GScene->LevelFromDistance2(lod, candidate.distance2, object->Scale(), object->Direction(),
+                                               GScene->GetCamera()->Direction());
+        if (level == LOD_INVISIBLE || level < 0 || level >= lod->NLevels() || lod->Resolution(level) >= 1000)
+        {
+            ++_rtDynamicStats.unsupported;
+            continue;
+        }
+        Shape* shape = lod->LevelOpaque(level);
+        if (!shape || shape->NVertex() > DynamicObjectVertices ||
+            _rtDynamicStats.vertices + shape->NVertex() > DynamicVertices)
+        {
+            ++_rtDynamicStats.budget;
+            continue;
+        }
+        const auto start = std::chrono::steady_clock::now();
+        object->Animate(level);
+        _rtDynamicStats.collectionMs += ElapsedRT(start);
+        struct RestorePose
+        {
+            Object* object;
+            int level;
+            ~RestorePose() { object->Deanimate(level); }
+        } restore{object, level};
+        const auto captured = _rtDynamicStats.captured;
+        CaptureRayGeometry(*object, *shape, level, *object);
+        _rtDynamicStats.fallback += _rtDynamicStats.captured - captured;
+    }
+    _vk.SetRTDynamicStats(_rtDynamicStats);
+    _rtDynamicCandidates.clear();
+}
+
 void EngineVK::CollectRTAOScene()
 {
     if (!_vk.RaySceneEnabled() || !GScene || !GScene->GetCamera() || !GScene->GetLandscape())
@@ -50,7 +281,8 @@ void EngineVK::CollectRTAOScene()
     ObjRadiusRectangle(x0, x1, z0, z1, position, position, radius);
     std::vector<vk::RTAOInstance> instances;
     std::set<const Object*> visited;
-    const size_t objectLimit = shadows ? 800 : 1024;
+    const size_t sceneLimit = 1024 - (_vk.RTDynamicEnabled() ? DynamicObjects : 0);
+    const size_t objectLimit = shadows ? 800 : sceneLimit;
     for (int z = z0; z <= z1 && instances.size() < objectLimit; ++z)
         for (int x = x0; x <= x1 && instances.size() < objectLimit; ++x)
         {
@@ -125,6 +357,7 @@ void EngineVK::CollectRTAOScene()
                 auto* buffer = dynamic_cast<VertexBufferVK*>(shape->GetVertexBuffer());
                 if (!buffer)
                     continue;
+                buffer->Update(*shape, false);
                 instance.mesh = buffer->Buffers();
                 for (auto* ranges : {&instance.ranges, &shadowOnly})
                 {
@@ -168,7 +401,7 @@ void EngineVK::CollectRTAOScene()
         for (int z = int(std::floor((position.Z() - radius) / patchSize));
              z <= int(std::floor((position.Z() + radius) / patchSize)); ++z)
             for (int x = int(std::floor((position.X() - radius) / patchSize));
-                 x <= int(std::floor((position.X() + radius) / patchSize)) && instances.size() < 1024; ++x)
+                 x <= int(std::floor((position.X() + radius) / patchSize)) && instances.size() < sceneLimit; ++x)
             {
                 if (x < 0 || z < 0 || (x + 1) * cells >= land->GetTerrainRange() ||
                     (z + 1) * cells >= land->GetTerrainRange())

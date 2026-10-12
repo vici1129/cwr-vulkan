@@ -56,6 +56,7 @@ vec4 traceWater(ivec2 pixel) {
     if(rayQueryGetIntersectionTypeEXT(query,true)==gl_RayQueryCommittedIntersectionTriangleEXT) {
         atomicAdd(groupHits,1);
         uint custom=rayQueryGetIntersectionInstanceCustomIndexEXT(query,true);
+        if((custom>>20)==3) atomicAdd(dynamicHits,1);
         Material m=Materials(materials[custom&65535u]).m[rayQueryGetIntersectionGeometryIndexEXT(query,true)];
         if(m.color!=uint64_t(0) && m.colorWidth>0 && m.colorHeight>0) {
             uint first=m.first+rayQueryGetIntersectionPrimitiveIndexEXT(query,true)*3;
@@ -73,6 +74,7 @@ vec4 traceWater(ivec2 pixel) {
             float fog=clamp((rayQueryGetIntersectionTEXT(query,true)-light.parameters.x)*light.parameters.y,0,1);
             color=mix(eyeResponse(color),toLinear(light.fog.rgb),fog);
             atomicAdd(shadedHits,1);
+            if((custom>>20)==3) atomicAdd(dynamicShaded,1);
             if((custom>>20)==2) atomicAdd(terrainHits,1);
             if(m.alpha!=uint64_t(0)) atomicAdd(alphaHits,1);
         }

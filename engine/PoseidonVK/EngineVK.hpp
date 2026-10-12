@@ -58,6 +58,19 @@ class EngineVK final : public Engine
     bool SetSSAO(bool enabled, float strength, float radius, float bias, float fade) override;
     RString SetRTAO(RString mode) override { return _vk.SetRTAO(static_cast<const char*>(mode)).c_str(); }
     void CollectRTAOScene();
+    RString SetRTDynamic(RString mode) override;
+    void CaptureRayGeometry(Object&, const Shape&, int, const FrameBase&) override;
+    void BeginRTDynamic();
+    void FinishRTDynamic();
+    struct RTDynamicCandidate
+    {
+        Object* object = nullptr; // only used during the current synchronous world draw
+        uint64_t id = 0;
+        float distance2 = 0;
+        bool captured = false;
+    };
+    std::vector<RTDynamicCandidate> _rtDynamicCandidates;
+    vk::RTDynamicStats _rtDynamicStats;
     struct RTTerrainPatch
     {
         std::vector<float> heights;

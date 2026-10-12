@@ -877,6 +877,10 @@ void Object::Draw(int forceLOD, ClipFlags clipFlags, const FrameBase& pos)
         clipFlags &= GScene->GetCamera()->MayBeClipped(bCenterW, bRadiusW, 1) | clipKeep;
     }
 
+    // Consume the live pose before Deanimate restores the shared model. Vulkan
+    // limits this to selected world objects; other renderers keep the no-op hook.
+    GEngine->CaptureRayGeometry(*this, *sShape, forceLOD, pos);
+
     PoseidonAssert(forceLOD >= 0);
 
     LightList work(true);

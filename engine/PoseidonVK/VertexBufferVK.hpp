@@ -14,6 +14,7 @@ class VertexBufferVK final : public VertexBuffer
     const std::shared_ptr<vk::MeshBuffers>& Buffers() const { return _buffers; }
 
   private:
+    vk::VulkanContext& _context;
     std::vector<vk::SectionRange> _sections;
     std::shared_ptr<vk::MeshBuffers> _buffers;
 };

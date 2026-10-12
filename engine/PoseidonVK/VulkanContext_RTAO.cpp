@@ -19,6 +19,7 @@
 #include <set>
 #include <sstream>
 #include <stdexcept>
+#include <map>
 
 namespace Poseidon::vk
 {
@@ -95,6 +96,8 @@ struct BLAS : Acceleration
     uint64_t used = 0;
     uint32_t triangles = 0;
     VkDeviceAddress address = 0;
+    uint64_t dynamicId = 0, revision = 0;
+    std::shared_ptr<RTBuffer> scratch;
 };
 struct RayMaterial
 {
@@ -137,6 +140,16 @@ struct VulkanContext::RTAOState
     std::array<VkPipeline, 6> compute{}, filter{};
     struct Slot
     {
+        struct DynamicMesh
+        {
+            std::shared_ptr<MeshBuffers> mesh;
+            std::vector<unsigned char> vertices, indices;
+            uint64_t revision = 0;
+            bool seen = false;
+            bool deformed = false;
+        };
+        std::map<uint64_t, DynamicMesh> dynamicMeshes;
+        RTDynamicStats dynamic;
         std::shared_ptr<Acceleration> tlas;
         std::shared_ptr<RTBuffer> instances, scratch, counters, materials;
         std::vector<std::shared_ptr<RTBuffer>> buildScratch;
@@ -173,7 +186,158 @@ struct VulkanContext::RTAOState
     uint32_t lastWaterRays = 0, lastWaterHits = 0, lastShaded = 0, lastShadedTerrain = 0, lastShadedAlpha = 0;
     bool waterDispatched = false;
     double waterRayMs = 0, waterFilterMs = 0;
+    RTDynamicStats dynamic;
+    std::map<uint64_t, VkTransformMatrixKHR> dynamicTransforms;
 };
+
+std::string VulkanContext::SetRTDynamic(std::string_view mode)
+{
+    if (mode == "status")
+    {
+        std::ostringstream out;
+        out << "RTDynamic=" << (_rtDynamicEnabled ? "on" : "off") << " active=" << (RTDynamicEnabled() ? "yes" : "no")
+            << " capability=" << _rtaoReason;
+        const auto stats = _rtao && RTDynamicEnabled() ? _rtao->dynamic : RTDynamicStats{};
+        out << " instances=" << stats.instances << " updatedTransforms=" << stats.transforms
+            << " BLASrebuilds=" << stats.rebuilds << " selected=" << stats.selected
+            << " rasterPoses=" << (stats.captured > stats.fallback ? stats.captured - stats.fallback : 0)
+            << " offscreenAnimate=" << stats.fallback << " unsupported=" << stats.unsupported
+            << " budgetExcluded=" << stats.budget << " excludedProxies=" << stats.proxies
+            << " vertices=" << stats.vertices << " uploadedBytes=" << stats.uploadedBytes
+            << " hits(AO/sun/water/shaded)=" << stats.hits[0] << '/' << stats.hits[1] << '/' << stats.hits[2] << '/'
+            << stats.hits[3] << " CPUms(collection/build)=" << stats.collectionMs << '/' << stats.buildMs;
+        if (_rtao && _rtao->timingSamples)
+            out << " sharedGPUms(BLAS/TLAS/AO/sun/water)=" << _rtao->blasMs << '/' << _rtao->tlasMs << '/'
+                << _rtao->rayMs << '/' << _rtao->sunRayMs << '/' << _rtao->waterRayMs;
+        else
+            out << " GPUtimings=unavailable";
+        out << "; last completed frame; limits=32 objects/12 people/65536 vertices/2048 scanned; "
+               "proxies/crew, destroyed objects, blended/dynamic textures and terrain-fitted models excluded";
+        return out.str();
+    }
+    if (mode != "on" && mode != "off")
+        return "INVALID: triRTDynamic on, off, status";
+    if (mode == "on" && !_rtaoAvailable)
+        return "UNSUPPORTED: " + _rtaoReason;
+    _rtDynamicEnabled = mode == "on";
+    ResetTemporalHistory();
+    if (_rtao)
+    {
+        std::erase_if(_rtao->scene, [](const auto& entry) { return entry.dynamicId != 0; });
+        _rtao->dynamic = {};
+        _rtao->dynamicTransforms.clear();
+    }
+    return _rtDynamicEnabled ? "OK: dynamic geometry enabled for the shared RT scene (next frame)"
+                             : "OK: static-only RT restored";
+}
+
+void VulkanContext::BeginRTDynamic()
+{
+    if (!_rtao || !_frameOpen)
+        return;
+    auto& slot = _rtao->slots[_frame]; // BeginFrame already waited for this fence.
+    slot.dynamic = {};
+    for (auto& [id, mesh] : slot.dynamicMeshes)
+        mesh.seen = false;
+    if (!RTDynamicEnabled())
+    {
+        slot.dynamicMeshes.clear();
+        _rtao->dynamic = {};
+        _rtao->dynamicTransforms.clear();
+    }
+}
+
+bool VulkanContext::AddRTDynamic(RTAOInstance instance, const void* vertices, size_t vertexBytes, const void* indices,
+                                 size_t indexBytes)
+{
+    if (!RTDynamicEnabled() || !_frameOpen || !_rtao || !instance.dynamicId)
+        return false;
+    auto& slot = _rtao->slots[_frame];
+    if (_rtao->scene.size() >= 1024 || slot.dynamic.instances >= 32 ||
+        (!instance.mesh &&
+         (!vertexBytes || vertexBytes > 8192 * 32 || vertexBytes % 32 || !indexBytes || indexBytes > 196608)))
+    {
+        ++slot.dynamic.budget;
+        return false;
+    }
+    auto& mesh = slot.dynamicMeshes[instance.dynamicId];
+    if (mesh.seen)
+        return false;
+    mesh.seen = true;
+    if (instance.mesh)
+    {
+        mesh.mesh = instance.mesh; // existing immutable raster geometry / shared BLAS
+        mesh.vertices.clear();
+        mesh.indices.clear();
+        mesh.deformed = false;
+        mesh.revision = 0;
+    }
+    else
+    {
+        const bool verticesChanged =
+            mesh.vertices.size() != vertexBytes || std::memcmp(mesh.vertices.data(), vertices, vertexBytes) != 0;
+        const bool indicesChanged =
+            mesh.indices.size() != indexBytes || std::memcmp(mesh.indices.data(), indices, indexBytes) != 0;
+        bool positionsChanged = mesh.vertices.size() != vertexBytes;
+        for (size_t i = 0; !positionsChanged && i < vertexBytes; i += 32)
+            positionsChanged = std::memcmp(mesh.vertices.data() + i, static_cast<const char*>(vertices) + i, 12) != 0;
+        if (!mesh.deformed || !mesh.mesh || mesh.mesh->vertices.size < vertexBytes ||
+            mesh.mesh->indices.size < indexBytes)
+        {
+            mesh.mesh = UploadMesh(vertices, vertexBytes, indices, indexBytes);
+            slot.dynamic.uploadedBytes += uint32_t(vertexBytes + indexBytes);
+        }
+        else
+        {
+            // These allocations are exclusive to this fence slot, including all BLAS
+            // and material references. No other in-flight frame ever queries them.
+            if (verticesChanged)
+            {
+                UploadMappedBuffer(mesh.mesh->vertices, vertices, vertexBytes);
+                slot.dynamic.uploadedBytes += uint32_t(vertexBytes);
+            }
+            if (indicesChanged)
+            {
+                UploadMappedBuffer(mesh.mesh->indices, indices, indexBytes);
+                slot.dynamic.uploadedBytes += uint32_t(indexBytes);
+            }
+        }
+        if (positionsChanged || indicesChanged)
+            ++mesh.revision;
+        if (verticesChanged)
+            mesh.vertices.assign(static_cast<const unsigned char*>(vertices),
+                                 static_cast<const unsigned char*>(vertices) + vertexBytes);
+        if (indicesChanged)
+            mesh.indices.assign(static_cast<const unsigned char*>(indices),
+                                static_cast<const unsigned char*>(indices) + indexBytes);
+        mesh.deformed = true;
+    }
+    instance.mesh = mesh.mesh;
+    instance.kind = 3;
+    instance.revision = mesh.revision;
+    auto& transform = _rtao->dynamicTransforms[instance.dynamicId];
+    if (std::memcmp(&transform, &instance.transform, sizeof(transform)) != 0)
+        ++slot.dynamic.transforms;
+    transform = instance.transform;
+    ++slot.dynamic.instances;
+    _rtao->scene.push_back(std::move(instance));
+    return true;
+}
+
+void VulkanContext::SetRTDynamicStats(const RTDynamicStats& stats)
+{
+    if (!_rtao || !_frameOpen)
+        return;
+    auto& slot = _rtao->slots[_frame];
+    const auto actual = slot.dynamic;
+    slot.dynamic = stats;
+    slot.dynamic.instances = actual.instances;
+    slot.dynamic.transforms = actual.transforms;
+    slot.dynamic.uploadedBytes = actual.uploadedBytes;
+    slot.dynamic.budget += actual.budget;
+    std::erase_if(slot.dynamicMeshes, [](const auto& pair) { return !pair.second.seen; });
+    std::erase_if(_rtao->dynamicTransforms, [&](const auto& pair) { return !slot.dynamicMeshes.contains(pair.first); });
+}
 
 void VulkanContext::FailRTReflections(std::string_view reason)
 {
@@ -214,7 +378,7 @@ std::string VulkanContext::SetRTReflections(std::string_view mode)
         else
             out << " GPUtimings=unavailable";
         out << "; shared " << SetRTAO("status")
-            << "; actual water only, 80m receivers/70m rays, static textured hits and weather sky fallback";
+            << "; actual water only, 80m receivers/70m rays, textured hits and weather sky fallback";
         return out.str();
     }
     if (mode != "on" && mode != "off")
@@ -379,7 +543,9 @@ std::string VulkanContext::SetRTAO(std::string_view mode)
         else
             out << " BLAS=0 TLAS=0 instances=0 completedPasses=0 rayQueriesExecuted=no";
         out << "; shared static LOD0 scene radius=" << (RTShadowsEnabled() || RTReflectionsEnabled() ? 160 : 80)
-            << "m; AO mask excludes terrain/foliage; all rays exclude animation, damage, alpha blending and proxies";
+            << "m; dynamic=" << (_rtDynamicEnabled ? "on" : "off")
+            << "; AO mask excludes terrain/foliage; static collection excludes animation/damage; blended "
+               "effects/proxies excluded";
         return out.str();
     }
     if (mode != "on" && mode != "off")
@@ -454,6 +620,8 @@ void VulkanContext::RetireRTAO()
         ++rt.completed;
         rt.blasBuilds += slot.built;
         rt.tlasBuilds += slot.tlasBuilt;
+        rt.dynamic = slot.dynamic;
+        std::copy_n(counts + 11, 4, rt.dynamic.hits.begin());
         if (slot.queries)
         {
             uint64_t stamps[16]{};
@@ -476,7 +644,7 @@ void VulkanContext::RetireRTAO()
                     vkGetQueryPoolResults(_device, _frames[_frame].frameQueries, 0, 2, sizeof(frame), frame,
                                           sizeof(uint64_t), VK_QUERY_RESULT_64_BIT) == VK_SUCCESS)
                     rt.frameMs = double((frame[1] - frame[0]) & mask) * _timestampPeriod / 1e6;
-                if (slot.built || slot.tlasBuilt || rt.completed % 120 == 0)
+                if ((!_rtDynamicEnabled && (slot.built || slot.tlasBuilt)) || rt.completed % 120 == 0)
                     std::fprintf(stderr,
                                  "Vulkan RTAO GPU: BLAS=%.4f TLAS=%.4f rays=%.4f filter=%.4f frame=%.4f ms; "
                                  "built=%u/%u instances=%u triangles=%u rays=%u hits=%u\n",
@@ -494,6 +662,14 @@ void VulkanContext::RetireRTAO()
                                  "shaded=%u terrain=%u alpha=%u\n",
                                  rt.waterRayMs, rt.waterFilterMs, rt.frameMs, rt.lastWaterRays, rt.lastWaterHits,
                                  rt.lastShaded, rt.lastShadedTerrain, rt.lastShadedAlpha);
+                if (_rtDynamicEnabled && rt.completed % 120 == 0)
+                    std::fprintf(stderr,
+                                 "Vulkan RT dynamic: instances=%u transforms=%u rebuilds=%u vertices=%u bytes=%u "
+                                 "CPUcollection=%.4f CPUbuild=%.4f BLAS=%.4f TLAS=%.4f AO=%.4f sun=%.4f water=%.4f "
+                                 "frame=%.4f ms\n",
+                                 rt.dynamic.instances, rt.dynamic.transforms, rt.dynamic.rebuilds, rt.dynamic.vertices,
+                                 rt.dynamic.uploadedBytes, rt.dynamic.collectionMs, rt.dynamic.buildMs, rt.blasMs,
+                                 rt.tlasMs, rt.rayMs, rt.sunRayMs, rt.waterRayMs, rt.frameMs);
             }
         }
         slot.pending = false;
@@ -515,7 +691,10 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
     rt.sunDispatched = false;
     rt.waterDispatched = false;
     if (rt.scene.empty())
+    {
+        rt.dynamic = slot.dynamic;
         return;
+    }
     const VkExtent2D half{(_worldExtent.width + 1) / 2, (_worldExtent.height + 1) / 2};
     if (!rt.layout)
     {
@@ -708,13 +887,13 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
         return result;
     };
     if (!slot.counters)
-        slot.counters = buffer(48, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, true);
+        slot.counters = buffer(64, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, true);
     if (!slot.materials)
         slot.materials = buffer(1024 * sizeof(uint64_t), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, true);
     if (!slot.reflectionLight)
         slot.reflectionLight = buffer(sizeof(_reflectionLighting), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, true);
     UploadMappedBuffer(slot.reflectionLight->buffer, _reflectionLighting.data(), sizeof(_reflectionLighting));
-    std::memset(slot.counters->buffer.mapped, 0, 48);
+    std::memset(slot.counters->buffer.mapped, 0, 64);
     if (!slot.queries && _timestampBits && _profile.enabled)
     {
         VkQueryPoolCreateInfo info{VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO};
@@ -745,6 +924,12 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
                          VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, 1, &depthBarrier, 0, nullptr, 0, nullptr);
     auto allocateAS = [&](Acceleration& as, VkAccelerationStructureTypeKHR type, VkDeviceSize size)
     {
+        if (as.handle && as.storage.buffer.size >= size)
+            return;
+        if (as.handle)
+            as.destroy(as.device, as.handle, nullptr);
+        as.handle = VK_NULL_HANDLE;
+        DestroyBuffer(_device, as.storage.buffer);
         as.device = _device;
         as.destroy = rt.destroy;
         as.storage.Create(_physical, _device, size, VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR);
@@ -761,6 +946,7 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
     };
     slot.built = slot.tlasBuilt = 0;
     slot.retained.clear();
+    const auto buildStart = std::chrono::steady_clock::now();
     std::vector<VkAccelerationStructureInstanceKHR> instances;
     stamp(0);
     for (const auto& entry : rt.scene)
@@ -770,7 +956,8 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
         auto found = std::find_if(rt.cache.begin(), rt.cache.end(),
                                   [&](const auto& blas)
                                   {
-                                      return blas && blas->mesh == entry.mesh && blas->ranges == entry.ranges &&
+                                      return blas && blas->mesh == entry.mesh &&
+                                             (entry.dynamicGeometry || blas->ranges == entry.ranges) &&
                                              blas->index16 == entry.index16;
                                   });
         if (found == rt.cache.end())
@@ -779,12 +966,21 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
             found = rt.cache.end() - 1;
         }
         auto& cached = *found;
-        if (!cached)
+        if (!cached ||
+            (entry.dynamicGeometry && (cached->revision != entry.revision || cached->ranges != entry.ranges)))
         {
-            auto blas = std::make_shared<BLAS>();
+            const bool rebuild =
+                !cached || cached->revision != entry.revision || cached->ranges.size() != entry.ranges.size() ||
+                !std::equal(entry.ranges.begin(), entry.ranges.end(), cached->ranges.begin(),
+                            [](const auto& a, const auto& b)
+                            { return a.first == b.first && a.count == b.count && bool(a.alpha) == bool(b.alpha); });
+            auto blas = cached ? cached : std::make_shared<BLAS>();
             blas->mesh = entry.mesh;
             blas->ranges = entry.ranges;
             blas->index16 = entry.index16;
+            blas->dynamicId = entry.dynamicGeometry ? entry.dynamicId : 0;
+            blas->revision = entry.revision;
+            blas->triangles = 0;
             std::vector<VkAccelerationStructureGeometryKHR> geometries;
             std::vector<VkAccelerationStructureBuildRangeInfoKHR> ranges;
             std::vector<uint32_t> counts;
@@ -819,32 +1015,46 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
             }
             if (geometries.empty() || geometries.size() > 1024 || blas->triangles > 1000000)
                 continue;
-            blas->materials.Create(_physical, _device, materials.size() * sizeof(RayMaterial),
-                                   VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, true);
+            if (blas->materials.buffer.size < materials.size() * sizeof(RayMaterial))
+            {
+                DestroyBuffer(_device, blas->materials.buffer);
+                blas->materials.Create(_physical, _device, materials.size() * sizeof(RayMaterial),
+                                       VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, true);
+            }
             UploadMappedBuffer(blas->materials.buffer, materials.data(), materials.size() * sizeof(RayMaterial));
-            VkAccelerationStructureBuildGeometryInfoKHR info{
-                VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR};
-            info.type = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR;
-            info.flags = VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR;
-            info.mode = VK_BUILD_ACCELERATION_STRUCTURE_MODE_BUILD_KHR;
-            info.geometryCount = uint32_t(geometries.size());
-            info.pGeometries = geometries.data();
-            VkAccelerationStructureBuildSizesInfoKHR sizes{
-                VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR};
-            rt.sizes(_device, VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &info, counts.data(), &sizes);
-            allocateAS(*blas, info.type, sizes.accelerationStructureSize);
-            auto scratch = buffer(sizes.buildScratchSize + rt.alignment, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
-            info.dstAccelerationStructure = blas->handle;
-            info.scratchData.deviceAddress = scratchAddress(*scratch);
-            const auto* rangePointer = ranges.data();
-            rt.build(command, 1, &info, &rangePointer);
-            slot.buildScratch.push_back(scratch);
-            VkAccelerationStructureDeviceAddressInfoKHR address{
-                VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_DEVICE_ADDRESS_INFO_KHR};
-            address.accelerationStructure = blas->handle;
-            blas->address = rt.address(_device, &address);
-            cached = blas;
-            ++slot.built;
+            if (rebuild)
+            {
+                VkAccelerationStructureBuildGeometryInfoKHR info{
+                    VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR};
+                info.type = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR;
+                info.flags = entry.dynamicGeometry ? VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_BUILD_BIT_KHR
+                                                   : VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR;
+                info.mode = VK_BUILD_ACCELERATION_STRUCTURE_MODE_BUILD_KHR;
+                info.geometryCount = uint32_t(geometries.size());
+                info.pGeometries = geometries.data();
+                VkAccelerationStructureBuildSizesInfoKHR sizes{
+                    VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR};
+                rt.sizes(_device, VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &info, counts.data(), &sizes);
+                allocateAS(*blas, info.type, sizes.accelerationStructureSize);
+                auto scratch = blas->scratch;
+                if (!scratch || scratch->buffer.size < sizes.buildScratchSize + rt.alignment)
+                    scratch = buffer(sizes.buildScratchSize + rt.alignment, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
+                if (entry.dynamicGeometry)
+                    blas->scratch = scratch;
+                info.dstAccelerationStructure = blas->handle;
+                info.scratchData.deviceAddress = scratchAddress(*scratch);
+                const auto* rangePointer = ranges.data();
+                rt.build(command, 1, &info, &rangePointer);
+                slot.buildScratch.push_back(scratch);
+                VkAccelerationStructureDeviceAddressInfoKHR address{
+                    VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_DEVICE_ADDRESS_INFO_KHR};
+                address.accelerationStructure = blas->handle;
+                blas->address = rt.address(_device, &address);
+                cached = blas;
+                ++slot.built;
+                if (entry.dynamicId)
+                    ++slot.dynamic.rebuilds;
+            }
         }
         cached->used = rt.serial;
         VkAccelerationStructureInstanceKHR instance{};
@@ -863,17 +1073,22 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
     stamp(1);
     stamp(2);
     rt.instanceCount = uint32_t(instances.size());
-    const bool changed = instances.size() != slot.previous.size() ||
+    const bool changed = slot.dynamic.rebuilds != 0 || instances.size() != slot.previous.size() ||
                          (!instances.empty() && std::memcmp(instances.data(), slot.previous.data(),
                                                             instances.size() * sizeof(instances[0])) != 0);
     if (!slot.tlas || changed)
     {
         // Per-frame-slot ownership: replacing TLAS/scratch never races an in-flight query.
-        slot.tlas.reset();
-        slot.scratch.reset();
-        slot.instances.reset();
-        slot.instances = buffer(std::max<size_t>(1, instances.size()) * sizeof(VkAccelerationStructureInstanceKHR),
-                                VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR, true);
+        if (!_rtDynamicEnabled)
+        {
+            slot.tlas.reset();
+            slot.scratch.reset();
+            slot.instances.reset();
+        }
+        const auto instanceBytes = std::max<size_t>(1, instances.size()) * sizeof(VkAccelerationStructureInstanceKHR);
+        if (!slot.instances || slot.instances->buffer.size < instanceBytes)
+            slot.instances =
+                buffer(instanceBytes, VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR, true);
         if (!instances.empty())
             UploadMappedBuffer(slot.instances->buffer, instances.data(), instances.size() * sizeof(instances[0]));
         VkAccelerationStructureGeometryKHR geometry{VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR};
@@ -890,9 +1105,11 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
         const uint32_t count = uint32_t(instances.size());
         VkAccelerationStructureBuildSizesInfoKHR sizes{VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR};
         rt.sizes(_device, VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &info, &count, &sizes);
-        slot.tlas = std::make_shared<Acceleration>();
+        if (!slot.tlas)
+            slot.tlas = std::make_shared<Acceleration>();
         allocateAS(*slot.tlas, info.type, sizes.accelerationStructureSize);
-        slot.scratch = buffer(sizes.buildScratchSize + rt.alignment, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
+        if (!slot.scratch || slot.scratch->buffer.size < sizes.buildScratchSize + rt.alignment)
+            slot.scratch = buffer(sizes.buildScratchSize + rt.alignment, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
         info.dstAccelerationStructure = slot.tlas->handle;
         info.scratchData.deviceAddress = scratchAddress(*slot.scratch);
         VkAccelerationStructureBuildRangeInfoKHR range{count, 0, 0, 0};
@@ -903,9 +1120,12 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
     }
     BuildBarrier(command, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
     stamp(3);
+    slot.dynamic.buildMs =
+        std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - buildStart).count();
     // Cache only local working geometry. Frame slots keep evicted entries alive
     // until every TLAS that references them has completed and been replaced.
-    std::erase_if(rt.cache, [&](const auto& item) { return !item || item->used + 120 < rt.serial; });
+    std::erase_if(rt.cache, [&](const auto& item)
+                  { return !item || item->used + (item->dynamicId ? FramesInFlight : 120) < rt.serial; });
     // All three effects consume this frame slot's single shared TLAS: sunlight,
     // water, then AO. Skipped timestamp intervals remain explicitly empty.
     for (int effect : {1, 2, 0})
@@ -939,7 +1159,7 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
                                     _rtWaterTargets ? _aaTargets[_image].water.view : _aaTargets[_image].color.view,
                                     VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
         VkDescriptorBufferInfo reflectionLight{slot.reflectionLight->buffer.buffer, 0, VK_WHOLE_SIZE};
-        VkDescriptorBufferInfo counter{slot.counters->buffer.buffer, 0, 48};
+        VkDescriptorBufferInfo counter{slot.counters->buffer.buffer, 0, 64};
         VkDescriptorBufferInfo materialBuffer{slot.materials->buffer.buffer, 0, VK_WHOLE_SIZE};
         VkWriteDescriptorSetAccelerationStructureKHR as{
             VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR};

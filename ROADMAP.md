@@ -14,6 +14,7 @@ This is a direction, **not a timetable or a promise**. Priorities may change, an
 - **Cloud shadows:** completed weather-synchronized stock-cloud coverage of direct sunlight, including CSM volumetric sunlight; independent default-off control, no RT requirement.
 - **Volumetric clouds:** verified optional half-resolution, three-layer density/scattering from stock weather; replaces the visible flat clouds, shares cloud-shadow coverage and water sky-reflection shading. Default Off, independent controls, no RT requirement for visible clouds; soft detail and stock background ordering remain deliberate limits.
 - **Occlusion:** SSAO and optional hardware ray-traced ambient occlusion (RTAO).
+- **Dynamic RT geometry:** verified default-off nearby vehicle and on-foot soldier coverage in the shared AO, sunlight and textured water ray-query scene. Reuses live animation and fence-safe bounded BLAS/TLAS updates; Malden/Everon evidence and 1080p/1440p costs are documented. Crew/equipment proxies, blended effects and destroyed wrecks remain excluded.
 - **Water:** textured hardware ray-query reflections and depth-aware coastal refraction/absorption, both independently selectable. Sky/cloud reflections milestone complete: optional directional stock-sky and moving-cloud sampling on water-ray misses.
 
 HDR10 surface negotiation and SDR fallback exist, but **physical HDR10 display output is not yet verified**. See the [development notes](docs/vulkan-foundation.md) for the actual coverage, limitations, performance and verification of individual features.
@@ -24,7 +25,6 @@ These are candidates, **not approved implementation commitments**.
 
 | Feature | Intended scope |
 | --- | --- |
-| Dynamic RT casters | Investigate moving soldiers, vehicles, animation and damage in the existing ray-query scene without unbounded AS rebuilding. |
 | Soft RT sunlight shadows | Explore penumbrae for RT-only silhouettes; current PCSS softens CSM, **not** the single-ray RT result. |
 | Targeted weather/water polish | Rain ripples, shoreline foam, underwater effects or wet surfaces only where stock assets and gameplay justify them. |
 | Optional presentation features | Depth of field, motion blur, color grading and dynamic resolution only if there is a clear use case. |

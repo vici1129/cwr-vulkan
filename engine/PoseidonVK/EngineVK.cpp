@@ -188,6 +188,7 @@ void EngineVK::BeginWorldEffects(bool enabled)
         try
         {
             CollectRTAOScene();
+            BeginRTDynamic();
         }
         catch (const std::exception& error)
         {
@@ -212,6 +213,7 @@ void EngineVK::FinishWorldEffects()
     if (!_worldEffectsPending)
         return;
     _worldEffectsPending = false;
+    FinishRTDynamic();
     if (_vk.TemporalEnabled() && GScene && GScene->GetCamera())
     {
         const auto* camera = GScene->GetCamera();

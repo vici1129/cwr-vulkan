@@ -469,6 +469,12 @@ int main()
         Check(!context.SSAOEnabled(), "SSAO must be disabled by default");
         Check(context.SetSSAO(true, 0.7f, 1.2f, 0.03f, 80), "valid SSAO controls are accepted");
         Check(!context.RTAOEnabled(), "RTAO defaults off");
+        Check(!context.RTDynamicEnabled() && context.SetRTDynamic("status").starts_with("RTDynamic=off active=no"),
+              "dynamic geometry defaults off independently of the ray effects");
+        Check(context.SetRTDynamic("on").starts_with("UNSUPPORTED:"), "dynamic geometry requires opted-in RT hardware");
+        Check(context.SetRTDynamic("invalid").starts_with("INVALID:"), "dynamic geometry validates controls");
+        Check(context.SetRTDynamic("off").starts_with("OK:") && context.SSAOEnabled(),
+              "dynamic geometry off preserves the AO selection");
         Check(!context.RTShadowsEnabled(), "RT sunlight defaults off independently of AO");
         Check(!context.RTReflectionsEnabled(), "RT water defaults off independently of AO and sunlight");
         Check(context.SetWaterRefraction("status").find("requested=off active=off captured=no") != std::string::npos,
