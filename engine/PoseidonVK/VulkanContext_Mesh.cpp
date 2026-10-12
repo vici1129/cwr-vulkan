@@ -147,11 +147,11 @@ void VulkanContext::FlushScreenBatch()
     const VkRect2D clip{{state.clip.x, state.clip.y}, {state.clip.width, state.clip.height}};
     DrawMesh(mesh.buffers, 0, count, false, {}, {1, 1, 1, 1}, state.image, state.sampler, state.cutoff,
              state.blend, true, state.depthTest, &clip, {}, 1, {0, -1, 0}, mesh.vertexOffset,
-             mesh.indexOffset, state.depthWrite, nullptr, false, state.additive);
+             mesh.indexOffset, state.depthWrite, nullptr, false, state.additive, state.waterOverlay);
 }
 
 void VulkanContext::CreateShapePipeline(bool translucent, bool screen, bool depthTest, bool depthWrite, bool shadow,
-                                        bool additive)
+                                        bool additive, bool waterOverlay)
 {
     if (!_shapeLayout)
     {
@@ -280,6 +280,17 @@ void VulkanContext::CreateShapePipeline(bool translucent, bool screen, bool dept
             // Only actual water writes a positive depth. Other visible surfaces invalidate it.
             // Projected shadows do not replace surface identity.
             temporalAttachments[3].colorWriteMask = shadow ? 0 : 15;
+            if (waterOverlay)
+            {
+                // Preserve depth/visibility only for foam beneath identified stock rain.
+                // An out-of-range normal marks the original refraction/RT rejection;
+                // MIN combines overlapping rain layers without losing that marker.
+                auto& water = temporalAttachments[3];
+                water.colorWriteMask = VK_COLOR_COMPONENT_R_BIT;
+                water.blendEnable = VK_TRUE;
+                water.colorBlendOp = VK_BLEND_OP_MIN;
+                water.srcColorBlendFactor = water.dstColorBlendFactor = VK_BLEND_FACTOR_ONE;
+            }
             blend.attachmentCount = 4;
             blend.pAttachments = temporalAttachments;
         }
@@ -313,7 +324,7 @@ void VulkanContext::CreateShapePipeline(bool translucent, bool screen, bool dept
         Require(vkCreateGraphicsPipelines(
                     _device, VK_NULL_HANDLE, 1, &pipeline, nullptr,
                     shadow        ? &(_worldActive ? _worldShadowPipelines : _shadowPipelines)[screen ? 1 : 0]
-                    : screen      ? &(_worldActive ? _worldScreenPipelines : _screenPipelines)[ScreenPipelineIndex(depthTest, translucent, depthWrite, additive)]
+                    : screen      ? &(_worldActive ? _worldScreenPipelines : _screenPipelines)[ScreenPipelineIndex(depthTest, translucent, depthWrite, additive, waterOverlay)]
                                   : &(_worldActive ? _worldShapePipelines : _shapePipelines)[ScreenPipelineIndex(depthTest, translucent, depthWrite)]),
                 "create graphics pipeline");
     }
@@ -338,9 +349,10 @@ void VulkanContext::DrawMesh(const std::shared_ptr<MeshBuffers>& mesh, uint32_t 
                              const std::shared_ptr<TextureImage>& detail, float secondaryMode,
                              const std::array<float, 3>& lightDirection, VkDeviceSize vertexOffset,
                              VkDeviceSize indexOffset, bool depthWrite, const ShapeLighting* lighting, bool shadow,
-                             bool additive)
+                             bool additive, bool waterOverlay)
 {
     FlushScreenBatch();
+    waterOverlay = waterOverlay && _worldActive && _shoreFoamEnabled && screen && blend && !depthWrite && !shadow;
     if (additive && (!screen || shadow || !blend))
         throw std::logic_error("Vulkan additive drawing requires a blended non-shadow screen mesh");
     if (shadow != _shadowPass)
@@ -372,10 +384,10 @@ void VulkanContext::DrawMesh(const std::shared_ptr<MeshBuffers>& mesh, uint32_t 
     if (sampler >= 8)
         throw std::out_of_range("Vulkan Shape: sampler index");
     auto& pipeline = shadow  ? (_worldActive ? _worldShadowPipelines : _shadowPipelines)[screen ? 1 : 0]
-                    : screen ? (_worldActive ? _worldScreenPipelines : _screenPipelines)[ScreenPipelineIndex(depthTest, blend, depthWrite, additive)]
+                    : screen ? (_worldActive ? _worldScreenPipelines : _screenPipelines)[ScreenPipelineIndex(depthTest, blend, depthWrite, additive, waterOverlay)]
                              : (_worldActive ? _worldShapePipelines : _shapePipelines)[ScreenPipelineIndex(depthTest, blend, depthWrite)];
     if (!pipeline)
-        CreateShapePipeline(blend, screen, depthTest, depthWrite, shadow, additive);
+        CreateShapePipeline(blend, screen, depthTest, depthWrite, shadow, additive, waterOverlay);
     const double lightingStart = _profile.enabled ? ProfileClock() : 0;
     CreateShadowFallback();
     const auto weatherSet = PrepareWeather();
@@ -515,6 +527,7 @@ void VulkanContext::DrawMesh(const std::shared_ptr<MeshBuffers>& mesh, uint32_t 
     std::copy(color.begin(), color.end(), constants.begin() + 16);
     constants[20] = alphaCutoff;
     constants[21] = _worldActive && _worldSamples != VK_SAMPLE_COUNT_1_BIT && !blend && !shadow ? 1.f : 0.f;
+    if (waterOverlay) constants[21] = -1.f;
     constants[22] = detail ? secondaryMode : 0;
     constants[23] = shadow ? 1.f : 0.f;
     std::copy(lightDirection.begin(), lightDirection.end(), constants.begin() + 24);

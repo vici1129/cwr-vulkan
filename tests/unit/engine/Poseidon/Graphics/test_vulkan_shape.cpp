@@ -276,6 +276,8 @@ TEST_CASE("Vulkan screen batches split on state changes and hold immutable textu
     REQUIRE_FALSE(lifetime.expired());
     auto next = batch.state;
     REQUIRE_FALSE(batch.NeedsFlush(next, 3));
+    next.waterOverlay = true; REQUIRE(batch.NeedsFlush(next, 3));
+    next = batch.state;
     next.image.reset(); REQUIRE(batch.NeedsFlush(next, 3));
     next = batch.state; ++next.sampler; REQUIRE(batch.NeedsFlush(next, 3));
     next = batch.state; next.cutoff = 0.5f; REQUIRE(batch.NeedsFlush(next, 3));
@@ -458,6 +460,8 @@ TEST_CASE("Vulkan screen pipeline keys keep every depth blend combination indepe
     REQUIRE(vk::ScreenPipelineIndex(false, true, false, true) == 9);
     REQUIRE(vk::ScreenPipelineIndex(true, true, true, true) == 11);
     REQUIRE(vk::ScreenPipelineIndex(true, true, false, true) == 15);
+    REQUIRE(vk::ScreenPipelineIndex(true, true, false, false, true) == 23);
+    REQUIRE(vk::ScreenPipelineIndex(true, true, false, true, true) == 31);
     REQUIRE(vk::ScreenPipelineIndex(true, false) == 2);
     REQUIRE(vk::ScreenPipelineIndex(true, true) == 3);
 }

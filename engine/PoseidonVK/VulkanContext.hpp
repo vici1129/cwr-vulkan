@@ -204,7 +204,7 @@ class VulkanContext
                   const std::shared_ptr<TextureImage>& detail = {}, float secondaryMode = 1,
                   const std::array<float, 3>& lightDirection = {0, -1, 0}, VkDeviceSize vertexOffset = 0,
                   VkDeviceSize indexOffset = 0, bool depthWrite = true, const ShapeLighting* lighting = nullptr,
-                  bool shadow = false, bool additive = false);
+                  bool shadow = false, bool additive = false, bool waterOverlay = false);
     void EndFrame();
     bool SetSSAO(bool enabled, float strength, float radius, float bias, float fade);
     bool SSAOEnabled() const { return _ssaoEnabled; }
@@ -246,11 +246,15 @@ class VulkanContext
     bool RTReflectionsEnabled() const { return _rtReflectionsEnabled && _rtaoAvailable; }
     std::string SetWaterRefraction(std::string_view mode);
     void FailWaterRefraction(std::string_view reason);
-    bool WaterSurfaceEnabled() const { return RTReflectionsEnabled() || _refractionEnabled; }
+    std::string SetShoreFoam(std::string_view mode);
+    bool ShoreFoamEnabled() const { return _shoreFoamEnabled; }
+    bool WaterCaptureEnabled() const { return _refractionEnabled || _shoreFoamEnabled; }
+    bool WaterSurfaceEnabled() const { return RTReflectionsEnabled() || WaterCaptureEnabled(); }
     std::string SetRainRipples(std::string_view mode, float rain = 0);
     bool RainRipplesEnabled() const { return _rainRipplesEnabled; }
-    void SetWaterFrame(const std::array<float, 16>& camera, const std::array<float, 4>& projection)
-    { _waterCamera = camera; _waterProjection = projection; }
+    void SetWaterFrame(const std::array<float, 16>& camera, const std::array<float, 4>& projection,
+                       const std::array<float, 4>& originTime = {})
+    { _waterCamera = camera; _waterProjection = projection; _waterOriginTime = originTime; }
     bool RaySceneEnabled() const { return RTAOEnabled() || RTShadowsEnabled() || RTReflectionsEnabled(); }
     void SetReflectionLighting(const std::array<std::array<float, 4>, 8>& data) { _reflectionLighting = data; }
     void SetRTSun(const std::array<float, 4>& sun) { _rtSun = sun; }
@@ -570,11 +574,14 @@ class VulkanContext
     void CreateCloudResources();
     void DestroyCloudResources() noexcept;
     bool _refractionRequested = false, _refractionEnabled = false, _waterCaptured = false, _waterRefracted = false;
+    bool _shoreFoamRequested = false, _shoreFoamEnabled = false;
     std::string _refractionFailure;
     uint64_t _waterCaptures = 0, _waterComposites = 0;
     double _waterCaptureMs = 0, _waterOpticsMs = 0;
     std::array<float, 16> _waterCamera{};
     std::array<float, 4> _waterProjection{};
+    std::array<float, 4> _waterOriginTime{};
+    std::string WaterCaptureSupport() const;
     std::vector<TemporalTarget> _waterBackground;
     VkDescriptorSetLayout _waterSetLayout = VK_NULL_HANDLE;
     VkDescriptorPool _waterPool = VK_NULL_HANDLE;
@@ -647,7 +654,7 @@ class VulkanContext
     VkDescriptorSet DispatchFSR(const std::array<float, 4>& projection);
     std::shared_ptr<TextureImage> _smaaArea, _smaaSearch;
     std::array<VkPipeline, 8> _worldShapePipelines{};
-    std::array<VkPipeline, 16> _worldScreenPipelines{};
+    std::array<VkPipeline, 32> _worldScreenPipelines{};
     std::array<VkPipeline, 2> _worldShadowPipelines{};
     VkPipeline _ssaoMSPipeline = VK_NULL_HANDLE;
     VkExtent2D RenderExtent() const { return _worldActive ? _worldExtent : _extent; }
@@ -698,12 +705,12 @@ class VulkanContext
     VkFormat _depthFormat = VK_FORMAT_UNDEFINED;
     VkPipelineLayout _shapeLayout = VK_NULL_HANDLE;
     std::array<VkPipeline, 8> _shapePipelines{};
-    std::array<VkPipeline, 16> _screenPipelines{};
+    std::array<VkPipeline, 32> _screenPipelines{};
     std::array<VkPipeline, 2> _shadowPipelines{}; // Native and software projected geometry.
     bool _shadowPass = false;
     bool _loggedShape = false;
     void CreateShapePipeline(bool blend = false, bool screen = false, bool depthTest = true, bool depthWrite = true,
-                             bool shadow = false, bool additive = false);
+                             bool shadow = false, bool additive = false, bool waterOverlay = false);
     void CreateDepthAttachment(DepthAttachment& depth);
     std::vector<VkImage> _images;
     std::vector<VkImageView> _views;

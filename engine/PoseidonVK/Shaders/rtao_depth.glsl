@@ -23,14 +23,17 @@ vec4 waterAt(ivec2 p) {
         // The reflection is blended after color resolve. Require full water
         // coverage; a single water sample must not modify foreground samples.
         // Shared by tracing AND the final filter (including its neighbors).
-        if(s.w<=0) return vec4(0);
+        if(s.w<=0 || s.x<-1) return vec4(0); // foam-only rain marker is not an RT receiver
         if(s.w>0 && s.w<closest) {w=s; closest=s.w;}
     }
     return w;
 }
 #else
 layout(set=0,binding=7) uniform sampler2D waterSurface;
-vec4 waterAt(ivec2 p) {return texelFetch(waterSurface,clamp(p,ivec2(0),depthSize()-1),0);}
+vec4 waterAt(ivec2 p) {
+    vec4 w=texelFetch(waterSurface,clamp(p,ivec2(0),depthSize()-1),0);
+    return w.x<-1 ? vec4(0) : w;
+}
 #endif
 #endif
 layout(push_constant) uniform Parameters {

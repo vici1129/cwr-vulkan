@@ -1,5 +1,6 @@
 #include <PoseidonVK/EngineVK.hpp>
 #include <PoseidonVK/ShapeTransformVK.hpp>
+#include <Poseidon/Core/Global.hpp>
 
 #include <Poseidon/Graphics/Shared/WindowPlacement.hpp>
 #include <Poseidon/Foundation/Logging/Logging.hpp>
@@ -184,7 +185,8 @@ void EngineVK::BeginWorldEffects(bool enabled)
         const auto* camera = GScene->GetCamera();
         const auto right = camera->DirectionAside(), up = camera->DirectionUp(), forward = camera->Direction();
         _vk.SetWaterFrame({right.X(), right.Y(), right.Z(), 0, up.X(), up.Y(), up.Z(), 0,
-                           forward.X(), forward.Y(), forward.Z(), 0, 0, 0, 0, 1}, _worldProjection);
+                             forward.X(), forward.Y(), forward.Z(), 0, 0, 0, 0, 1}, _worldProjection,
+                            {camera->Position().X(), camera->Position().Y(), camera->Position().Z(), Glob.time.toFloat()});
         try
         {
             CollectRTAOScene();

@@ -19,9 +19,9 @@ void Require(VkResult result, const char* operation)
 struct WaterPush
 {
     std::array<float, 16> camera;
-    std::array<float, 4> projection, jitter;
+    std::array<float, 4> projection, jitter, effects, originTime;
 };
-static_assert(sizeof(WaterPush) == 96);
+static_assert(sizeof(WaterPush) == 128);
 } // namespace
 
 std::string VulkanContext::SetRainRipples(std::string_view mode, float rain)
@@ -49,17 +49,8 @@ std::string VulkanContext::SetWaterRefraction(std::string_view mode)
     if (mode != "on" && mode != "off")
         return "INVALID: triWaterRefraction on, off, status";
     if (mode == "on")
-    {
-        if (!_refractionFailure.empty())
-            return "UNSUPPORTED: " + _refractionFailure;
-        if (_physical && _aaColorFormat != SceneFormat)
-            return "UNSUPPORTED: water refraction requires FP16 HDR";
-        VkPhysicalDeviceFeatures features{};
-        if (_physical)
-            vkGetPhysicalDeviceFeatures(_physical, &features);
-        if (_physical && !features.independentBlend)
-            return "UNSUPPORTED: water requires independent MRT blending";
-    }
+        if (const auto failure = WaterCaptureSupport(); !failure.empty())
+            return "UNSUPPORTED: " + failure;
     if (_refractionRequested != (mode == "on"))
     {
         _refractionRequested = mode == "on";
@@ -69,19 +60,54 @@ std::string VulkanContext::SetWaterRefraction(std::string_view mode)
     return "OK: water refraction requested for next frame";
 }
 
+std::string VulkanContext::WaterCaptureSupport() const
+{
+    if (!_refractionFailure.empty()) return _refractionFailure;
+    if (_physical && _aaColorFormat != SceneFormat) return "water capture requires FP16 HDR";
+    VkPhysicalDeviceFeatures features{};
+    if (_physical) vkGetPhysicalDeviceFeatures(_physical, &features);
+    if (_physical && !features.independentBlend) return "water requires independent MRT blending";
+    return {};
+}
+
+std::string VulkanContext::SetShoreFoam(std::string_view mode)
+{
+    if (mode == "status")
+        return std::string("ShoreFoam requested=") + (_shoreFoamRequested ? "on" : "off") +
+               " active=" + (_shoreFoamEnabled ? "on" : "off") +
+               " captured=" + (_waterCaptured ? "yes" : "no") +
+               " composited=" + (_waterRefracted ? "yes" : "no") +
+               " lastGPUms(shared capture/optics)=" + std::to_string(_waterCaptureMs) + "/" +
+               std::to_string(_waterOpticsMs) + " fallback=" +
+               (_refractionFailure.empty() ? "none" : _refractionFailure) +
+               "; terrain coast only, simulation time, independent refraction, no RT requirement";
+    if (mode != "on" && mode != "off") return "INVALID: triShoreFoam on, off, status";
+    if (mode == "on")
+        if (const auto failure = WaterCaptureSupport(); !failure.empty())
+            return "UNSUPPORTED: " + failure;
+    if (_shoreFoamRequested != (mode == "on"))
+    {
+        _shoreFoamRequested = mode == "on";
+        _recreate = true;
+        ResetTemporalHistory();
+    }
+    return "OK: shoreline foam requested for next frame";
+}
+
 void VulkanContext::FailWaterRefraction(std::string_view reason)
 {
-    if (!_refractionRequested && !_refractionEnabled)
+    if (!_refractionRequested && !_refractionEnabled && !_shoreFoamRequested && !_shoreFoamEnabled)
         return;
     _refractionFailure = reason;
     _refractionRequested = _refractionEnabled = false;
+    _shoreFoamRequested = _shoreFoamEnabled = false;
     _recreate = true;
     ResetTemporalHistory();
 }
 
 void VulkanContext::CreateWaterResources()
 {
-    if (!_refractionEnabled)
+    if (!WaterCaptureEnabled())
         return;
     VkDescriptorSetLayoutBinding bindings[4]{};
     for (unsigned i = 0; i < 4; ++i)
@@ -222,7 +248,7 @@ void VulkanContext::CreateWaterResources()
 
 void VulkanContext::CaptureWaterBackground()
 {
-    if (!_refractionEnabled || _waterCaptured || !_worldActive || !_worldPassOpen || _waterBackground.empty())
+    if (!WaterCaptureEnabled() || _waterCaptured || !_worldActive || !_worldPassOpen || _waterBackground.empty())
         return;
     auto& frame = _frames[_frame];
     const auto command = frame.command;
@@ -246,7 +272,7 @@ void VulkanContext::CaptureWaterBackground()
     const VkRect2D scissor{{0, 0}, _worldExtent};
     vkCmdSetViewport(command, 0, 1, &viewport);
     vkCmdSetScissor(command, 0, 1, &scissor);
-    const WaterPush push{_waterCamera, _waterProjection, {}};
+    const WaterPush push{_waterCamera, _waterProjection, {}, {}, {}};
     vkCmdPushConstants(command, _waterLayout, VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(push), &push);
     vkCmdDraw(command, 3, 1, 0, 0);
     vkCmdEndRenderPass(command);
@@ -266,7 +292,7 @@ void VulkanContext::CaptureWaterBackground()
 
 void VulkanContext::DrawWaterRefraction()
 {
-    if (!_worldActive || !_refractionEnabled || !_waterCaptured || _waterRefracted)
+    if (!_worldActive || !WaterCaptureEnabled() || !_waterCaptured || _waterRefracted)
         return;
     FlushScreenBatch();
     auto& frame = _frames[_frame];
@@ -288,7 +314,8 @@ void VulkanContext::DrawWaterRefraction()
     const VkRect2D scissor{{0, 0}, _worldExtent};
     vkCmdSetViewport(command, 0, 1, &viewport);
     vkCmdSetScissor(command, 0, 1, &scissor);
-    WaterPush push{_waterCamera, _waterProjection, {}};
+    WaterPush push{_waterCamera, _waterProjection, {},
+                   {_refractionEnabled ? 1.f : 0.f, _shoreFoamEnabled ? 1.f : 0.f, 0, 0}, _waterOriginTime};
     if (IsTemporal(_aaMode))
     {
         push.jitter[0] = _taaJitter[0];
@@ -335,5 +362,6 @@ void VulkanContext::DestroyWaterResources() noexcept
     _waterSetLayout = VK_NULL_HANDLE;
     _waterBackground.clear();
     _refractionEnabled = _waterCaptured = _waterRefracted = false;
+    _shoreFoamEnabled = false;
 }
 } // namespace Poseidon::vk

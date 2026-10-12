@@ -203,7 +203,9 @@ void EngineVK::SubmitScreen(const MipInfo& mip, const Vertex2DAbs* vertices, int
     const float cutoff = blend ? 1.f / 255 : alpha == AlphaStats::Cutout ? 0.5f : 0;
     _vk.QueueScreenPolygon(_screenVertices,
                            {image, vk::ShapeSampler(render::SplitLegacy(flags)), cutoff, blend, depth,
-                            (flags & NoZWrite) == 0, (flags & IsLight) != 0, scissor});
+                            (flags & NoZWrite) == 0, (flags & IsLight) != 0, scissor,
+                            _vk.ShoreFoamEnabled() && blend && (flags & NoZWrite) && GScene &&
+                                mip._texture == GScene->Preloaded(TextureRain)});
 }
 void EngineVK::DrawPoly(const MipInfo& mip, const Vertex2DPixel* vertices, int n, const Rect2DPixel& clip, int flags)
 {

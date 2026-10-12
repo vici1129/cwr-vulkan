@@ -94,6 +94,10 @@ static GameValue TriWaterRefraction(const GameState*, GameValuePar arg)
 {
     return GameValue(GEngine ? GEngine->SetWaterRefraction(RString(arg)) : RString("UNSUPPORTED: no renderer"));
 }
+static GameValue TriShoreFoam(const GameState*, GameValuePar arg)
+{
+    return GameValue(GEngine ? GEngine->SetShoreFoam(RString(arg)) : RString("UNSUPPORTED: no renderer"));
+}
 static GameValue TriCloudShadows(const GameState*, GameValuePar arg)
 {
     return GameValue(GEngine ? GEngine->SetCloudShadows(RString(arg)) : RString("UNSUPPORTED: no renderer"));
@@ -3160,6 +3164,7 @@ INIT_MODULE(GameStateExtTest, 3)
     GGameState.NewFunction(GameFunction(GameString, "triRTReflections", TriRTReflections, GameString));
     GGameState.NewFunction(GameFunction(GameString, "triWaterRefraction", TriWaterRefraction, GameString));
     GGameState.NewFunction(GameFunction(GameString, "triRainRipples", TriRainRipples, GameString));
+    GGameState.NewFunction(GameFunction(GameString, "triShoreFoam", TriShoreFoam, GameString));
     GGameState.NewFunction(GameFunction(GameString, "triCloudShadows", TriCloudShadows, GameString));
     GGameState.NewFunction(GameFunction(GameString, "triVolumetricClouds", TriVolumetricClouds, GameString));
     GGameState.NewFunction(GameFunction(GameString, "triSkyReflections", TriSkyReflections, GameString));

@@ -779,7 +779,7 @@ bool VulkanContext::RecreateSwapchain(uint32_t width, uint32_t height)
         {
             if (RTReflectionsEnabled())
                 FailRTReflections(error.what());
-            else if (_refractionRequested)
+            else if (_refractionRequested || _shoreFoamRequested)
                 FailWaterRefraction(error.what());
             else if (IsFSR(_requestedAA))
             {

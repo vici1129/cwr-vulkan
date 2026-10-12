@@ -214,7 +214,7 @@ TEST_CASE("Post-resolve RT corrections reject mixed MSAA coverage", "[Graphics][
     const auto filter = ReadTextFile(root / "rtao_filter.frag");
     REQUIRE(sun.find("!rtSameDepth(viewZ(d),z)") != std::string::npos);
     REQUIRE(sun.find("!rtSameLight(direct[channel],other[channel])") != std::string::npos);
-    REQUIRE(depth.find("if(s.w<=0) return vec4(0);") != std::string::npos);
+    REQUIRE(depth.find("if(s.w<=0 || s.x<-1) return vec4(0);") != std::string::npos);
     REQUIRE(filter.find("vec4 w=waterAt(p);") != std::string::npos);
     REQUIRE(filter.find("if(w.w<=0) {outColor=vec4(0);return;}") != std::string::npos);
     REQUIRE(filter.find("vec4 other=waterAt(q);") != std::string::npos);

@@ -153,6 +153,9 @@ void main() {
     outColor.rgb = mix(fogColor, outColor.rgb, visibility);
 #ifdef RT_WATER
     outWater=vec4(0);
+    // Foam-only rain marker: MIN writes only R; depth, fog and the other normal
+    // component survive. Refraction and RT still reject these rain-covered pixels.
+    if(draw.reserved<-.5) outWater.x=-2-outColor.a;
     if(lighting.rtWater.x>.5) {
         outWater=vec4(waterNormal.x,waterNormal.z,visibility,1.0/gl_FragCoord.w);
     }

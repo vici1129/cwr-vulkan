@@ -514,6 +514,29 @@ int main()
         Check(!context.RTReflectionsEnabled() && !context.RTShadowsEnabled() && context.SSAOEnabled(),
               "refraction selection does not enable rays or change AO");
         Check(context.SetWaterRefraction("off").starts_with("OK:"), "refraction toggles off independently");
+        Check(context.SetShoreFoam("status").find("requested=off active=off captured=no") != std::string::npos &&
+                  !context.WaterCaptureEnabled(), "foam defaults off without capture resources");
+        Check(context.SetShoreFoam("on").starts_with("OK:") && !context.RaySceneEnabled() &&
+                  context.SetWaterRefraction("status").find("requested=off") != std::string::npos,
+              "foam can request shared capture without refraction or ray support");
+        const auto foamRequested = context.SetShoreFoam("status");
+        Check(context.SetShoreFoam("invalid").starts_with("INVALID:") &&
+                  context.SetShoreFoam("status") == foamRequested, "invalid foam command preserves selection");
+        context.SetWaterRefraction("on");
+        context.SetWaterRefraction("off");
+        Check(context.SetShoreFoam("status") == foamRequested && !context.RainRipplesEnabled(),
+              "refraction round trip preserves independent foam and ripple selections");
+        Check(context.SetShoreFoam("off").starts_with("OK:") &&
+                  context.SetShoreFoam("status").find("requested=off active=off") != std::string::npos,
+              "foam round trip restores disabled request");
+        {
+            VulkanContext foamFailure;
+            foamFailure.SetShoreFoam("on");
+            foamFailure.FailWaterRefraction("test shared capture unavailable");
+            Check(foamFailure.SetShoreFoam("status").find("requested=off active=off") != std::string::npos &&
+                      foamFailure.SetShoreFoam("on").starts_with("UNSUPPORTED:") && !foamFailure.WaterCaptureEnabled(),
+                  "foam-only capture failure disables shared resources and reports fallback");
+        }
         context.SetWaterRefraction("on");
         context.FailWaterRefraction("test capture unavailable");
         Check(context.SetWaterRefraction("status").find("requested=off active=off") != std::string::npos &&

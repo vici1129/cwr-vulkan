@@ -1,0 +1,114 @@
+[
+  {
+    "mode": "off",
+    "gpu": [
+      1.8009,
+      1.8006,
+      1.801,
+      1.8007
+    ],
+    "cpu": [
+      6.178,
+      6.176,
+      6.175,
+      6.175
+    ],
+    "command": [
+      2.882,
+      2.885,
+      2.88,
+      2.927
+    ],
+    "allocations": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "status": "\"ShoreFoam requested=off active=off captured=no composited=no lastGPUms(shared capture/optics)=0.141312/0.177152 fallback=none; terrain coast only, simulation time, independent refraction, no RT requirement\""
+  },
+  {
+    "mode": "on",
+    "gpu": [
+      1.9607,
+      1.9353,
+      1.9361,
+      1.935
+    ],
+    "cpu": [
+      6.176,
+      6.177,
+      6.175,
+      6.18
+    ],
+    "command": [
+      2.9,
+      2.899,
+      2.909,
+      2.89
+    ],
+    "allocations": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "status": "\"ShoreFoam requested=on active=on captured=yes composited=yes lastGPUms(shared capture/optics)=0.141312/0.178176 fallback=none; terrain coast only, simulation time, independent refraction, no RT requirement\""
+  },
+  {
+    "mode": "on",
+    "gpu": [
+      1.9361,
+      1.9353,
+      1.9362,
+      1.9355
+    ],
+    "cpu": [
+      6.179,
+      6.178,
+      6.178,
+      6.176
+    ],
+    "command": [
+      2.894,
+      2.896,
+      2.893,
+      2.891
+    ],
+    "allocations": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "status": "\"ShoreFoam requested=on active=on captured=yes composited=yes lastGPUms(shared capture/optics)=0.141312/0.178176 fallback=none; terrain coast only, simulation time, independent refraction, no RT requirement\""
+  },
+  {
+    "mode": "off",
+    "gpu": [
+      1.5517,
+      1.6884,
+      1.7556,
+      1.8009
+    ],
+    "cpu": [
+      6.173,
+      6.173,
+      6.175,
+      6.174
+    ],
+    "command": [
+      2.897,
+      2.901,
+      2.907,
+      2.886
+    ],
+    "allocations": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "status": "\"ShoreFoam requested=off active=off captured=no composited=no lastGPUms(shared capture/optics)=0.142336/0.178176 fallback=none; terrain coast only, simulation time, independent refraction, no RT requirement\""
+  }
+]

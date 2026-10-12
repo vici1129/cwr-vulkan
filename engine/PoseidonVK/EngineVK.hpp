@@ -100,6 +100,10 @@ class EngineVK final : public Engine
     }
     bool _waterSurface = false;
     RString SetRainRipples(RString mode) override;
+    RString SetShoreFoam(RString mode) override
+    {
+        return _vk.SetShoreFoam(static_cast<const char*>(mode)).c_str();
+    }
     std::array<float, 4> RainRippleParameters() const;
     RString SetWaterRefraction(RString mode) override
     {

@@ -29,6 +29,7 @@ struct ScreenState
     float cutoff = 0;
     bool blend = false, depthTest = true, depthWrite = true, additive = false;
     Clip clip;
+    bool waterOverlay = false; // Explicit rain overlay; retain depth for foam, reject other optics.
     bool operator==(const ScreenState&) const = default;
 };
 // One consecutive run only. No sorting, resource lookup or GPU ownership here.

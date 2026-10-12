@@ -1,5 +1,187 @@
 # Vulkan backend development
 
+## Optional shoreline foam (2026-10-12)
+
+`triShoreFoam "on"`, `"off"`, `"status"` selects subtle coastal foam. Default
+**Off**, Vulkan only, **no hardware RT requirement**. Refraction remains
+independently selectable, including Off while foam is On. There are no new
+assets, dependencies, menus or persistent settings. GL33 reports unsupported.
+Status distinguishes requested/active resources and shared capture/composition
+execution; it does not claim that eligible coastline pixels were visible.
+The reported capture/optics GPU times are the last completed shared-pass samples.
+
+### Depth, pattern and composition
+
+Landscape draws terrain before water and objects. The existing first-water
+capture (`water_capture.frag`) therefore contains terrain color and view depth,
+not vehicle or boat bottoms. Foam and refraction share this one capture and the
+existing water normal/visibility/depth MRT. Either request enables the resources;
+with both Off, their capture and composition do not execute. Capability/resource
+failure disables both requests with a concrete fallback while retaining ordinary
+water and resources independently required by RT. Toggles recreate resources
+and reset temporal history; no new steady-frame allocations are introduced.
+
+The existing `water_refraction.frag` composition reconstructs the real water and
+terrain positions. Foam requires a valid captured bottom within 0.65 m vertically
+of water, then projects eight probes on a 2.2 m **world-space** neighborhood.
+At least one must find actual terrain above the local water surface. Shore
+distance is estimated from the sampled rise/run, fading between 0.9 and 1.9 m.
+Flat shallow bays cannot qualify from depth alone. Missing/offscreen depth,
+foreground samples, excessive projection error, large jumps and steep slopes
+are rejected. The existing capture's FP16 contact tolerance, 200 m depth limit,
+MSAA mixed-depth rejection and full-water-coverage guard remain in force.
+
+Integer-hashed smooth noise at three world-space scales creates sparse patches
+with holes and soft edges. Low-frequency dissolution uses `Glob.time`, as does
+the bounded drift using the stock water animation's half-speed sine. The actual
+animated water normal supplies a small extra displacement. The band follows the
+existing animated surface depth; no water/terrain geometry or independent wave
+simulation changes. Fine variation fades with a 0.045-0.16 m pixel footprint;
+the entire effect fades at 30-65 m and 0.12-0.30 m footprints. Derivatives execute
+before nonuniform exits. Pausing the simulation freezes the procedural clock.
+
+Foam color is a restrained neutral scattering tint derived from the already
+lit, night-adapted, fogged captured terrain. There is no emissive white floor.
+Opacity is bounded to 0.48 before the coastal/noise/depth/visibility fades.
+Foam and transmission are algebraically combined in the existing one blend;
+the original Fresnel, distortion, absorption, RT/sky reflection and ripple
+calculations remain. With foam Off, the original transmission result is used.
+
+Stock fullscreen rain normally invalidates the optical water mask. While foam
+is enabled, only draws using the identified stock rain texture receive a small
+pipeline variant: MIN blending writes an out-of-range normal-X marker containing
+rain opacity while preserving water depth and fog visibility. Foam can use that
+depth with reduced visibility; refraction and RT **still reject** marked samples,
+including any marked MSAA sample. This avoids changing reflections across the
+whole sea merely by enabling foam in rain. Object/boat/soldier draws retain
+ordinary water-mask invalidation. Off uses the original rain pipeline and mask.
+
+### Verification record
+
+Verified in stock `01TakeTheCar.ABEL` (Malden) and `05HeavyMetal.Eden` (Everon),
+using direct diagnostic launches, copied profiles, scripted camera/weather/time
+controls and actual game terrain/water. These are gameplay rendering checks,
+not Steam launch qualification or completed missions. No game data was edited.
+Work started from public main `ddc3998` in an isolated worktree; private DLSS/NGX
+history and uncommitted changes in the original checkout were not incorporated.
+
+Malden's coastal village/beach, rocky outcrop and steep cliff, and Everon's sandy
+bank, rocky headland, steep bank and broad shallow bay were inspected. Main
+`triSetView` positions/directions (engine XYZ, Y up):
+
+| Scene | Position | Direction |
+| --- | --- | --- |
+| Malden beach | 3545, 8, 3225 | 1, -0.3, 0 |
+| Malden rock / cliff | 3128, 10, 3100 / 2850, 13, 7240 | -1, -0.4, 0 / 0, -0.4, 1 |
+| Everon sandy bank | 5100, 8, 3780 | 0, -0.35, 1 |
+| Everon rock / steep bank | 10925, 12, 8950 / 10850, 12, 8890 | -1, -0.4, 0 / 0, -0.5, -1 |
+| Everon broad bay | 4300, 10, 9305 | 0, -0.4, 1 |
+
+Foam appears as small, soft, separated patches along eligible terrain contacts,
+not a continuous white contour. The broad shallow bay and open-water views have
+zero changed pixels on toggling foam. Steep banks receive much less foam;
+vertical/unreliable contacts deliberately do not get a forced outline. Nearby
+Jeep and BoatW test objects retain their foreground silhouettes without a foam
+halo, including MSAA4. They were spawned only in the disposable diagnostic scene.
+
+Both islands were checked in clear weather, heavy rain, fog and at midnight;
+night foam stays dark. Normal and 4x simulation-time sequences change the patches
+gently with the stock water; frozen-time A/B images are identical. Malden's actual
+pause menu also holds simulation time and identical captures (the existing menu
+path suppresses world effects). Low-angle and underwater views safely suppress
+foam. Camera traversal/return was checked in AA Off, TAA, FSR Quality and MSAA4
+on both islands. The AA-Off camera return is pixel-identical in the coastal
+region (not the HUD or distant terrain at the top of the frame); no conspicuous
+screen-edge trails or fine-pattern crawling were seen in the sampled sequences.
+
+Independent refraction, RT reflections, sky fallback and rain-ripple selections,
+and all together, retain the original water outside the foam patches. In the
+settled rainy Off/On/Off matrix, all six combinations on each island restore
+**zero different pixels**. Clear-weather AA-Off pairs change 14,511 Malden /
+14,695 Everon coastal pixels and restore exactly. MSAA4 round trips also restore
+exactly. The clear-weather six-combination matrix at 1440p also restores exactly.
+TAA/FSR comparisons are qualitative: jitter/history reset on toggles,
+so their whole-image differences are not a foam mask. Occasional mission hint
+and radio fades were excluded from scene-parity conclusions. A separate Vulkan
+launch without ray-query opt-in verifies foam-only capture in all four AA modes,
+with refraction Off and the RT capability explicitly unavailable.
+
+Matched **unedited** 1920x1080 gameplay window captures (including window border):
+
+| Scene / other water effects | Foam Off | Foam On |
+| --- | --- | --- |
+| Malden, clear, ordinary water | [Off](evidence/shoreline-foam/malden-clear-off.png) | [On](evidence/shoreline-foam/malden-clear-on.png) |
+| Everon, clear, ordinary water | [Off](evidence/shoreline-foam/everon-clear-off.png) | [On](evidence/shoreline-foam/everon-clear-on.png) |
+| Malden, rain, refraction + RT/sky + ripples | [Off](evidence/shoreline-foam/malden-rain-all-off.png) | [On](evidence/shoreline-foam/malden-rain-all-on.png) |
+| Everon rocky bank, refraction | [Off](evidence/shoreline-foam/everon-rock-off.png) | [On](evidence/shoreline-foam/everon-rock-on.png) |
+| Everon broad shallow bay, refraction | [Off](evidence/shoreline-foam/everon-bay-off.png) | [On, identical](evidence/shoreline-foam/everon-bay-on.png) |
+| Malden Jeep/boat, refraction, MSAA4 | [Off](evidence/shoreline-foam/malden-objects-off.png) | [On](evidence/shoreline-foam/malden-objects-on.png) |
+
+### Performance and automated checks
+
+RTX 4060 Ti, driver 617.14, Core i7-12700F; RelWithDebInfo, validation disabled,
+AA Off, 100% world scale, VSync requested Off, fixed Malden beach camera and
+simulation. Each table row uses Off / On / On / Off, three seconds settling and
+eight seconds sampling per trial (eight existing two-second intervals per mode).
+Standalone uses clear weather; shared uses heavy rain with refraction, RT/sky
+reflections and ripples requested On. Standalone includes enabling the existing
+water MRT/capture/composition; shared reuses those resources. Values are medians
+of whole-frame GPU timestamps and CPU command-recording times, not a new isolated
+foam timer. GPU clocks remain automatic; short toggle/clock transients and
+coverage affect these numbers. This is not an FPS guarantee.
+
+| Resolution / water effects | GPU Off / On (ms) | Added GPU (ms) | CPU commands Off / On (ms) | CPU frame Off / On (ms) |
+| --- | ---: | ---: | ---: | ---: |
+| 1080p, standalone | 1.801 / 1.936 | 0.135 | 2.892 / 2.895 | 6.175 / 6.178 |
+| 1080p, shared, rain | 2.067 / 2.105 | 0.038 | 1.842 / 1.830 | 6.173 / 6.173 |
+| 1440p, standalone | 1.836 / 2.062 | 0.225 | 2.953 / 2.942 | 6.176 / 6.174 |
+| 1440p, shared, rain | 2.426 / 2.549 | 0.122 | 1.856 / 1.833 | 6.173 / 6.172 |
+
+CPU differences are within run-to-run noise; no CPU speedup is claimed. Frame
+wall time is presentation-paced in these runs. Steady-state allocation counters
+remain **0.0/frame** in every sampled interval. MSAA, render scale and near-shore
+coverage can increase cost. Shared capture/optics timings remain available in
+`triShoreFoam "status"`, including when refraction itself is Off.
+
+Vulkan-enabled and GL33-only focused builds pass. The
+`[vulkan-shape],[vulkan-aa],[ShadowMath]` suites pass **1,532 assertions / 68 cases**
+with Vulkan and **1,492 / 67** without. Driver-free policy/lifetime tests pass
+**479 checks**, including default Off, invalid-command preservation, independent
+refraction/ripple/RT selection, foam-only shared-capture failure and fallback.
+Batch/pipeline tests cover the rain-overlay distinction. The policy suite's
+intentional teardown-error injection is expected, not a live validation error.
+
+Live core/synchronization validation shutdowns on the final game binary:
+Malden **44,870**, Everon **91,724**, no-ray-capability **8,636** submitted/presented
+frames; each reports **0 errors / 0 warnings** and was closed normally.
+Vulkan executable SHA-256:
+`C35D1F40D2A6C86BA9BD95314CEE200628F55DBE8C905AAF1B1F5042B366BCBC`.
+GL33 live `on`, `off`, `status` all report unsupported; the settled Off/On/Off
+coast images are pixel-identical. GL33 executable SHA-256:
+`48EA31ACA78E05CCEB0573FDF4BE5522A146EFA9E3D4F4BF7F7156BF9229462B`.
+Raw action journals, runtime/validation logs, matched captures, traversal/time
+sequences and timing JSON are retained under ignored
+`build/shadow-live/foam-{malden-verified,everon-verified,nort-verified,perf-1080,perf-1440,gl33-verified}`.
+Committed representative screenshots are from that same executable.
+The four sampled performance records are also committed beside the screenshots
+as `1080p-standalone.json`, `1080p-shared.json`, `1440p-standalone.json` and
+`1440p-shared.json`. A later player relocation in the 1440p session triggered the
+stock mission's off-course ending; it is not a mission win or a walking test,
+and occurred after all timing and matched-effect captures. Shoreline traversal
+coverage here is camera traversal, not a full mission playthrough.
+
+### Deliberate limits
+
+This is a conservative visible-depth effect, not simulated surf. Although the
+pattern and probes are world-anchored, the available terrain depth is still
+screen-space: missing/offscreen/occluded data, grazing views, distant shores and
+steep discontinuities fade or omit foam. Very flat coasts can have no qualifying
+nearby dry-terrain probe. There are no wakes, object-contact foam, breaking waves,
+underwater foam, persistent foam history, new geometry or shoreline assets.
+Stock low-poly coastal corners remain visible. Night/dark terrain can make foam
+barely visible; it is intentionally not brightened to an emissive outline.
+Ordinary stock-wave aliasing and temporal-AA history behavior are not replaced.
+
 ## Optional rain ripples (2026-10-12)
 
 `triRainRipples "on"`, `"off"`, `"status"` controls rain impacts on actual

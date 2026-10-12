@@ -159,6 +159,7 @@ bool VulkanContext::CreateAAResources(VkFormat format)
     // Even Off uses the completed-world boundary for tone mapping before UI.
 
     _refractionEnabled = _refractionRequested;
+    _shoreFoamEnabled = _shoreFoamRequested;
     _rtWaterTargets = WaterSurfaceEnabled();
     _rtShadowTargets = RTShadowsEnabled() || _rtWaterTargets || _contactEnabled;
     VkAttachmentDescription attachments[5]{};
