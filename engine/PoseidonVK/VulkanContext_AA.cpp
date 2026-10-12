@@ -158,7 +158,8 @@ void VulkanContext::CreateAAResources(VkFormat format)
                  _renderScale, _worldExtent.width, _worldExtent.height, _worldSamples, _aaSampleSupport);
     // Even Off uses the completed-world boundary for tone mapping before UI.
 
-    _rtWaterTargets = RTReflectionsEnabled();
+    _refractionEnabled = _refractionRequested;
+    _rtWaterTargets = WaterSurfaceEnabled();
     _rtShadowTargets = RTShadowsEnabled() || _rtWaterTargets || _contactEnabled;
     VkAttachmentDescription attachments[5]{};
     auto& color = attachments[0];
@@ -500,10 +501,20 @@ void VulkanContext::CreateAAResources(VkFormat format)
     CreateSunShaftResources();
     CreateVolumetricResources();
     CreateContactResources();
+    try
+    {
+        CreateWaterResources();
+    }
+    catch (const std::exception& error)
+    {
+        DestroyWaterResources();
+        FailWaterRefraction(error.what());
+    }
 }
 
 void VulkanContext::BeginAAWorld()
 {
+    _waterCaptured = _waterRefracted = false;
     if (!_frameOpen || _aaTargets.empty())
         return;
     if (_worldActive)
@@ -603,6 +614,7 @@ void VulkanContext::DrawAAPass(unsigned index, VkFramebuffer framebuffer, VkDesc
 
 void VulkanContext::FinishAAWorld(const std::array<float, 4>& projection)
 {
+    DrawWaterRefraction(); // RT Fresnel reflections are composed over the transmitted bottom.
     _contactDrew = false;
     if (RaySceneEnabled())
     {
@@ -672,6 +684,7 @@ void VulkanContext::FinishAAWorld(const std::array<float, 4>& projection)
 
 void VulkanContext::DestroyAAResources() noexcept
 {
+    DestroyWaterResources();
     DestroyBloomResources();
     DestroySunShaftResources();
     DestroyVolumetricResources();

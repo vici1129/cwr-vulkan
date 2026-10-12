@@ -450,6 +450,21 @@ int main()
         Check(!context.RTAOEnabled(), "RTAO defaults off");
         Check(!context.RTShadowsEnabled(), "RT sunlight defaults off independently of AO");
         Check(!context.RTReflectionsEnabled(), "RT water defaults off independently of AO and sunlight");
+        Check(context.SetWaterRefraction("status").find("requested=off active=off captured=no") != std::string::npos,
+              "refraction defaults off and reports capture separately from selection");
+        Check(context.SetWaterRefraction("on").starts_with("OK:"), "raster refraction needs no ray capability");
+        const auto refractionRequested = context.SetWaterRefraction("status");
+        Check(context.SetWaterRefraction("invalid").starts_with("INVALID:") &&
+                  context.SetWaterRefraction("status") == refractionRequested,
+              "invalid refraction commands preserve the current request");
+        Check(!context.RTReflectionsEnabled() && !context.RTShadowsEnabled() && context.SSAOEnabled(),
+              "refraction selection does not enable rays or change AO");
+        Check(context.SetWaterRefraction("off").starts_with("OK:"), "refraction toggles off independently");
+        context.SetWaterRefraction("on");
+        context.FailWaterRefraction("test capture unavailable");
+        Check(context.SetWaterRefraction("status").find("requested=off active=off") != std::string::npos &&
+                  context.SetWaterRefraction("on").starts_with("UNSUPPORTED:"),
+              "failed refraction resources retain original water and a concrete fallback");
         Check(context.SetRTReflections("on").starts_with("UNSUPPORTED:"), "RT water rejects missing ray capabilities");
         Check(context.SSAOEnabled() && !context.RTAOEnabled() && !context.RTShadowsEnabled(),
               "water rejection leaves other lighting selections intact");

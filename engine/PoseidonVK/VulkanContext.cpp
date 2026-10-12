@@ -495,7 +495,7 @@ void VulkanContext::CreateFrameResources()
             queries.queryType = VK_QUERY_TYPE_TIMESTAMP;
             queries.queryCount = 2;
             Check(vkCreateQueryPool(_device, &queries, nullptr, &frame.ssaoQueries), "create AO timestamps");
-            queries.queryCount = 12;
+            queries.queryCount = 16;
             Check(vkCreateQueryPool(_device, &queries, nullptr, &frame.frameQueries), "create frame GPU timestamps");
             queries.queryCount = 2;
             Check(vkCreateQueryPool(_device, &queries, nullptr, &frame.csmQueries), "create CSM timestamps");
@@ -860,6 +860,19 @@ bool VulkanContext::BeginFrame(uint32_t width, uint32_t height)
         }
         frame.taaTimestamped = false;
     }
+    for (unsigned effect = 0; effect < 2; ++effect)
+    {
+        auto& timestamped = effect ? frame.waterOpticsTimestamped : frame.waterCaptureTimestamped;
+        if (!timestamped) continue;
+        uint64_t stamps[2]{};
+        if (vkGetQueryPoolResults(_device, frame.frameQueries, 12 + effect * 2, 2, sizeof(stamps), stamps,
+                                 sizeof(uint64_t), VK_QUERY_RESULT_64_BIT) == VK_SUCCESS)
+        {
+            const uint64_t mask = _timestampBits == 64 ? UINT64_MAX : (uint64_t(1) << _timestampBits) - 1;
+            (effect ? _waterOpticsMs : _waterCaptureMs) = double((stamps[1] - stamps[0]) & mask) * _timestampPeriod / 1e6;
+        }
+        timestamped = false;
+    }
     if (frame.contactTimestamped)
     {
         uint64_t stamps[2]{};
@@ -971,7 +984,7 @@ bool VulkanContext::BeginFrame(uint32_t width, uint32_t height)
     Check(vkBeginCommandBuffer(frame.command, &commands), "begin frame command buffer");
     if (frame.frameQueries)
     {
-        vkCmdResetQueryPool(frame.command, frame.frameQueries, 0, 12);
+        vkCmdResetQueryPool(frame.command, frame.frameQueries, 0, 16);
         vkCmdWriteTimestamp(frame.command, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, frame.frameQueries, 0);
     }
     VkClearValue clears[2]{};

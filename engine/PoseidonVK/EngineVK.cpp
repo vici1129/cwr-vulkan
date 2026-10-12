@@ -181,6 +181,10 @@ void EngineVK::BeginWorldEffects(bool enabled)
         const auto& p = GScene->GetCamera()->ProjectionNormal();
         _worldProjection = {p(0, 0), p(1, 1), p(2, 2), p.Position().Z()};
         _vk.BeginAAWorld();
+        const auto* camera = GScene->GetCamera();
+        const auto right = camera->DirectionAside(), up = camera->DirectionUp(), forward = camera->Direction();
+        _vk.SetWaterFrame({right.X(), right.Y(), right.Z(), 0, up.X(), up.Y(), up.Z(), 0,
+                           forward.X(), forward.Y(), forward.Z(), 0, 0, 0, 0, 1}, _worldProjection);
         try
         {
             CollectRTAOScene();

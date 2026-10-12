@@ -116,7 +116,7 @@ void EngineVK::SubmitSoftware(const std::vector<uint32_t>& indices)
                                  state.cutoff;
     vk::ShapeLighting receiver;
     std::shared_ptr<vk::TextureImage> waterBump;
-    if (_waterSurface && _vk.RTReflectionsEnabled())
+    if (_waterSurface && _vk.WaterSurfaceEnabled())
     {
         try
         {
@@ -128,7 +128,8 @@ void EngineVK::SubmitSoftware(const std::vector<uint32_t>& indices)
         }
         catch (const std::exception& error)
         {
-            _vk.FailRTReflections(error.what());
+            if (_vk.RTReflectionsEnabled()) _vk.FailRTReflections(error.what());
+            _vk.FailWaterRefraction(error.what());
         }
     }
     if (!receiver.rtWater[0])

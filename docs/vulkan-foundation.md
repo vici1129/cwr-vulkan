@@ -1,5 +1,184 @@
 # Vulkan backend development
 
+## Optional coastal water refraction (2026-10-12)
+
+Built on main `db3895d`, in an isolated checkout to preserve the private
+DLSS/NGX work. Default **Off**, Vulkan-only, runtime-only:
+
+```sqf
+triWaterRefraction "on"
+triWaterRefraction "off"
+triWaterRefraction "status"
+```
+
+No ray-query device, RT opt-in, new assets, dependencies, menus or saved settings
+are required. `triRTReflections` remains independent. GL33 returns
+`UNSUPPORTED: water refraction requires Vulkan`; its rendering is unchanged.
+Status distinguishes the requested/active selection from this frame's actual
+capture/composition, counts completed recordings, reports the last completed
+GPU capture/optics intervals when profiling, and exposes resource fallback reasons.
+Changing the selection recreates the existing world targets and resets AA history.
+
+### Rendering and conservative boundaries
+
+`Landscape::DrawRect` submits terrain, then water, then horizon/objects. Water
+overwrites the depth needed to recover the bottom. On the first actual water
+draw, `VulkanContext_Water.cpp` ends/resolves the world pass, draws an immutable
+pre-water snapshot, then resumes the existing world pass with LOAD. The snapshot
+stores already-lit, already-fogged linear HDR RGB and positive view depth in one
+FP16 RGBA image. MSAA capture rejects mixed sky/depth discontinuities. It never
+samples a color/depth attachment while that attachment is being written.
+
+The existing explicit landscape-water identity, animated stock bump texture,
+geometric normal and surface-depth MRT are shared with RT reflections. This
+does not infer water from arbitrary specular materials. Later visible geometry
+invalidates the water record, so pier decks/posts, foreground objects and
+transparency are preserved. MSAA requires water coverage in **every** sample;
+mixed boundary pixels retain their original resolved color.
+
+Before RT reflections and the remaining world effects, one fullscreen blend
+reconstructs surface-to-bottom optical path length from both actual depths and
+the camera ray. Shallows reveal the original terrain; exponential absorption
+attenuates red more than green/blue, while increasingly retaining the original
+weather-lit animated water with depth. No constant bright or tropical water
+color is introduced. Transmission is capped at 72% before Fresnel/depth/fog
+attenuation, preserving the authored surface even in very shallow water.
+Its Fresnel term matches the existing restrained RT-water curve; independently
+selected RT reflections are composed afterward and are never replaced by the
+bottom. Existing fog is not applied twice. Volumetric sunlight, world AA,
+bloom/tone mapping and native-resolution cockpit/HUD/UI retain their boundaries.
+
+Animated normal perturbation offsets the background by at most 2.5 internal
+pixels per axis, fades to zero at contact, and rejects the entire displaced
+bilinear footprint at foreground silhouettes, shorelines or large bottom-depth
+jumps. An invalid offset uses the valid undistorted bottom. An invalid base
+sample retains the original water. FP16 depth-rounding tolerance at contact
+avoids a dark opaque shoreline ribbon. This is a subtle screen-space effect,
+not a displaced water mesh or an underwater renderer.
+
+The effect fades out between 55 and 80 m from the camera, rejects sky/missing
+bottom, upward/grazing rays and paths longer than 35 m, and adds no invented
+seabed. Dry views issue neither capture nor optics draws. With the feature Off,
+it allocates no refraction images and issues no refraction work.
+
+### Coastline verification
+
+Direct developer launches of stock GOG `02Infantry.Abel` (Malden) and
+`05HeavyMetal.Eden` (Everon), isolated profiles, RTX 4060 Ti 8 GB / driver 617.14,
+900 m visibility. These are actual island terrain and pier assets, not smoke-test
+geometry or Steam-route qualification. Off/On/Off pairs pin the same camera and
+freeze simulation. Mission overlays, tree transitions and RT sampling can still
+differ between captures; this is not a deterministic replay of the entire game.
+
+| Identical camera and RT selection | Refraction Off | Refraction On |
+| --- | --- | --- |
+| Malden shallow beach / pier, RT Off | ![Malden Off](evidence/water-refraction/malden-off.png) | ![Malden On](evidence/water-refraction/malden-on.png) |
+| Malden beach / pier, RT On | ![Malden RT Off](evidence/water-refraction/malden-rt-off.png) | ![Malden RT On](evidence/water-refraction/malden-rt-on.png) |
+| Everon steep coastal bank, RT Off | ![Everon Off](evidence/water-refraction/everon-off.png) | ![Everon On](evidence/water-refraction/everon-on.png) |
+
+Malden camera `[3520,8,3240,1,-.5,.2]` and Everon
+`[5100,16,3780,0,-.35,1]` use engine X/up/Z position and direction. Sand/terrain
+continues visibly below the surface, loses contrast with depth, and retains
+the original water animation. Pier geometry and RT pier/tree/building
+reflections remain visible. Low coastal, open/deep water, dry inland and
+below-water views were also checked. Malden's frozen RT-Off beach, deep and
+inland Off-return captures were pixel-identical. Its below-water Off/On pair
+was also identical; no new underwater behavior is provided.
+
+Both islands exercised AA Off, FXAA, SMAA, TAA, FSR Native/Quality and MSAA
+2x/4x/8x, with independent RT-Off/On comparisons, noon/dawn/night,
+overcast/fog, and moving-camera sequences with animated water in Off/TAA/FSR/
+MSAA4. Combined CSM, soft/contact shadows, RTAO, RT sunlight/reflections,
+atmosphere, volumetrics and bloom were exercised; SSAO and sun shafts were
+checked separately. Malden additionally passed odd-size resize to 1281x721
+and minimize/restore. HUD and overlays remain outside water composition.
+HDR requested the existing SDR fallback: FP16 composition was tested,
+**physical HDR10 output was unavailable** on this display/compositor.
+
+After fixing an initial RT double-EndRenderPass integration error, the main
+Malden run closed normally after **90,564 submitted / 90,563 presented frames**,
+and Everon after **34,597 / 34,597**, both with **zero core/synchronization
+validation errors or warnings**. The initial failed run is retained separately,
+not counted as passing evidence. Refraction also ran with `CWR_VK_RTAO` absent,
+reporting zero BLAS/TLAS/rays. The GL33-only build opened the stock mission,
+rendered its original coastline and rejected all three refraction commands.
+The final 2560x1440 build repeated all nine AA Off/On/Off pairs without RT
+capability opt-in, then closed normally after **11,478 submitted/presented
+frames**, again with **zero core/synchronization errors or warnings**.
+
+Both Vulkan+FSR and GL33-only builds passed. Focused rendering/AA/material/
+texture/factory/window tests, including authorized stock PAA banks, passed
+**2,011 assertions / 82 cases** for Vulkan and **1,765 / 78** for GL33.
+The driver-free Vulkan policy/lifetime suite passed **431 checks** (its intentional
+teardown-error fixture is not a live validation failure). Both single-sample and
+MSAA variants of both new shaders passed `spirv-val --target-env vulkan1.0`.
+
+### Measured GPU cost
+
+RTX 4060 Ti, driver 617.14, windowed 1920x1080 / 2560x1440, same frozen Malden
+beach camera, noon/clear, 900 m visibility, VSync Off. Validation was disabled
+for timing; CSM, SSAO, RTAO and RT sunlight were Off. Each case warmed for 3 s,
+then sampled 20 completed-frame timestamp pairs over approximately 5 s.
+AA-Off cases used Off/On/On/Off at each RT selection. Whole-frame numbers are
+means of the renderer's GPU log intervals, not CPU frame time or FPS.
+
+| Resolution | AA | RT reflections | Refraction capture / optics (ms) | Sum (ms) | Whole GPU frame, refraction Off / On (ms) |
+| --- | --- | --- | --- | --- | --- |
+| 1080p | Off | Off | 0.118 / 0.197 | 0.314 | 1.185 / 1.546 |
+| 1080p | Off | On | 0.077 / 0.136 | 0.213 | 1.674 / 1.764 |
+| 1080p | TAA | On | 0.072 / 0.140 | 0.212 | — / 2.086 |
+| 1080p | FSR Quality | On | 0.036 / 0.058 | 0.094 | — / 2.061 |
+| 1080p | MSAA 4x | On | 0.148 / 0.225 | 0.373 | — / 2.212 |
+| 1080p | MSAA 8x | On | 0.273 / 0.773 | 1.046 | — / 4.669 |
+| 1440p | Off | Off | 0.128 / 0.229 | 0.357 | 1.411 / 1.630 |
+| 1440p | Off | On | 0.102 / 0.168 | 0.270 | 1.896 / 2.035 |
+| 1440p | TAA | On | 0.117 / 0.179 | 0.296 | — / 2.483 |
+| 1440p | FSR Quality | On | 0.032 / 0.068 | 0.100 | — / 2.054 |
+| 1440p | MSAA 4x | On | 0.292 / 0.342 | 0.634 | — / 3.645 |
+| 1440p | MSAA 8x | On | 0.562 / 1.353 | 1.915 | — / 8.237 |
+
+FSR Quality uses 1280x720 / 1706x960 internal buffers. Automatic graphics clocks
+ranged from 615–2850 MHz across the 1080p cases and 930–2850 MHz at 1440p;
+they were **not locked or modified**. Thus the whole-frame Off/On difference
+is not an isolated incremental cost, and lower pass times with RT On reflect
+different clock states. Capture timing includes the pre-water end/resolve and
+resume boundary. These direct pass timings do **not** include the extra raster
+MRT bandwidth when RT reflections were previously Off. Conservative all-sample
+depth/coverage checks make MSAA 8x materially more expensive. This is one GPU,
+one coastal workload, not a general performance guarantee.
+
+Timing evidence: `refraction-perf1080/refraction-perf.json` and
+`refraction-perf1440/refraction-perf.json`. Final Vulkan executable SHA-256:
+`A0F48D64A4E546F741A6211314E86F76EE4EE12B4ED361C2DB02DE285FD4FDE6`.
+
+### Limitations
+
+- Legacy ocean-only tiles and texture-index-zero cells omit bottom geometry.
+  They retain original water. Bottoms outside the captured view, deeply submerged
+  terrain and objects drawn after water cannot be reconstructed. Submerged pier
+  extensions are not fabricated; visible foreground pier geometry is preserved.
+- Forced `--sw-tl` startup fails **before enabling this feature** on both this
+  build and the unchanged main executable with `unsupported flags 0x1000000`
+  in the existing terrain software material path. Runtime PAUSE also leaves
+  native-centered terrain segments unusable in the forced software view.
+  The shared software-water identification/projection hook is wired where valid,
+  but full forced-software refraction is **not qualified**; no legacy material,
+  cache or draw-order restructuring was added to claim support.
+- At mixed MSAA coverage, conservative original-color pixels can remain along
+  a thin shoreline edge. Temporal modes retain their existing reactive-water
+  treatment; no separate refraction history or promise of shimmer-free water
+  is introduced. Native coarse coastline triangulation and pre-existing tidal/
+  dawn shoreline changes remain visible.
+- One snapshot per swapchain image adds about 47.5 MiB at 1080p or 84.4 MiB at
+  1440p for three images. With RT reflections Off, the existing water/sun MRT
+  pair is also enabled: total additional image storage is about 142.4/253.1 MiB
+  at 1x, and grows with MSAA. With RT reflections already On, that pair is reused.
+  No resources are persisted across shutdown.
+
+Raw profiles, actions, screenshots and failed-attempt evidence are retained under
+ignored `build/shadow-live/refraction-*` in the original development checkout;
+the representative unedited screenshots above are committed with this document.
+
 ## Optional contact-hardening CSM (2026-10-12)
 
 Built on `28139f7`; the existing contact-shadow, RT, volumetric and MSAA fixes

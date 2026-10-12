@@ -201,6 +201,11 @@ class VulkanContext
     std::string SetRTReflections(std::string_view mode);
     void FailRTReflections(std::string_view reason);
     bool RTReflectionsEnabled() const { return _rtReflectionsEnabled && _rtaoAvailable; }
+    std::string SetWaterRefraction(std::string_view mode);
+    void FailWaterRefraction(std::string_view reason);
+    bool WaterSurfaceEnabled() const { return RTReflectionsEnabled() || _refractionEnabled; }
+    void SetWaterFrame(const std::array<float, 16>& camera, const std::array<float, 4>& projection)
+    { _waterCamera = camera; _waterProjection = projection; }
     bool RaySceneEnabled() const { return RTAOEnabled() || RTShadowsEnabled() || RTReflectionsEnabled(); }
     void SetReflectionLighting(const std::array<std::array<float, 4>, 8>& data) { _reflectionLighting = data; }
     void SetRTSun(const std::array<float, 4>& sun) { _rtSun = sun; }
@@ -369,6 +374,7 @@ class VulkanContext
         bool shaftsTimestamped = false;
         bool volumeTimestamped = false;
         bool contactTimestamped = false;
+        bool waterCaptureTimestamped = false, waterOpticsTimestamped = false;
         bool ssaoTimestamped = false;
         VkQueryPool csmQueries = VK_NULL_HANDLE;
         bool csmTimestamped = false;
@@ -469,6 +475,21 @@ class VulkanContext
         VkDescriptorSet set = VK_NULL_HANDLE;
         VkFramebuffer framebuffer = VK_NULL_HANDLE;
     };
+    bool _refractionRequested = false, _refractionEnabled = false, _waterCaptured = false, _waterRefracted = false;
+    std::string _refractionFailure;
+    uint64_t _waterCaptures = 0, _waterComposites = 0;
+    double _waterCaptureMs = 0, _waterOpticsMs = 0;
+    std::array<float, 16> _waterCamera{};
+    std::array<float, 4> _waterProjection{};
+    std::vector<TemporalTarget> _waterBackground;
+    VkDescriptorSetLayout _waterSetLayout = VK_NULL_HANDLE;
+    VkDescriptorPool _waterPool = VK_NULL_HANDLE;
+    VkPipelineLayout _waterLayout = VK_NULL_HANDLE;
+    std::array<VkPipeline, 2> _waterPipelines{};
+    void CreateWaterResources();
+    void DestroyWaterResources() noexcept;
+    void CaptureWaterBackground();
+    void DrawWaterRefraction();
     std::array<TemporalTarget, 2> _taaHistory{};
     static constexpr unsigned BloomLevels = 4;
     struct BloomTarget

@@ -69,6 +69,10 @@ class EngineVK final : public Engine
         return _vk.SetRTReflections(static_cast<const char*>(mode)).c_str();
     }
     bool _waterSurface = false;
+    RString SetWaterRefraction(RString mode) override
+    {
+        return _vk.SetWaterRefraction(static_cast<const char*>(mode)).c_str();
+    }
     bool InitDrawDone() override { return _vk.FrameOpen(); }
     bool IsAbleToDraw() override { return !_failed && !_paused && IsOpen(); }
     void Clear(bool clearZ = true, bool clear = true, PackedColor color = PackedColor(0)) override;

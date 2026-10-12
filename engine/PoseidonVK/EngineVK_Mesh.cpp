@@ -83,7 +83,7 @@ void EngineVK::PrepareTriangleTL(const MipInfo& mip, const render::LegacySpec& s
     _lighting.rtWater = {};
     // Landscape water deliberately uses Detail, not the legacy Water shader family.
     // The explicit draw boundary also avoids labelling arbitrary specular materials as water.
-    if (_waterSurface && _vk.RTReflectionsEnabled())
+    if (_waterSurface && _vk.WaterSurfaceEnabled())
     {
         try
         {
@@ -97,7 +97,8 @@ void EngineVK::PrepareTriangleTL(const MipInfo& mip, const render::LegacySpec& s
         }
         catch (const std::exception& error)
         {
-            _vk.FailRTReflections(error.what());
+            if (_vk.RTReflectionsEnabled()) _vk.FailRTReflections(error.what());
+            _vk.FailWaterRefraction(error.what());
         }
     }
     _sectionShadow = ((_shapeFlags | render::MergeLegacy(spec)) & IsShadow) != 0;

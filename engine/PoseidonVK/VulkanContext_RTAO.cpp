@@ -721,7 +721,8 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
         Require(vkCreateQueryPool(_device, &info, nullptr, &slot.queries), "create GPU timestamps");
     }
     FlushScreenBatch();
-    vkCmdEndRenderPass(command);
+    if (_worldPassOpen)
+        vkCmdEndRenderPass(command);
     _worldPassOpen = false;
     _commands = {};
     if (slot.queries)

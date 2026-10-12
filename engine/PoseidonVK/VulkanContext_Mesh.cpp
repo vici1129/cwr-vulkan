@@ -350,6 +350,8 @@ void VulkanContext::DrawMesh(const std::shared_ptr<MeshBuffers>& mesh, uint32_t 
         throw std::out_of_range("Vulkan Shape: indexed draw exceeds geometry or is not a triangle list");
     if (!count)
         return;
+    if (_worldActive && !shadow && depthTest && lighting && lighting->rtWater[0] > .5f)
+        CaptureWaterBackground();
     if (shadow && _profile.enabled)
     {
         ++(screen ? _profile.softwareShadows : _profile.nativeShadows);
