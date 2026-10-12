@@ -2,6 +2,7 @@
 #extension GL_GOOGLE_include_directive : require
 #include "shape_uniforms.glsl"
 #include "color_space.glsl"
+#include "weather.glsl"
 layout(set=0,binding=0) uniform sampler2D scattering;
 #ifdef MULTISAMPLE_DEPTH
 layout(set=1,binding=0) uniform sampler2DMS sceneDepth;
@@ -16,7 +17,7 @@ layout(set=1,binding=0) uniform sampler2D sceneDepth;
 ivec2 depthSize() { return textureSize(sceneDepth,0); }
 float depthAt(ivec2 p) { return texelFetch(sceneDepth,p,0).r; }
 #endif
-layout(set=3,binding=0) uniform sampler2DArray shadowMap;
+layout(set=3,binding=5) uniform sampler2DArray shadowMap;
 layout(location=0) in vec2 texCoord;
 layout(location=0) out vec4 outColor;
 layout(push_constant) uniform Volume { vec4 projection; vec4 settings; } volume;
@@ -112,7 +113,9 @@ void main() {
     // sky contributions would cut each shaft off at a foliage silhouette.
     // Bound directional energy against the existing atmospheric brightness,
     // scaling all channels together to retain the engine's sunlight hue.
-    vec3 radiance=sun*(.18*phase*sum*lighting.atmosphereSun.w);
+    // Clouds vary over kilometres: one midpoint lookup per short fog ray is
+    // sufficient, sharing the surface coverage without 48 repeated lookups.
+    vec3 radiance=sun*(.18*phase*sum*lighting.atmosphereSun.w)*cloudSunlight(weather.camera.xyz+ray*end*.5);
     float budget=max(dot(fog,vec3(.2126,.7152,.0722)),.02)*.3;
     radiance*=min(1.0,budget/max(dot(radiance,vec3(.2126,.7152,.0722)),.00001));
     outColor=vec4(radiance,z);

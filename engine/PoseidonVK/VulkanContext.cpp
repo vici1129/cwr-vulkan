@@ -948,6 +948,8 @@ bool VulkanContext::BeginFrame(uint32_t width, uint32_t height)
         frame.csmTimestamped = false;
     }
     frame.textures.clear();
+    _weatherSlots[_frame * 2].prepared = false;
+    _weatherSlots[_frame * 2 + 1].prepared = false;
     // Only this frame's completed fence permits overwriting its mapped pages.
     frame.transientPage = 0;
     for (auto& page : frame.transientPages)
@@ -1234,6 +1236,7 @@ unsigned VulkanContext::Shutdown() noexcept
         _smaaArea.reset();
         _smaaSearch.reset();
         DestroySwapchain();
+        DestroyWeather();
         // Immutable geometry can be shared by both frame slots; teardown follows device idle.
         DestroyBuffer(_device, _triangleIndices);
         DestroyBuffer(_device, _triangleVertices);

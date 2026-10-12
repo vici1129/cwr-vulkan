@@ -20,6 +20,11 @@ struct TextureMip
     uint32_t width, height;
     const void* rgba;
 };
+struct WeatherLighting
+{
+    std::array<std::array<float, 4>, 3> layers{}; // map origin X/Z, inverse span, layer height
+    std::array<float, 4> camera{}, sun{}, cloudColor{}, skyColor{}, sunSky{}, options{};
+};
 inline VkPipelineRasterizationStateCreateInfo ShapeRasterization(bool shadow)
 {
     VkPipelineRasterizationStateCreateInfo raster{VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO};
@@ -202,7 +207,14 @@ class VulkanContext
                std::max({_volumeFrame.atmosphereColor[0], _volumeFrame.atmosphereColor[1],
                          _volumeFrame.atmosphereColor[2]}) > .00001f;
     }
-    bool SeparateSunlight() const { return RTShadowsEnabled() || ContactShadowsEligible() || SoftShadowsEligible(); }
+    bool SeparateSunlight() const { return RTShadowsEnabled() || ContactShadowsEligible() || SoftShadowsEligible() || CloudShadowsEnabled(); }
+    std::string SetCloudShadows(std::string_view mode);
+    std::string SetSkyReflections(std::string_view mode);
+    bool CloudShadowsEnabled() const { return _cloudShadows; }
+    bool CloudShadowsActive() const { return _cloudShadows && _weatherLighting.sun[3] > 0; }
+    bool WeatherNeeded() const { return _cloudShadows || (_skyReflections && RTReflectionsEnabled()); }
+    void SetWeatherFrame(const WeatherLighting& lighting, const std::array<std::shared_ptr<TextureImage>, 4>& images);
+    void FailWeather(std::string_view reason);
     std::string SetRTReflections(std::string_view mode);
     void FailRTReflections(std::string_view reason);
     bool RTReflectionsEnabled() const { return _rtReflectionsEnabled && _rtaoAvailable; }
@@ -266,6 +278,24 @@ class VulkanContext
     const std::array<float, 4>& EyeCoef() const { return _eyeCoef; }
 
   private:
+    bool _cloudShadows = false, _skyReflections = false;
+    std::string _weatherFailure;
+    WeatherLighting _weatherLighting{};
+    std::array<std::shared_ptr<TextureImage>, 4> _weatherImages{};
+    VkDescriptorSetLayout _weatherLayout = VK_NULL_HANDLE;
+    struct WeatherSlot
+    {
+        BufferVK uniform;
+        VkDescriptorPool pool = VK_NULL_HANDLE;
+        VkDescriptorSet set = VK_NULL_HANDLE;
+        std::array<std::shared_ptr<TextureImage>, 4> images{};
+        bool prepared = false;
+    };
+    // Fallback and active-CSM snapshots per frame; never rewrite a bound set.
+    std::array<WeatherSlot, 4> _weatherSlots{};
+    void CreateWeatherLayout();
+    VkDescriptorSet PrepareWeather();
+    void DestroyWeather() noexcept;
     struct RTAOState;
     std::shared_ptr<RTAOState> _rtao;
     bool _rtShadowsEnabled = false, _rtShadowTargets = false;
@@ -298,10 +328,10 @@ class VulkanContext
     // Handles are non-owning: frame retention below still owns every resource.
     struct CommandState
     {
+        VkDescriptorSet weather = VK_NULL_HANDLE;
         VkPipeline pipeline = VK_NULL_HANDLE;
         std::array<VkDescriptorSet, 2> textures{};
         VkDescriptorSet lighting = VK_NULL_HANDLE;
-        VkDescriptorSet cascades = VK_NULL_HANDLE;
         uint32_t lightingOffset = 0;
         VkBuffer vertex = VK_NULL_HANDLE, index = VK_NULL_HANDLE;
         VkDeviceSize vertexOffset = 0, indexOffset = 0;

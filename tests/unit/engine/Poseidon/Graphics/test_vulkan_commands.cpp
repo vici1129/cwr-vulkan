@@ -73,6 +73,9 @@ struct VulkanCommandStateTest
         context._whiteTexture = texture;
         context._csmFallbackSet = Handle<VkDescriptorSet>(60);
         context._shapeLayout = Handle<VkPipelineLayout>(2);
+        context._weatherLayout = Handle<VkDescriptorSetLayout>(70);
+        context._weatherSlots[0].prepared = true;
+        context._weatherSlots[0].set = Handle<VkDescriptorSet>(71);
         context._shapePipelines.fill(Handle<VkPipeline>(3));
         context._screenPipelines.fill(Handle<VkPipeline>(4));
         context._shadowPipelines.fill(Handle<VkPipeline>(5));

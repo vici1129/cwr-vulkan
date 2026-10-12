@@ -82,6 +82,14 @@ static GameValue TriWaterRefraction(const GameState*, GameValuePar arg)
 {
     return GameValue(GEngine ? GEngine->SetWaterRefraction(RString(arg)) : RString("UNSUPPORTED: no renderer"));
 }
+static GameValue TriCloudShadows(const GameState*, GameValuePar arg)
+{
+    return GameValue(GEngine ? GEngine->SetCloudShadows(RString(arg)) : RString("UNSUPPORTED: no renderer"));
+}
+static GameValue TriSkyReflections(const GameState*, GameValuePar arg)
+{
+    return GameValue(GEngine ? GEngine->SetSkyReflections(RString(arg)) : RString("UNSUPPORTED: no renderer"));
+}
 static GameValue TriHDR(const GameState*, GameValuePar arg)
 {
     return GameValue(GEngine ? GEngine->SetHDR(RString(arg)) : RString("UNSUPPORTED: no renderer"));
@@ -3129,6 +3137,8 @@ INIT_MODULE(GameStateExtTest, 3)
     GGameState.NewFunction(GameFunction(GameString, "triSoftShadows", TriSoftShadows, GameString));
     GGameState.NewFunction(GameFunction(GameString, "triRTReflections", TriRTReflections, GameString));
     GGameState.NewFunction(GameFunction(GameString, "triWaterRefraction", TriWaterRefraction, GameString));
+    GGameState.NewFunction(GameFunction(GameString, "triCloudShadows", TriCloudShadows, GameString));
+    GGameState.NewFunction(GameFunction(GameString, "triSkyReflections", TriSkyReflections, GameString));
     GGameState.NewFunction(GameFunction(GameBool, "triRenderScale", TriRenderScale, GameScalar));
     GGameState.NewFunction(GameFunction(GameString, "triSetPlayerFaceView", TriSetPlayerFaceView, GameArray));
     GGameState.NewFunction(GameFunction(GameString, "triSetRoleFaceView", TriSetRoleFaceView, GameArray));

@@ -1,5 +1,176 @@
 # Vulkan backend development
 
+## Moving cloud shadows and weather-sky water reflections (2026-10-12)
+
+Built from main `f7e9507` in an isolated worktree, leaving the private DLSS/NGX
+checkout untouched. Both effects are **Off by default**, independent, Vulkan-only
+and process-local. There are no new menus, saved settings, assets or dependencies.
+
+```sqf
+triCloudShadows "on"       // also "off" and "status"; no RT prerequisite
+triSkyReflections "on"     // also "off" and "status"
+```
+
+Sky reflections require the existing `triRTReflections "on"` path and its
+`CWR_VK_RTAO=1` hardware ray-query opt-in. Enabling the new control does not enable
+RT reflections implicitly; its reply/status explains an unavailable prerequisite.
+Status reports requested/active state, shared cloud position and resource fallback.
+Updates take effect on the next rendered world frame. GL33 returns `UNSUPPORTED`.
+
+### Shared stock weather, not another cloud simulation
+
+`Weather::MoveClouds(deltaT)` remains the sole animation clock. The placement math
+formerly inside `Landscape::DrawClouds` is exposed as `GetCloudLayer/GetCloudCell`
+and used by both the original cloud draw and `EngineVK_Weather.cpp`: the same
+seeded four stock cloud meshes/textures, empty cells, rotations, offsets, three
+layer heights, layer velocities and weather-dependent height. No wall-clock wind,
+new random pattern or copied animation state is introduced.
+
+The Vulkan cache flattens those textured mesh triangles into three RGBA coverage
+maps, each 1152 square over 72 km (96 texels per original 6 km cell). Seed-space
+maps are immutable while in use; uniforms supply the actual animated world offset
+and current height every frame. Maps recenter only after a three-cell displacement,
+on the same texel grid; a soft edge fade prevents clamped border stripes. Mesh
+vertical billow is deliberately approximated by the original layer plane.
+
+Cloud alpha/brightness, ambient/diffuse/sky/sun-sky colors, eye accommodation,
+sun direction, night effect and sky transmission come from the live engine.
+The stock skydome's mesh UV mapping is resolved into a small 256x128 directional
+upper-hemisphere lookup. Its texture is refreshed when the weather blender
+replaces the source image, including changes made through the same texture object.
+Missing sky samples retain the previous horizon/zenith fallback.
+
+### Lighting and water integration
+
+Opaque and alpha-tested eligible world surfaces project toward the sun through
+the three layer planes. Bilinear texture alpha produces broad, soft coverage;
+the modest transmission factor is applied only to the existing separated direct
+sunlight term. Ambient, local lights, emissive/no-sun surfaces and fog are not
+multiplied by cloud coverage. Terrain, buildings and foliage use the same world
+coordinates. UI, cockpit/weapon overlays and true alpha-blended effects are excluded.
+
+Cloud transmission is independent of geometry visibility. CSM/soft CSM operates
+on the direct term, and the existing contact/RT composition still combines geometry
+visibility with `min`, not another multiply. Its captured sunlight is already
+cloud-weighted, so the later pass cannot apply cloud attenuation twice. Existing
+CSM volumetric sunlight samples the same coverage at each short ray's midpoint;
+there is no second volumetric system. Strength tapers with `SkyThrough`, low sun
+elevation and `NightEffect`, avoiding extra darkening at full overcast or night.
+
+Water-ray misses sample the directional stock sky and the same cloud maps along
+the reflected ray. The ray origin accounts for `DrawClouds`' camera-relative
+`CloudScale=0.1`; original cloud alpha-distance fade and lighting are reused.
+Hardware sRGB decoding precedes filtering; the sky lookup wraps at its azimuth
+seam. Textured geometry hits, animated bump normals, restrained Fresnel, 60-80 m
+receiver fade, existing water fog/eye response and coastal refraction are retained.
+When cloud shadows are enabled, reflected geometry's direct sunlight also uses
+the hit position's coverage. Turning sky reflections off restores the original
+gradient miss path without disabling cloud shadows or refraction.
+
+Weather and CSM share descriptor set 3, preserving Vulkan's four-set minimum.
+Fallback/active-CSM snapshots are frame-fenced and never rewritten after binding;
+retained image references protect uploads and weather changes across frames.
+There is no added rendering pass or per-frame cloud-map rasterization. Maps use
+about 15.2 MiB plus a 128 KiB sky texture; replaced images can temporarily overlap
+in flight. Initial map creation/recentering uses transient CPU memory and synchronous
+uploads. Neither map generation nor sky conversion runs while both controls are
+off (or only sky is requested without the RT prerequisite).
+
+### Gameplay and matched captures
+
+Tests used actual stock `02Infantry.Abel` (Malden) and `05HeavyMetal.Eden` (Everon),
+isolated profiles and the established muted direct-development launch, not a
+synthetic scene or a Steam-route qualification. Assisted fixed cameras covered
+terrain, forest, buildings, shorelines and open water. Normal infantry movement
+in both missions advanced the player approximately 26 m, including third-person
+views. This is graphics gameplay coverage, not mission completion.
+
+Both islands were compared Off/On/Off at overcast 0, 0.45 and 1, at noon, dawn
+(05:35), sunset (19:30) and midnight. AA Off, TAA, FSR Quality and MSAA 4x were
+checked with CSM, soft/contact shadows, RT sunlight, volumetric fog, RT water and
+refraction together. Normal-time camera motion and accelerated time (30x) were
+checked separately from frozen comparisons. One initial Everon camera was below
+water; those captures were rejected and replaced with verified above-water views.
+
+The final Malden animation series reports shared cloud positions
+`1.025802 -> 21.300497 -> 41.656162 -> 62.032154 -> 82.358841`.
+At every frozen epoch the two effects report the same position; both `setAccTime 0`
+and the simulation pause kept `102.698578` unchanged across three-second samples.
+The screenshots below are original window captures, with no relighting or contrast
+enhancement. Each Off/On pair freezes the same camera, weather and cloud epoch.
+
+| Frozen Malden comparison | Off | On |
+| --- | --- | --- |
+| Terrain/cloud position 62.032154 | ![Cloud shadows off](evidence/cloud-weather/land-62-off.png) | ![Cloud shadows on](evidence/cloud-weather/land-62-on.png) |
+| Same terrain after cloud movement, position 82.358841 | ![Later shadows off](evidence/cloud-weather/land-82-off.png) | ![Later shadows on](evidence/cloud-weather/land-82-on.png) |
+| Open water/cloud position 41.656162 | ![Sky reflections off](evidence/cloud-weather/sea-41-off.png) | ![Sky reflections on](evidence/cloud-weather/sea-41-on.png) |
+| Same water after cloud movement, position 62.032154 | ![Later sky reflections off](evidence/cloud-weather/sea-62-off.png) | ![Later sky reflections on](evidence/cloud-weather/sea-62-on.png) |
+
+### Measured GPU cost
+
+RTX 4060 Ti, driver 617.14, final executable SHA-256
+`57AA133C83BF63AE4721373CEAD1C381D56C52E9F486B473E7820389864E3B22`.
+Actual 1920x1080 and 2560x1440 outputs, VSync/validation off, stock Malden,
+noon/overcast 0.45, fixed camera and paused simulation. Each selection warms for
+three seconds, then records approximately six seconds of existing GPU timestamps.
+Cloud-only terrain and sky-only open-water runs use Off/On/On/Off; combined coast
+runs use Off/On for each AA mode. Values below are means of the existing two-second
+whole-frame GPU intervals, not wall-frame/FPS estimates or a synthetic shader cost.
+Other optional shadow/AO/volume/refraction effects are off for this timing isolation;
+they were enabled together in the separate compatibility comparisons.
+
+| Effect and AA | 1080p GPU ms Off / On | Observed delta | 1440p GPU ms Off / On | Observed delta |
+| --- | ---: | ---: | ---: | ---: |
+| Cloud only, AA Off, RT reflections Off | 1.695 / 1.853 | +0.158 | 1.843 / 1.978 | +0.135 |
+| Sky only, AA Off, RT reflections On | 2.006 / 2.007 | +0.001 | 2.110 / 2.118 | +0.007 |
+| Both, TAA, RT reflections On | 2.174 / 2.305 | +0.131 | 2.339 / 2.425 | +0.086 |
+| Both, FSR Quality, RT reflections On | 2.112 / 2.125 | +0.013 | 2.215 / 2.239 | +0.023 |
+| Both, MSAA 4x, RT reflections On | 2.230 / 2.262 | +0.032 | 3.087 / 3.278 | +0.191 |
+
+For sky-only water, the existing trace/shade timestamp averages are
+0.413 -> 0.450 ms at 1080p and 0.607 -> 0.613 ms at 1440p. Cloud sampling is inline
+in surface shading, so it has no separate pass timestamp. These are small **observed
+differences**, not a fixed hardware-independent budget: automatic graphics clocks
+varied from 450-1920 MHz during the 1080p cases and 750-2850 MHz at 1440p. For example,
+cloud-only clocks rose from about 450 to 540 MHz and 750 to 960 MHz respectively;
+the 1440p MSAA pair stayed at 2850 MHz. Memory clocks also changed between 5001
+and 9201 MHz. No clocks or persistent power settings were modified. This CPU-heavy
+game can leave the GPU underclocked, and sub-0.02 ms differences are within noise;
+do not infer that the feature gets cheaper as resolution rises. Initial/cache
+rebuild uploads are excluded from these steady-state measurements.
+
+### Verification and limits
+
+Vulkan and GL33 builds pass. Focused suites pass 2,050 assertions/89 cases (Vulkan)
+and 1,804/85 (GL33); driver-free policy/lifetime guards pass 444 checks, including
+default-off, selector validation, independence and missing-RT behavior. Six focused
+single/MS shader combinations compile and pass `spirv-val` for Vulkan 1.2.
+Live Vulkan with ray-query capability disabled still casts cloud shadows and
+reports sky reflections inactive. GL33 startup and both unsupported replies pass.
+
+Core and synchronization validation remained clean through normal shutdown:
+the broad Malden/Everon runs submitted 27,886/45,658 frames; final-build repeats
+submitted 13,696/22,589; the non-RT-capability run submitted 1,396. All five report
+zero errors and warnings. Each of the two resize/minimize-restore runs has one
+submitted frame without presentation during swapchain recreation. Final Everon
+also repeated CSM Off/On and TAA-to-FSR switching after resize. Frozen terrain
+Off/return image crops are pixel-identical at the two published cloud epochs.
+Local raw profiles, status samples, timing JSON and captures remain under the
+original checkout's ignored `build/shadow-live/cloud-validation-{malden,everon}`,
+`cloud-final-{malden,everon}`, `cloud-no-rt`, `cloud-gl33` and
+`cloud-perf-{1080,1440}`. No stock game assets or user profiles were modified.
+
+This is a restrained approximation, not volumetric clouds, a general environment
+probe or exact reflected cloud geometry. The low-resolution maps omit vertical
+billow and fine silhouette detail; cloud opacity overlaps are flattened. Sun/moon
+discs and stars are not captured. Unsupported sky samples keep the old fallback;
+below-horizon directions clamp to the horizon. Very low-angle sun rays can leave
+the finite map and fade out.
+Weather maps may cause a one-time upload/recenter hitch; their peak CPU cost is
+not part of steady GPU timings. Existing RT geometry/ray-range exclusions remain.
+No multi-hour flight, arbitrary mod-cloud assets, AMD/Intel GPU or physical HDR10
+display qualification is claimed. All enhancements remain opt-in.
+
 ## Terrain-cache and refraction-fallback follow-up (2026-10-12)
 
 Two narrow corrections on `138e8c4`: the volumetric terrain-shadow cache key

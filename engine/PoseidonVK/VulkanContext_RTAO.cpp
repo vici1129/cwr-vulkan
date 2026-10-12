@@ -537,8 +537,10 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
         Require(vkCreateDescriptorSetLayout(_device, &set, nullptr, &rt.setLayout), "create descriptors");
         const VkPushConstantRange push{VK_SHADER_STAGE_COMPUTE_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(Push)};
         VkPipelineLayoutCreateInfo layout{VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO};
-        layout.setLayoutCount = 1;
-        layout.pSetLayouts = &rt.setLayout;
+        CreateWeatherLayout();
+        const VkDescriptorSetLayout layouts[]{rt.setLayout, _weatherLayout};
+        layout.setLayoutCount = 2;
+        layout.pSetLayouts = layouts;
         layout.pushConstantRangeCount = 1;
         layout.pPushConstantRanges = &push;
         Require(vkCreatePipelineLayout(_device, &layout, nullptr, &rt.layout), "create layout");
@@ -993,6 +995,8 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
         }
         vkCmdBindPipeline(command, VK_PIPELINE_BIND_POINT_COMPUTE, rt.compute[ms]);
         vkCmdBindDescriptorSets(command, VK_PIPELINE_BIND_POINT_COMPUTE, rt.layout, 0, 1, &set, 0, nullptr);
+        const auto weather = PrepareWeather();
+        vkCmdBindDescriptorSets(command, VK_PIPELINE_BIND_POINT_COMPUTE, rt.layout, 1, 1, &weather, 0, nullptr);
         vkCmdPushConstants(command, rt.layout, VK_SHADER_STAGE_COMPUTE_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0,
                            sizeof(push), &push);
         stamp(rayStamp);

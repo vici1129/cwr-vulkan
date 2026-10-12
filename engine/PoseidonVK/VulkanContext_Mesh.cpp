@@ -167,7 +167,8 @@ void VulkanContext::CreateShapePipeline(bool translucent, bool screen, bool dept
         uniforms.bindingCount = 1;
         uniforms.pBindings = &binding;
         Require(vkCreateDescriptorSetLayout(_device, &uniforms, nullptr, &_lightingLayout), "create lighting layout");
-        const VkDescriptorSetLayout sets[] = {_textureLayout, _textureLayout, _lightingLayout, _textureLayout};
+        CreateWeatherLayout();
+        const VkDescriptorSetLayout sets[] = {_textureLayout, _textureLayout, _lightingLayout, _weatherLayout};
         layout.setLayoutCount = 4;
         layout.pSetLayouts = sets;
         layout.pushConstantRangeCount = 1;
@@ -375,19 +376,19 @@ void VulkanContext::DrawMesh(const std::shared_ptr<MeshBuffers>& mesh, uint32_t 
         CreateShapePipeline(blend, screen, depthTest, depthWrite, shadow, additive);
     const double lightingStart = _profile.enabled ? ProfileClock() : 0;
     CreateShadowFallback();
-    const auto shadowSet = _csmActive ? _frames[_frame].shadow.set : _csmFallbackSet;
-    if (_commands.cascades != shadowSet)
+    const auto weatherSet = PrepareWeather();
+    if (_commands.weather != weatherSet)
     {
         vkCmdBindDescriptorSets(_frames[_frame].command, VK_PIPELINE_BIND_POINT_GRAPHICS, _shapeLayout, 3, 1,
-                                &shadowSet, 0, nullptr);
-        _commands.cascades = shadowSet;
+                                &weatherSet, 0, nullptr);
+        _commands.weather = weatherSet;
     }
     if (lighting)
     {
         auto receiver = *lighting;
         if (!_worldActive || !_rtWaterTargets || shadow || !depthTest)
             receiver.rtWater[0] = 0;
-        if (!_worldActive || (!_rtShadowTargets && !SoftShadowsEligible()) || shadow || blend || !depthTest || !depthWrite)
+        if (!_worldActive || (!_rtShadowTargets && !SoftShadowsEligible() && !CloudShadowsActive()) || shadow || blend || !depthTest || !depthWrite)
             receiver.rtSun[0] = 0;
         if (_worldActive && _atmosphereEnabled && !shadow && depthTest &&
             (screen ? receiver.atmosphereSun[3] > 0 : receiver.fogParams[2] > .5f))

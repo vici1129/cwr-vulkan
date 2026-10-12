@@ -1,5 +1,7 @@
 // Closest-hit water reflection shading on the shared AO/sunlight TLAS.
 #include "color_space.glsl"
+#define WEATHER_SET 1
+#include "weather.glsl"
 layout(set=0,binding=8,std430) readonly buffer ReflectionLight {
     vec4 ambient, diffuse, zenith, horizon, sunSky, fog, eye, parameters;
 } light;
@@ -48,8 +50,8 @@ vec4 traceWater(ivec2 pixel) {
     }
     atomicAdd(groupRays,1);
     // Existing weather sky texture endpoints and the engine's sun-sky lighting lobe.
-    vec3 color=eyeResponse(toLinear(mix(light.horizon.rgb,light.zenith.rgb,sqrt(max(direction.y,0)))+
-        light.sunSky.rgb*pow(max(dot(direction,ao.sun.xyz),0),6)));
+    vec3 color=eyeResponse(reflectedWeather(world,direction,toLinear(mix(light.horizon.rgb,light.zenith.rgb,sqrt(max(direction.y,0)))+
+        light.sunSky.rgb*pow(max(dot(direction,ao.sun.xyz),0),6))));
     if(rayQueryGetIntersectionTypeEXT(query,true)==gl_RayQueryCommittedIntersectionTriangleEXT) {
         atomicAdd(groupHits,1);
         uint custom=rayQueryGetIntersectionInstanceCustomIndexEXT(query,true);
@@ -63,6 +65,10 @@ vec4 traceWater(ivec2 pixel) {
             vec3 normal=normalize(cross(b-a,c-a));
             if(dot(normal,direction)>0) normal=-normal;
             color=sampleColor(m,uv)*legacyLightToLinear(light.ambient.rgb+light.diffuse.rgb*max(dot(normal,ao.sun.xyz),0));
+            if(weather.sun.w>0) {
+                vec3 ambient=sampleColor(m,uv)*legacyLightToLinear(light.ambient.rgb);
+                color=ambient+max(color-ambient,vec3(0))*cloudSunlight(world+direction*rayQueryGetIntersectionTEXT(query,true));
+            }
             float fog=clamp((rayQueryGetIntersectionTEXT(query,true)-light.parameters.x)*light.parameters.y,0,1);
             color=mix(eyeResponse(color),toLinear(light.fog.rgb),fog);
             atomicAdd(shadedHits,1);

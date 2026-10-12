@@ -46,6 +46,11 @@ class EngineVK final : public Engine
     RString SetVolumetricFog(RString mode) override { return _vk.SetVolumetricFog(static_cast<const char*>(mode)).c_str(); }
     void SetSunVisibility(float visibility) override { _vk.SetSunVisibility(visibility); }
     void UpdateAtmosphere();
+    void UpdateWeather();
+    struct WeatherCache;
+    std::shared_ptr<WeatherCache> _weatherCache;
+    RString SetCloudShadows(RString mode) override { return _vk.SetCloudShadows(static_cast<const char*>(mode)).c_str(); }
+    RString SetSkyReflections(RString mode) override { return _vk.SetSkyReflections(static_cast<const char*>(mode)).c_str(); }
     bool UsesHDRLighting() const override { return true; }
     bool SetSSAO(bool enabled, float strength, float radius, float bias, float fade) override;
     RString SetRTAO(RString mode) override { return _vk.SetRTAO(static_cast<const char*>(mode)).c_str(); }

@@ -3,6 +3,7 @@
 #include "shape_uniforms.glsl"
 #include "shadow_sample.glsl"
 #include "color_space.glsl"
+#include "weather.glsl"
 layout(location = 0) out vec4 outColor;
 layout(location = 0) in vec2 texCoord;
 layout(location = 1) in vec4 vertexColor;
@@ -60,7 +61,7 @@ void main() {
         if(draw.detailEnabled>.5) base *= legacyLightToLinear(vec3(WORLD_TEXTURE(detailTexture,texCoord*32).a*2));
     }
     if (separate) {
-        outColor.rgb = base + max(outColor.rgb-base,vec3(0))*csm;
+        outColor.rgb = base + max(outColor.rgb-base,vec3(0))*csm*cloudSunlight(shadowWorld+weather.camera.xyz);
     } else outColor.rgb *= csm;
     // Contact-only capture must not change legacy CSM shading where no ray
     // hits. Preserve its original scene result, including ambient and fog.

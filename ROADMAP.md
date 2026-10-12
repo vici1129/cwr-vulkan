@@ -10,20 +10,11 @@ This is a direction, **not a timetable or a promise**. Priorities may change, an
 - **Image quality:** FXAA, SMAA, MSAA, TAA, AMD FSR 3.1.4 temporal upscaling, and world render scaling.
 - **HDR and atmosphere:** FP16 linear-HDR world rendering, tone mapping, bloom, atmospheric perspective, screen-space sunlight shafts, and CSM-shadowed volumetric sunlight/fog.
 - **Sunlight shadows:** cascaded shadow maps (CSM), contact-hardening soft CSM filtering, short screen-space contact shadows, and hybrid hardware ray-query sunlight shadows.
+- **Cloud shadows:** completed weather-synchronized stock-cloud coverage of direct sunlight, including CSM volumetric sunlight; independent default-off control, no RT requirement.
 - **Occlusion:** SSAO and optional hardware ray-traced ambient occlusion (RTAO).
-- **Water:** textured hardware ray-query reflections and depth-aware coastal refraction/absorption, both independently selectable.
+- **Water:** textured hardware ray-query reflections and depth-aware coastal refraction/absorption, both independently selectable. Sky/cloud reflections milestone complete: optional directional stock-sky and moving-cloud sampling on water-ray misses.
 
 HDR10 surface negotiation and SDR fallback exist, but **physical HDR10 display output is not yet verified**. See the [development notes](docs/vulkan-foundation.md) for the actual coverage, limitations, performance and verification of individual features.
-
-## Next
-
-### 1. Cloud shadows
-
-Use the existing moving cloud/weather information to modulate **direct sunlight** across terrain and objects. Keep the effect consistent with time of day, overcast, CSM and volumetric sunlight. Do not replace the stock cloud renderer for this milestone.
-
-### 2. Sky and cloud reflections on water
-
-Improve water-ray misses beyond the current horizon/zenith gradient, reflecting the game's actual weather sky and cloud appearance where feasible. Preserve the original animated water, refraction and restrained reflection strength.
 
 ## Later candidates
 

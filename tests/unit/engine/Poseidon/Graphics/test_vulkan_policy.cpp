@@ -502,6 +502,22 @@ int main()
         Check(context.SetRTAO("invalid").starts_with("INVALID:"), "RTAO rejects unknown commands");
         Check(context.SetRTAO("off").starts_with("OK:") && context.SSAOEnabled(), "RTAO off preserves SSAO preference");
         Check(context.SSAOEnabled(), "SSAO runtime enable must take effect");
+        Check(context.SetCloudShadows("status").find("requested=off active=off") == 0, "cloud shadows default off");
+        Check(context.SetSkyReflections("status").find("requested=off active=off") == 0, "sky reflections default off");
+        Check(context.SetCloudShadows("on").starts_with("OK:") && context.CloudShadowsEnabled(),
+              "cloud sunlight works without ray-query hardware");
+        Check(context.SeparateSunlight(), "clouds request direct sunlight separation");
+        Check(context.SetSkyReflections("on").find("inactive: requires") != std::string::npos,
+              "sky reflections report the missing RT prerequisite");
+        Check(context.CloudShadowsEnabled() && !context.RTReflectionsEnabled(), "sky control does not enable RT or change clouds");
+        Check(context.SetCloudShadows("invalid").starts_with("INVALID:") && context.CloudShadowsEnabled(),
+              "invalid cloud selector preserves the request");
+        Check(context.SetSkyReflections("invalid").starts_with("INVALID:"), "invalid sky selector is rejected");
+        context.SetCloudShadows("off");
+        Check(!context.CloudShadowsEnabled() && context.SetSkyReflections("status").find("requested=on") == 0,
+              "cloud and sky requests are independent");
+        context.SetSkyReflections("off");
+        Check(!context.WeatherNeeded(), "disabled weather requires no coverage or sky update");
         Check(!context.SetSSAO(false, std::numeric_limits<float>::quiet_NaN(), 1, 0, 80), "reject NaN SSAO strength");
         Check(!context.SetSSAO(false, 1, 0, 0, 80), "reject zero SSAO radius");
         Check(!context.SetSSAO(false, 1, 1, 1, 80), "reject SSAO bias covering its radius");

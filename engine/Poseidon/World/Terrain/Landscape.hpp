@@ -808,6 +808,12 @@ class Landscape: public SerializeClass
 	float SkyThrough() const {return _weather._skyThrough;}
 	float CloudsAlpha() const {return _weather._cloudsAlpha;}
 	float CloudsBrightness() const {return _weather._cloudsBrightness;}
+	// The renderer and optional weather lighting consume the same seeded cells.
+	struct CloudLayer { float x, z, height; int xCell, zCell; };
+	struct CloudCell { float x, z, azimuth; int type; };
+	CloudLayer GetCloudLayer(int layer) const;
+	CloudCell GetCloudCell(int layer, int x, int z) const;
+	Object *SkyObject() const { return _skyObject; }
 		
 	Object *NearestObject
 	(

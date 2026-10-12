@@ -1,4 +1,4 @@
-layout(set=3, binding=0) uniform sampler2DArray shadowMap;
+layout(set=3, binding=5) uniform sampler2DArray shadowMap;
 #include "soft_shadow_math.glsl"
 // Fixed light-space patterns: no screen noise, frame rotation or extra history.
 const vec2 softDisk[8]=vec2[8](

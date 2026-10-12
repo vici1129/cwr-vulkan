@@ -75,7 +75,8 @@ void VulkanContext::CreateVolumetricResources()
         write.pImageInfo = &image;
         vkUpdateDescriptorSets(_device, 1, &write, 0, nullptr);
     }
-    const VkDescriptorSetLayout sets[]{_textureLayout, _textureLayout, _lightingLayout, _textureLayout};
+    CreateWeatherLayout();
+    const VkDescriptorSetLayout sets[]{_textureLayout, _textureLayout, _lightingLayout, _weatherLayout};
     const VkPushConstantRange push{VK_SHADER_STAGE_FRAGMENT_BIT, 0, 32};
     VkPipelineLayoutCreateInfo layout{VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO};
     layout.setLayoutCount = 4;
@@ -183,7 +184,7 @@ void VulkanContext::DrawVolumetricFog(const std::array<float, 4>& projection)
         vkCmdBeginRenderPass(command, &pass, VK_SUBPASS_CONTENTS_INLINE);
         vkCmdBindPipeline(command, VK_PIPELINE_BIND_POINT_GRAPHICS, _volumePipelines[i]);
         const VkDescriptorSet sets[]{i ? _volumeTargets[_image].set : _aaTargets[_image].colorSet,
-                                     _aaTargets[_image].depthSet, uniform.set, frame.shadow.set};
+                                     _aaTargets[_image].depthSet, uniform.set, PrepareWeather()};
         vkCmdBindDescriptorSets(command, VK_PIPELINE_BIND_POINT_GRAPHICS, _volumeLayout, 0, 4, sets, 1,
                                 &uniform.offset);
         const VkViewport viewport{0, 0, float(extent.width), float(extent.height), 0, 1};

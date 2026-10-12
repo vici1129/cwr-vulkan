@@ -1707,6 +1707,26 @@ struct CloudInfo
     float posX, posZ, azimut;
 };
 
+Landscape::CloudLayer Landscape::GetCloudLayer(int layer) const
+{
+    static const float heights[] = {6000, 4000, 2000};
+    static const float xSpeed[] = {.040f, .024f, .020f};
+    static const float zSpeed[] = {.008f, -.004f, -.008f};
+    float x = CloudsPosition() * xSpeed[layer], z = CloudsPosition() * zSpeed[layer];
+    const int ix = toIntFloor(x), iz = toIntFloor(z);
+    return {(x - ix) * SKY_GRID, (z - iz) * SKY_GRID,
+            heights[layer] * std::clamp(CloudsBrightness(), .6f, 1.f), ix, iz};
+}
+
+Landscape::CloudCell Landscape::GetCloudCell(int layer, int x, int z) const
+{
+    const int seed = _randGen.GetSeed(x, z, layer);
+    return {_randGen.RandomValue(seed + 1) * (SKY_GRID * .5f),
+            _randGen.RandomValue(seed + 2) * (SKY_GRID * .5f),
+            _randGen.RandomValue(seed + 3) * H_PI,
+            toIntFloor(_randGen.RandomValue(seed) * 8)};
+}
+
 void Landscape::DrawClouds(Scene& scene)
 {
     const Camera& camera = *scene.GetCamera();
@@ -1745,38 +1765,17 @@ void Landscape::DrawClouds(Scene& scene)
         clouds1.Resize(0);
         clouds2.Resize(0);
         clouds3.Resize(0);
-        const static float skyY[SKY_LEVELS] = {6000, 4000, 2000};
-#define SP (2.0f)
-        const static float skyXSpeed[SKY_LEVELS] = {+0.020 * SP, +0.012 * SP, +0.010 * SP};
-        const static float skyZSpeed[SKY_LEVELS] = {+0.004 * SP, -0.002 * SP, -0.004 * SP};
         int xx, zz;
-
-        float cPos = CloudsPosition();
-        float xMove = cPos * skyXSpeed[skyLevel];
-        float zMove = cPos * skyZSpeed[skyLevel];
-
-        float height = CloudsBrightness();
-        saturate(height, 0.6, 1);
-
-        int xMoveInt = toIntFloor(xMove);
-        int zMoveInt = toIntFloor(zMove);
-        xMove -= xMoveInt;
-        zMove -= zMoveInt;
-
-        xMove *= SKY_GRID;
-        zMove *= SKY_GRID;
-
-        float posY = skyY[skyLevel] * height;
+        const auto layer = GetCloudLayer(skyLevel);
+        const float posY = layer.height;
 
         for (zz = skyBegEnd.zBeg; zz <= skyBegEnd.zEnd; zz++)
         {
             for (xx = skyBegEnd.xBeg; xx <= skyBegEnd.xEnd; xx++)
             {
                 // preloaded objects _cloud[]
-                int seedXZ = _randGen.GetSeed(xx - xMoveInt, zz - zMoveInt, skyLevel);
-                float isHereF = _randGen.RandomValue(seedXZ);
-                // RandBegin(xx-xMoveInt,zz-zMoveInt,skyLevel);
-                int isHere = toIntFloor(isHereF * 8);
+                const auto cell = GetCloudCell(skyLevel, xx - layer.xCell, zz - layer.zCell);
+                int isHere = cell.type;
                 if (isHere >= N_CLOUDS)
                 {
                     continue;
@@ -1784,12 +1783,12 @@ void Landscape::DrawClouds(Scene& scene)
                 CloudArray& array = *clouds[isHere];
                 CloudInfo& info = array.Append();
 
-                float xOffset = xMove + _randGen.RandomValue(seedXZ + 1) * (SKY_GRID * 0.5);
-                float zOffset = zMove + _randGen.RandomValue(seedXZ + 2) * (SKY_GRID * 0.5);
+                float xOffset = layer.x + cell.x;
+                float zOffset = layer.z + cell.z;
 
                 info.posX = xx * SKY_GRID + xOffset;
                 info.posZ = zz * SKY_GRID + zOffset;
-                info.azimut = _randGen.RandomValue(seedXZ + 3) * (2 * H_PI / 2);
+                info.azimut = cell.azimuth;
                 // Point3 pos=Vector3(xx*SKY_GRID+xOffset,skyY[skyLevel]*height,zz*SKY_GRID+zOffset);
             }
         }

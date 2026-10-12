@@ -400,6 +400,8 @@ class Engine : public IGraphicsEngine
     virtual RString SetSoftShadows(RString) { return "UNSUPPORTED: soft shadows require Vulkan"; }
     virtual RString SetRTReflections(RString) { return "UNSUPPORTED: RT water reflections require Vulkan"; }
     virtual RString SetWaterRefraction(RString) { return "UNSUPPORTED: water refraction requires Vulkan"; }
+    virtual RString SetCloudShadows(RString) { return "UNSUPPORTED: cloud shadows require Vulkan"; }
+    virtual RString SetSkyReflections(RString) { return "UNSUPPORTED: sky reflections require Vulkan RT water reflections"; }
     virtual bool SeparateSunlight() const { return false; }
     virtual void NextFrame();                             // swap frames - get ready for next frame
     virtual bool InitDrawDone() { return true; }
