@@ -18,6 +18,10 @@ Models, textures, sounds, missions, and voices. These are not in this repository
 In short: the code is free software, the name is not, and the game data comes separately. This license covers the source code only and grants no rights to the trademarks.
 
 
+## CWRR Vulkan rendering roadmap
+
+This independent community fork's proposed graphics milestones are in [ROADMAP.md](ROADMAP.md). Technical notes and real-gameplay results are in [docs/vulkan-foundation.md](docs/vulkan-foundation.md). This is not an official Bohemia Interactive roadmap.
+
 ## Quick Start
 
 ```sh
