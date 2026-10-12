@@ -397,6 +397,7 @@ class Engine : public IGraphicsEngine
     virtual bool SetSSAO(bool, float, float, float, float) { return false; }
     virtual RString SetRTAO(RString) { return "UNSUPPORTED: RTAO requires Vulkan"; }
     virtual RString SetRTShadows(RString) { return "UNSUPPORTED: RT shadows require Vulkan"; }
+    virtual RString SetSoftRTShadows(RString) { return "UNSUPPORTED: soft RT shadows require Vulkan"; }
     virtual RString SetRTDynamic(RString) { return "UNSUPPORTED: dynamic RT requires Vulkan"; }
     virtual void CaptureRayGeometry(Object&, const Shape&, int, const FrameBase&) {}
     virtual RString SetContactShadows(RString) { return "UNSUPPORTED: contact shadows require Vulkan"; }

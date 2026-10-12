@@ -61,9 +61,9 @@ std::string VulkanContext::SetSoftShadows(std::string_view mode)
 {
     if (mode == "status")
         return std::string("enabled=") + (_softShadowsEnabled ? "on" : "off") +
-            " csm=" + (_csmActive ? "ready" : "inactive") +
-            " source=" + (SoftShadowsEligible() ? "active" : "inactive") +
-            " blocker=13 filter=8x4 radius=1-8texels sunRadius=0.4deg RT=hard-unmodified";
+               " csm=" + (_csmActive ? "ready" : "inactive") +
+               " source=" + (SoftShadowsEligible() ? "active" : "inactive") +
+               " blocker=13 filter=8x4 radius=1-8texels sunRadius=0.4deg RT=independent(triSoftRTShadows)";
     if (mode != "on" && mode != "off")
         return "INVALID: triSoftShadows on, off, status";
     if (_softShadowsEnabled != (mode == "on"))

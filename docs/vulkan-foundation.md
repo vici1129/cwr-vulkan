@@ -1,5 +1,159 @@
 # Vulkan backend development
 
+## Optional soft RT sunlight (2026-10-12)
+
+`triSoftRTShadows "on"`, `"off"`, `"status"` controls sun-disc sampling in
+the existing hardware sunlight pass. Default **Off**, Vulkan only. Start with
+`CWR_VK_RTAO=1` on ray-query-capable hardware and explicitly enable
+`triRTShadows "on"` first. An unsupported/missing prerequisite is reported,
+never enabled implicitly. `triSoftShadows` still independently controls CSM
+PCSS; neither soft-shadow command changes the other.
+
+The selection is retained while RT sunlight is disabled, but is ineligible and
+executes no extra rays. Status distinguishes the selection, prerequisite,
+eligibility, configured sample count, last completed frame's sample/ray/hit
+counts, world dispatch and existing GPU trace/composition timestamps. Completed
+statistics can lag a toggle by the frames in flight; they are not predictions.
+
+### Sampling and composition
+
+The new branch of `rtao.comp` traces **four total rays per eligible receiver**
+across a uniform solar disc with a **0.4-degree half-angle** (the existing PCSS
+sun size). Two opposite pairs occupy equal-area inner and outer annuli. Each
+receiver's sample centroid is exactly on the original sunlight direction and
+the mean squared disc radius is 1/2. A deterministic hash of 1/64 m world-space
+light-plane cells varies rotation and radius, breaking up four-copy silhouette
+bands without a frame seed, screen-space pattern, image blur or extra history.
+
+Visibility is the mean of the four binary, alpha-tested ray results. Penumbra
+width comes from actual caster/receiver separation: the disc's geometric radius
+grows approximately as `separation * tan(0.4 degrees)`, approaching zero at
+contact. The shader does not estimate blocker distance and then blur the image.
+Disabling the option takes the original single-ray code, with its original
+direction, origin bias, hit counters and visibility arithmetic intact.
+
+The pass uses the **same TLAS, BLAS, materials and alpha-cutout confirmation**
+as hard RT sunlight, including terrain, static buildings/foliage and supported
+live vehicle/soldier geometry when `triRTDynamic` is enabled. No scene collection,
+upload, AS ownership or lifetime policy changes. Receiver MRT eligibility,
+MSAA coverage rejection, 100 m ray length, mask 255, 40-50 m receiver fade,
+sunlight intensity and normal/directional bias are unchanged. The spare
+`jitter.z` push component selects sampling; the existing 128-byte ABI is retained.
+
+The existing direct-light reduction remains `min(CSM, RT)`, with contact
+composition taking the maximum reduction (equivalent to `min(CSM, RT, contact)`),
+not multiplying independent visibility estimates. Ambient/material detail is
+untouched. Cloud attenuation remains in the existing sunlight source; volumetric
+fog remains CSM-shadowed. This does **not** add volumetric ray queries. A darker
+CSM/contact shadow may therefore dominate a softer RT edge when combined; valid
+shadows are never erased to make the new effect appear more prominent.
+
+### Gameplay evidence and limits
+
+Verification uses the built executable launched directly in muted diagnostic
+sessions with copied profiles, stock **Take the Car / Malden** and **Heavy Metal /
+Everon** missions, stock objects, live AI/animation and fixed developer camera
+views for matched captures. It is not a synthetic mesh fixture or Steam-launch
+acceptance. Diagnostic placement/rotation and helicopter altitude resets make
+comparisons repeatable; these are not claimed as independent human-driven runs.
+
+CSM and legacy object/vehicle projected shadows were independently disabled for
+RT-only evidence (`CSM passes/frame=0`, native/software shadow draws zero).
+Malden's elevated helicopter silhouette spreads while nearby truck, Jeep and
+soldier contacts stay narrow. Building/chimney and alpha-cutout foliage shadows
+also work with dynamic collection disabled. Everon covers soldiers walking,
+turning and crouching, rotated vehicles, raised helicopter and tree silhouettes.
+Both islands exercise AA Off, TAA, FSR Quality and MSAA4, and combinations with
+CSM/PCSS, contact shadows, cloud shadows, atmosphere and volumetric fog/clouds.
+
+In Malden's AA-Off near/far comparison, Hard -> Soft changes 27,074 pixels;
+Hard -> Soft -> Hard restores **every pixel**. An unshadowed truck-body region
+has zero changed pixels. Everon's stationary foliage Soft captures and a
+camera-away/return pair are also pixel-identical. These checks demonstrate
+determinism, not a guarantee of alias-free motion at all viewing distances.
+
+Four visibility samples are intentionally bounded, not ground truth. Fine
+spatial grain and subpixel aliasing can remain in wide penumbrae/thin foliage,
+especially without AA; existing TAA/FSR can smooth it but no new reconstruction
+or denoiser is introduced. The feature does not soften unsupported receivers,
+RT range boundaries, legacy projected shadows or volumetric shadows. The
+existing dynamic-geometry exclusions (crew/equipment proxies, blended effects,
+destroyed objects) remain. Zero-separation self-shadow bias is unchanged.
+
+Unretouched window captures (open at full resolution; each pair changes only
+the soft RT selection, not PCSS or shadow strength):
+
+| Scene | Hard | Soft | What to inspect |
+| --- | --- | --- | --- |
+| Malden, RT only, AA Off | [Hard](evidence/soft-rt-shadows/malden-contact-hard.png) | [Soft](evidence/soft-rt-shadows/malden-contact-soft.png) | Raised helicopter penumbra versus sharp soldier/vehicle contact; terrain texture and truck detail are not blurred. |
+| Malden village, dynamic Off | [Hard](evidence/soft-rt-shadows/malden-static-hard.png) | [Soft](evidence/soft-rt-shadows/malden-static-soft.png) | Chimney/roof, building edges and cutout vegetation; no dynamic scene prerequisite. |
+| Everon, RT only, AA Off | [Hard](evidence/soft-rt-shadows/everon-casters-hard.png) | [Soft](evidence/soft-rt-shadows/everon-casters-soft.png) | Turned vehicles, crouched soldier, raised helicopter and tree silhouettes. |
+| Everon foliage, dynamic Off | [Hard](evidence/soft-rt-shadows/everon-foliage-hard.png) | [Soft](evidence/soft-rt-shadows/everon-foliage-soft.png) | Alpha-tested holes remain; branch/leaf shadows soften with separation from the ground. |
+| Everon, 1440p, combined, TAA | [Hard](evidence/soft-rt-shadows/everon-combined-hard.png) | [Soft](evidence/soft-rt-shadows/everon-combined-soft.png) | CSM/PCSS/contact/cloud/volumetric coexistence, not RT-only proof; conservative composition intentionally retains darker coverage. |
+
+### Measured cost and verification
+
+RTX **4060 Ti 8 GB**, driver **617.14**, Core **i7-12700F**, RelWithDebInfo,
+native 1920x1080 and 2560x1440, AA Off, VSync Off, validation **off for timing**.
+Stock Malden coastal scene, five nearby objects (Jeep, Ural, M1, UH60, soldier),
+all three RT effects and dynamic geometry On, CSM/contact/cloud shadows Off.
+For each resolution and frozen/live state: Hard / Soft / Soft / Hard runs,
+3 s warm-up then 8 s sampling per run, 64 completed-frame status samples per
+mode. Live trials use actual soldier/vehicle animation and quarter-second
+position/rotation/velocity commands, resetting helicopter altitude to prevent
+impact. They are repeatable workload windows, not deterministic simulation
+replays. Existing GPU timestamps are used; no benchmark framework was added.
+
+| Resolution / workload | Sun trace Hard / Soft (ms) | Added sun trace (ms) | Whole GPU frame Hard / Soft (ms) | CPU frame Hard / Soft (ms) |
+| --- | ---: | ---: | ---: | ---: |
+| 1080p frozen | 0.337 / 0.630 | 0.293 | 2.323 / 2.434 | 6.772 / 6.741 |
+| 1080p moving | 0.333 / 0.597 | 0.264 | 2.579 / 2.629 | 7.348 / 7.266 |
+| 1440p frozen | 0.590 / 1.009 | 0.419 | 3.407 / 3.899 | 6.835 / 6.741 |
+| 1440p moving | 0.588 / 1.019 | 0.431 | 3.684 / 4.193 | 7.358 / 7.533 |
+
+Numbers are medians. Composition remains about 0.040-0.052 ms at 1080p and
+0.072 ms at 1440p. Frozen scenes rebuild neither BLAS nor TLAS; live 1440p
+BLAS/TLAS medians are essentially identical (0.198/0.075 ms) across modes.
+1080p live BLAS timings vary (0.249 hard / 0.207 soft), so whole-frame deltas
+must not be substituted for the isolated sunlight cost. GPU scheduling, live
+animation and clock variation mean component timings need not sum to the
+whole-frame difference; these are not FPS guarantees or CPU speedups.
+
+Receiver coverage and alpha traversal matter. The close Everon foliage
+validation view observed roughly **0.44 / 1.70 ms** hard/soft sunlight at 1080p;
+the closer vehicle/raised-helicopter validation view at 1440p was about
+**0.59 / 1.46 ms**. These are individual validation-on observations, not the
+paired benchmark medians above. Four rays remain practical in the measured
+scenes, but the cost is not a universal 0.3 ms. The balanced spatial pattern
+and fixed four-ray cap were retained; no extra filtering/history was needed.
+
+Focused Vulkan and GL33-only builds passed. Driver-free Vulkan policy tests:
+**466 checks** (the deliberate `TEST-teardown-only` validation-error injection
+is expected). `[vulkan-shape],[vulkan-aa],[ShadowMath]`: Vulkan **1,527 assertions /
+68 cases**, GL33 **1,487 / 67**. The new scalar shader-math test checks the disc
+angle, bounds, annular stratification, opposite-pair centroid, second moment
+and separation-proportional offsets. Control tests cover default Off, rejected
+capabilities, invalid commands and prerequisite/PCSS independence.
+
+Live validation receipts: Malden **21,588**, Everon **22,536**, final 1440p
+Everon **20,074** submitted/presented frames, each **0 errors / 0 warnings**.
+The final run includes active cloud coverage, live dynamic animation, camera
+changes, dynamic Off/On, removal/destruction and RT effect toggles. A Vulkan
+launch without `CWR_VK_RTAO` correctly rejects On (5,230 frames, also zero
+validation messages). With ray capability but RT sunlight Off, On rejects
+without changing the prerequisite. GL33's command is unsupported and a live
+before/after screenshot is pixel-identical. Test games exited normally and
+used disposable profile copies; private DLSS/NGX work was not touched.
+
+Evidence/build receipts under ignored `build/shadow-live/soft-rt-*` retain raw
+screenshots, commands, runtime logs, `soft-perf.json` and `soft-summary.json`.
+Sampling/evidence/performance executable SHA-256:
+`5220FA9E58D2A32EAC9BFB8E6C87FFC0AD9996AEEED92755A88B3D3C17526427`.
+Final rebuild after C++ changed-line formatting (no algorithm change):
+`6F35AAD889DF7EDF9860821663F4549F88F2F80E7C1F5846418C7DA5F3817CEB`;
+this is the final 1440p and missing-opt-in validation build. GL33:
+`1799EE60F8519A54C0AE16992939CACBE2A156C086B60BDB93C97A2A547C3071`.
+
 ## Optional dynamic ray-query geometry (2026-10-12)
 
 `triRTDynamic "on"`, `"off"`, `"status"` extends the **existing shared RT
@@ -1040,11 +1194,13 @@ use the original path, with no additional soft filtering or sun separation.
 
 ### Hybrid RT and contact shadows
 
-The raw RT visibility/reduction and its off-screen caster coverage are
-unchanged. Existing conservative `min(CSM, RT, contact)` composition remains;
+At the time of this PCSS milestone, raw RT visibility/reduction and its
+off-screen caster coverage were unchanged. Existing conservative
+`min(CSM, RT, contact)` composition remains;
 there is no multiplication of independent darkening factors. A hard RT result
-can dominate the softer CSM edge. **RT silhouettes have not become physically
-soft**: this milestone adds neither multiple area-light rays nor RT denoising.
+can dominate the softer CSM edge. This PCSS milestone itself adds neither
+multiple area-light rays nor RT denoising; the later independent
+`triSoftRTShadows` option is documented at the top of this file.
 Disable RT sunlight to inspect the CSM penumbrae independently. Short-range
 screen-space contact shadows remain separate and can reinforce feet/tracks
 without widening their own rays or changing their sampling budget.

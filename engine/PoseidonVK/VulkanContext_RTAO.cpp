@@ -167,6 +167,7 @@ struct VulkanContext::RTAOState
         VkQueryPool queries = VK_NULL_HANDLE;
         bool pending = false;
         uint32_t built = 0, tlasBuilt = 0;
+        uint32_t sunSamples = 0;
     };
     std::array<Slot, FramesInFlight> slots;
     std::vector<std::shared_ptr<BLAS>> cache;
@@ -179,6 +180,7 @@ struct VulkanContext::RTAOState
     bool worldDispatched = false;
     uint64_t totalSunRays = 0, totalSunHits = 0;
     uint32_t lastSunRays = 0, lastSunHits = 0;
+    uint32_t lastSunSamples = 0;
     uint32_t lastTerrainHits = 0, lastAlphaHits = 0;
     double sunRayMs = 0, sunFilterMs = 0;
     bool sunDispatched = false;
@@ -413,6 +415,44 @@ std::string VulkanContext::SetRTReflections(std::string_view mode)
                                  : "OK: original water restored";
 }
 
+std::string VulkanContext::SetSoftRTShadows(std::string_view mode)
+{
+    if (mode == "status")
+    {
+        std::ostringstream out;
+        out << "SoftRTShadows=" << (_softRTShadowsEnabled ? "on" : "off")
+            << " eligible=" << (SoftRTShadowsEnabled() ? "yes" : "no")
+            << " RTShadows=" << (RTShadowsEnabled() ? "on" : "off") << " capability=" << _rtaoReason
+            << " samples=" << (SoftRTShadowsEnabled() ? 4 : 1)
+            << " sunHalfAngle=0.4deg sampling=world-anchored-disc PCSS=independent";
+        if (_rtao)
+        {
+            out << " lastCompletedSamples=" << _rtao->lastSunSamples << " lastCompletedRays=" << _rtao->lastSunRays
+                << " lastCompletedHits=" << _rtao->lastSunHits
+                << " lastWorldDispatch=" << (_rtao->sunDispatched ? "yes" : "no");
+            if (_rtao->timingSamples)
+                out << " lastGPUms(rays/compose)=" << _rtao->sunRayMs << '/' << _rtao->sunFilterMs;
+        }
+        else
+            out << " lastCompletedSamples=0 lastCompletedRays=0 lastWorldDispatch=no";
+        return out.str();
+    }
+    if (mode != "on" && mode != "off")
+        return "INVALID: triSoftRTShadows on, off, status";
+    if (mode == "on" && !_rtaoAvailable)
+        return "UNSUPPORTED: " + _rtaoReason;
+    if (mode == "on" && !RTShadowsEnabled())
+        return "UNSUPPORTED: enable triRTShadows first; prerequisites are not enabled implicitly";
+    if (_softRTShadowsEnabled != (mode == "on"))
+    {
+        FlushScreenBatch();
+        _softRTShadowsEnabled = mode == "on";
+        ResetTemporalHistory();
+    }
+    return _softRTShadowsEnabled ? "OK: soft RT sunlight enabled (four sun-disc rays), PCSS unchanged"
+                                 : "OK: original single-ray RT sunlight restored";
+}
+
 std::string VulkanContext::SetRTShadows(std::string_view mode)
 {
     if (mode == "status")
@@ -606,6 +646,7 @@ void VulkanContext::RetireRTAO()
         rt.totalHits += counts[1];
         rt.lastSunRays = counts[2];
         rt.lastSunHits = counts[3];
+        rt.lastSunSamples = slot.sunSamples;
         rt.totalSunRays += counts[2];
         rt.totalSunHits += counts[3];
         rt.lastTerrainHits = counts[4];
@@ -689,6 +730,7 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
     rt.instanceCount = rt.triangleCount = 0;
     rt.worldDispatched = false;
     rt.sunDispatched = false;
+    slot.sunSamples = 0;
     rt.waterDispatched = false;
     if (rt.scene.empty())
     {
@@ -1208,6 +1250,12 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
         push.sun = _rtSun;
         if (effect)
             push.settings[3] = 50.f;
+        if (effect == 1)
+        {
+            // Spare component: preserve the 128-byte push ABI and all AO/water settings.
+            push.jitter[2] = SoftRTShadowsEnabled() ? 1.f : 0.f;
+            slot.sunSamples = SoftRTShadowsEnabled() ? 4 : 1;
+        }
         if (IsTemporal(_aaMode))
         {
             push.jitter[0] = _taaJitter[0];

@@ -28,6 +28,40 @@ using std::min;
 using std::max;
 #include <PoseidonVK/Shaders/soft_shadow_math.glsl>
 }
+namespace SoftRTShadowMath
+{
+using std::sqrt;
+#include <PoseidonVK/Shaders/soft_rt_shadow_math.glsl>
+} // namespace SoftRTShadowMath
+
+TEST_CASE("RT sun-disc samples are bounded, balanced and contact hardening", "[Graphics][Shaders][ShadowMath]")
+{
+    using namespace SoftRTShadowMath;
+    REQUIRE(std::abs(rtSunDiscSlope() - std::tan(.4f * 3.14159265359f / 180)) < 1e-8f);
+    for (float radial : {.00001f, .125f, .5f, .875f, .99999f})
+        for (float rotation : {0.f, .7f, 2.4f, 5.9f})
+        {
+            float x = 0, y = 0, radiusSquared = 0;
+            for (int i = 0; i < 4; ++i)
+            {
+                const float r = rtSunDiskRadius(i, radial), angle = rtSunDiskAngle(i, rotation);
+                REQUIRE(r > 0);
+                REQUIRE(r < 1);
+                REQUIRE((i < 2 ? r * r < .5f : r * r > .5f));
+                x += r * std::cos(angle);
+                y += r * std::sin(angle);
+                radiusSquared += r * r;
+                // Geometry, not screen-space kernel width: displacement vanishes at
+                // contact and grows linearly with caster/receiver separation.
+                const float nearOffset = .1f * rtSunDiscSlope() * r;
+                const float farOffset = 10.f * rtSunDiscSlope() * r;
+                REQUIRE(std::abs(farOffset - 100 * nearOffset) < 1e-7f);
+            }
+            REQUIRE(std::abs(x) < 1e-6f);
+            REQUIRE(std::abs(y) < 1e-6f);
+            REQUIRE(std::abs(radiusSquared * .25f - .5f) < 1e-6f);
+        }
+}
 
 TEST_CASE("Directional PCSS radius is contact-hardening and cascade-scaled", "[Graphics][Shaders][ShadowMath]")
 {

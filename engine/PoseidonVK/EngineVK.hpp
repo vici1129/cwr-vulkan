@@ -82,6 +82,10 @@ class EngineVK final : public Engine
     const void* _rtLandscape = nullptr;
     float _rtTerrainGrid = 0;
     RString SetRTShadows(RString mode) override { return _vk.SetRTShadows(static_cast<const char*>(mode)).c_str(); }
+    RString SetSoftRTShadows(RString mode) override
+    {
+        return _vk.SetSoftRTShadows(static_cast<const char*>(mode)).c_str();
+    }
     RString SetContactShadows(RString mode) override { return _vk.SetContactShadows(static_cast<const char*>(mode)).c_str(); }
     RString SetSoftShadows(RString mode) override { return _vk.SetSoftShadows(static_cast<const char*>(mode)).c_str(); }
     bool SeparateSunlight() const override { return _vk.SeparateSunlight(); }

@@ -476,6 +476,18 @@ int main()
         Check(context.SetRTDynamic("off").starts_with("OK:") && context.SSAOEnabled(),
               "dynamic geometry off preserves the AO selection");
         Check(!context.RTShadowsEnabled(), "RT sunlight defaults off independently of AO");
+        Check(!context.SoftRTShadowsEnabled() &&
+                  context.SetSoftRTShadows("status").starts_with("SoftRTShadows=off eligible=no"),
+              "soft RT defaults off and reports eligibility separately");
+        Check(context.SetSoftRTShadows("on").starts_with("UNSUPPORTED:"), "soft RT requires opted-in ray capability");
+        Check(!context.RaySceneEnabled() && !context.SoftShadowsEnabled(),
+              "soft RT rejection never enables prerequisites or PCSS");
+        const auto softRTStatus = context.SetSoftRTShadows("status");
+        Check(context.SetSoftRTShadows("invalid").starts_with("INVALID:") &&
+                  context.SetSoftRTShadows("status") == softRTStatus,
+              "invalid soft RT command preserves selection");
+        Check(context.SetSoftRTShadows("off").starts_with("OK:") && !context.SoftRTShadowsEnabled(),
+              "soft RT off is safe without a device");
         Check(!context.RTReflectionsEnabled(), "RT water defaults off independently of AO and sunlight");
         Check(context.SetWaterRefraction("status").find("requested=off active=off captured=no") != std::string::npos,
               "refraction defaults off and reports capture separately from selection");

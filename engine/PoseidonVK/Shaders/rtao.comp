@@ -10,6 +10,7 @@ layout(set=0,binding=2,rgba32f) uniform writeonly image2D resultAO;
 layout(set=0,binding=3,std430) buffer Counters { uint rays; uint hits; uint sunRays; uint sunHits; uint terrainHits; uint alphaHits; uint waterRays; uint waterHits; uint shadedHits; uint shadedTerrain; uint shadedAlpha; uint dynamicAO; uint dynamicSun; uint dynamicWater; uint dynamicShaded; } counters;
 #ifdef SUN_SHADOW
 #include "sunlight_depth.glsl"
+#include "soft_rt_shadow_math.glsl"
 #endif
 shared uint groupRays;
 shared uint groupHits;
@@ -90,6 +91,44 @@ vec4 traceAO(ivec2 pixel) {
     n=normalize(mat3(ao.camera)*n);
     vec3 world=(ao.camera*vec4(p,1)).xyz;
 #ifdef SUN_SHADOW
+    if(ao.jitter.z>.5) {
+        vec3 center=normalize(ao.sun.xyz);
+        if(dot(n,center)<0) n=-n;
+        vec3 tangent=normalize(cross(abs(center.y)<.95?vec3(0,1,0):vec3(1,0,0),center));
+        vec3 bitangent=cross(center,tangent);
+        // Light-plane coordinates keep the pattern fixed to the world, not the
+        // screen, TAA jitter or frame number. Fine cells break four-ray bands
+        // without turning contact edges into a screen-space blur.
+        uvec2 cell=uvec2(ivec2(floor(vec2(dot(world,tangent),dot(world,bitangent))*64)));
+        uint hash=cell.x*1597334677u ^ cell.y*3812015801u;
+        hash^=hash>>16; hash*=2246822519u; hash^=hash>>13;
+        float rotation=6.2831853*(float(hash&65535u)+.5)/65536;
+        float radial=(float(hash>>16)+.5)/65536;
+        uint hitCount=0;
+        for(int i=0;i<4;++i) {
+            float angle=rtSunDiskAngle(i,rotation);
+            vec3 direction=normalize(center+rtSunDiscSlope()*rtSunDiskRadius(i,radial)*
+                (tangent*cos(angle)+bitangent*sin(angle)));
+            rayQueryEXT query;
+            rayQueryInitializeEXT(query,scene,gl_RayFlagsTerminateOnFirstHitEXT,255,
+                world+n*.025+direction*.015,.01,direction,100.0);
+            while(rayQueryProceedEXT(query)) {
+                if(rayQueryGetIntersectionTypeEXT(query,false)==gl_RayQueryCandidateIntersectionTriangleEXT && opaqueHit(query))
+                    rayQueryConfirmIntersectionEXT(query);
+            }
+            if(rayQueryGetIntersectionTypeEXT(query,true)==gl_RayQueryCommittedIntersectionTriangleEXT) {
+                ++hitCount;
+                uint kind=rayQueryGetIntersectionInstanceCustomIndexEXT(query,true)>>20;
+                if(kind==2) atomicAdd(terrainHits,1);
+                if(kind==1) atomicAdd(alphaHits,1);
+                if(kind==3) atomicAdd(dynamicHits,1);
+            }
+        }
+        atomicAdd(groupRays,4); atomicAdd(groupHits,hitCount);
+        float fade=1-smoothstep(40.0,50.0,cameraDistance);
+        float rtVisibility=1-float(hitCount)*.25*fade*ao.sun.w;
+        return vec4(direct.rgb*max(0,direct.a-min(direct.a,rtVisibility)),p.z);
+    }
     // Exactly one deterministic sun ray. Bounded tracing complements, never
     // replaces, CSM's distant and unsupported geometry coverage.
     rayQueryEXT query;

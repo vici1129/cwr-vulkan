@@ -213,6 +213,8 @@ class VulkanContext
     bool RTAOEnabled() const { return _rtaoEnabled && _rtaoAvailable; }
     std::string SetRTShadows(std::string_view mode);
     bool RTShadowsEnabled() const { return _rtShadowsEnabled && _rtaoAvailable; }
+    std::string SetSoftRTShadows(std::string_view mode);
+    bool SoftRTShadowsEnabled() const { return _softRTShadowsEnabled && RTShadowsEnabled(); }
     std::string SetContactShadows(std::string_view mode);
     bool ContactShadowsEnabled() const { return _contactEnabled; }
     bool ContactShadowsEligible() const
@@ -329,6 +331,7 @@ class VulkanContext
     struct RTAOState;
     std::shared_ptr<RTAOState> _rtao;
     bool _rtShadowsEnabled = false, _rtShadowTargets = false;
+    bool _softRTShadowsEnabled = false;
     bool _contactRequested = false, _contactEnabled = false, _contactDrew = false;
     bool _softShadowsEnabled = false;
     uint64_t _contactDraws = 0;
