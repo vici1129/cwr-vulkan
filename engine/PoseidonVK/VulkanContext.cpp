@@ -769,8 +769,8 @@ bool VulkanContext::RecreateSwapchain(uint32_t width, uint32_t height)
     {
         try
         {
-            CreateAAResources(SceneFormat);
-            break;
+            if (CreateAAResources(SceneFormat))
+                break;
         }
         catch (const std::exception& error)
         {
@@ -786,8 +786,8 @@ bool VulkanContext::RecreateSwapchain(uint32_t width, uint32_t height)
             }
             else
                 throw;
-            DestroyAAResources();
         }
+        DestroyAAResources();
     }
     _recreate = false;
     std::fprintf(stderr, "Vulkan HDR: %s; format=%d colorSpace=%d scene=RGBA16F peak=%.0f white=%.0f metadata=%s\n",

@@ -209,7 +209,7 @@ class EngineVK final : public Engine
     std::vector<float> _volumeTerrain;
     std::shared_ptr<vk::MeshBuffers> _volumeTerrainMesh;
     const void* _volumeLandscape = nullptr;
-    std::array<float, 4> _volumeTerrainKey{};
+    std::array<float, 5> _volumeTerrainKey{};
     float _shadowSunFactor = 0;
     bool _shadowWorld = false;
     std::array<float, 4> _worldProjection{};

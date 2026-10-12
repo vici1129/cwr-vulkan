@@ -119,6 +119,11 @@ struct ShadowAlphaBatch
     uint32_t first = 0, count = 0;
 };
 // Cached terrain is local to a stable grid origin, not the moving camera.
+inline std::array<float, 5> ShadowTerrainKey(int x, int z, float grid, int cells, float terrainGrid)
+{
+    // SurfaceY depends on the actual subdivision even when sampling is clamped to 8 m.
+    return {float(x), float(z), grid, float(cells), terrainGrid};
+}
 inline std::array<float, 16> TranslateShadowMatrix(const float* matrix, const std::array<float, 3>& offset)
 {
     std::array<float, 16> result;
@@ -559,7 +564,7 @@ class VulkanContext
     VkExtent2D RenderExtent() const { return _worldActive ? _worldExtent : _extent; }
     VkFramebuffer SceneFramebuffer() const { return _worldActive ? _aaTargets[_image].scene : _framebuffers[_image]; }
     VkRenderPass ResumePass() const { return _worldActive ? _worldResume : _resumePass; }
-    void CreateAAResources(VkFormat format);
+    bool CreateAAResources(VkFormat format); // false: optional fallback requires rebuilding the selected targets
     void DestroyAAResources() noexcept;
     void CreateAAImage(DepthAttachment& image, VkFormat format, VkImageUsageFlags usage,
                        VkSampleCountFlagBits samples, VkImageAspectFlags aspect, VkExtent2D extent = {});

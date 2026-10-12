@@ -83,7 +83,7 @@ void EngineVK::RenderShadowDepthScene(const float* matrices, const float* splits
         const float grid = std::max(8.f, land->GetTerrainGrid());
         const int cx = int(std::floor(position.X() / grid)), cz = int(std::floor(position.Z() / grid));
         const int cells = int(std::ceil(radius / grid));
-        const std::array<float, 4> key{float(cx), float(cz), grid, float(cells)};
+        const auto key = vk::ShadowTerrainKey(cx, cz, grid, cells, land->GetTerrainGrid());
         if (_volumeLandscape != land || _volumeTerrainKey != key)
         {
             _volumeTerrain.clear();

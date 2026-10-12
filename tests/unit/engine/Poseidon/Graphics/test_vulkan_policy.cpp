@@ -271,6 +271,17 @@ int main()
             Check(!VulkanContext::VolumetricSourceEligible(volume), "empty fog range needs no volume CSM");
             volume.fogParams[1] = 99;
             Check(!VulkanContext::VolumetricSourceEligible(volume), "reversed fog range needs no volume CSM");
+            const auto ultraTerrain = ShadowTerrainKey(440, 405, 8.f, 50, 6.25f);
+            const auto extremeTerrain = ShadowTerrainKey(440, 405, 8.f, 50, 3.125f);
+            Check(ultraTerrain != extremeTerrain,
+                  "stationary Ultra/Extreme terrain changes invalidate the volume shadow mesh");
+            Check(ultraTerrain == ShadowTerrainKey(440, 405, 8.f, 50, 6.25f),
+                  "unchanged terrain subdivision reuses the volume shadow mesh");
+            Check(ultraTerrain != ShadowTerrainKey(441, 405, 8.f, 50, 6.25f) &&
+                      ultraTerrain != ShadowTerrainKey(440, 406, 8.f, 50, 6.25f) &&
+                      ultraTerrain != ShadowTerrainKey(440, 405, 8.f, 51, 6.25f) &&
+                      ultraTerrain != ShadowTerrainKey(440, 405, 12.5f, 50, 6.25f),
+                  "volume shadow cache still tracks cell, extent and sampling grid");
             // Matrix translation must reproduce per-vertex camera subtraction,
             // including nonidentity rotations and the homogeneous row.
             const std::array<float, 16> matrix{1,2,3,4, 5,6,7,8, 9,10,11,12, 13,14,15,16};

@@ -1,5 +1,30 @@
 # Vulkan backend development
 
+## Terrain-cache and refraction-fallback follow-up (2026-10-12)
+
+Two narrow corrections on `138e8c4`: the volumetric terrain-shadow cache key
+now includes the actual terrain subdivision grid as well as its clamped sampling
+grid; Ultra (6.25 m) and Extreme (3.125 m) no longer collide at a stationary
+8 m sampling cell. If optional refraction resource creation fails, AA creation
+now explicitly retries after destroying the selected targets, before declaring
+the swapchain ready. Attachments still required by RT reflections are retained.
+The rendering algorithms, default selections and GL33 are unchanged.
+
+Verification: Vulkan build, 434 driver-free policy/lifetime checks and 673
+settings/AA/shape assertions in 49 cases passed. A temporary diagnostic build
+threw immediately after water-resource creation: RT-Off recovered with neither
+water nor sunlight MRT; RT-On/MSAA4 recovered with both MRTs and working RT
+reflections. A frozen Malden camera logged rebuilds at the same cell `(440,405)`
+for terrain grids `6.25 -> 3.125 -> 6.25`, with sampling grid/extent unchanged.
+These two runs closed with zero validation errors/warnings after 7,742 and
+2,395 frames. This verifies invalidation, not a quantified visual difference
+from the original stale-mesh bug. All fault injection/log instrumentation was
+removed before the final build. Raw evidence remains in ignored
+`build/shadow-live/surgical-*` in the original development checkout.
+The final uninstrumented build passed Malden Off/On/Off comparisons with RT
+Off/On and AA Off/TAA/MSAA4, closing after 6,656 frames with zero validation
+errors/warnings (SHA-256 `D5770564140011886B933515EC9C1DD07186F17C826B46BEA9B647C87D10D0BF`).
+
 ## Optional coastal water refraction (2026-10-12)
 
 Built on main `db3895d`, in an isolated checkout to preserve the private

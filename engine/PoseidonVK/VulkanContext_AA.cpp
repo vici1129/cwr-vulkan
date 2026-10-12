@@ -123,7 +123,7 @@ void VulkanContext::CreateAAImage(DepthAttachment& target, VkFormat format, VkIm
     Require(vkCreateImageView(_device, &view, nullptr, &target.view), "create world view");
 }
 
-void VulkanContext::CreateAAResources(VkFormat format)
+bool VulkanContext::CreateAAResources(VkFormat format)
 {
     constexpr auto colorUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
     constexpr auto depthUsage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
@@ -509,7 +509,11 @@ void VulkanContext::CreateAAResources(VkFormat format)
     {
         DestroyWaterResources();
         FailWaterRefraction(error.what());
+        // The world pass/MRTs were selected before this failure. The swapchain
+        // retry must rebuild them, retaining attachments still needed by RT.
+        return false;
     }
+    return true;
 }
 
 void VulkanContext::BeginAAWorld()
