@@ -19,13 +19,15 @@ layout(set = 3, binding = 7) uniform sampler2DArray localDepth1;
 
 float localVisibility(int slot, sampler2DArray map) {
     vec4 clip = lighting.localShadowVP[slot] * vec4(shadowWorld, 1);
-    if (clip.w <= .1) return 1.0;
-    vec3 p = clip.xyz / clip.w;
+    // Evaluate derivatives before divergent frustum exits. The guarded divisor
+    // keeps rejected receivers finite without changing any valid projection.
+    vec3 p = clip.xyz / max(clip.w, .1);
     vec2 uv = vec2(p.x, -p.y) * .5 + .5;
+    vec3 dx=dFdx(vec3(uv,p.z)), dy=dFdy(vec3(uv,p.z));
+    if (clip.w <= .1) return 1.0;
     if (p.z <= 0 || p.z >= 1 || any(lessThan(uv,vec2(0))) || any(greaterThan(uv,vec2(1)))) return 1.0;
     // Receiver-plane PCF correction keeps sloping terrain attached without a
     // large constant perspective-depth bias. Bound corrections at silhouettes.
-    vec3 dx=dFdx(vec3(uv,p.z)), dy=dFdy(vec3(uv,p.z));
     float det=dx.x*dy.y-dx.y*dy.x;
     vec2 gradient=abs(det)>1e-12 ? vec2(dy.y*dx.z-dx.y*dy.z,dx.x*dy.z-dy.x*dx.z)/det : vec2(0);
     float texel=1.0/lighting.localShadowControl.y;
@@ -34,7 +36,8 @@ float localVisibility(int slot, sampler2DArray map) {
     for(int y=-1;y<=1;++y) for(int x=-1;x<=1;++x) {
         vec2 offset=vec2(x,y)*texel;
         float correction=clamp(dot(gradient,offset),-bias*4,bias*4);
-        visibility += p.z+correction-bias <= texture(map,vec3(uv+offset,0)).r ? 1.0 : 0.0;
+        // Single-level depth maps need no implicit derivatives after the exits.
+        visibility += p.z+correction-bias <= textureLod(map,vec3(uv+offset,0),0.0).r ? 1.0 : 0.0;
     }
     float range=lighting.localShadowControl[2+slot];
     return mix(visibility/9.0,1.0,smoothstep(range*.8,range,clip.w));
