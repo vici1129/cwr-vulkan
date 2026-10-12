@@ -30,7 +30,7 @@ void main() {
     fogVisibility = fog;
     specularColor = vec3(0.0);
     shadowWorld = vec3(0.0);
-    if (lighting.shadowReceiver.x > 0.5 || lighting.atmosphereSun.w > 0.0 || lighting.rtSun.x > .5 || lighting.rtWater.x>.5 || lighting.localShadowControl.x>0) {
+    if (lighting.shadowReceiver.x > 0.5 || lighting.atmosphereSun.w > 0.0 || lighting.rtSun.x > .5 || lighting.rtWater.x>.5 || lighting.localShadowControl.x>0 || lighting.wetSurface.x>0) {
         vec3 view = vec3(clipPosition.x / lighting.shadowReceiver.y,
                          -clipPosition.y / lighting.shadowReceiver.z, clipPosition.w);
         shadowWorld = (lighting.world * vec4(view, 0.0)).xyz;

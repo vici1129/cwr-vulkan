@@ -407,7 +407,7 @@ bool VulkanContext::CreateAAResources(VkFormat format)
     }
     if (IsFSR(_aaMode)) CreateFSR();
     const VkDescriptorSetLayout sets[]{_textureLayout, _textureLayout, _textureLayout, _textureLayout};
-    const VkPushConstantRange push{VK_SHADER_STAGE_FRAGMENT_BIT, 0, 12 * sizeof(float)};
+    const VkPushConstantRange push{VK_SHADER_STAGE_FRAGMENT_BIT, 0, 24 * sizeof(float)};
     VkPipelineLayoutCreateInfo layout{VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO};
     layout.setLayoutCount = 4;
     layout.pSetLayouts = sets;
@@ -611,7 +611,10 @@ void VulkanContext::DrawAAPass(unsigned index, VkFramebuffer framebuffer, VkDesc
     float push[]{1.f / _worldExtent.width,   1.f / _worldExtent.height, float(_worldExtent.width),
                        float(_worldExtent.height), 1.f / _extent.width,       1.f / _extent.height,
                        float(_extent.width),       float(_extent.height), OutputPeak(), composite ? 1.f : 0.f,
-                       _bloomEnabled ? _bloomStrength : 0.f, 0};
+                       _bloomEnabled ? _bloomStrength : 0.f, 0,
+                       _underwater[0], _underwater[1], _underwater[2], _underwaterEnabled && composite ? 1.f : 0.f,
+                       _underwater[4], _underwater[5], _underwater[6], _underwater[7],
+                       _underwater[8], _underwater[9], _underwater[10], _underwater[11]};
     if (index == 5)
     {
         push[4]=_taaProjection[2]; push[5]=_taaProjection[3];

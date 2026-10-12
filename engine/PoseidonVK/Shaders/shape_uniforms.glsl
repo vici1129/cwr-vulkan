@@ -27,6 +27,7 @@ layout(set = 2, binding = 0, std140) uniform ShapeLighting {
     vec4 rtSun;
     vec4 rtWater;
     vec4 rainRipples;
+    vec4 wetSurface;
     mat4 localShadowVP[2];
     vec4 localShadowControl;
 } lighting;

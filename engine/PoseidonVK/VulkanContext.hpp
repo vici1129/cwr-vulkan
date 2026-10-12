@@ -252,6 +252,15 @@ class VulkanContext
     bool WaterSurfaceEnabled() const { return RTReflectionsEnabled() || WaterCaptureEnabled(); }
     std::string SetRainRipples(std::string_view mode, float rain = 0);
     bool RainRipplesEnabled() const { return _rainRipplesEnabled; }
+    std::string SetWetSurfaces(std::string_view mode);
+    std::string SetUnderwater(std::string_view mode);
+    float WetRain() const { return _wetSurfacesEnabled ? _wetRain : 0.f; }
+    float UnderwaterRainVisibility() const
+    {
+        const float t = _underwaterEnabled ? std::clamp(_underwater[0] / .25f, 0.f, 1.f) : 0.f;
+        return 1.f - t*t*(3.f-2.f*t);
+    }
+    void SetEnvironmentFrame(float rain, float time, const std::array<float, 12>& underwater);
     void SetWaterFrame(const std::array<float, 16>& camera, const std::array<float, 4>& projection,
                        const std::array<float, 4>& originTime = {})
     { _waterCamera = camera; _waterProjection = projection; _waterOriginTime = originTime; }
@@ -575,6 +584,9 @@ class VulkanContext
     void DestroyCloudResources() noexcept;
     bool _refractionRequested = false, _refractionEnabled = false, _waterCaptured = false, _waterRefracted = false;
     bool _shoreFoamRequested = false, _shoreFoamEnabled = false;
+    bool _wetSurfacesEnabled = false, _underwaterEnabled = false;
+    float _wetRain = 0, _wetTime = -1;
+    std::array<float, 12> _underwater{};
     std::string _refractionFailure;
     uint64_t _waterCaptures = 0, _waterComposites = 0;
     double _waterCaptureMs = 0, _waterOpticsMs = 0;

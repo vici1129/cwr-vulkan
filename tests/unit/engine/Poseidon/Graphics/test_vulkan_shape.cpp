@@ -12,9 +12,19 @@
 #include <catch2/catch_approx.hpp>
 #include <limits>
 #include <PoseidonVK/LocalShadowVK.hpp>
+#include <PoseidonVK/WetSurfaceVK.hpp>
 #include <Poseidon/Graphics/Core/TLVertex.hpp>
 
 using namespace Poseidon;
+
+TEST_CASE("Wet response excludes unclassified and vegetated stock surfaces", "[Graphics][vulkan-shape]")
+{
+    for (auto surface : {"default", "tn??????", "tt??????", "tv??????", "pl??????", "more_anim*", "podlaha_prkna*", "vehicle"})
+        REQUIRE(vk::WetSurface(surface) == std::array<float, 3>{});
+    REQUIRE(vk::WetSurface("asfalt*")[1] > vk::WetSurface("pi??????")[1]);
+    REQUIRE(vk::WetSurface("sh??????")[0] > 0);
+    REQUIRE(vk::WetSurface("cesta*")[0] < .2f);
+}
 
 TEST_CASE("Spotlight direct separation preserves the prepared cone and excludes ambient",
           "[Graphics][vulkan-shape][local-shadows]")
@@ -382,9 +392,11 @@ TEST_CASE("Vulkan native normals use inverse transpose and materials use the eng
     REQUIRE(offsetof(vk::ShapeLighting, previousMVP) == 1104);
     REQUIRE(offsetof(vk::ShapeLighting, temporal) == 1168);
     REQUIRE(offsetof(vk::ShapeLighting, outputColor) == 1200);
-    REQUIRE(sizeof(vk::ShapeLighting) == 1440);
-    REQUIRE(offsetof(vk::ShapeLighting, localShadowMatrices) == 1296);
-    REQUIRE(offsetof(vk::ShapeLighting, localShadowControl) == 1424);
+    REQUIRE(sizeof(vk::ShapeLighting) == 1456);
+    REQUIRE(offsetof(vk::ShapeLighting, wetSurface) == 1296);
+    REQUIRE(lighting.wetSurface == std::array<float, 4>{});
+    REQUIRE(offsetof(vk::ShapeLighting, localShadowMatrices) == 1312);
+    REQUIRE(offsetof(vk::ShapeLighting, localShadowControl) == 1440);
     REQUIRE(offsetof(vk::ShapeLighting, rainRipples) == 1280);
     REQUIRE(lighting.rainRipples == std::array<float, 4>{});
     REQUIRE(offsetof(vk::ShapeLighting, rtWater) == 1264);

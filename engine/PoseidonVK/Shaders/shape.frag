@@ -100,6 +100,21 @@ void main() {
         outColor.a = draw.alphaCutoff > 0.0 ?
             clamp((outColor.a-draw.alphaCutoff)/max(fwidth(outColor.a),1.0/255.0)+0.5,0.0,1.0) : 1.0;
     } else if (outColor.a < draw.alphaCutoff) discard;
+    float wetDiffuse = 1.0;
+    vec3 wetHighlight = vec3(0);
+    if (lighting.wetSurface.x > 0) {
+        vec3 normal = normalize(cross(dFdx(shadowWorld),dFdy(shadowWorld)));
+        if (normal.y < 0) normal = -normal;
+        float exposure = smoothstep(.15,.8,normal.y) * smoothstep(0.0,.35,shadowWorld.y-lighting.wetSurface.w);
+        wetDiffuse -= lighting.wetSurface.x * exposure;
+        vec3 view = normalize(-shadowWorld);
+        vec3 halfVector = normalize(view-lighting.sunDirection.xyz);
+        float lobe = pow(max(dot(normal,halfVector),0.0),lighting.wetSurface.z);
+        float fresnel = .04+.16*pow(1-clamp(dot(normal,view),0.0,1.0),5);
+        wetHighlight = legacyLightToLinear(max(directSun.rgb,vec3(0))) *
+            (lighting.wetSurface.y*exposure*lobe*(1+fresnel*4));
+        outColor.rgb = outColor.rgb*wetDiffuse+wetHighlight;
+    }
     vec3 base = outColor.rgb;
     bool captureSun = lighting.rtSun.x > .5 && directSun.a > .99 && draw.detailEnabled < 1.5;
     bool separate = captureSun && lighting.rtSun.x < 1.5;
@@ -109,10 +124,17 @@ void main() {
         // ambient/emissive/local lighting or already-composited fog.
         base = texel.rgb * legacyLightToLinear(draw.color.rgb * max(litColor-directSun.rgb,vec3(0)));
         if(draw.detailEnabled>.5) base *= legacyLightToLinear(vec3(WORLD_TEXTURE(detailTexture,texCoord*32).a*2));
+        base *= wetDiffuse;
     }
     if (separate) {
         outColor.rgb = base + max(outColor.rgb-base,vec3(0))*csm*cloudSunlight(shadowWorld+weather.camera.xyz);
-    } else outColor.rgb *= csm;
+    } else {
+        outColor.rgb *= csm;
+        // Blended road edges do not enter the separate sunlight MRT. Their new
+        // sheen still follows cloud coverage and the existing CSM visibility.
+        if (lighting.wetSurface.x > 0)
+            outColor.rgb -= wetHighlight*csm*(1-cloudSunlight(shadowWorld+weather.camera.xyz));
+    }
     // Contact-only capture must not change legacy CSM shading where no ray
     // hits. Preserve its original scene result, including ambient and fog.
     vec3 contactBase = base*csm;

@@ -117,6 +117,12 @@ void EngineVK::SubmitSoftware(const std::vector<uint32_t>& indices)
     const float cutoff = shadow ? std::max(1, (GetShadowFactor() * 7) >> 4) / 255.f :
                                  state.cutoff;
     vk::ShapeLighting receiver;
+    receiver.wetSurface = WetParameters(_softwareMip._texture, _softwareFlags);
+    if (receiver.wetSurface[0] > 0 && GScene->MainLight())
+    {
+        const auto direction = GScene->MainLight()->Direction();
+        receiver.sunDirection = {direction.X(), direction.Y(), direction.Z(), 0};
+    }
     std::shared_ptr<vk::TextureImage> waterBump;
     receiver.rainRipples = _waterSurface ? RainRippleParameters() : std::array<float, 4>{};
     if (_waterSurface && (_vk.WaterSurfaceEnabled() || receiver.rainRipples[0] > 0))
@@ -142,7 +148,7 @@ void EngineVK::SubmitSoftware(const std::vector<uint32_t>& indices)
     const bool atmosphere = _shadowWorld && _vk.AtmosphereEnabled();
     const bool localShadows = _vk.LocalShadowsEnabled() && !_softwareMesh->directLocal.empty();
     if (_shadowWorld &&
-        (_shadowTuning.enabled || atmosphere || _vk.SeparateSunlight() || receiver.rtWater[0] || localShadows) &&
+        (_shadowTuning.enabled || atmosphere || _vk.SeparateSunlight() || receiver.rtWater[0] || localShadows || receiver.wetSurface[0]) &&
         !(_softwareFlags & (DisableSun | NoZBuf | NoDropdown | IsLight | IsShadow | IsAlphaFog)) && GScene &&
         GScene->GetCamera())
     {
@@ -165,7 +171,7 @@ void EngineVK::SubmitSoftware(const std::vector<uint32_t>& indices)
                  (_softwareFlags & NoZBuf) == 0, nullptr, waterBump, 0, {0, -1, 0}, mesh.vertexOffset, mesh.indexOffset,
                  (_softwareFlags & NoZWrite) == 0,
                  receiver.shadowReceiver[0] || receiver.atmosphereSun[3] || receiver.rtSun[0] || receiver.rtWater[0] ||
-                         _temporalTerrain || localShadows
+                         _temporalTerrain || localShadows || receiver.wetSurface[0]
                      ? &receiver
                      : nullptr,
                  shadow, !shadow && (_softwareFlags & IsLight) != 0);

@@ -175,11 +175,15 @@ void EngineVK::SubmitScreen(const MipInfo& mip, const Vertex2DAbs* vertices, int
     if (right == x || bottom == y)
         return;
     const vk::ScreenState::Clip scissor{x, y, unsigned(right - x), unsigned(bottom - y)};
+    const float rainVisibility = _shadowWorld && GScene && mip._texture == GScene->Preloaded(TextureRain)
+        ? _vk.UnderwaterRainVisibility() : 1.f;
+    if (rainVisibility == 0) return;
     _screenVertices.clear();
     for (int i = 0; i < n; ++i)
     {
         _screenVertices.push_back(vk::ScreenGeometry(vertices[i], _width, _height));
         _screenVertices.back().fog = fog;
+        _screenVertices.back().color[3] *= rainVisibility;
         if (light)
         {
             auto& color = _screenVertices.back().color;

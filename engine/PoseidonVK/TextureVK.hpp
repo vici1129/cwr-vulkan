@@ -14,6 +14,8 @@ class TextureVK final : public Texture
     void UpdateRGBA(const void* rgba, uint32_t size);
     const DecodedImage& Pixels() const { return _pixels; }
     bool IsDynamic() const { return _dynamic; }
+    const std::array<float, 3>& WetResponse() const { return _wetResponse; }
+    bool WetRoad() const { return _wetRoad; }
     int AWidth(int level = 0) const override;
     int AHeight(int level = 0) const override;
     int ANMipmaps() const override { return int(_levels.size()); }
@@ -39,6 +41,8 @@ class TextureVK final : public Texture
     void RefreshMetadata();
     const DecodedImage& InterpolationPixels();
     bool _dynamic = false;
+    std::array<float, 3> _wetResponse{};
+    bool _wetRoad = false;
     PacFormat _sourceFormat = PacARGB8888;
     Ref<Texture> _interpolateFirst, _interpolateSecond;
     float _interpolateFactor = 0;

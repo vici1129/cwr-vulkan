@@ -1,4 +1,5 @@
 #include <PoseidonVK/EngineVK.hpp>
+#include <Poseidon/Core/Global.hpp>
 #include <Poseidon/World/Scene/Scene.hpp>
 #include <Poseidon/World/Scene/Camera/Camera.hpp>
 #include <Poseidon/World/Terrain/Landscape.hpp>
@@ -7,6 +8,22 @@
 
 namespace Poseidon
 {
+void EngineVK::UpdateEnvironment()
+{
+    const auto* camera = GScene->GetCamera();
+    const auto* land = GScene->GetLandscape();
+    if (!land || !camera) return;
+    const auto position = camera->Position();
+    const auto& p = camera->ProjectionNormal();
+    const float ground = land->SurfaceY(position.X(), position.Z());
+    const float depth = ground < land->GetSeaLevel() && position.Y() >= ground
+        ? std::max(land->GetSeaLevel() - position.Y(), 0.f) : 0.f;
+    _vk.SetEnvironmentFrame(land->GetRainDensity(), Glob.time.toFloat(),
+        {depth, p(2,2), p.Position().Z(), 0,
+         1.f/p(0,0), 1.f/p(1,1), camera->DirectionAside().Y(), camera->DirectionUp().Y(),
+         camera->Direction().Y(), _fogColor.R(), _fogColor.G(), _fogColor.B()});
+}
+
 void EngineVK::UpdateAtmosphere()
 {
     const auto* camera = GScene->GetCamera();

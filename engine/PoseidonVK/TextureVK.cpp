@@ -1,5 +1,6 @@
 #include <PoseidonVK/TextureVK.hpp>
 #include <PoseidonVK/TextureInterpolationVK.hpp>
+#include <PoseidonVK/WetSurfaceVK.hpp>
 #include <Poseidon/IO/Streams/QBStream.hpp>
 #include <Poseidon/Foundation/Logging/Logging.hpp>
 #include <algorithm>
@@ -180,6 +181,13 @@ Ref<Texture> TextBankVK::Load(RStringB name)
         return nullptr;
     }
     Ref<TextureVK> texture = new TextureVK(key.c_str());
+    texture->_wetResponse = vk::WetSurface(static_cast<const char*>(GetSurface(name)._name));
+    const std::string_view surface = static_cast<const char*>(GetSurface(name)._name);
+    texture->_wetRoad = surface == "silnice*" || surface == "asfalt*" || surface == "cesta*";
+    // Stock mixed grass tiles have no per-pixel material mask.
+    const auto stem = key.substr(key.find_last_of('\\') + 1);
+    if (stem.find("tt") != std::string::npos || stem.find("tn") != std::string::npos ||
+        stem.find("tv") != std::string::npos || stem.find("pl") != std::string::npos) texture->_wetResponse = {};
     _cache.emplace(key, texture);
     return texture.GetRef();
 }

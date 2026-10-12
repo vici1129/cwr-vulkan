@@ -1,5 +1,181 @@
 # Vulkan backend development
 
+## Optional wet surfaces and underwater rendering (2026-10-13)
+
+`triWetSurfaces "on"`, `"off"`, `"status"` and independently
+`triUnderwater "on"`, `"off"`, `"status"`. Both default **Off**, are Vulkan-only,
+need no hardware ray tracing, and have no persistent setting. GL33 returns
+unsupported. This milestone starts from public main `2596bcb` in an isolated
+worktree; the original checkout's private DLSS/NGX work is not included.
+
+### Wet surface selection and lighting
+
+Texture loading caches a small response from the existing `CfgSurfaces.files`
+identity, using the engine's own surface lookup. Asphalt/road/runway/concrete,
+dirt tracks/field soil/village ground, rock and sand receive different bounded
+responses. Physical simulation roughness is **not** reinterpreted as optical
+roughness. Grass, foliage, cloth, water, unknown materials and known mixed grass
+ground tiles are excluded. Stock mixed tiles encode several constituents in one texture;
+without a material mask, applying a sheen to the whole tile would wet painted
+grass. No replacement textures, normal maps or masks are introduced.
+
+Stock road textures have blended edges. These explicitly classified roads retain
+their original alpha/depth behavior while receiving the same response as their
+interior; other transparent surfaces are excluded. General building and vehicle
+atlases lack reliable exposed-material identification and remain unchanged.
+Upward-facing eligibility fades on steep surfaces, and submerged terrain is
+excluded using the current animated sea height. This is not a rain-occlusion
+simulation: no shelter tracing, puddles or retained water storage is added.
+
+`Landscape::GetRainDensity()` feeds a two-simulation-second exponential response;
+`Glob.time` controls its advance. Pause freezes it, time acceleration scales it,
+and a clock rewind resets it. Weather continues to evolve in the original engine;
+status reports the smoothed rain actually used, not merely a requested script
+rain value. Off bypasses wet shading immediately. Toggle changes reset existing
+temporal history, without changing AA selection or allocating new render targets.
+
+One `vec4` extends the existing native/software shape lighting uniform. Maximum
+diffuse darkening is 10-16% in linear light, with original texture detail and hue
+retained. A small broad sunlight lobe follows geometric normal, view direction
+and existing direct sunlight, with a bounded grazing response. Wet diffuse and
+sunlight separation share the same scale, so eligible opaque receivers preserve
+CSM/RT/cloud composition. Road edges retain the existing CSM path and their new
+sheen also follows cloud coverage. Night-eye response and world fog remain after
+surface shading. Local lights retain their existing lit diffuse response; this
+milestone does not invent local specular data missing from software-lit terrain.
+Wetness affects raster receivers; the existing simplified RT water hit-material
+shading is unchanged, not a second wet-material implementation.
+
+### Underwater optical path
+
+The renderer samples `Landscape::GetSeaLevel()` (including tide and stock wave
+animation), actual camera height and terrain height. The camera must be between
+the seabed and sea plane; inland/underground camera positions are excluded.
+Nothing changes gameplay fog ranges, AI, movement, physics or camera constraints.
+
+The existing final world/AA composite reconstructs distance from world depth.
+Upward rays stop their water path at the actual sea plane. RGB transmittance is
+`exp(-distance * [0.14, 0.065, 0.045])`, preferentially absorbing red. In-scattering
+uses the existing weather/time/eye-adapted fog color, with restrained channel
+weights and decreasing energy at depth; there is no emissive nighttime floor.
+This happens in linear HDR before existing tone mapping, after existing world
+fog, water optics and AA reconstruction. HUD, menus, weapons and cockpit overlays
+follow the world boundary and are excluded. No extra pass, image, descriptor,
+history buffer or post-processing framework is added.
+
+A smooth 0-0.25 m **submerged** transition prevents a tint discontinuity at the
+surface; at or above the plane the shader is an exact no-op. Only the explicitly
+identified stock fullscreen rain texture fades over that same interval. Water
+rain ripples are independent. Existing above-water refraction, RT/sky reflections,
+foam and wave geometry retain their original paths. Upward optical attenuation
+improves the view through the surface, but stock one-sided/missing water geometry
+is not replaced: no new underside geometry, total-internal-reflection model,
+caustics or offscreen reconstruction is claimed. Transparent world effects share
+the existing opaque depth, as in other depth-based world effects.
+
+### Verification and performance
+
+Diagnostic cameras/weather use real stock
+`01TakeTheCar.ABEL` and `05HeavyMetal.Eden`, copied profiles and the existing
+local harness. These are assisted gameplay rendering checks, not mission wins
+or Steam launch qualification. Stock assets and missions remain unchanged.
+
+Both islands were exercised through dry, light/heavy rain, sunset, night and fog,
+with actual simulated rain recorded. Roads, pure rock/sand/soil and excluded
+grass/foliage/building textures were inspected. Underwater checks cover shallow
+and approximately 13 m depths, horizontal/down/up views, repeated crossings,
+simulation speeds 0/1/4 and camera movement. The original seafloor, distant
+above-water silhouettes and one-sided water remain visible where the stock
+geometry allows them; this is optical attenuation, not a geometry replacement.
+
+AA Off, TAA, FSR Quality and MSAA4 were checked on both islands. CSM, RT sunlight,
+atmosphere, cloud shadows/clouds, RT/sky water reflections, refraction, rain
+ripples and shoreline foam were exercised with the new controls independent and
+together. Settled AA Off/MSAA4 frozen Off/On/Off comparisons restore exactly. Temporal
+AA has its normal history/jitter differences and is not claimed pixel-identical.
+Above-water underwater-toggle pairs are identical. Four successive frozen-time
+Malden captures are identical; the actual pause menu also froze simulation time
+and was unchanged by both toggles. No HUD tint or simulation/AI change is added.
+Everon also exercised a driven Jeep at night with two active local shadow maps:
+the headlight-lit road retained its original diffuse lighting, the vehicle and
+stock beam meshes were excluded, and the wet toggle restored exactly.
+
+Matched, unretouched 1920x1080 client captures (soil: 2560x1440), including the
+original window border, are below. Each pair holds camera, simulation time,
+weather, AA and other effects fixed; the combined pair changes only the two new controls.
+
+| View | Off | On |
+| --- | --- | --- |
+| Malden rainy road; grass/buildings excluded | [Original](evidence/wet-underwater/malden-road-off.png) | [Wet](evidence/wet-underwater/malden-road-on.png) |
+| Malden stock rock; original colors/detail retained | [Original](evidence/wet-underwater/malden-rock-off.png) | [Wet](evidence/wet-underwater/malden-rock-on.png) |
+| Malden village ground and dirt track | [Original](evidence/wet-underwater/malden-soil-off.png) | [Wet](evidence/wet-underwater/malden-soil-on.png) |
+| Everon rainy road and foliage | [Original](evidence/wet-underwater/everon-road-off.png) | [Wet](evidence/wet-underwater/everon-road-on.png) |
+| Malden submerged, clear daylight | [Original](evidence/wet-underwater/malden-underwater-off.png) | [Underwater](evidence/wet-underwater/malden-underwater-on.png) |
+| Everon submerged, clear daylight | [Original](evidence/wet-underwater/everon-underwater-off.png) | [Underwater](evidence/wet-underwater/everon-underwater-on.png) |
+| Malden rainy coast, both controls | [Both off](evidence/wet-underwater/malden-combined-off.png) | [Both on](evidence/wet-underwater/malden-combined-on.png) |
+
+Focused Vulkan and GL33 builds pass. Current focused shape/AA/shadow suites pass
+1,545 assertions / 69 cases with Vulkan and 1,505 / 68 with GL33; Vulkan policy
+guards pass 488 checks, including independent controls, pause/rewind rain,
+rain-film crossing and default/off behavior without a ray-capable device.
+The policy suite deliberately injects a teardown failure; its mock error is not
+a live Vulkan validation finding.
+
+Final live validation (including synchronization validation) closed normally with
+zero errors and zero warnings: Malden 56,027 submitted/presented frames, Everon
+89,563, and a no-ray-capability Malden run 7,378. The latter exercised both
+controls and all four requested AA modes without enabling ray-query capability.
+A separate Vulkan-disabled GL33 build returned unsupported for both controls;
+its combined Off/On/Off images were pixel-identical and it exited normally.
+
+The final Vulkan executable SHA-256 is
+`528af0b8ae4c8da5c74b31a5aa4fb057466a8a4a6c47e0ad520d0899102efbc1`.
+Local raw action journals, statuses, screenshots, profile intervals and shutdown
+receipts are in `build/shadow-live/environment-{malden-verified,everon-verified,no-rt,gl33}`.
+Focused build/test logs are in the isolated worktree's `build/` directory.
+An initial capture-focus failure was retried after re-verifying the exact game
+window; the failed batch is not counted. A late Malden vehicle relocation exited
+the stock mission normally, so the successful headlight check used Everon instead.
+
+### Whole-frame cost
+
+RTX 4060 Ti, NVIDIA 617.14, Core i7-12700F; RelWithDebInfo, validation off,
+AA Off / 100% native scale, SDR, no ray capability or other optional effects.
+Each fixed real-Malden view uses Off/On/On/Off blocks: 3 s settling, then 8 s
+sampling per block. The table gives medians of eight existing-profiler samples
+per state. GPU values are **whole-frame timestamps**, not an isolated shader
+estimate; CPU frame values are wall-frame intervals, with command recording
+reported separately. Simulation is frozen to isolate rendering. VSync was
+requested off, but wall frames remained paced near 6.17-6.19 ms; these CPU
+frame numbers cannot establish an uncapped FPS gain.
+
+| View / resolution | GPU Off -> On (ms) | GPU delta (ms) | CPU frame Off -> On (ms) | CPU command Off -> On (ms) | Raw samples |
+| --- | --- | --- | --- | --- | --- |
+| Rainy road / 1080p | 1.928 -> 1.927 | -0.001 | 6.172 -> 6.172 | 0.573 -> 0.578 | [JSON](evidence/wet-underwater/1080-wet.json) |
+| Rainy road / 1440p | 2.034 -> 2.035 | +0.000 | 6.172 -> 6.172 | 0.729 -> 0.727 | [JSON](evidence/wet-underwater/1440-wet.json) |
+| Clear underwater / 1080p | 1.397 -> 1.253 | -0.144 | 6.175 -> 6.175 | 3.426 -> 3.451 | [JSON](evidence/wet-underwater/1080-underwater.json) |
+| Clear underwater / 1440p | 1.906 -> 1.925 | +0.019 | 6.185 -> 6.188 | 3.416 -> 3.415 | [JSON](evidence/wet-underwater/1440-underwater.json) |
+| Rainy coast, both / 1080p | 1.661 -> 1.743 | +0.081 | 6.172 -> 6.173 | 1.702 -> 1.735 | [JSON](evidence/wet-underwater/1080-combined.json) |
+| Rainy coast, both / 1440p | 2.017 -> 1.917 | -0.100 | 6.173 -> 6.173 | 1.796 -> 1.813 | [JSON](evidence/wet-underwater/1440-combined.json) |
+
+GPU timing noise is significant in the CPU-heavy coastal view: for example,
+1080p underwater Off samples span 0.940-2.005 ms and On 0.711-1.962 ms.
+Negative deltas are **not** a claimed shader speedup. In rain, enabling underwater
+also omits the stock fullscreen rain film, so combined cost is a net comparison,
+not a pure absorption-shader measurement. The measured positive median delta
+peaks at 0.081 ms GPU / 0.033 ms CPU command time; wet-only GPU differences are
+below the sampling resolution. Every sampled interval reports **0.0 Vulkan
+allocations/frame**. The implementation adds no steady-frame allocation path.
+
+Reproduction camera arrays (engine XYZ, then direction XYZ) are
+`[7116,78,6100,0,-0.12,1]` for the road, `[3500,0,3240,1,0,0]` underwater, and
+`[3500,3,3240,1,0.05,0]` combined. Date is 1985-07-05 noon, fog zero. Road/coast
+use requested overcast/rain 1; underwater uses clear/dry weather. After weather
+settling, actual smoothed rain was 0.949/0.810 (road, 1080p/1440p), zero
+(underwater), and 0.956/0.931 (combined). Actual underwater depths were
+3.337/3.260 m and 0.456/0.543 m respectively; stock tide/waves explain the
+differences. Native drawable extents were verified in the runtime logs.
+
 ## Optional shoreline foam (2026-10-12)
 
 `triShoreFoam "on"`, `"off"`, `"status"` selects subtle coastal foam. Default

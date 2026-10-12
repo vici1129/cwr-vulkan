@@ -19,17 +19,10 @@ This is a direction, **not a timetable or a promise**. Priorities may change, an
 - **Water:** textured hardware ray-query reflections and depth-aware coastal refraction/absorption, both independently selectable. Sky/cloud reflections milestone complete: optional directional stock-sky and moving-cloud sampling on water-ray misses.
 - **Rain ripples:** verified optional world-anchored impact rings driven by actual rain and simulation time, sharing the existing water normal with ordinary shading, RT/sky reflections and coastal refraction. Default Off, no RT requirement; Malden/Everon weather, AA, pause and dry-parity checks plus RTX 4060 Ti 1080p/1440p costs are documented. Fine detail fades with distance; stock waves and shoreline geometry remain.
 - **Shoreline foam:** verified optional broken, softly animated patches at shallow terrain coasts, reusing the existing water capture/composition with independent refraction selection. Default Off, no RT requirement; Malden/Everon beach, rock, bay, weather, AA and preservation checks plus RTX 4060 Ti 1080p/1440p costs are documented. Missing depth, grazing views and steep contacts conservatively omit foam; stock geometry remains unchanged.
+- **Wet surfaces:** completed optional rain-driven darkening and restrained sunlight sheen for reliably classified roads and ground, using stock surface identities and simulation time. Default Off, no RT requirement; grass/foliage, known mixed grass tiles and unclassified building/vehicle atlases are excluded. Malden/Everon weather, lighting, AA, restoration and RTX 4060 Ti 1080p/1440p costs are documented.
+- **Underwater rendering:** completed optional depth-dependent absorption/scattering in the existing world composite, driven by actual animated sea level and stock lighting/fog. Default Off, independent of wet surfaces, no RT requirement; UI and above-water views remain unchanged. Malden/Everon depth, crossing, weather, AA and combined-operation checks plus 1080p/1440p costs are documented. Stock one-sided water geometry and transparent-depth limitations remain.
 
 HDR10 surface negotiation and SDR fallback exist, but **physical HDR10 display output is not yet verified**. See the [development notes](docs/vulkan-foundation.md) for the actual coverage, limitations, performance and verification of individual features.
-
-## Later candidates
-
-These are candidates, **not approved implementation commitments**.
-
-| Feature | Intended scope |
-| --- | --- |
-| Targeted weather/water polish | Underwater effects or wet surfaces only where stock assets and gameplay justify them. |
-| Optional presentation features | Depth of field, motion blur, color grading and dynamic resolution only if there is a clear use case. |
 
 ## Final major experiments
 

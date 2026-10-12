@@ -199,6 +199,7 @@ void EngineVK::BeginWorldEffects(bool enabled)
             _vk.FailRTReflections(error.what());
         }
         UpdateAtmosphere();
+        UpdateEnvironment();
         UpdateWeather();
         BeginTemporalWorld();
     }

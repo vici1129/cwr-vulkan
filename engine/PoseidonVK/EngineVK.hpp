@@ -88,7 +88,7 @@ class EngineVK final : public Engine
     }
     RString SetContactShadows(RString mode) override { return _vk.SetContactShadows(static_cast<const char*>(mode)).c_str(); }
     RString SetSoftShadows(RString mode) override { return _vk.SetSoftShadows(static_cast<const char*>(mode)).c_str(); }
-    bool SeparateSunlight() const override { return _vk.SeparateSunlight(); }
+    bool SeparateSunlight() const override { return _vk.SeparateSunlight() || _vk.WetRain() > 0; }
     RString SetLocalShadows(RString mode) override;
     int PrepareLocalShadows() override;
     Light* LocalShadowLight(int slot) const override;
@@ -100,6 +100,10 @@ class EngineVK final : public Engine
     }
     bool _waterSurface = false;
     RString SetRainRipples(RString mode) override;
+    RString SetWetSurfaces(RString mode) override { return _vk.SetWetSurfaces(static_cast<const char*>(mode)).c_str(); }
+    RString SetUnderwater(RString mode) override { return _vk.SetUnderwater(static_cast<const char*>(mode)).c_str(); }
+    void UpdateEnvironment();
+    std::array<float, 4> WetParameters(Texture* texture, int flags) const;
     RString SetShoreFoam(RString mode) override
     {
         return _vk.SetShoreFoam(static_cast<const char*>(mode)).c_str();

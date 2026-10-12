@@ -27,6 +27,19 @@ std::array<float, 4> EngineVK::RainRippleParameters() const
     return {rain, Glob.time.toFloat(), position.X(), position.Z()};
 }
 
+std::array<float, 4> EngineVK::WetParameters(Texture* texture, int flags) const
+{
+    if (!_shadowWorld || _waterSurface || _vk.WetRain() <= 0 || !texture ||
+        (flags & (IsShadow | IsLight | DisableSun | NoDropdown | NoZBuf))) return {};
+    const auto* vkTexture = dynamic_cast<TextureVK*>(texture);
+    if (!vkTexture || (!vkTexture->WetRoad() &&
+        (vkTexture->IsTransparent() || (flags & (NoZWrite | IsAlpha | IsTransparent))))) return {};
+    const auto response = vkTexture->WetResponse();
+    const auto* land = GScene->GetLandscape();
+    return {response[0]*_vk.WetRain(), response[1]*_vk.WetRain(), response[2],
+            land->GetSeaLevel()-GScene->GetCamera()->Position().Y()};
+}
+
 void EngineVK::BeginShadowPass()
 {
     if (_activeShape || _softwareMesh)
@@ -101,6 +114,7 @@ void EngineVK::PrepareTriangleTL(const MipInfo& mip, const render::LegacySpec& s
     }
     _sectionSampler = vk::ShapeSampler(spec);
     _lighting.rtWater = {};
+    _lighting.wetSurface = WetParameters(mip._texture, _shapeFlags | render::MergeLegacy(spec));
     _lighting.rainRipples = _waterSurface ? RainRippleParameters() : std::array<float, 4>{};
     // Landscape water deliberately uses Detail, not the legacy Water shader family.
     // The explicit draw boundary also avoids labelling arbitrary specular materials as water.

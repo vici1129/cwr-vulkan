@@ -8,7 +8,8 @@ layout(set=1,binding=0) uniform sampler2DMS sceneDepth;
 #else
 layout(set=1,binding=0) uniform sampler2D sceneDepth;
 #endif
-layout(push_constant) uniform AA { vec4 metrics; vec4 outputMetrics; vec4 colorControl; } aa;
+layout(push_constant) uniform AA { vec4 metrics; vec4 outputMetrics; vec4 colorControl; vec4 water; vec4 waterView; vec4 waterLight; } aa;
+#include "underwater.glsl"
 layout(location=0) in vec2 texCoord;
 layout(location=0) out vec4 outColor;
 void main() {
@@ -35,6 +36,6 @@ void main() {
     }
     outColor = color / total;
     if (aa.colorControl.z > 0.) outColor.rgb += texture(bloom, texCoord).rgb * aa.colorControl.z;
-    outColor.rgb = toneMap(outColor.rgb, aa.colorControl.x);
+    outColor.rgb = toneMap(underwaterColor(outColor.rgb,depth,texCoord), aa.colorControl.x);
     gl_FragDepth = depth;
 }

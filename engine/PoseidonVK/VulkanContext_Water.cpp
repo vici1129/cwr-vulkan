@@ -5,6 +5,7 @@
 #include <PoseidonVK/Shaders/water_refraction.frag.hpp>
 #include <PoseidonVK/Shaders/water_refraction_ms.frag.hpp>
 #include <stdexcept>
+#include <cmath>
 
 namespace Poseidon::vk
 {
@@ -34,6 +35,34 @@ std::string VulkanContext::SetRainRipples(std::string_view mode, float rain)
         return "INVALID: triRainRipples on, off, status";
     _rainRipplesEnabled = mode == "on";
     return "OK: rain ripples " + std::string(mode);
+}
+
+std::string VulkanContext::SetWetSurfaces(std::string_view mode)
+{
+    if (mode == "status") return std::string("WetSurfaces requested=") + (_wetSurfacesEnabled ? "on" : "off") +
+        " rain=" + std::to_string(_wetRain) + "; classified ground and road edges only; no RT requirement";
+    if (mode != "on" && mode != "off") return "INVALID: triWetSurfaces on, off, status";
+    if (_wetSurfacesEnabled != (mode == "on")) ResetTemporalHistory();
+    _wetSurfacesEnabled = mode == "on";
+    return "OK: wet surfaces " + std::string(mode);
+}
+
+std::string VulkanContext::SetUnderwater(std::string_view mode)
+{
+    if (mode == "status") return std::string("Underwater requested=") + (_underwaterEnabled ? "on" : "off") +
+        " depth=" + std::to_string(_underwater[0]) + "; world composite only; animated sea level; no RT requirement";
+    if (mode != "on" && mode != "off") return "INVALID: triUnderwater on, off, status";
+    _underwaterEnabled = mode == "on";
+    return "OK: underwater " + std::string(mode);
+}
+
+void VulkanContext::SetEnvironmentFrame(float rain, float time, const std::array<float, 12>& underwater)
+{
+    rain = std::isfinite(rain) ? std::clamp(rain, 0.f, 1.f) : 0.f;
+    if (_wetTime < 0 || time < _wetTime) _wetRain = rain;
+    else _wetRain += (rain - _wetRain) * (1.f - std::exp(-std::max(time - _wetTime, 0.f) / 2.f));
+    _wetTime = time;
+    _underwater = underwater;
 }
 
 std::string VulkanContext::SetWaterRefraction(std::string_view mode)

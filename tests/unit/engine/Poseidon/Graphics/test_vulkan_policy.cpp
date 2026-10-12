@@ -489,6 +489,36 @@ int main()
         Check(context.SetSoftRTShadows("off").starts_with("OK:") && !context.SoftRTShadowsEnabled(),
               "soft RT off is safe without a device");
         Check(!context.RTReflectionsEnabled(), "RT water defaults off independently of AO and sunlight");
+        Check(context.SetWetSurfaces("status").find("requested=off") != std::string::npos &&
+              context.SetUnderwater("status").find("requested=off") != std::string::npos,
+              "environment effects default off");
+        context.SetEnvironmentFrame(0, 10, {});
+        context.SetEnvironmentFrame(1, 10, {});
+        context.SetWetSurfaces("on");
+        Check(context.WetRain() == 0, "wet weather smoothing freezes with simulation clock");
+        context.SetEnvironmentFrame(1, 12, {});
+        Check(context.WetRain() > .6f && context.WetRain() < .7f, "rain changes smoothly in simulation time");
+        const float wet = context.WetRain();
+        context.SetUnderwater("on");
+        std::array<float, 12> submerged{};
+        submerged[0] = .125f;
+        context.SetEnvironmentFrame(1, 12, submerged);
+        Check(context.UnderwaterRainVisibility() == .5f, "rain film fades continuously within the submerged crossing");
+        submerged[0] = .25f;
+        context.SetEnvironmentFrame(1, 12, submerged);
+        Check(context.UnderwaterRainVisibility() == 0, "submerged camera excludes stock screen rain");
+        Check(context.SetWetSurfaces("invalid").starts_with("INVALID:") && context.WetRain() == wet &&
+              context.SetUnderwater("invalid").starts_with("INVALID:"), "invalid environment commands preserve state");
+        context.SetWetSurfaces("off");
+        Check(context.WetRain() == 0 && context.SetUnderwater("status").find("requested=on") != std::string::npos,
+              "wet off restores immediately without changing underwater");
+        context.SetUnderwater("off");
+        Check(context.UnderwaterRainVisibility() == 1, "underwater off restores original rain film");
+        context.SetEnvironmentFrame(0, 0, {});
+        context.SetWetSurfaces("on");
+        Check(context.WetRain() == 0 && !context.RaySceneEnabled() && !context.WaterSurfaceEnabled(),
+              "simulation rewind resets weather and environmental effects need no ray or water resources");
+        context.SetWetSurfaces("off");
         Check(!context.RainRipplesEnabled() &&
                   context.SetRainRipples("status", 1).find("requested=off active=off rain=1.000000") != std::string::npos,
               "rain ripples default off even in heavy rain");

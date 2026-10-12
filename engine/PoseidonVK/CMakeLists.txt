@@ -77,7 +77,7 @@ foreach(kind clouds clouds_composite clouds_composite_temporal fxaa smaa_edge sm
         COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/generated/PoseidonVK/Shaders"
         COMMAND "${Vulkan_GLSLANG_VALIDATOR_EXECUTABLE}" -V --target-env vulkan1.0 ${defines}
             --vn "Cwr${kind}_frag" -o "${header}" "${CMAKE_CURRENT_SOURCE_DIR}/Shaders/${source}.frag"
-        DEPENDS "Shaders/${source}.frag" Shaders/smaa_common.glsl
+        DEPENDS "Shaders/${source}.frag" Shaders/smaa_common.glsl Shaders/underwater.glsl
             Shaders/shape_uniforms.glsl Shaders/shadow_sample.glsl Shaders/soft_shadow_math.glsl Shaders/rain_ripples.glsl Shaders/color_space.glsl Shaders/weather.glsl Shaders/cloud_volume.glsl
             ThirdParty/SMAA/SMAA.hlsl ThirdParty/FXAA/Fxaa3_11.h VERBATIM)
     list(APPEND VK_SHADER_HEADERS "${header}")

@@ -1,7 +1,8 @@
 #version 450
 #extension GL_GOOGLE_include_directive : require
 #include "color_space.glsl"
-layout(push_constant) uniform AA { vec4 metrics; vec4 outputMetrics; vec4 colorControl; } aa;
+layout(push_constant) uniform AA { vec4 metrics; vec4 outputMetrics; vec4 colorControl; vec4 water; vec4 waterView; vec4 waterLight; } aa;
+#include "underwater.glsl"
 #define FXAA_PC 1
 #define FXAA_GLSL_130 1
 #define FXAA_QUALITY__PRESET 29
@@ -19,6 +20,6 @@ void main() {
         1.0/vec2(textureSize(source,0)), vec4(0), vec4(0), vec4(0),
         0.5, 0.125, 0.0312, 0.0, 0.0, 0.0, vec4(0));
     outColor.a = 1.0;
-    if (aa.colorControl.y > .5) outColor.rgb = toneMap(outColor.rgb, aa.colorControl.x);
     gl_FragDepth = texture(sceneDepth,texCoord).r;
+    if (aa.colorControl.y > .5) outColor.rgb = toneMap(underwaterColor(outColor.rgb,gl_FragDepth,texCoord), aa.colorControl.x);
 }
