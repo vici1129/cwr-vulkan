@@ -13,6 +13,7 @@ layout(location = 5) out vec4 previousClip;
 layout(location = 6) out vec4 directSun;
 layout(location = 7) out vec3 localDirect0;
 layout(location = 8) out vec3 localDirect1;
+layout(location = 9) out vec3 surfaceNormal;
 layout(push_constant) uniform ShapeDraw { mat4 mvp; vec4 color; float alphaCutoff; float reserved; float detailEnabled; float shadow; } draw;
 void main() {
     gl_Position = draw.mvp * vec4(position, 1.0);
@@ -22,6 +23,7 @@ void main() {
     specularColor = vec3(0.0);
     directSun = vec4(0);
     localDirect0 = localDirect1 = vec3(0);
+    surfaceNormal = vec3(0);
     vec3 relativeWorld = (lighting.world * vec4(position, 1.0)).xyz;
     shadowWorld = relativeWorld;
     float distance = length(relativeWorld);
@@ -36,6 +38,7 @@ void main() {
         return;
     }
     vec3 worldNormal = normalize(lighting.normalMatrix * normal);
+    surfaceNormal = worldNormal;
     float NdotL = max(0.0, dot(worldNormal, -lighting.sunDirection.xyz));
     directSun = vec4((lighting.diffuse.rgb * NdotL + lighting.rtSun.yzw) * lighting.ambient.w, 1);
     vec3 color = lighting.emissive.rgb +

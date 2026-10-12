@@ -3,6 +3,7 @@
 #include "shape_uniforms.glsl"
 #include "shadow_sample.glsl"
 #include "color_space.glsl"
+#include "pbr.glsl"
 #include "weather.glsl"
 #include "rain_ripples.glsl"
 layout(location = 0) out vec4 outColor;
@@ -15,6 +16,7 @@ layout(location = 5) in vec4 previousClip;
 layout(location = 6) in vec4 directSun;
 layout(location = 7) in vec3 localDirect0;
 layout(location = 8) in vec3 localDirect1;
+layout(location = 9) in vec3 surfaceNormal;
 layout(set = 3, binding = 6) uniform sampler2DArray localDepth0;
 layout(set = 3, binding = 7) uniform sampler2DArray localDepth1;
 
@@ -79,6 +81,24 @@ void main() {
         }
     }
     vec4 texel = WORLD_TEXTURE(diffuseTexture, texCoord);
+    vec3 base, contactBase;
+    bool captureSun, separate;
+    float csm;
+    if (lighting.pbr.x > 0.0) {
+        int mask=int(lighting.localShadowControl.x);
+        vec2 localShadow=vec2(1);
+        if((mask & 1)!=0) localShadow.x=localVisibility(0,localDepth0);
+        if((mask & 2)!=0) localShadow.y=localVisibility(1,localDepth1);
+        vec3 sun;
+        pbrLighting(texel.rgb,draw.color.rgb,shadowWorld,surfaceNormal,localShadow,base,sun);
+        captureSun=lighting.rtSun.x>.5;
+        // PBR always separates sunlight, including CSM-only and contact-only.
+        separate=true;
+        csm=sunlightVisibility(shadowWorld,1.0);
+        sun*=cloudSunlight(shadowWorld+weather.camera.xyz);
+        outColor=vec4(base+sun*csm,texel.a*draw.color.a);
+        contactBase=base;
+    } else {
     vec3 litColor = vertexColor.rgb;
     int localMask = int(lighting.localShadowControl.x);
     if ((localMask & 1) != 0) litColor -= localDirect0 * (1.0-localVisibility(0,localDepth0));
@@ -115,10 +135,10 @@ void main() {
             (lighting.wetSurface.y*exposure*lobe*(1+fresnel*4));
         outColor.rgb = outColor.rgb*wetDiffuse+wetHighlight;
     }
-    vec3 base = outColor.rgb;
-    bool captureSun = lighting.rtSun.x > .5 && directSun.a > .99 && draw.detailEnabled < 1.5;
-    bool separate = captureSun && lighting.rtSun.x < 1.5;
-    float csm = sunlightVisibility(shadowWorld, separate ? 1.0 : fogVisibility);
+    base = outColor.rgb;
+    captureSun = lighting.rtSun.x > .5 && directSun.a > .99 && draw.detailEnabled < 1.5;
+    separate = captureSun && lighting.rtSun.x < 1.5;
+    csm = sunlightVisibility(shadowWorld, separate ? 1.0 : fogVisibility);
     if (captureSun) {
         // Derive the sunlight-only difference in linear HDR, not by multiplying
         // ambient/emissive/local lighting or already-composited fog.
@@ -137,7 +157,7 @@ void main() {
     }
     // Contact-only capture must not change legacy CSM shading where no ray
     // hits. Preserve its original scene result, including ambient and fog.
-    vec3 contactBase = base*csm;
+    contactBase = base*csm;
     if(lighting.rtWater.x>.5 && lighting.rainRipples.x>0) {
         // Broad, bounded response on the existing lit water (also without RT).
         // Use only the change in normal: no new light, gloss lobe or Fresnel term.
@@ -149,6 +169,7 @@ void main() {
         // colors; the normal response must not relabel ambient as direct sun.
         base *= modulation;
         contactBase *= modulation;
+    }
     }
     // Keep the night-eye response in its calibrated perceptual domain.
     outColor.rgb = nightResponse(outColor.rgb);

@@ -13,9 +13,22 @@
 #include <limits>
 #include <PoseidonVK/LocalShadowVK.hpp>
 #include <PoseidonVK/WetSurfaceVK.hpp>
+#include <PoseidonVK/PBRMaterialVK.hpp>
 #include <Poseidon/Graphics/Core/TLVertex.hpp>
 
 using namespace Poseidon;
+
+TEST_CASE("PBR prototype only selects inspected stock dielectric textures", "[Graphics][vulkan-shape]")
+{
+    REQUIRE(vk::PBRMaterial("data\\skala_piskovec2.pac", 0) == .85f);
+    REQUIRE(vk::PBRMaterial("data\\sloupek_bily_orezly_.pac", 0) == .6f);
+    REQUIRE(vk::PBRMaterial("data\\sloupek_bily_orezly_.pac", 5) == .65f);
+    REQUIRE(vk::PBRMaterial("data\\sloupek_bily_orezly_.pac", 100000) == .5f);
+    REQUIRE(vk::PBRMaterial("data\\sloupek_bily_orezly_.pac", -1) == .6f);
+    for (auto name : {"data\\mutt_kapotag.pac", "data\\sloupek_bily_orezly_.paa", "addon\\sloupek_bily_orezly_.pac",
+                      "data\\redbarel.pac", "data\\beton_universal.pac", ""})
+        REQUIRE(vk::PBRMaterial(name, 5) == 0);
+}
 
 TEST_CASE("Wet response excludes unclassified and vegetated stock surfaces", "[Graphics][vulkan-shape]")
 {
@@ -392,7 +405,10 @@ TEST_CASE("Vulkan native normals use inverse transpose and materials use the eng
     REQUIRE(offsetof(vk::ShapeLighting, previousMVP) == 1104);
     REQUIRE(offsetof(vk::ShapeLighting, temporal) == 1168);
     REQUIRE(offsetof(vk::ShapeLighting, outputColor) == 1200);
-    REQUIRE(sizeof(vk::ShapeLighting) == 1456);
+    REQUIRE(sizeof(vk::ShapeLighting) == 1488);
+    REQUIRE(offsetof(vk::ShapeLighting, pbr) == 1456);
+    REQUIRE(offsetof(vk::ShapeLighting, pbrDiffuse) == 1472);
+    REQUIRE(lighting.pbr == std::array<float, 4>{});
     REQUIRE(offsetof(vk::ShapeLighting, wetSurface) == 1296);
     REQUIRE(lighting.wetSurface == std::array<float, 4>{});
     REQUIRE(offsetof(vk::ShapeLighting, localShadowMatrices) == 1312);

@@ -489,6 +489,16 @@ int main()
         Check(context.SetSoftRTShadows("off").starts_with("OK:") && !context.SoftRTShadowsEnabled(),
               "soft RT off is safe without a device");
         Check(!context.RTReflectionsEnabled(), "RT water defaults off independently of AO and sunlight");
+        Check(!context.PBREnabled() && context.SetPBR("status").find("requested=off") != std::string::npos,
+              "PBR prototype defaults off");
+        Check(context.SetPBR("on").starts_with("OK:") && context.PBREnabled() && !context.RaySceneEnabled(),
+              "PBR needs no ray capable device");
+        Check(context.SetPBR("status").find("stock-dielectric-v1") != std::string::npos &&
+              context.SetPBR("status").find("software/other materials legacy") != std::string::npos,
+              "PBR status identifies the prototype and coverage");
+        Check(context.SetPBR("invalid").starts_with("INVALID:") && context.PBREnabled(),
+              "invalid PBR control preserves mode");
+        Check(context.SetPBR("off").starts_with("OK:") && !context.PBREnabled(), "PBR off restores legacy selection");
         Check(context.SetWetSurfaces("status").find("requested=off") != std::string::npos &&
               context.SetUnderwater("status").find("requested=off") != std::string::npos,
               "environment effects default off");

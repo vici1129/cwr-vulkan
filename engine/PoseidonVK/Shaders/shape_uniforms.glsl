@@ -30,4 +30,6 @@ layout(set = 2, binding = 0, std140) uniform ShapeLighting {
     vec4 wetSurface;
     mat4 localShadowVP[2];
     vec4 localShadowControl;
+    vec4 pbr;
+    vec4 pbrDiffuse;
 } lighting;

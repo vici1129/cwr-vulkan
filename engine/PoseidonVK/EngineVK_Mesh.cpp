@@ -2,6 +2,7 @@
 #include <PoseidonVK/VertexBufferVK.hpp>
 #include <PoseidonVK/ShapeTransformVK.hpp>
 #include <PoseidonVK/ShapeLightingVK.hpp>
+#include <PoseidonVK/PBRMaterialVK.hpp>
 #include <Poseidon/Core/Global.hpp>
 #include <Poseidon/World/Scene/Scene.hpp>
 #include <Poseidon/World/Scene/Camera/Camera.hpp>
@@ -157,6 +158,18 @@ void EngineVK::PrepareTriangleTL(const MipInfo& mip, const render::LegacySpec& s
     _sectionAlphaCutoff = state.cutoff;
     _sectionDepthTest = state.depthTest;
     _sectionDepthWrite = state.depthWrite;
+    _lighting.pbr = {};
+    // Only the native opaque world path has the original surface normals and
+    // separate light/material inputs. Never relabel CPU-lit or blended geometry.
+    if (_vk.PBREnabled() && _shadowWorld && !_waterSurface && !_sectionBlend &&
+        _sectionDepthTest && _sectionDepthWrite && _secondaryMode == 0 &&
+        _lighting.ambient[3] > 0 &&
+        // Legacy vertex lighting modes can explicitly suppress sunlight (e.g.
+        // MSInShadow interior proxies). Keep those modes entirely legacy.
+        _lighting.pbrDiffuse[0] >= .99f && _lighting.pbrDiffuse[1] >= .99f && _lighting.pbrDiffuse[2] >= .99f &&
+        !((_shapeFlags | render::MergeLegacy(spec)) & (IsShadow | IsLight | DisableSun | NoDropdown | NoZBuf)))
+        if (const auto* texture = dynamic_cast<TextureVK*>(mip._texture); texture && !texture->IsTransparent())
+            _lighting.pbr = {vk::PBRMaterial(texture->MaterialKey(), int(_lighting.specular[3])), .04f, 0, 0};
     _lighting.shadowReceiver[0] = _shadowWorld && _shadowTuning.enabled && _sunEnabled &&
         _lighting.ambient[3] > 0 && !(_shapeFlags & (NoZBuf | IsShadow | DisableSun | NoDropdown)) &&
         !(render::MergeLegacy(spec) & (NoZBuf | IsShadow | DisableSun | NoDropdown)) ? 1.f : 0.f;
@@ -240,6 +253,7 @@ void EngineVK::DrawSectionTL(const Shape& shape, int begin, int end)
         color[i] *= _materialColor[i];
     if (!_vk.FrameOpen())
         return; // Minimized drawable: no acquired image, but unsupported states above still fail.
+    if (_lighting.pbr[0] > 0) _vk.RecordPBRDraw(_lighting.pbr[0]);
     _vk.DrawMesh(buffer->Buffers(), range.begin, range.end - range.begin, sizeof(VertexIndex) == 2, _shapeMVP, color,
                  _sectionTexture, _sectionSampler, _sectionAlphaCutoff, _sectionBlend, false, _sectionDepthTest, nullptr,
                  _sectionDetail, _secondaryMode, _bumpLight, 0, 0, _sectionDepthWrite, &_lighting, _sectionShadow);

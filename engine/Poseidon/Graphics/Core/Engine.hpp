@@ -410,6 +410,7 @@ class Engine : public IGraphicsEngine
     virtual RString SetWaterRefraction(RString) { return "UNSUPPORTED: water refraction requires Vulkan"; }
     virtual RString SetRainRipples(RString) { return "UNSUPPORTED: rain ripples require Vulkan"; }
     virtual RString SetShoreFoam(RString) { return "UNSUPPORTED: shoreline foam requires Vulkan"; }
+    virtual RString SetPBR(RString) { return "UNSUPPORTED: PBR prototype requires Vulkan"; }
     virtual RString SetWetSurfaces(RString) { return "UNSUPPORTED: wet surfaces require Vulkan"; }
     virtual RString SetUnderwater(RString) { return "UNSUPPORTED: underwater rendering requires Vulkan"; }
     virtual RString SetCloudShadows(RString) { return "UNSUPPORTED: cloud shadows require Vulkan"; }

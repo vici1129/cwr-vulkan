@@ -1,5 +1,236 @@
 # Vulkan backend development
 
+## PBR feasibility prototype: two stock dielectric surfaces (2026-10-13)
+
+`triPBR "on"`, `"off"`, `"status"`. Default **Off**, Vulkan only, no hardware
+RT requirement, no persistent setting. Status identifies `stock-dielectric-v1`,
+the two exact texture identities and native draw counts since the last toggle.
+Invalid arguments leave the setting unchanged; GL33 reports unsupported.
+This work starts at public main `123d5e8` in an isolated worktree. Private
+DLSS/NGX changes in the original checkout are neither modified nor published.
+
+The **limited feasibility prototype is completed**, not the wider PBR
+roadmap. No new assets, material database, renderer framework, environment maps,
+reflection probes, dependencies or ray-tracing passes are introduced.
+
+### Asset evidence and deliberately limited selection
+
+Stock Data/Data3D PBOs, material configuration and island object tables were
+inspected read-only using the existing PoseidonTools. Original texture pixels,
+UVs, geometry and normals are reused without modification.
+
+| Exact stock texture | Selected response | Inference and boundary |
+| --- | --- | --- |
+| `data\skala_piskovec2.pac` | Matte rock, perceptual roughness 0.85 | Opaque mottled rock texture on stock `kamen*_zula` and `skala_new` geometry (also reused on barrier masonry). No optical roughness was supplied by the asset; this is an intentionally broad dielectric lobe. |
+| `data\sloupek_bily_orezly_.pac` | Worn painted signpost, default roughness 0.60 | Dedicated opaque post surface in `znacka_*` road signs, not the sign-face atlas. Paint/oxidation is treated conservatively as dielectric, not as exposed metal. |
+
+Both use neutral normal-incidence reflectance **F0 = 0.04**, metallic = 0.
+There is no defensible stock metallic mask for mixed vehicle/building atlases;
+none is invented. No optional metallic example was selected. The exact-name
+allowlist does not match replacement extensions or similarly named addon paths.
+
+Existing positive specular power is only a lobe-width hint for the painted
+surface: `clamp(pow(2/(power+2), 1/4), 0.50, 0.65)`; missing/zero power uses
+0.60. It is **not** power-as-roughness, nor a calibrated conversion between
+legacy and GGX highlights. The stock tested draws have zero legacy power, so
+their response uses the defaults. Rock remains 0.85 independently of power.
+Existing specular color is not interpreted as metallic reflectance.
+
+Only opaque, depth-tested/writing native world Shape sections with original
+normals and ordinary material lighting qualify. Blending, transparent textures,
+water, detail/secondary shader modes, overlays, shadow geometry, disabled-sun
+and authored suppressed-light materials remain legacy. A post can inherit a
+cutout flag from its sign object while its own texture is fully opaque; the
+opaque post qualifies, the separate cutout sign face does not. Software-lit
+geometry never qualifies. Diagnostic barrel samples used that software path;
+an interior sink proxy had `MSInShadow` with zero diffuse sunlight. Neither was
+silently promoted to native lighting or given invented sun highlights.
+
+### Lighting integration
+
+`ShapeLightingVK.hpp` retains TLMaterial/light preparation and the existing
+inverse-transpose normal transform. Two vec4s extend its std140 payload to
+1488 bytes: selected roughness/F0 and original material diffuse for eligibility.
+The native vertex shader passes the transformed normal for interpolation and
+fragment renormalization. The software vertex shader supplies a zero normal
+and always uses the original fragment branch.
+
+The fragment BRDF is isotropic GGX, exact separable Smith masking-shadowing,
+Schlick Fresnel, and Lambert diffuse multiplied by `(1-F)`. Texture sampling is
+already sRGB-decoded; lighting coefficients are converted with the existing
+HDR-aware legacy-to-linear conversion. All BRDF evaluation/composition is in
+linear HDR. The legacy light scale represents a Lambert response, not measured
+irradiance, so incident direct light is multiplied by pi. TLMaterial's ordinary
+over-white object-brightness gain (1.6 in these draws) remains an incident-light
+multiplier, **not** an albedo clamped to white. No exposure or color-grade change
+is used to make the comparison look better.
+
+Selected fragments replace, rather than add to, legacy vertex sunlight and
+specular. Ambient is retained with a conservative `(1-F0)` diffuse allocation;
+emissive is retained unchanged. Forced diffuse is removed from ambient and
+included with shadowed sunlight. Local lights use their original positions,
+colors, range cutoff, inverse-square-clamped attenuation, cone and night scale,
+with per-fragment BRDF response and the existing selected local shadow maps.
+No fake ambient specular or environment reflection is added.
+
+Sun diffuse and specular share CSM and cloud visibility. The existing sunlight
+MRT carries their combined contribution to RT/contact/soft-shadow composition,
+which retains the existing `min(CSM, RT)` rule. Ambient/emissive/local light are
+not relabeled as sun. Night-eye response, world fog/atmospheric fog, temporal
+motion outputs and world tone mapping follow surface shading as before.
+Selected rock/post textures have no classified wet-ground response; wetness on
+surrounding terrain retains its original path. This prototype does not invent
+a second wet-clearcoat lobe or optical roughness from gameplay surface friction.
+
+Off selects the original legacy calculations. Toggle changes only reset existing
+temporal history; no new image, pass, descriptor or frame allocation is needed.
+Raster PBR is not implemented again in simplified RT reflection-hit shading.
+
+### Verification, evidence and limits
+
+Assisted real-game rendering checks use stock `01TakeTheCar.ABEL` (Malden) and
+`05HeavyMetal.Eden` (Everon), copied profiles, diagnostic camera/weather controls
+and exact-window captures. These are direct developer launches, not a Steam
+launch qualification or mission-completion test. Game audio was disabled.
+Raw camera coordinates use engine X/Y-up/Z and direction XYZ:
+
+| Surface | Existing island object | Diagnostic view |
+| --- | --- | --- |
+| Malden rock | 83921, `kamen3_zula` near 7219.9 / 166.3 / 7705.7 | `[7215,168.8,7708,1,-.35,-.6]` |
+| Malden post | 37429, `znacka_prednost` | `[7264.1,169.3,7943.5,-1,-.15,-.2]` |
+| Everon rock cluster | 31998 and neighboring `skala_new` instances | `[9220,199,1065,1,-.2,-.4]` |
+| Everon post | 23553, `znacka_prednost` | `[7613,134,4531,-.5,-.2,-1]` |
+
+Both islands/surfaces were compared in midday sunlight, overcast/rain, sunset,
+sunrise, midnight and fog, with additional oblique/opposite Malden views.
+Weather was advanced before freezing each comparison; requested rain is not
+misreported as instantaneous actual rain. Populated CSM and CSM+RT comparisons,
+cloud shadows/volumetric clouds, atmosphere and wet ground were exercised.
+The first Malden CSM setup had no casters because object shadows were disabled;
+it was repeated with `triEnableShadows` as well as `triEnableShadowMaps`.
+Everon's subsequent CSM recorded about 13,017 caster vertices/frame.
+
+Stock Jeep headlights illuminated the Malden rock and Everon post; both selected
+local shadow maps were active. These temporary Jeep instances supplied ordinary
+engine lights, not new light models or authored assets. AA Off, TAA, FSR Quality
+and MSAA4 ran with PBR; Everon's AA sweep also included the combined shadow/
+weather effects. Existing HDR negotiation reported linear RGBA16F composition,
+exposure 1 and the unchanged SDR fallback: **physical HDR10 was unavailable**.
+
+Matched Legacy/PBR examples below are original PNG window captures, not crops,
+retouched images, generated comparisons or exposure-adjusted marketing shots.
+Full local matrices include Off -> On -> Off returns. All settled AA-Off/MSAA4
+pairs restored identically; TAA/FSR have jitter/history differences and are
+qualitative comparisons, not pixel-equality or exhaustive ghosting certification.
+
+| Example | Legacy | PBR |
+| --- | --- | --- |
+| Malden matte rock, sun | [PNG](evidence/pbr/malden-rock-dry-off.png) | [PNG](evidence/pbr/malden-rock-dry-on.png) |
+| Malden painted post, sunrise with weather effects | [PNG](evidence/pbr/malden-post-sunrise-off.png) | [PNG](evidence/pbr/malden-post-sunrise-on.png) |
+| Malden rock, rain/wet ground/cloud/RT | [PNG](evidence/pbr/malden-rock-wet-off.png) | [PNG](evidence/pbr/malden-rock-wet-on.png) |
+| Everon transformed stock rocks, sun | [PNG](evidence/pbr/everon-rock-sun-off.png) | [PNG](evidence/pbr/everon-rock-sun-on.png) |
+| Everon post; sign face excluded | [PNG](evidence/pbr/everon-post-sun-off.png) | [PNG](evidence/pbr/everon-post-sun-on.png) |
+| Everon rock self/neighbor shadows, CSM+RT | [PNG](evidence/pbr/everon-rock-csm-rt-off.png) | [PNG](evidence/pbr/everon-rock-csm-rt-on.png) |
+| Everon post, shadowed headlights at midnight | [PNG](evidence/pbr/everon-post-headlights-off.png) | [PNG](evidence/pbr/everon-post-headlights-on.png) |
+| Malden rock, headlight cone and local shadows, no RT capabilities | [PNG](evidence/pbr/malden-rock-headlights-off.png) | [PNG](evidence/pbr/malden-rock-headlights-on.png) |
+
+The headlight rock comparison is particularly useful: per-fragment evaluation
+resolves the light cone across the original large triangles instead of smearing
+it through vertex lighting. It does not add finer geometry or texture normals.
+
+Both Vulkan and GL33 RelWithDebInfo builds pass. Focused `[vulkan-shape]`,
+`[vulkan-aa]`, `[ShadowMath]` tests pass: Vulkan **1,559 assertions / 70 cases**,
+GL33 **1,519 / 69**; driver-free Vulkan policy/lifetime tests **493 checks**.
+These cover selection/defaults, controls, uniform ABI and existing transformed
+inverse-transpose normals, including nonuniform scale. The policy suite's
+intentional `TEST-teardown-only` validation error is an injected assertion fixture,
+not a live renderer error. All six shape fragment variants and both vertex
+shaders compile and pass `spirv-val --target-env vulkan1.0`.
+
+Final implementation executable SHA-256:
+`EB8551B4EB486628B68A98D7D2B6A3EA23CBFB940321D901F338B490ED7D9343`.
+Malden's validation run presented 79,103 frames with zero errors/warnings.
+Everon's matrix presented 47,968 with zero errors/warnings; its later cleanup
+attempt used unsupported `moveOut` script syntax, causing test-mode exit 2.
+That helper error is not counted as a successful gameplay-exit test; a fresh
+supported-command no-RT smoke run presented another **8,730 frames**, exited
+normally and reported zero validation errors/warnings. Physical forward input
+moved the soldiers about **4.9 m on each island** with PBR enabled; diagnostic
+cameras are distinct from those input checks. GL33 launched successfully and
+returned unsupported for PBR; Off/On/Off images were all identical (zero changed
+pixels). Ray capabilities stayed disabled during the no-RT checks, including
+all four requested AA modes. Local journals, raw captures and profiler
+logs are under `build/shadow-live/pbr-*` in the original checkout. Representative
+[Malden](evidence/pbr/malden-pairs.jsonl) and
+[Everon](evidence/pbr/everon-pairs.jsonl) pixel statistics are retained here.
+
+Disabled-PBR pixels also match the clean pre-prototype `123d5e8` executable
+(SHA-256 `528AF0B8AE4C8DA5C74B31A5AA4FB057466A8A4A6C47E0AD520D0899102EFBC1`)
+exactly in the tested rock ROI `(600,350)-(1350,850)` and post ROI
+`(832,350)-(875,800)` of the raw 1922x1112 window captures. Full separate-launch
+images have subtitle/HUD and simulation-phase differences; they are not claimed
+pixel-identical. Same-session settled off/on/off frames supply full-frame parity.
+The first Malden `post` entry predates subtitle settling and is excluded from
+that claim; subsequent named surface/weather pairs are the acceptance evidence.
+
+### RTX 4060 Ti cost
+
+Windows, RTX 4060 Ti 8 GB, driver 617.14, Core i7-12700F. Validation and ray-query
+capabilities disabled for timing; AA Off, 100% scale, vsync off, frozen midday
+views above. No builds ran during sampling. Four alternating Off/On/On/Off
+blocks each discard three seconds then sample eight seconds; entries are medians
+of the engine's periodic GPU timestamp and CPU profiler records (milliseconds).
+
+| Scene / extent | GPU Off -> On | Delta | CPU frame Off -> On | CPU command Off -> On | Raw samples |
+| --- | --- | --- | --- | --- | --- |
+| Rock / 1920x1080 | 1.8374 -> 1.8649 | +0.0275 | 6.1720 -> 6.1720 | 1.0590 -> 1.0560 | [JSON](evidence/pbr/1080-rock.json) |
+| Post / 1920x1080 | 1.9335 -> 1.9678 | +0.0343 | 6.1725 -> 6.1725 | 1.7585 -> 1.7380 | [JSON](evidence/pbr/1080-post.json) |
+| Rock / 2560x1440 | 1.9463 -> 1.9758 | +0.0295 | 6.1720 -> 6.1720 | 1.0640 -> 1.0650 | [JSON](evidence/pbr/1440-rock.json) |
+| Post / 2560x1440 | 2.0750 -> 2.0810 | +0.0060 | 6.1725 -> 6.1720 | 1.7435 -> 1.7435 | [JSON](evidence/pbr/1440-post.json) |
+
+These are small-scene estimates, not a universal cost or a claim that negative
+CPU deltas are speedups. GPU clock/driver noise is appreciable at this scale;
+the CPU frame is limited around the existing 162 Hz pacing floor. Command cost
+shows no meaningful increase and allocations/frame remain **0.0**. The close
+rock covers a substantial portion of the frame; cost for wider material coverage
+has not been measured. The 1440p world targets and swapchain were verified at
+2560x1440, but the oversized window exceeds the 1080p desktop: this is render
+workload timing, not physical 1440p display/capture qualification.
+
+### What this establishes, and what it does not
+
+The useful improvement is a restrained, continuous view/light-dependent response
+on the painted post, including headlights, and a broad diffuse-dominant response
+on rock. Original markings, dirt, cracks and color identity remain visible;
+neither sample acquires a metallic appearance or a polished-plastic sheen.
+Direct highlights are attenuated with their direct light, rather than being
+added after shadowing. Existing CSM darkness/sun-factor tuning deliberately
+allows residual direct light; this prototype preserves it, not a new physically
+opaque-shadow calibration. This is deliberately a small change, not a dramatic
+before/after makeover.
+
+The engine's lighting coefficients are not calibrated radiometric quantities.
+Moving NdotL, local falloff and BRDF evaluation into linear space does change
+brightness relative to legacy gamma-domain vertex lighting; the biggest rock
+differences are at low-angle evening light. Neighboring legacy surfaces do not
+magically acquire the same response. Texture-baked shading and low-poly normal
+facets remain, as do the existing CSM/RT bias and geometric shadow artifacts.
+Roughness/F0 are plausible defaults, not measurements. Constant diffuse ambient
+is not directional sky irradiance, and there is no specular environment response:
+the post can still look dull away from direct lights. No new normal detail,
+rust/paint masks, per-pixel material variation or wet coating is inferred.
+
+Broader adoption is worth a **targeted native-material follow-up**, not blanket
+enablement. It would first need reliable per-section material identity and
+documented linear albedo/light intensity conventions, an explicit policy for
+legacy inside/shining/forced-light modes and texture-baked illumination, and
+consistent handling of the remaining CPU-lit geometry. The latter lacks the
+original per-fragment normal/material/direct-light inputs; merely running its
+already-lit color through this BRDF would double-light it. Animated/deformed
+eligible materials, environment illumination and parity with RT hit shading
+would require separate design and validation. None is smuggled into this
+feasibility milestone, and none of the broader PBR roadmap is marked complete.
+
 ## Optional wet surfaces and underwater rendering (2026-10-13)
 
 `triWetSurfaces "on"`, `"off"`, `"status"` and independently

@@ -26,6 +26,7 @@ TextureVK::TextureVK(RStringB name)
     QIFStreamB file;
     file.AutoOpen(name);
     const auto key = TextureKey(name);
+    _materialKey = key;
     if (file.fail() || file.rest() == 0)
         throw std::runtime_error("Vulkan texture: cannot open " + key);
     if (file.rest() >= 2)

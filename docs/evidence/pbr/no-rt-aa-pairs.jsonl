@@ -1,0 +1,4 @@
+{"name": "everon-post-nort-off", "feature": "triPBR", "changed": 14951, "restored": 0, "mean": [0.11340105854962232, 0.10739290981366832, 0.10823370439964365], "bounds": [998, 346, 1604, 1108]}
+{"name": "everon-post-nort-taa", "feature": "triPBR", "changed": 1661254, "restored": 1610331, "mean": [4.999369287088539, 5.419130720397667, 5.301297359614909], "bounds": [1, 31, 1921, 1111]}
+{"name": "everon-post-nort-fsr-quality", "feature": "triPBR", "changed": 201038, "restored": 1056439, "mean": [0.15541037513381595, 0.14971103242276107, 0.14780485705088375], "bounds": [1, 103, 1921, 1111]}
+{"name": "everon-post-nort-msaa4", "feature": "triPBR", "changed": 15640, "restored": 0, "mean": [0.11488379535705463, 0.10853923520912719, 0.10952928604047044], "bounds": [997, 320, 1605, 1109]}

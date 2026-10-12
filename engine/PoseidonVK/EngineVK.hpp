@@ -100,6 +100,7 @@ class EngineVK final : public Engine
     }
     bool _waterSurface = false;
     RString SetRainRipples(RString mode) override;
+    RString SetPBR(RString mode) override { return _vk.SetPBR(static_cast<const char*>(mode)).c_str(); }
     RString SetWetSurfaces(RString mode) override { return _vk.SetWetSurfaces(static_cast<const char*>(mode)).c_str(); }
     RString SetUnderwater(RString mode) override { return _vk.SetUnderwater(static_cast<const char*>(mode)).c_str(); }
     void UpdateEnvironment();

@@ -1,0 +1,23 @@
+{
+  "base_commit": "123d5e8",
+  "base_executable_sha256": "528AF0B8AE4C8DA5C74B31A5AA4FB057466A8A4A6C47E0AD520D0899102EFBC1",
+  "prototype_executable_sha256": "EB8551B4EB486628B68A98D7D2B6A3EA23CBFB940321D901F338B490ED7D9343",
+  "base_run": "build/shadow-live/pbr-legacy-baseline",
+  "prototype_run": "build/shadow-live/pbr-nort-1080",
+  "method": "PIL RGB absolute pixel difference, original unretouched 1922x1112 window PNGs; AA off, PBR off, no RT capabilities, frozen noon cameras",
+  "rock": {
+    "base_image": "baseline-rock-old.png",
+    "prototype_image": "baseline-rock-new.png",
+    "roi_xyxy_exclusive": [600, 350, 1350, 850],
+    "roi_changed_pixels": 0,
+    "full_frame_changed_pixels": 36686
+  },
+  "post": {
+    "base_image": "baseline-post-old.png",
+    "prototype_image": "baseline-post-new.png",
+    "roi_xyxy_exclusive": [832, 350, 875, 800],
+    "roi_changed_pixels": 0,
+    "full_frame_changed_pixels": 43131
+  },
+  "limit": "Separate launches have subtitle/HUD and simulation-phase differences. Only the specified material ROIs are claimed identical to the prior executable. See separate same-session off/on/off full-frame comparisons."
+}

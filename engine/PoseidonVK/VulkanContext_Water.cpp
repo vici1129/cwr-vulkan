@@ -37,6 +37,21 @@ std::string VulkanContext::SetRainRipples(std::string_view mode, float rain)
     return "OK: rain ripples " + std::string(mode);
 }
 
+std::string VulkanContext::SetPBR(std::string_view mode)
+{
+    if (mode == "status") return std::string("PBR prototype=stock-dielectric-v1 requested=") +
+        (_pbrEnabled ? "on" : "off") +
+        "; native opaque Shape only: data/skala_piskovec2.pac (matte rock), "
+        "data/sloupek_bily_orezly_.pac (painted signposts); "
+        "F0=0.04, metallic=0; software/other materials legacy; no RT requirement; "
+        "native draws since toggle stone=" + std::to_string(_pbrDraws[0]) +
+        " paint=" + std::to_string(_pbrDraws[1]);
+    if (mode != "on" && mode != "off") return "INVALID: triPBR on, off, status";
+    if (_pbrEnabled != (mode == "on")) { ResetTemporalHistory(); _pbrDraws = {}; }
+    _pbrEnabled = mode == "on";
+    return "OK: PBR stock-dielectric-v1 " + std::string(mode);
+}
+
 std::string VulkanContext::SetWetSurfaces(std::string_view mode)
 {
     if (mode == "status") return std::string("WetSurfaces requested=") + (_wetSurfacesEnabled ? "on" : "off") +

@@ -31,6 +31,7 @@ inline void ShapeMaterial(ShapeLighting& out, const TLMaterial& material, const 
     out.specular = {specular.R(), specular.G(), specular.B(), float(material.specularPower)};
     const auto direction = sun.Direction();
     out.sunDirection = {direction.X(), direction.Y(), direction.Z(), 0};
+    out.pbrDiffuse = {material.diffuse.R(), material.diffuse.G(), material.diffuse.B(), 0};
 }
 inline void ShapeFog(ShapeLighting& out, float start, float end, ColorVal color, bool enabled)
 {

@@ -18,8 +18,10 @@ layout(location = 5) out vec4 previousClip;
 layout(location = 6) out vec4 directSun;
 layout(location = 7) out vec3 localDirect0;
 layout(location = 8) out vec3 localDirect1;
+layout(location = 9) out vec3 surfaceNormal;
 void main() {
     gl_Position = clipPosition;
+    surfaceNormal = vec3(0); // Software lighting is deliberately outside PBR coverage.
     gl_Position.xy += lighting.temporal.xy * gl_Position.w;
     previousClip = oldClip;
     directSun = sunColor;
