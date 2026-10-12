@@ -489,6 +489,21 @@ int main()
         Check(context.SetSoftRTShadows("off").starts_with("OK:") && !context.SoftRTShadowsEnabled(),
               "soft RT off is safe without a device");
         Check(!context.RTReflectionsEnabled(), "RT water defaults off independently of AO and sunlight");
+        Check(!context.RainRipplesEnabled() &&
+                  context.SetRainRipples("status", 1).find("requested=off active=off rain=1.000000") != std::string::npos,
+              "rain ripples default off even in heavy rain");
+        Check(context.SetRainRipples("on").starts_with("OK:") && context.RainRipplesEnabled(),
+              "rain ripples require no ray device or refraction resources");
+        Check(context.SetRainRipples("status", 0).find("requested=on active=off rain=0.000000") != std::string::npos,
+              "dry weather leaves ripple request dormant");
+        Check(context.SetRainRipples("status", .2f).find("requested=on active=on rain=0.200000") != std::string::npos,
+              "status reports actual light rainfall");
+        Check(context.SetRainRipples("invalid").starts_with("INVALID:") && context.RainRipplesEnabled(),
+              "invalid ripple commands preserve selection");
+        Check(!context.WaterSurfaceEnabled() && !context.RaySceneEnabled(),
+              "ripples never allocate water targets or enable other water effects");
+        Check(context.SetRainRipples("off").starts_with("OK:") && !context.RainRipplesEnabled(),
+              "ripples toggle off independently");
         Check(context.SetWaterRefraction("status").find("requested=off active=off captured=no") != std::string::npos,
               "refraction defaults off and reports capture separately from selection");
         Check(context.SetWaterRefraction("on").starts_with("OK:"), "raster refraction needs no ray capability");

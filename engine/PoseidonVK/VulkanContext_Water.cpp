@@ -24,6 +24,18 @@ struct WaterPush
 static_assert(sizeof(WaterPush) == 96);
 } // namespace
 
+std::string VulkanContext::SetRainRipples(std::string_view mode, float rain)
+{
+    if (mode == "status")
+        return std::string("RainRipples requested=") + (_rainRipplesEnabled ? "on" : "off") +
+               " active=" + (_rainRipplesEnabled && rain > 0 ? "on" : "off") +
+               " rain=" + std::to_string(rain) + "; actual water only, simulation time, no RT requirement";
+    if (mode != "on" && mode != "off")
+        return "INVALID: triRainRipples on, off, status";
+    _rainRipplesEnabled = mode == "on";
+    return "OK: rain ripples " + std::string(mode);
+}
+
 std::string VulkanContext::SetWaterRefraction(std::string_view mode)
 {
     if (mode == "status")

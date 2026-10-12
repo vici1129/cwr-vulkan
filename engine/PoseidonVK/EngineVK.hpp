@@ -99,6 +99,8 @@ class EngineVK final : public Engine
         return _vk.SetRTReflections(static_cast<const char*>(mode)).c_str();
     }
     bool _waterSurface = false;
+    RString SetRainRipples(RString mode) override;
+    std::array<float, 4> RainRippleParameters() const;
     RString SetWaterRefraction(RString mode) override
     {
         return _vk.SetWaterRefraction(static_cast<const char*>(mode)).c_str();

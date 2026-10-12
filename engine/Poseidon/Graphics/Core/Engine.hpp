@@ -408,6 +408,7 @@ class Engine : public IGraphicsEngine
     virtual bool LocalShadowCaster(int, Vector3Par, float) const { return false; }
     virtual RString SetRTReflections(RString) { return "UNSUPPORTED: RT water reflections require Vulkan"; }
     virtual RString SetWaterRefraction(RString) { return "UNSUPPORTED: water refraction requires Vulkan"; }
+    virtual RString SetRainRipples(RString) { return "UNSUPPORTED: rain ripples require Vulkan"; }
     virtual RString SetCloudShadows(RString) { return "UNSUPPORTED: cloud shadows require Vulkan"; }
     virtual RString SetVolumetricClouds(RString) { return "UNSUPPORTED: volumetric clouds require Vulkan"; }
     // Return true only when a replacement was drawn; all other backends retain stock clouds.

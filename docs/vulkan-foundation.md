@@ -1,5 +1,164 @@
 # Vulkan backend development
 
+## Optional rain ripples (2026-10-12)
+
+`triRainRipples "on"`, `"off"`, `"status"` controls rain impacts on actual
+landscape water. Default **Off**, Vulkan only, **no hardware RT requirement**.
+The selection is process-local; there is no menu, config entry or environment
+switch. Status reports `requested`, `active` and current `rain` intensity even
+when disabled. Active means requested with positive actual rainfall; it does
+not mean every visible pixel receives a ripple. Dry weather leaves a requested
+On dormant. Invalid commands preserve the selection; GL33 reports unsupported.
+RT reflections, sky reflections and coastal refraction retain their independent
+controls and existing prerequisites. Enabling ripples enables none of them.
+
+### Water integration
+
+Native `EngineVK_Mesh.cpp` water and software shoreline water pass one additional
+`vec4` through the existing shape lighting uniform: `Landscape::GetRainDensity()`,
+`Glob.time.toFloat()` and the camera's world X/Z. This is the same simulation
+time used by stock water animation, not wall time or a second weather clock.
+The explicit landscape water boundary excludes terrain, models, rain particles
+and other transparent materials. No geometry, original water UV animation,
+passes, targets, textures, particles, simulation objects or dependencies are added.
+The existing bump texture is reused when preparing the water normal.
+
+`rain_ripples.glsl` evaluates a bounded 3x3 neighborhood of 0.8 m cells. Integer
+hashes vary each cell's phase and 1.1-2.4 simulation-second impact interval, and
+each event's position and rainfall threshold. A compact circular slope expands
+from 0.025 to 0.365 m radius over 0.8 simulation seconds, with a smooth onset and
+decaying amplitude. Neighboring impacts can overlap without clipping at cell
+edges; neither the cell centers nor a common frame phase appear as a pattern.
+Rainfall smoothly controls both event occupancy and slope strength. No random
+frame seed or camera-relative noise is used.
+
+The slope perturbs the **existing animated bump/geometric normal**. Ordinary
+water applies a broad response from the change in normal to its existing lit
+color, bounded to +/-22%, before the original night response and fog. It adds
+no emissive light or sharp specular lobe. The same resulting normal is written
+to the existing water buffer for RT reflected rays, sky/cloud reflection
+directions and coastal refraction. Any separately captured direct sunlight
+uses equally modulated full/base colors, preserving ambient separation.
+Fresnel, absorption, reflection/refraction fades, fog, displaced-footprint
+rejection at shores, MSAA edge guards and underwater exclusions are unchanged.
+
+Detail fades from 12 to 55 m and as the largest world-space pixel footprint
+grows from 0.015 to 0.075 m. Derivatives are evaluated before nonuniform exits.
+Underwater or fully faded samples leave the original normal intact. With Off
+or zero rain, the procedural branch and ordinary-water modulation are bypassed;
+dry On also retains the original water preparation/temporal eligibility.
+Ripple-only rendering does not allocate the reflection/refraction water MRT.
+
+### Gameplay and image checks
+
+Built from public main `c679ec3` in an isolated worktree. Direct, muted diagnostic
+launches use copied profiles and stock **Take the Car / Malden** and **Heavy Metal /
+Everon** missions, with live game simulation and developer camera/weather/time
+controls. These are real stock terrain/water/objects, not a synthetic water test
+mesh; camera comparisons are assisted, not claims of mission completion or Steam
+launch acceptance. Private DLSS/NGX edits in the original checkout were untouched.
+
+Both islands cover dry, approximately 0.2 light rain and approximately 1.0 heavy
+rain, day/night, coastal and open-sea views, grazing angles, underwater views,
+normal simulation and 4x accelerated time. AA Off, TAA, FSR Quality and MSAA4
+were checked with the water effects combined. Refraction-only, RT-only, sky
+reflection and ordinary-water combinations were also toggled separately.
+The final no-ray-capability run repeats all four AA modes with standalone ripples.
+Final combined validation additionally exercises CSM/PCSS, RT sunlight,
+atmosphere, active cloud shadows, volumetric fog/clouds and TAA during live and
+accelerated simulation.
+
+Frozen AA-Off comparisons change **176,999 pixels** in Malden heavy rain versus
+**16,008** in light rain; Everon changes **201,110 / 15,240** respectively.
+These are different simulated weather snapshots, not a fitted density ratio.
+All four Off -> On -> Off comparisons restore every pixel. Malden dry weather
+with RT/sky/refraction On and Everon dry ordinary water have **zero changed
+pixels**. Underwater views on both islands and the Malden inland view are also
+identical. The final Everon camera-away/return images are byte-identical, as
+are the two AA-Off frozen captures on each island. The real Malden pause menu
+holds simulation time at 37.989 s and produces identical captures across the
+pause; resume, 1x and 4x simulation advance the water normally. A five-second
+rain transition smoothly reduced reported density from about 0.76 toward zero;
+stock overcast weather subsequently began another small rain increase, which
+the effect followed. Clear weather reports exactly zero and restores parity.
+
+No new coastal seam, reflection boundary, synchronized ring grid or excessive
+ripple sparkle was observed in these bounded checks. Stock rain streaks and
+the large animated water texture remain visible and are not new ripple geometry.
+TAA/FSR screenshots have ordinary jitter/history differences and are qualitative
+checks, not pixel-parity evidence. GL33 starts without a renderer argument and
+rejects On/Off/Status; its scene pixels are unchanged (the weapon HUD's existing
+real-time fade changes a small upper-left rectangle between captures).
+
+Unretouched matched window captures; open at full resolution to inspect the
+small rings in the near water. Each pair changes only ripple selection:
+
+| Scene | Off | On |
+| --- | --- | --- |
+| Malden, heavy rain, ordinary water | [Off](evidence/rain-ripples/malden-heavy-off.png) | [On](evidence/rain-ripples/malden-heavy-on.png) |
+| Malden, light rain, ordinary water | [Off](evidence/rain-ripples/malden-light-off.png) | [On](evidence/rain-ripples/malden-light-on.png) |
+| Malden, dry, all three water effects | [Off](evidence/rain-ripples/malden-dry-off.png) | [On, identical](evidence/rain-ripples/malden-dry-on.png) |
+| Malden, heavy rain, RT/sky/refraction | [Off](evidence/rain-ripples/malden-optics-off.png) | [On](evidence/rain-ripples/malden-optics-on.png) |
+| Everon coast, heavy rain, RT/sky/refraction | [Off](evidence/rain-ripples/everon-optics-off.png) | [On](evidence/rain-ripples/everon-optics-on.png) |
+| Everon open sea, RT/sky/refraction | [Off](evidence/rain-ripples/everon-sea-off.png) | [On](evidence/rain-ripples/everon-sea-on.png) |
+
+### Cost and verification
+
+RTX **4060 Ti**, driver **617.14**, Core **i7-12700F**, RelWithDebInfo, native
+1920x1080 and 2560x1440, AA Off, VSync Off, validation **off for timing**.
+Fixed Malden coast `[3520,5,3240,1,-.5,.2]` in raw engine camera coordinates,
+noon, heavy rain, simulation frozen, CSM and other lighting enhancements Off.
+Each configuration uses Off / On / On / Off, three seconds warm-up and eight
+seconds sampling per trial: eight existing two-second GPU profile intervals
+per mode. Values below are medians of **whole-frame GPU timestamps**, including
+the effect of changed reflection rays where enabled, not isolated ripple-pass
+timings. There is no new pass or profiling infrastructure.
+
+| Resolution / water effects | GPU Off / On (ms) | Added GPU (ms) | CPU frame Off / On (ms) |
+| --- | ---: | ---: | ---: |
+| 1080p, ordinary water | 1.854 / 1.949 | 0.095 | 6.174 / 6.172 |
+| 1080p, RT + sky + refraction | 2.011 / 2.097 | 0.086 | 6.173 / 6.173 |
+| 1440p, ordinary water | 1.964 / 2.064 | 0.100 | 6.172 / 6.176 |
+| 1440p, RT + sky + refraction | 2.224 / 2.361 | 0.137 | 6.173 / 6.173 |
+
+The measured increment is small in these views; clock/scheduling variation and
+water coverage prevent interpreting the table as an isolated shader cost or
+FPS guarantee. CPU pacing dominates these runs; no CPU speedup is claimed.
+Steady-state profile allocation counts remain zero. Near-water coverage, sample
+count, render scale and the evolving impact pattern can change the cost.
+
+Vulkan-enabled and GL33-only builds pass. Focused `[vulkan-shape],[vulkan-aa],
+[ShadowMath]` suites pass **1,529 assertions / 68 cases** with Vulkan and
+**1,489 / 67** without. Uniform-layout checks cover the added weather vector;
+driver-free policy tests pass **473 checks**, including default Off, dry dormant
+state, actual rain reporting, invalid commands, no RT/resource prerequisite
+and independent water controls. The policy suite's deliberate teardown-error
+injection is expected, not a live validation finding.
+
+Live core/synchronization validation shutdown receipts: Malden **47,383**,
+Everon **34,140**, final no-ray-capability run **12,265**, final combined-effects
+run **19,816** submitted/presented frames; every run has **0 errors / 0 warnings**.
+The no-ray run subsequently exited 0 after an assisted player relocation
+triggered the stock mission's off-course ending; that is not a mission win.
+All other listed sessions were closed normally. No game data was edited.
+
+Raw captures, command journals, timing JSON and runtime logs are retained in
+ignored `build/shadow-live/rain-{malden-02,everon-01,perf-1080,perf-1440,
+no-rt-final,gl33-final,combined-final}`. Committed matched images precede the
+final sunlight-separation correction, with RT sunlight/cloud shadows disabled;
+their ripple/optics math is unchanged. The corrected executable was rebuilt,
+retested and used for timing, no-ray and combined-effects validation. SHA-256:
+`A1636C96E6746B8FDCEC10A285AE2855CE85EEE777F69BF7B2948A055E374A63` (Vulkan),
+`59F6CA7A9540449341F94AA8926B10205C3407CA66A93AA6B8434E6AC3018392` (GL33).
+
+Limits: these are inexpensive normal-only impacts, not a fluid simulation or
+particle-to-surface collision system. They fade out at distance and may be
+hard to distinguish against strong stock waves, particularly in light rain or
+at reduced internal resolution. Existing temporal water behavior and stock
+shoreline geometry remain. No foam, puddles, wet terrain, underwater rendering
+or new rain particles are included. Arbitrary mods, other GPUs and multi-hour
+sessions are not qualified by this run. Keep the feature opt-in.
+
 ## Optional soft RT sunlight (2026-10-12)
 
 `triSoftRTShadows "on"`, `"off"`, `"status"` controls sun-disc sampling in

@@ -247,6 +247,8 @@ class VulkanContext
     std::string SetWaterRefraction(std::string_view mode);
     void FailWaterRefraction(std::string_view reason);
     bool WaterSurfaceEnabled() const { return RTReflectionsEnabled() || _refractionEnabled; }
+    std::string SetRainRipples(std::string_view mode, float rain = 0);
+    bool RainRipplesEnabled() const { return _rainRipplesEnabled; }
     void SetWaterFrame(const std::array<float, 16>& camera, const std::array<float, 4>& projection)
     { _waterCamera = camera; _waterProjection = projection; }
     bool RaySceneEnabled() const { return RTAOEnabled() || RTShadowsEnabled() || RTReflectionsEnabled(); }
@@ -344,6 +346,7 @@ class VulkanContext
     void DestroyContactResources() noexcept;
     void DrawContactShadows(const std::array<float, 4>& projection, VkImageView rtSun = VK_NULL_HANDLE);
     bool _rtReflectionsEnabled = false, _rtWaterTargets = false;
+    bool _rainRipplesEnabled = false;
     std::string _rtReflectionFailure;
     std::array<std::array<float, 4>, 8> _reflectionLighting{};
     std::array<float, 4> _rtSun{};

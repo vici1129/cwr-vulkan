@@ -33,6 +33,7 @@ foreach(kind triangle shape screen shadow gamma ssao csm)
                 "${CMAKE_CURRENT_SOURCE_DIR}/Shaders/shape_uniforms.glsl"
                 "${CMAKE_CURRENT_SOURCE_DIR}/Shaders/shadow_sample.glsl"
                 "${CMAKE_CURRENT_SOURCE_DIR}/Shaders/soft_shadow_math.glsl"
+                "${CMAKE_CURRENT_SOURCE_DIR}/Shaders/rain_ripples.glsl"
                 "${CMAKE_CURRENT_SOURCE_DIR}/Shaders/color_space.glsl"
                 "${CMAKE_CURRENT_SOURCE_DIR}/Shaders/weather.glsl" VERBATIM)
         list(APPEND VK_SHADER_HEADERS "${header}")
@@ -77,7 +78,7 @@ foreach(kind clouds clouds_composite clouds_composite_temporal fxaa smaa_edge sm
         COMMAND "${Vulkan_GLSLANG_VALIDATOR_EXECUTABLE}" -V --target-env vulkan1.0 ${defines}
             --vn "Cwr${kind}_frag" -o "${header}" "${CMAKE_CURRENT_SOURCE_DIR}/Shaders/${source}.frag"
         DEPENDS "Shaders/${source}.frag" Shaders/smaa_common.glsl
-            Shaders/shape_uniforms.glsl Shaders/shadow_sample.glsl Shaders/soft_shadow_math.glsl Shaders/color_space.glsl Shaders/weather.glsl Shaders/cloud_volume.glsl
+            Shaders/shape_uniforms.glsl Shaders/shadow_sample.glsl Shaders/soft_shadow_math.glsl Shaders/rain_ripples.glsl Shaders/color_space.glsl Shaders/weather.glsl Shaders/cloud_volume.glsl
             ThirdParty/SMAA/SMAA.hlsl ThirdParty/FXAA/Fxaa3_11.h VERBATIM)
     list(APPEND VK_SHADER_HEADERS "${header}")
 endforeach()

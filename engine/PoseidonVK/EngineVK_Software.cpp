@@ -118,7 +118,8 @@ void EngineVK::SubmitSoftware(const std::vector<uint32_t>& indices)
                                  state.cutoff;
     vk::ShapeLighting receiver;
     std::shared_ptr<vk::TextureImage> waterBump;
-    if (_waterSurface && _vk.WaterSurfaceEnabled())
+    receiver.rainRipples = _waterSurface ? RainRippleParameters() : std::array<float, 4>{};
+    if (_waterSurface && (_vk.WaterSurfaceEnabled() || receiver.rainRipples[0] > 0))
     {
         try
         {

@@ -26,6 +26,7 @@ layout(set = 2, binding = 0, std140) uniform ShapeLighting {
     vec4 atmosphereColor; // engine sun color, camera altitude density
     vec4 rtSun;
     vec4 rtWater;
+    vec4 rainRipples;
     mat4 localShadowVP[2];
     vec4 localShadowControl;
 } lighting;

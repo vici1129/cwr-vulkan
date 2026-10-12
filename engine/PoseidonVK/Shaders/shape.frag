@@ -4,6 +4,7 @@
 #include "shadow_sample.glsl"
 #include "color_space.glsl"
 #include "weather.glsl"
+#include "rain_ripples.glsl"
 layout(location = 0) out vec4 outColor;
 layout(location = 0) in vec2 texCoord;
 layout(location = 1) in vec4 vertexColor;
@@ -63,6 +64,20 @@ vec3 nightResponse(vec3 color) {
     return toLinear(mix(vec3(luminance),perceptual,clamp(luminance+lighting.eyeCoef.a,0.0,1.0)));
 }
 void main() {
+    vec3 waterNormal=vec3(0,1,0), originalWaterNormal=waterNormal;
+    if(lighting.rtWater.x>.5) {
+        // Same animated bump and geometry for native sea and software coast water.
+        vec3 bump=WORLD_TEXTURE(detailTexture,texCoord+lighting.rtWater.yz).xyz*2-1;
+        vec3 geometric=normalize(cross(dFdx(shadowWorld),dFdy(shadowWorld)));
+        if(geometric.y<0) geometric=-geometric;
+        originalWaterNormal=normalize(geometric+vec3(bump.y,0,bump.x)*.06);
+        waterNormal=originalWaterNormal;
+        if(lighting.rainRipples.x>0) {
+            vec2 slope=rainSlope(shadowWorld);
+            if(dot(slope,slope)>0)
+                waterNormal=normalize(originalWaterNormal+vec3(slope.x,0,slope.y));
+        }
+    }
     vec4 texel = WORLD_TEXTURE(diffuseTexture, texCoord);
     vec3 litColor = vertexColor.rgb;
     int localMask = int(lighting.localShadowControl.x);
@@ -101,6 +116,18 @@ void main() {
     // Contact-only capture must not change legacy CSM shading where no ray
     // hits. Preserve its original scene result, including ambient and fog.
     vec3 contactBase = base*csm;
+    if(lighting.rtWater.x>.5 && lighting.rainRipples.x>0) {
+        // Broad, bounded response on the existing lit water (also without RT).
+        // Use only the change in normal: no new light, gloss lobe or Fresnel term.
+        vec3 view=normalize(-shadowWorld);
+        float response=dot(waterNormal-originalWaterNormal,view);
+        float modulation=1+clamp(response*3.0,-.22,.22);
+        outColor.rgb *= modulation;
+        // Keep any separately captured sunlight a difference of equally shaded
+        // colors; the normal response must not relabel ambient as direct sun.
+        base *= modulation;
+        contactBase *= modulation;
+    }
     // Keep the night-eye response in its calibrated perceptual domain.
     outColor.rgb = nightResponse(outColor.rgb);
     float visibility = clamp(fogVisibility, 0.0, 1.0);
@@ -127,12 +154,7 @@ void main() {
 #ifdef RT_WATER
     outWater=vec4(0);
     if(lighting.rtWater.x>.5) {
-        // Existing water bump texture and animated water UV stream, z/x tangent axes.
-        vec3 bump=WORLD_TEXTURE(detailTexture,texCoord+lighting.rtWater.yz).xyz*2-1;
-        vec3 geometric=normalize(cross(dFdx(shadowWorld),dFdy(shadowWorld)));
-        if(geometric.y<0) geometric=-geometric;
-        vec3 n=normalize(geometric+vec3(bump.y,0,bump.x)*.06);
-        outWater=vec4(n.x,n.z,visibility,1.0/gl_FragCoord.w);
+        outWater=vec4(waterNormal.x,waterNormal.z,visibility,1.0/gl_FragCoord.w);
     }
 #endif
     // World tone mapping follows reconstruction; cockpit geometry uses the same

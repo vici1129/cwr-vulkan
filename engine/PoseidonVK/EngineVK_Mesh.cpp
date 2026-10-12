@@ -5,12 +5,28 @@
 #include <Poseidon/Core/Global.hpp>
 #include <Poseidon/World/Scene/Scene.hpp>
 #include <Poseidon/World/Scene/Camera/Camera.hpp>
+#include <Poseidon/World/Terrain/Landscape.hpp>
 #include <Poseidon/Graphics/Core/TLVertex.hpp>
 #include <Poseidon/IO/ParamFile/ParamFile.hpp>
 #include <Poseidon/IO/ParamFileExt.hpp>
 
 namespace Poseidon
 {
+RString EngineVK::SetRainRipples(RString mode)
+{
+    const auto* land = GScene ? GScene->GetLandscape() : nullptr;
+    return _vk.SetRainRipples(static_cast<const char*>(mode), land ? land->GetRainDensity() : 0).c_str();
+}
+
+std::array<float, 4> EngineVK::RainRippleParameters() const
+{
+    if (!_vk.RainRipplesEnabled() || !GScene || !GScene->GetLandscape() || !GScene->GetCamera())
+        return {};
+    const float rain = std::clamp(GScene->GetLandscape()->GetRainDensity(), 0.f, 1.f);
+    const auto position = GScene->GetCamera()->Position();
+    return {rain, Glob.time.toFloat(), position.X(), position.Z()};
+}
+
 void EngineVK::BeginShadowPass()
 {
     if (_activeShape || _softwareMesh)
@@ -85,9 +101,10 @@ void EngineVK::PrepareTriangleTL(const MipInfo& mip, const render::LegacySpec& s
     }
     _sectionSampler = vk::ShapeSampler(spec);
     _lighting.rtWater = {};
+    _lighting.rainRipples = _waterSurface ? RainRippleParameters() : std::array<float, 4>{};
     // Landscape water deliberately uses Detail, not the legacy Water shader family.
     // The explicit draw boundary also avoids labelling arbitrary specular materials as water.
-    if (_waterSurface && _vk.WaterSurfaceEnabled())
+    if (_waterSurface && (_vk.WaterSurfaceEnabled() || _lighting.rainRipples[0] > 0))
     {
         try
         {
