@@ -56,6 +56,7 @@ void VulkanContext::SetWeatherFrame(const WeatherLighting& lighting,
                                     const std::array<std::shared_ptr<TextureImage>, 4>& images)
 {
     _weatherLighting = lighting;
+    _weatherLighting.options[3] = _cloudsEnabled && !_cloudsTargets.empty() && images[0] && images[1] && images[2] ? 1.f : 0.f;
     _weatherLighting.sun[3] *= _cloudShadows ? 1.f : 0.f;
     _weatherLighting.options[0] *= _skyReflections && RTReflectionsEnabled() ? 1.f : 0.f;
     _weatherImages = images;

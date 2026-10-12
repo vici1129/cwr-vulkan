@@ -500,6 +500,16 @@ bool VulkanContext::CreateAAResources(VkFormat format)
     CreateBloomResources();
     CreateSunShaftResources();
     CreateVolumetricResources();
+    try
+    {
+        CreateCloudResources();
+    }
+    catch (const std::exception& error)
+    {
+        DestroyCloudResources();
+        _cloudsFailure = error.what();
+        // Optional allocation failure retains the original cloud draw.
+    }
     CreateContactResources();
     try
     {
@@ -688,6 +698,7 @@ void VulkanContext::FinishAAWorld(const std::array<float, 4>& projection)
 
 void VulkanContext::DestroyAAResources() noexcept
 {
+    DestroyCloudResources();
     DestroyWaterResources();
     DestroyBloomResources();
     DestroySunShaftResources();

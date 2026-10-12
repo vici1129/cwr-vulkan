@@ -38,9 +38,13 @@ foreach(kind triangle shape screen shadow gamma ssao csm)
         list(APPEND VK_SHADER_HEADERS "${header}")
     endforeach()
 endforeach()
-foreach(kind fxaa smaa_edge smaa_weight smaa_blend aa_composite aa_composite_ms ssao_ms taa shape_temporal shape_sun shape_sun_temporal shape_water shape_water_temporal shadow_sun fsr_masks fsr_composite bloom sun_shafts sun_shafts_ms volumetric_fog volumetric_fog_ms water_capture water_capture_ms water_refraction water_refraction_ms)
+foreach(kind clouds clouds_composite clouds_composite_temporal fxaa smaa_edge smaa_weight smaa_blend aa_composite aa_composite_ms ssao_ms taa shape_temporal shape_sun shape_sun_temporal shape_water shape_water_temporal shadow_sun fsr_masks fsr_composite bloom sun_shafts sun_shafts_ms volumetric_fog volumetric_fog_ms water_capture water_capture_ms water_refraction water_refraction_ms)
     set(source "${kind}")
     set(defines)
+    if(kind STREQUAL "clouds_composite_temporal")
+        set(source "clouds_composite")
+        set(defines -DTEMPORAL=1)
+    endif()
     if(kind STREQUAL "shape_temporal")
         set(source "shape")
         set(defines -DTEMPORAL=1)
@@ -73,7 +77,7 @@ foreach(kind fxaa smaa_edge smaa_weight smaa_blend aa_composite aa_composite_ms 
         COMMAND "${Vulkan_GLSLANG_VALIDATOR_EXECUTABLE}" -V --target-env vulkan1.0 ${defines}
             --vn "Cwr${kind}_frag" -o "${header}" "${CMAKE_CURRENT_SOURCE_DIR}/Shaders/${source}.frag"
         DEPENDS "Shaders/${source}.frag" Shaders/smaa_common.glsl
-            Shaders/shape_uniforms.glsl Shaders/shadow_sample.glsl Shaders/soft_shadow_math.glsl Shaders/color_space.glsl Shaders/weather.glsl
+            Shaders/shape_uniforms.glsl Shaders/shadow_sample.glsl Shaders/soft_shadow_math.glsl Shaders/color_space.glsl Shaders/weather.glsl Shaders/cloud_volume.glsl
             ThirdParty/SMAA/SMAA.hlsl ThirdParty/FXAA/Fxaa3_11.h VERBATIM)
     list(APPEND VK_SHADER_HEADERS "${header}")
 endforeach()
@@ -100,7 +104,7 @@ foreach(kind rtao rtao_ms rtao_filter rtao_filter_ms rtshadow rtshadow_ms rtshad
         COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/generated/PoseidonVK/Shaders"
         COMMAND "${Vulkan_GLSLANG_VALIDATOR_EXECUTABLE}" -V --target-env vulkan1.2 ${defines}
             --vn "Cwr${kind}_${stage}" -o "${header}" "${CMAKE_CURRENT_SOURCE_DIR}/Shaders/${source}.${stage}"
-        DEPENDS "Shaders/${source}.${stage}" Shaders/rtao_depth.glsl Shaders/rtao_coverage.glsl Shaders/sunlight_depth.glsl Shaders/rtao_water.glsl Shaders/color_space.glsl Shaders/weather.glsl VERBATIM)
+        DEPENDS "Shaders/${source}.${stage}" Shaders/rtao_depth.glsl Shaders/rtao_coverage.glsl Shaders/sunlight_depth.glsl Shaders/rtao_water.glsl Shaders/color_space.glsl Shaders/weather.glsl Shaders/cloud_volume.glsl VERBATIM)
     list(APPEND VK_SHADER_HEADERS "${header}")
 endforeach()
 foreach(kind contact_shadows contact_shadows_ms contact_shadows_rt contact_shadows_rt_ms)
@@ -152,6 +156,7 @@ target_link_libraries(PoseidonVKPolicyTests PRIVATE Vulkan::Vulkan)
 add_test(NAME PoseidonVKPolicyTests COMMAND PoseidonVKPolicyTests)
 foreach(target PoseidonVK PoseidonVKPolicyTests)
     target_sources(${target} PRIVATE VulkanContext_Weather.cpp)
+    target_sources(${target} PRIVATE VulkanContext_Clouds.cpp)
     target_sources(${target} PRIVATE VulkanContext_RTAO.cpp)
     target_sources(${target} PRIVATE VulkanContext_Contact.cpp)
     target_sources(${target} PRIVATE VulkanContext_Water.cpp)

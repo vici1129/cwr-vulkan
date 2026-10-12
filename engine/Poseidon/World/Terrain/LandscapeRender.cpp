@@ -1729,6 +1729,8 @@ Landscape::CloudCell Landscape::GetCloudCell(int layer, int x, int z) const
 
 void Landscape::DrawClouds(Scene& scene)
 {
+    if (GEngine->DrawVolumetricClouds())
+        return;
     const Camera& camera = *scene.GetCamera();
 
     // Matrix4Val invView=camera.Transform();

@@ -39,7 +39,42 @@ std::shared_ptr<vk::TextureImage> UploadMap(vk::VulkanContext& context, const st
         for (int c = 0; c < 4; ++c)
             bytes[p * 4 + c] = uint8_t(std::clamp(
                 std::lround(255 * (c == 3 ? pixels[p][c] : pixels[p][c] / std::max(pixels[p][3], .00001f))), 0l, 255l));
-    return context.UploadTexture(MapSize, MapSize, bytes.data());
+    // Coarse ray intervals need a filtered footprint, not point samples of
+    // distant cloud detail. Base level stays byte-identical for cloud shadows
+    // and the disabled-volume reflection path. Average premultiplied coverage
+    // before unpremultiplication so empty texels cannot darken cloud edges.
+    std::vector<std::vector<uint8_t>> levels;
+    levels.push_back(std::move(bytes));
+    auto previous = pixels;
+    int size = MapSize;
+    while (size > 36)
+    {
+        const int next = size / 2;
+        std::vector<Pixel> filtered(next * next);
+        levels.emplace_back(next * next * 4);
+        for (int y = 0; y < next; ++y)
+            for (int x = 0; x < next; ++x)
+            {
+                auto& p = filtered[y * next + x];
+                for (int j = 0; j < 2; ++j)
+                    for (int i = 0; i < 2; ++i)
+                        for (int c = 0; c < 4; ++c)
+                            p[c] += previous[(y * 2 + j) * size + x * 2 + i][c] * .25f;
+                for (int c = 0; c < 4; ++c)
+                    levels.back()[(y * next + x) * 4 + c] = uint8_t(std::clamp(
+                        std::lround(255 * (c == 3 ? p[c] : p[c] / std::max(p[3], .00001f))), 0l, 255l));
+            }
+        previous = std::move(filtered);
+        size = next;
+    }
+    std::vector<vk::TextureMip> mips;
+    size = MapSize;
+    for (const auto& level : levels)
+    {
+        mips.push_back({uint32_t(size), uint32_t(size), level.data()});
+        size /= 2;
+    }
+    return context.UploadTexture(mips);
 }
 float Edge(float ax, float ay, float bx, float by, float px, float py)
 {
@@ -106,9 +141,14 @@ void EngineVK::UpdateWeather()
         lighting.skyColor = {sky.R(), sky.G(), sky.B(), 0};
         lighting.sunSky = {sunSky.R(), sunSky.G(), sunSky.B(), 0};
         lighting.options = {0, 0, land->CloudsPosition(), 0};
+        const auto ambient = sun->Ambient() * eye * eye * land->CloudsBrightness();
+        const auto direct = sun->Diffuse() * eye * eye * land->CloudsBrightness();
+        lighting.volumeAmbient = {ambient.R(), ambient.G(), ambient.B(), 0};
+        lighting.volumeSun = {direct.R(), direct.G(), direct.B(), 1.f - sun->NightEffect()};
         for (int layer = 0; layer < 3; ++layer)
         {
             const auto move = land->GetCloudLayer(layer);
+            lighting.drift[layer] = {move.xCell * Grid + move.x, move.zCell * Grid + move.z, 0, 0};
             int cx = int(std::floor(position.X() / Grid)) - move.xCell - Cells / 2;
             int cz = int(std::floor(position.Z() / Grid)) - move.zCell - Cells / 2;
             const bool reuse = cache.images[layer] && std::abs(cx - cache.origins[layer][0]) <= 2 &&
@@ -255,5 +295,12 @@ void EngineVK::UpdateWeather()
     {
         _vk.FailWeather(error.what());
     }
+}
+
+bool EngineVK::DrawVolumetricClouds()
+{
+    if (!_worldEffectsPending || _nightVision || !GScene || !GScene->GetCamera())
+        return false;
+    return _vk.DrawVolumetricClouds();
 }
 } // namespace Poseidon

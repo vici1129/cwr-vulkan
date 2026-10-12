@@ -495,7 +495,7 @@ void VulkanContext::CreateFrameResources()
             queries.queryType = VK_QUERY_TYPE_TIMESTAMP;
             queries.queryCount = 2;
             Check(vkCreateQueryPool(_device, &queries, nullptr, &frame.ssaoQueries), "create AO timestamps");
-            queries.queryCount = 16;
+            queries.queryCount = 18;
             Check(vkCreateQueryPool(_device, &queries, nullptr, &frame.frameQueries), "create frame GPU timestamps");
             queries.queryCount = 2;
             Check(vkCreateQueryPool(_device, &queries, nullptr, &frame.csmQueries), "create CSM timestamps");
@@ -899,6 +899,18 @@ bool VulkanContext::BeginFrame(uint32_t width, uint32_t height)
         }
         frame.volumeTimestamped = false;
     }
+    if (frame.cloudsTimestamped)
+    {
+        uint64_t stamps[2]{};
+        if (vkGetQueryPoolResults(_device, frame.frameQueries, 16, 2, sizeof(stamps), stamps,
+                                 sizeof(uint64_t), VK_QUERY_RESULT_64_BIT) == VK_SUCCESS)
+        {
+            const uint64_t mask = _timestampBits == 64 ? ~uint64_t(0) : (uint64_t(1) << _timestampBits) - 1;
+            _profile.cloudsGpuMs += double((stamps[1] - stamps[0]) & mask) * _timestampPeriod / 1e6;
+            ++_profile.cloudsGpuSamples;
+        }
+        frame.cloudsTimestamped = false;
+    }
     if (frame.shaftsTimestamped)
     {
         uint64_t stamps[2]{};
@@ -983,12 +995,13 @@ bool VulkanContext::BeginFrame(uint32_t width, uint32_t height)
         _profile.commandStart = ProfileClock();
     Check(vkResetCommandBuffer(frame.command, 0), "reset frame command buffer");
     _commands = {};
+    _cloudsDrew = false;
     VkCommandBufferBeginInfo commands{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
     commands.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
     Check(vkBeginCommandBuffer(frame.command, &commands), "begin frame command buffer");
     if (frame.frameQueries)
     {
-        vkCmdResetQueryPool(frame.command, frame.frameQueries, 0, 16);
+        vkCmdResetQueryPool(frame.command, frame.frameQueries, 0, 18);
         vkCmdWriteTimestamp(frame.command, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, frame.frameQueries, 0);
     }
     VkClearValue clears[2]{};
@@ -1174,6 +1187,10 @@ void VulkanContext::ReportProfile()
         std::fprintf(stderr, "Vulkan ContactShadows: gpu_ms=%.4f samples=%llu world=%ux%u\n",
             _profile.contactGpuMs / _profile.contactGpuSamples,
             static_cast<unsigned long long>(_profile.contactGpuSamples), _worldExtent.width, _worldExtent.height);
+    if (_profile.cloudsGpuSamples)
+        std::fprintf(stderr, "Vulkan clouds: gpu_ms=%.4f samples=%llu half=%ux%u\n",
+                     _profile.cloudsGpuMs / _profile.cloudsGpuSamples,
+                     static_cast<unsigned long long>(_profile.cloudsGpuSamples), _cloudsExtent.width, _cloudsExtent.height);
     if (_profile.volumeGpuSamples)
         std::fprintf(stderr, "Vulkan VolumetricFog: gpu_ms=%.4f samples=%llu world=%ux%u half=%ux%u\n",
             _profile.volumeGpuMs / _profile.volumeGpuSamples,

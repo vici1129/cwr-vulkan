@@ -518,6 +518,18 @@ int main()
               "cloud and sky requests are independent");
         context.SetSkyReflections("off");
         Check(!context.WeatherNeeded(), "disabled weather requires no coverage or sky update");
+        Check(context.SetVolumetricClouds("status").starts_with("requested=off active=off"),
+              "volume clouds default off");
+        Check(!context.DrawVolumetricClouds(), "unavailable volume draw preserves legacy clouds");
+        Check(context.SetVolumetricClouds("on").starts_with("OK:") && context.WeatherNeeded(),
+              "volume clouds request stock weather without hardware ray queries");
+        Check(!context.CloudShadowsEnabled() && !context.RTReflectionsEnabled() && !context.SeparateSunlight(),
+              "volume cloud control is independent of surface shadows and RT");
+        Check(context.SetVolumetricClouds("invalid").starts_with("INVALID:") && context.WeatherNeeded(),
+              "invalid cloud command preserves request");
+        Check(!context.DrawVolumetricClouds(), "requested clouds without an acquired world must not suppress stock draw");
+        context.SetVolumetricClouds("off");
+        Check(!context.WeatherNeeded(), "volume clouds off releases weather demand");
         Check(!context.SetSSAO(false, std::numeric_limits<float>::quiet_NaN(), 1, 0, 80), "reject NaN SSAO strength");
         Check(!context.SetSSAO(false, 1, 0, 0, 80), "reject zero SSAO radius");
         Check(!context.SetSSAO(false, 1, 1, 1, 80), "reject SSAO bias covering its radius");

@@ -24,6 +24,8 @@ struct WeatherLighting
 {
     std::array<std::array<float, 4>, 3> layers{}; // map origin X/Z, inverse span, layer height
     std::array<float, 4> camera{}, sun{}, cloudColor{}, skyColor{}, sunSky{}, options{};
+    std::array<std::array<float, 4>, 3> drift{};
+    std::array<float, 4> volumeAmbient{}, volumeSun{};
 };
 inline VkPipelineRasterizationStateCreateInfo ShapeRasterization(bool shadow)
 {
@@ -209,10 +211,12 @@ class VulkanContext
     }
     bool SeparateSunlight() const { return RTShadowsEnabled() || ContactShadowsEligible() || SoftShadowsEligible() || CloudShadowsEnabled(); }
     std::string SetCloudShadows(std::string_view mode);
+    std::string SetVolumetricClouds(std::string_view mode);
+    bool DrawVolumetricClouds();
     std::string SetSkyReflections(std::string_view mode);
     bool CloudShadowsEnabled() const { return _cloudShadows; }
     bool CloudShadowsActive() const { return _cloudShadows && _weatherLighting.sun[3] > 0; }
-    bool WeatherNeeded() const { return _cloudShadows || (_skyReflections && RTReflectionsEnabled()); }
+    bool WeatherNeeded() const { return _cloudsRequested || _cloudShadows || (_skyReflections && RTReflectionsEnabled()); }
     void SetWeatherFrame(const WeatherLighting& lighting, const std::array<std::shared_ptr<TextureImage>, 4>& images);
     void FailWeather(std::string_view reason);
     std::string SetRTReflections(std::string_view mode);
@@ -359,6 +363,8 @@ class VulkanContext
         double shaftsGpuMs = 0;
         uint64_t shaftsGpuSamples = 0;
         double volumeGpuMs = 0;
+        double cloudsGpuMs = 0;
+        uint64_t cloudsGpuSamples = 0;
         double contactGpuMs = 0;
         uint64_t contactGpuSamples = 0;
         uint64_t volumeGpuSamples = 0;
@@ -408,6 +414,7 @@ class VulkanContext
         bool bloomTimestamped = false;
         bool shaftsTimestamped = false;
         bool volumeTimestamped = false;
+        bool cloudsTimestamped = false;
         bool contactTimestamped = false;
         bool waterCaptureTimestamped = false, waterOpticsTimestamped = false;
         bool ssaoTimestamped = false;
@@ -510,6 +517,15 @@ class VulkanContext
         VkDescriptorSet set = VK_NULL_HANDLE;
         VkFramebuffer framebuffer = VK_NULL_HANDLE;
     };
+    bool _cloudsRequested = false, _cloudsEnabled = false, _cloudsDrew = false;
+    std::string _cloudsFailure;
+    VkExtent2D _cloudsExtent{};
+    std::vector<TemporalTarget> _cloudsTargets;
+    VkDescriptorPool _cloudsPool = VK_NULL_HANDLE;
+    VkPipelineLayout _cloudsLayout = VK_NULL_HANDLE;
+    std::array<VkPipeline, 2> _cloudsPipelines{};
+    void CreateCloudResources();
+    void DestroyCloudResources() noexcept;
     bool _refractionRequested = false, _refractionEnabled = false, _waterCaptured = false, _waterRefracted = false;
     std::string _refractionFailure;
     uint64_t _waterCaptures = 0, _waterComposites = 0;

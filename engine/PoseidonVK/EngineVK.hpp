@@ -47,6 +47,8 @@ class EngineVK final : public Engine
     void SetSunVisibility(float visibility) override { _vk.SetSunVisibility(visibility); }
     void UpdateAtmosphere();
     void UpdateWeather();
+    bool DrawVolumetricClouds() override;
+    RString SetVolumetricClouds(RString mode) override { return _vk.SetVolumetricClouds(static_cast<const char*>(mode)).c_str(); }
     struct WeatherCache;
     std::shared_ptr<WeatherCache> _weatherCache;
     RString SetCloudShadows(RString mode) override { return _vk.SetCloudShadows(static_cast<const char*>(mode)).c_str(); }

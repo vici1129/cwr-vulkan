@@ -4,21 +4,27 @@
 layout(set=WEATHER_SET,binding=0,std140) uniform WeatherLighting {
     vec4 layers[3];
     vec4 camera, sun, cloudColor, skyColor, sunSky, options;
+    vec4 drift[3];
+    vec4 volumeAmbient, volumeSun;
 } weather;
 layout(set=WEATHER_SET,binding=1) uniform sampler2D cloudHigh;
 layout(set=WEATHER_SET,binding=2) uniform sampler2D cloudMiddle;
 layout(set=WEATHER_SET,binding=3) uniform sampler2D cloudLow;
 layout(set=WEATHER_SET,binding=4) uniform sampler2D weatherSky;
 
-vec4 cloudAt(int layer,vec2 world) {
+vec4 cloudAtLOD(int layer,vec2 world,float lod) {
     vec2 uv=(world-weather.layers[layer].xy)*weather.layers[layer].z;
     // Never clamp an edge cloud into a stripe outside the finite coverage map.
     float edge=min(min(uv.x,uv.y),min(1-uv.x,1-uv.y));
     if(edge<=0) return vec4(0);
-    vec4 c=layer==0?textureLod(cloudHigh,uv,0):layer==1?textureLod(cloudMiddle,uv,0):textureLod(cloudLow,uv,0);
+    vec4 c=layer==0?textureLod(cloudHigh,uv,lod):layer==1?textureLod(cloudMiddle,uv,lod):textureLod(cloudLow,uv,lod);
     c.a*=smoothstep(0,.04,edge);
     return c;
 }
+vec4 cloudAt(int layer,vec2 world) { return cloudAtLOD(layer,world,0); }
+#ifdef CLOUD_VOLUME
+#include "cloud_volume.glsl"
+#endif
 float cloudSunlight(vec3 world) {
     if(weather.sun.w<=0 || weather.cloudColor.a<=0) return 1;
     float transmission=1;
@@ -41,6 +47,12 @@ vec3 reflectedWeather(vec3 world,vec3 direction,vec3 fallback) {
     // DrawClouds compresses both positions and geometry around the camera by
     // CloudScale. Undo that transform for the water ray's origin only.
     vec3 origin=weather.camera.xyz+(world-weather.camera.xyz)/weather.camera.w;
+#ifdef CLOUD_VOLUME
+    if(weather.options.w>.5) {
+        vec4 volume=marchClouds(origin,direction,16,.5);
+        return volume.rgb+color*(1-volume.a);
+    }
+#endif
     for(int i=0;i<3 && direction.y>.001;++i) {
         float t=(weather.layers[i].w-origin.y)/direction.y;
         if(t<=0 || t>=19000) continue;

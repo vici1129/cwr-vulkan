@@ -1,6 +1,7 @@
 // Closest-hit water reflection shading on the shared AO/sunlight TLAS.
 #include "color_space.glsl"
 #define WEATHER_SET 1
+#define CLOUD_VOLUME
 #include "weather.glsl"
 layout(set=0,binding=8,std430) readonly buffer ReflectionLight {
     vec4 ambient, diffuse, zenith, horizon, sunSky, fog, eye, parameters;

@@ -1,5 +1,197 @@
 # Vulkan backend development
 
+## Optional volumetric clouds (2026-10-12)
+
+Built from main `33b7499` (including `02bd402`) in an isolated worktree, without
+editing the private DLSS/NGX checkout. This is a **default-Off, Vulkan-only,
+process-local** replacement for the visible stock cloud layers:
+
+```sqf
+triVolumetricClouds "on"
+triVolumetricClouds "off"
+triVolumetricClouds "status"
+```
+
+No RT hardware, new assets, dependencies, menus or persistent settings are needed.
+The control is independent of `triCloudShadows`, `triSkyReflections` and volumetric
+sunlight. GL33 returns `UNSUPPORTED` and continues using its original renderer.
+Status distinguishes requested/active state, half-resolution extent, sample bounds,
+shared weather position and resource fallback. Changes take effect next frame.
+
+### Density, placement and lighting
+
+`Landscape::DrawClouds`, `EngineVK_Weather.cpp`, `weather.glsl`, stock cloud shadows
+and water sky reflections were traced before changing the draw path. The existing
+three stock coverage maps remain the source of cloud types, alpha, tint, seeded
+placement and rotation. `Weather::MoveClouds` remains the only animation clock.
+Layer positions, independent velocities, weather-dependent height, sunlight,
+ambient light, eye accommodation and time-of-day colors come from the live engine.
+There is no second weather or shadow simulation.
+
+`cloud_volume.glsl` extrudes coverage into three disjoint shallow volumes centered
+on the original layer heights: thickness 1200/1100/1000 in stock unscaled cloud
+coordinates (120/110/100 apparent metres with the original 0.1 `CloudScale`). The
+view ray is evaluated in the inverse camera-relative scale, preserving the stock
+apparent positions rather than interpreting the layer heights as ordinary world
+altitudes. Two inexpensive, smooth value-noise scales perturb top/bottom profiles
+and erode margins. Noise coordinates subtract each layer's original drift, so
+billows move with the coverage and stop with simulation time.
+
+The visible pass takes at most 32 stratified samples per layer, 96 in total, with
+empty-density, missed-layer and low-transmittance exits. Two sunward density taps
+approximate self-shadowing; height-dependent ambient fill and a restrained forward
+scattering lobe produce lit edges/tops and darker interiors. Stock accommodated
+cloud color retains its original UNORM energy ceiling before linear-HDR shading,
+avoiding a uniformly white HDR shoulder. Night/dawn/sunset use engine lighting,
+not a separate sun model. Alpha follows the original cloud fog range plus a smooth
+finite-distance fade. The authored skydome, including its overcast backdrop, stays.
+
+Coverage receives five additional mip levels, down to 36 square. Premultiplied
+filtering avoids dark empty-texel borders; the original base-level bytes are
+unchanged. Ray-step footprints select the mip and suppress unresolved procedural
+detail. The mip grids remain aligned across stock 6 km cell recentering. This and
+fixed spatial stratification replace the rejected low-sample horizontal banding
+and distant grain without introducing a history buffer or denoiser.
+
+### Rendering and existing effects
+
+The replacement is invoked at the original cloud draw point, after the skydome,
+stars, sun and moon, before terrain/objects. It suspends the world pass, ray marches
+into half-world-resolution RGBA16F, resumes the existing LOAD pass and composites
+premultiplied color. Terrain is then drawn normally: silhouettes never depend on
+upsampling a half-resolution depth mask. Existing sunlight/water MRTs are preserved.
+The original `Landscape::DrawClouds` body is untouched and runs when the feature is
+Off, unavailable, or night vision requires the legacy path. No legacy cloud meshes
+are drawn on top of a successful volume pass.
+
+TAA and FSR use their existing world integration. Cloud pixels invalidate the
+skydome's temporal correspondence (wind and volume parallax make it inappropriate),
+which rejects old TAA cloud history and marks FSR pixels reactive. There is no
+dedicated cloud accumulation. MSAA composites into the existing multisampled world
+target; FSR uses half of its *internal* render size. This favors stable soft clouds
+over high-frequency detail or trails. Resize, AA changes and toggles use the normal
+idle resource-recreation and history-reset lifecycle. Cloud resource creation
+failure records a fallback and retains the original draw; missing weather also
+retains it. Real device-memory exhaustion was not injected.
+
+Cloud shadows continue sampling the original shared coverage at the same positions
+and weather phase, including their contribution to CSM volumetric sunlight. They
+approximate the broad footprint, not each new procedural density lobe. Enabling
+volumes does not enable shadows. Existing water-ray misses can reuse the same
+density/scattering functions with 16 samples per layer (48 maximum), the same
+weather buffer, and inverse camera-relative `CloudScale`. This requires the
+existing independent RT-reflection and sky-reflection controls; the visible cloud
+effect does not. No additional RT dispatch or environment probe was added.
+
+### Real captures and verification
+
+These are unretouched exact-window PNGs from real stock Malden/Everon missions,
+not generated reference art. Each pair freezes the same camera, date, weather and
+simulation phase, changing only `triVolumetricClouds`. Window chrome/HUD are kept.
+
+| Scene | Original Off | Volumetric On |
+| --- | --- | --- |
+| Malden coast, partial overcast, noon | [Off](evidence/volumetric-clouds/malden-noon-off.png) | [On](evidence/volumetric-clouds/malden-noon-on.png) |
+| Malden, heavy overcast | [Off](evidence/volumetric-clouds/malden-overcast-off.png) | [On](evidence/volumetric-clouds/malden-overcast-on.png) |
+| Malden, sunset | [Off](evidence/volumetric-clouds/malden-sunset-off.png) | [On](evidence/volumetric-clouds/malden-sunset-on.png) |
+| Malden water, existing RT/sky reflections and atmosphere effects | [Off](evidence/volumetric-clouds/malden-water-off.png) | [On](evidence/volumetric-clouds/malden-water-on.png) |
+| Everon, elevated viewpoint | [Off](evidence/volumetric-clouds/everon-elevated-off.png) | [On](evidence/volumetric-clouds/everon-elevated-on.png) |
+| Moving weather, shared phase 8.427530 | [Off](evidence/volumetric-clouds/weather-0-off.png) | [On](evidence/volumetric-clouds/weather-0-on.png) |
+| Same view after accelerated weather, phase 69.653786 | [Off](evidence/volumetric-clouds/weather-3-off.png) | [On](evidence/volumetric-clouds/weather-3-on.png) |
+
+The visual improvement is rounded silhouettes and visible shaded volume instead
+of flat bright sheets; it deliberately remains soft and close to the stock art.
+Both islands were tested at ground/coastal and elevated views with clear (0),
+partial (.45) and heavy (1) overcast, at noon, 05:35 dawn, 19:30 sunset and midnight.
+Moving-camera sequences covered AA Off, TAA, FSR Quality and MSAA4. Paired tests also
+enabled cloud shadows, sky/water reflections, water refraction, atmospheric
+perspective, sunlight shafts, volumetric sunlight, CSM/soft/contact/RT shadows and
+RTAO together. No obvious terrain-edge seams, double mesh clouds or persistent
+cloud trails were seen in those sequences. Both missions also ran with actual
+player walking (approximately 15 m), not only fixed developer cameras.
+
+A separate run with ray-query and FSR opt-ins absent rendered active volumes in
+AA Off/TAA with both independent weather effects Off. A timed overcast transition
+advanced coverage .490 -> .654 -> .822 at normal time, then reached 1.000 at 20x;
+a subsequent fog transition also rendered correctly. Its 2,862 submitted/presented
+frames ended with zero Vulkan/synchronization-validation errors or warnings.
+The GL33-only executable started normally and returned `UNSUPPORTED` for all three
+new command selectors. These checks used the Windows game-automation workflow's
+exact executable/PID targeting and isolated profiles.
+
+Normal time, 30x accelerated weather, `setAccTime 0` and actual simulation pause
+were checked. The shared phase advanced during motion and remained identical
+across both paused captures. Twelve AA-Off Malden weather/time sky regions were
+pixel-identical on Off -> On -> Off return; this is a bounded sky-region comparison,
+not a claim that every HUD/temporal-AA pixel is identical. TAA/FSR still jitter.
+
+Final Vulkan/synchronization-validation runs submitted/presented 21,031/21,031
+frames on Malden and 71,272/71,271 on Everon, with **zero errors and zero warnings**.
+The latter includes resize and minimize/restore (one submitted frame not presented).
+The loaded Vulkan executable SHA-256 was
+`A2BE2EF07E7F1DD6C7634DB63DB9BE55E2E95004609987874C8AF96EA6E28EFF`.
+These were muted, isolated-profile **direct development launches**, not Steam-route
+qualification. Full Vulkan and GL33-only builds passed; policy tests passed 451
+checks, Vulkan focused tests 1,115 assertions/77 cases and GL33 focused tests 1,075
+assertions/76 cases. New cloud shaders and both water-reflection shader variants
+passed explicit SPIR-V validation. Private DLSS/NGX integration was not qualified.
+
+### Performance and limits
+
+RTX 4060 Ti, driver 617.14, validation disabled, VSync off, July 5 noon, partial
+overcast, frozen simulation, 1400 m visibility. Runtime status verified actual
+1920x1080 and 2560x1440 outputs. The sky test uses Malden camera
+`[3520,8,3240,1,.12,.2]`; the water-heavy test uses `[3200,6,3150,0,-.08,-1]`.
+Other optional shadow/AO/volume/refraction effects are Off. Only the water test
+enables RT reflections and sky reflections. Each state warms for three seconds
+then collects approximately five seconds of completed GPU profiling intervals
+and 20 status samples. AA Off was repeated Off/On/On/Off; other rows are paired.
+Times below are means in milliseconds, **GPU execution, not wall-clock FPS**.
+
+| Output / AA | Whole frame Off | Whole frame On | Visible cloud pass On |
+| --- | ---: | ---: | ---: |
+| 1080p / Off (repeated mean) | 1.613 | 2.083 | 1.415 |
+| 1080p / TAA | 2.116 | 2.365 | 1.510 |
+| 1080p / FSR Quality | 1.995 | 2.381 | 0.821 |
+| 1080p / MSAA4 | 1.627 | 2.228 | 1.426 |
+| 1440p / Off (repeated mean) | 1.816 | 2.269 | 1.470 |
+| 1440p / TAA | 2.158 | 2.559 | 1.476 |
+| 1440p / FSR Quality | 2.052 | 2.269 | 0.713 |
+| 1440p / MSAA4 | 1.808 | 2.697 | 1.596 |
+| 1080p water-heavy / Off | 1.747 | 2.633 | 0.429 |
+| 1440p water-heavy / Off | 1.908 | 4.624 | 0.732 |
+
+Visible-pass timestamps include the world-pass interruption, half-resolution march
+and composite, not the removed stock cloud draws or RT reflection work. In the
+water-heavy views, the existing trace/shade stage measured 0.444 -> 1.646 ms at
+1080p and 0.593 -> 2.926 ms at 1440p. The reflection volume is appreciably more
+expensive than the old planar miss shader; leave sky reflections Off if that cost
+is undesirable. Filter times were respectively .216 -> .081 and .244 -> .216 ms.
+
+GPU auto-boost was **not locked**: sky trials ranged from 525 to 1815 MHz at 1080p
+and 870 to 2850 MHz at 1440p; memory also switched between 5001 and 9201 MHz.
+This explains both the small net frame deltas versus pass cost and the apparently
+cheaper 1440p FSR result. Do not interpret these as fixed-clock scaling, universal
+budgets or guaranteed frame-rate gains. No power/clock policy was changed.
+
+Half targets were 960x540 / 1280x720 for native rendering; FSR Quality reduces
+them to 640x360 / 853x480. With three swapchain images, RGBA16F cloud targets add
+approximately 11.9 / 21.1 MiB at native 1080p / 1440p. Shared cloud coverage with
+mips is 20.25 MiB instead of 15.19 MiB (plus the existing sky lookup). Steady frozen
+profiles report zero per-frame allocations/texture uploads. Coverage creation or
+recenter still performs the existing synchronous CPU raster/upload, now including
+mip generation; these uncommon stalls and initial pipeline compilation are not
+included in the steady-state GPU numbers.
+
+The effect does not engulf terrain/aircraft in near-cloud fog: it retains stock
+background ordering. Cameras inside/above slabs have sorted bounded intervals,
+but flying through clouds, multi-hour sessions and arbitrary modded skies are not
+qualified. Fine density does not produce fine terrain cloud shadows. Water uses
+a cheaper integration and the existing water-filter footprint, not exact mirror
+matching. Low coverage-map resolution and history rejection limit sharp detail,
+especially under FSR. This is an intentionally bounded extension of stock weather,
+not a physically based atmospheric framework.
+
 ## Early refraction allocation recovery (2026-10-12)
 
 The outer AA-resource recovery handler now disables requested water refraction

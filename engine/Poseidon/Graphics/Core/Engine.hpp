@@ -401,6 +401,9 @@ class Engine : public IGraphicsEngine
     virtual RString SetRTReflections(RString) { return "UNSUPPORTED: RT water reflections require Vulkan"; }
     virtual RString SetWaterRefraction(RString) { return "UNSUPPORTED: water refraction requires Vulkan"; }
     virtual RString SetCloudShadows(RString) { return "UNSUPPORTED: cloud shadows require Vulkan"; }
+    virtual RString SetVolumetricClouds(RString) { return "UNSUPPORTED: volumetric clouds require Vulkan"; }
+    // Return true only when a replacement was drawn; all other backends retain stock clouds.
+    virtual bool DrawVolumetricClouds() { return false; }
     virtual RString SetSkyReflections(RString) { return "UNSUPPORTED: sky reflections require Vulkan RT water reflections"; }
     virtual bool SeparateSunlight() const { return false; }
     virtual void NextFrame();                             // swap frames - get ready for next frame
