@@ -50,9 +50,9 @@ void main() {
             clamp((outColor.a-draw.alphaCutoff)/max(fwidth(outColor.a),1.0/255.0)+0.5,0.0,1.0) : 1.0;
     } else if (outColor.a < draw.alphaCutoff) discard;
     vec3 base = outColor.rgb;
-    float csm = sunlightVisibility(shadowWorld, fogVisibility);
     bool captureSun = lighting.rtSun.x > .5 && directSun.a > .99 && draw.detailEnabled < 1.5;
     bool separate = captureSun && lighting.rtSun.x < 1.5;
+    float csm = sunlightVisibility(shadowWorld, separate ? 1.0 : fogVisibility);
     if (captureSun) {
         // Derive the sunlight-only difference in linear HDR, not by multiplying
         // ambient/emissive/local lighting or already-composited fog.
@@ -60,7 +60,6 @@ void main() {
         if(draw.detailEnabled>.5) base *= legacyLightToLinear(vec3(WORLD_TEXTURE(detailTexture,texCoord*32).a*2));
     }
     if (separate) {
-        csm = sunlightVisibility(shadowWorld, 1.0);
         outColor.rgb = base + max(outColor.rgb-base,vec3(0))*csm;
     } else outColor.rgb *= csm;
     // Contact-only capture must not change legacy CSM shading where no ray

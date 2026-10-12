@@ -385,7 +385,7 @@ void VulkanContext::DrawMesh(const std::shared_ptr<MeshBuffers>& mesh, uint32_t 
         auto receiver = *lighting;
         if (!_worldActive || !_rtWaterTargets || shadow || !depthTest)
             receiver.rtWater[0] = 0;
-        if (!_worldActive || !_rtShadowTargets || shadow || blend || !depthTest || !depthWrite)
+        if (!_worldActive || (!_rtShadowTargets && !SoftShadowsEligible()) || shadow || blend || !depthTest || !depthWrite)
             receiver.rtSun[0] = 0;
         if (_worldActive && _atmosphereEnabled && !shadow && depthTest &&
             (screen ? receiver.atmosphereSun[3] > 0 : receiver.fogParams[2] > .5f))
@@ -402,6 +402,10 @@ void VulkanContext::DrawMesh(const std::shared_ptr<MeshBuffers>& mesh, uint32_t 
         if (TemporalEnabled()) receiver.temporalExtent = {1.f / _worldExtent.width, 1.f / _worldExtent.height,
             IsFSR(_aaMode) ? std::log2(float(_worldExtent.width) / _extent.width) - 1.f : 0.f, 0};
         receiver.shadow = _csmActive ? _csmState : ShadowLighting{};
+        // Surface-only opt-in. Volumetrics keep their existing CSM sampler;
+        // water and unsupported sunlight receivers retain ordinary filtering.
+        if (SoftShadowsEligible() && receiver.rtSun[0] > .5f && secondaryMode < 1.5f)
+            receiver.shadow.strength[2] = .007f; // tan(sun angular radius), about 0.4 degrees
         BindLighting(receiver, screen);
         if (_profile.enabled && !shadow)
         {

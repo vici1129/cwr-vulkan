@@ -32,6 +32,7 @@ foreach(kind triangle shape screen shadow gamma ssao csm)
             DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/Shaders/${kind}.${stage}"
                 "${CMAKE_CURRENT_SOURCE_DIR}/Shaders/shape_uniforms.glsl"
                 "${CMAKE_CURRENT_SOURCE_DIR}/Shaders/shadow_sample.glsl"
+                "${CMAKE_CURRENT_SOURCE_DIR}/Shaders/soft_shadow_math.glsl"
                 "${CMAKE_CURRENT_SOURCE_DIR}/Shaders/color_space.glsl" VERBATIM)
         list(APPEND VK_SHADER_HEADERS "${header}")
     endforeach()
@@ -71,7 +72,7 @@ foreach(kind fxaa smaa_edge smaa_weight smaa_blend aa_composite aa_composite_ms 
         COMMAND "${Vulkan_GLSLANG_VALIDATOR_EXECUTABLE}" -V --target-env vulkan1.0 ${defines}
             --vn "Cwr${kind}_frag" -o "${header}" "${CMAKE_CURRENT_SOURCE_DIR}/Shaders/${source}.frag"
         DEPENDS "Shaders/${source}.frag" Shaders/smaa_common.glsl
-            Shaders/shape_uniforms.glsl Shaders/shadow_sample.glsl Shaders/color_space.glsl
+            Shaders/shape_uniforms.glsl Shaders/shadow_sample.glsl Shaders/soft_shadow_math.glsl Shaders/color_space.glsl
             ThirdParty/SMAA/SMAA.hlsl ThirdParty/FXAA/Fxaa3_11.h VERBATIM)
     list(APPEND VK_SHADER_HEADERS "${header}")
 endforeach()

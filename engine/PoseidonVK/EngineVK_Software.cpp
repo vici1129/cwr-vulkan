@@ -147,8 +147,10 @@ void EngineVK::SubmitSoftware(const std::vector<uint32_t>& indices)
         const auto& projection = camera->ProjectionNormal();
         receiver.shadowReceiver = {_shadowTuning.enabled ? 1.f : 0.f, projection(0, 0), projection(1, 1), 0};
         receiver.atmosphereSun[3] = atmosphere ? 1.f : 0.f;
-        receiver.rtSun[0] = (_vk.RTShadowsEnabled() || (_vk.ContactShadowsEligible() && !_waterSurface)) &&
-                                   !_softwareMesh->directSun.empty() ? (_vk.RTShadowsEnabled() ? 1.f : 2.f) : 0.f;
+        receiver.rtSun[0] = (_vk.RTShadowsEnabled() || ((_vk.ContactShadowsEligible() ||
+                (_vk.SoftShadowsEligible() && _shadowTuning.enabled)) && !_waterSurface)) &&
+                !_softwareMesh->directSun.empty() ?
+                (_vk.RTShadowsEnabled() || _vk.SoftShadowsEligible() ? 1.f : 2.f) : 0.f;
     }
     if (receiver.rtWater[0] && receiver.shadowReceiver[1] <= 0)
         receiver.rtWater = {}; // unsupported software projection retains ordinary water

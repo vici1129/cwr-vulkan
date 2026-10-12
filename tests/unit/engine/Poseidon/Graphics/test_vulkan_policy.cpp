@@ -238,6 +238,26 @@ int main()
                   "invalid contact command preserves selection");
             Check(!hdrContext.RaySceneEnabled(), "contact does not request a ray tracing scene");
             Check(hdrContext.SetContactShadows("off").starts_with("OK"), "disable contact shadows");
+            Check(!hdrContext.SoftShadowsEnabled(), "soft CSM defaults off");
+            Check(hdrContext.SetSoftShadows("on").starts_with("OK") && hdrContext.SoftShadowsEnabled(),
+                  "soft CSM does not require hardware RT");
+            Check(!hdrContext.SoftShadowsEligible(), "soft CSM skips absent sunlight");
+            ShapeLighting softSource{};
+            softSource.atmosphereSun[3] = .5f;
+            softSource.atmosphereColor = {1,1,1,0};
+            hdrContext.SetVolumetricFrame(softSource);
+            Check(hdrContext.SoftShadowsEligible() && hdrContext.SeparateSunlight(),
+                  "soft sunlight separation works without a contact or RT target");
+            softSource.atmosphereColor = {};
+            hdrContext.SetVolumetricFrame(softSource);
+            Check(!hdrContext.SoftShadowsEligible(), "soft CSM skips zero sun radiance");
+            hdrContext.SetVolumetricFrame({});
+            Check(hdrContext.SetSoftShadows("invalid").starts_with("INVALID") && hdrContext.SoftShadowsEnabled(),
+                  "invalid soft CSM selection preserves state");
+            Check(!hdrContext.RaySceneEnabled() && !hdrContext.ContactShadowsEnabled(),
+                  "soft CSM does not enable ray tracing or contact shadows");
+            Check(hdrContext.SetSoftShadows("off").starts_with("OK") && !hdrContext.SoftShadowsEnabled(),
+                  "soft CSM can return to original filtering");
             ShapeLighting volume{};
             volume.fogParams = {100, 1000, 0, 0};
             Check(!VulkanContext::VolumetricSourceEligible(volume), "zero source needs no volume CSM");

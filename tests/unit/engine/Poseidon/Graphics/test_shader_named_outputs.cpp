@@ -22,6 +22,28 @@ using std::min;
 using std::max;
 #include <PoseidonVK/Shaders/rtao_coverage.glsl>
 }
+namespace SoftShadowMath
+{
+using std::min;
+using std::max;
+#include <PoseidonVK/Shaders/soft_shadow_math.glsl>
+}
+
+TEST_CASE("Directional PCSS radius is contact-hardening and cascade-scaled", "[Graphics][Shaders][ShadowMath]")
+{
+    using SoftShadowMath::softShadowRadius;
+    for (float resolution : {512.f,1024.f,2048.f,4096.f})
+    {
+        const float texel=1/resolution;
+        REQUIRE(softShadowRadius(0,.006f,.1f,texel)==texel);
+        REQUIRE(softShadowRadius(-1,.006f,.1f,texel)==texel);
+        REQUIRE(softShadowRadius(1e6f,.006f,.1f,texel)==8*texel);
+        REQUIRE(softShadowRadius(20,.006f,.1f,texel)>=softShadowRadius(5,.006f,.1f,texel));
+    }
+    // Away from the floor/cap, changing cascade width changes UV radius, not metres.
+    REQUIRE(std::abs(softShadowRadius(10,.006f,.02f,1.f/4096)/.02f-.06f)<1e-6f);
+    REQUIRE(std::abs(softShadowRadius(10,.006f,.03f,1.f/4096)/.03f-.06f)<1e-6f);
+}
 
 // I-28 / B-025 — shader source related-computation co-location.
 //

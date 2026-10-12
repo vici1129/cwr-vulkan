@@ -125,11 +125,12 @@ void EngineVK::PrepareTriangleTL(const MipInfo& mip, const render::LegacySpec& s
         _lighting.ambient[3] > 0 && !(_shapeFlags & (NoZBuf | IsShadow | DisableSun | NoDropdown)) &&
         !(render::MergeLegacy(spec) & (NoZBuf | IsShadow | DisableSun | NoDropdown)) ? 1.f : 0.f;
     _lighting.rtSun[0] =
-        _shadowWorld && (_vk.RTShadowsEnabled() || (_vk.ContactShadowsEligible() && !_waterSurface)) &&
+        _shadowWorld && (_vk.RTShadowsEnabled() || ((_vk.ContactShadowsEligible() ||
+                (_vk.SoftShadowsEligible() && _shadowTuning.enabled)) && !_waterSurface)) &&
                 _sunEnabled && _lighting.ambient[3] > 0 && !_sectionBlend &&
                 _sectionDepthWrite &&
                 !((_shapeFlags | render::MergeLegacy(spec)) & (NoZBuf | IsShadow | DisableSun | NoDropdown | IsLight))
-            ? (_vk.RTShadowsEnabled() ? 1.f : 2.f)
+            ? (_vk.RTShadowsEnabled() || _vk.SoftShadowsEligible() ? 1.f : 2.f)
             : 0.f;
     if (_sectionShadow)
     {

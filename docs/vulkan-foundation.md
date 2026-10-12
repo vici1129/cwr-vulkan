@@ -1,5 +1,180 @@
 # Vulkan backend development
 
+## Optional contact-hardening CSM (2026-10-12)
+
+Built on `28139f7`; the existing contact-shadow, RT, volumetric and MSAA fixes
+remain in place. Default **Off**, runtime-only and Vulkan-only:
+
+```sqf
+triSoftShadows "on"
+triSoftShadows "off"
+triSoftShadows "status"
+```
+
+No hardware RT or `CWR_VK_RTAO=1` requirement. No new menu, saved setting,
+dependency, shadow map, fullscreen pass, history or denoiser. Status reports
+the switch, current CSM/source availability, sampling budget, radius cap and
+the explicitly unchanged hard-RT behavior. Toggling resets ordinary world-AA
+history but does not recreate render targets. Enabling this does not enable
+CSM, RT or `triContactShadows`; these remain independent controls.
+
+### Surface filtering and lighting
+
+`shadow_sample.glsl` retains the existing cascade selection, coverage
+fallthrough, quadratic cascade bias, 15% transition bands and far fade. Off
+executes the original nine nearest-depth comparisons and their original
+arithmetic. On adds a bounded directional-light PCSS-style branch:
+
+- Search 13 depths: the original 3×3 footprint plus four wider light-space
+  probes. The wider search targets 60 cm, limited to 1–8 shadow texels. No
+  blockers returns lit; small estimated penumbrae reuse the original 3×3 result.
+- Recover UV/metre and depth/metre from the lengths of the orthographic
+  light-matrix rows. Average positive receiver-to-blocker depth separation is
+  converted to metres, then multiplied by `tan(sun radius) = 0.007` (about
+  0.4 degrees). This is a modest gameplay-tuned sun size, not a calibrated
+  physical area-light solution. Cascade depth padding does not set softness.
+- Clamp the resulting filter radius to 1–8 texels. Smoothly transition from
+  the contact filter over the first two texels, avoiding a kernel switch at
+  the threshold. Larger penumbrae use eight fixed disk positions, each with
+  a four-depth gather and bilinear comparison weights: at most 21 texture
+  operations / 45 fetched depth values per sampled cascade. Cascade blending can
+  sample two cascades. The initial sparse search could miss narrow casters;
+  retaining the complete 3×3 neighborhood fixed that during tuning.
+- Derive receiver-plane gradients before divergent cascade selection. Correct
+  each comparison's receiver depth while retaining the original base bias;
+  bound correction to max(2×bias, 5 cm in light-depth units). Narrow kernels
+  near map edges and clamp footprints inside the map so the white sampler
+  border cannot become a spurious penumbra light source.
+
+The pattern is fixed in light space with the existing snapped cascade maps;
+there is no frame-varying noise. World AA sees the result normally, including
+jittered TAA/FSR input and MSAA. Resolution is the actual CSM texel size, not
+the screen/output resolution.
+
+Soft surface shadows use the existing separated-direct-sun lighting path,
+including CPU-lit terrain, without requiring a sunlight MRT. Ambient, local
+lights and emissive terms are not passed through the soft filter. This matters
+visually: the original non-RT legacy CSM path attenuates the whole surface;
+the sunlight-only branch can have **lighter shadow interiors**, especially
+on ambient-heavy terrain/foliage. The comparisons therefore show both the
+penumbra change and this existing lighting-path distinction, not just a blur.
+Off restores the legacy path exactly; RT-enabled lighting keeps its existing
+separation. Water, blended/unsupported sunlight receivers and volumetric
+scattering keep their original shadow sampling. Night/zero-source/full-overcast
+use the original path, with no additional soft filtering or sun separation.
+
+### Hybrid RT and contact shadows
+
+The raw RT visibility/reduction and its off-screen caster coverage are
+unchanged. Existing conservative `min(CSM, RT, contact)` composition remains;
+there is no multiplication of independent darkening factors. A hard RT result
+can dominate the softer CSM edge. **RT silhouettes have not become physically
+soft**: this milestone adds neither multiple area-light rays nor RT denoising.
+Disable RT sunlight to inspect the CSM penumbrae independently. Short-range
+screen-space contact shadows remain separate and can reinforce feet/tracks
+without widening their own rays or changing their sampling budget.
+
+### Gameplay evidence and checks
+
+Muted, isolated developer launches used stock GOG 3.05 missions
+`02Infantry.Abel` (Malden) and `05HeavyMetal.Eden` (Everon), not a Steam-route
+or mission-completion qualification. Final tested executable SHA-256:
+`99edc54f9e95e9e57ca08d524fb8f94ee2f4bb1ff2a27a21adc3b131eb1f94d7`.
+Subsequent source changes to the tested implementation are comments only.
+
+Frozen Off → On → Off views cover soldiers, jeep wheels, tank tracks, building
+edges, fences, poles, bushes, forest floor and terrain. Tested noon, 06:00,
+18:00, full overcast and midnight; CSM and RT sunlight independently Off/On;
+AA Off, TAA, FSR Quality, MSAA 2/4/8; separate contact shadows; SSAO/RTAO,
+atmosphere/volumetric fog and water reflections. The Malden water run reported
+96,994 shaded reflection hits in the sampled completed frame, not merely an
+enabled toggle. Actual walking inputs moved the player on both islands;
+camera sweeps and distance sweeps crossed the leading approximately 20/50 m
+omni-cascade transition regions. Also checked CSM resolutions 1024/2048/4096
+and odd 1281×721 resize/minimize/restore.
+
+Native-resolution crops, with no brightness enhancement; RT sunlight and
+screen-space contact shadows are Off in these pairs:
+
+| View | Original CSM | Soft CSM |
+|---|---|---|
+| Malden dawn building edge | ![Building Off](evidence/soft-shadows/malden-building-off.png) | ![Building On](evidence/soft-shadows/malden-building-on.png) |
+| Everon dawn forest floor | ![Forest Off](evidence/soft-shadows/everon-forest-off.png) | ![Forest On](evidence/soft-shadows/everon-forest-on.png) |
+| Everon noon track contact | ![Tracks Off](evidence/soft-shadows/everon-contact-off.png) | ![Tracks On](evidence/soft-shadows/everon-contact-on.png) |
+
+Raw local captures, action receipts, hashes, status responses and logs are
+under the original checkout's `build/shadow-live/soft-malden-final` and
+`soft-everon-final`. Final validation/synchronization-validation shutdowns:
+
+- Malden: 23,372 submitted / 23,371 presented; **0 errors, 0 warnings**.
+- Everon: 60,160 submitted / 60,158 presented; **0 errors, 0 warnings**.
+- Fixed 1800×550 scene crops returned pixel-identically after disabling the
+  effect in the Malden village/dawn/noon and Everon forest/dawn comparisons.
+  Night, full overcast and CSM-Off views (RT independently Off/On) also had zero
+  Off/On changed pixels in those checked regions. This excludes changing UI
+  and does not claim arbitrary full-frame temporal-AA bitwise equality.
+- Cross-executable check against the original `28139f7` build: a fixed
+  730×80 terrain region was pixel-identical with this feature Off, both with
+  CSM enabled and disabled. The larger cross-launch view was not identical
+  (moving scene/UI elements); this is a scoped check, not a full-frame claim.
+
+The stale system Epic overlay manifest still emits a loader message, separate
+from the zero live validation counters. Vulkan+FSR and Vulkan-disabled GL33
+builds passed. Focused results: **425** driver-free policy/lifetime checks,
+**949 assertions / 67 cases** for shader/shadow-math/Vulkan-shape tests, and
+**909 assertions / 66 cases** in the GL33-only equivalent. The policy suite's
+deliberately injected teardown validation error is expected. New tests cover
+default/invalid/independent controls, sun-source gating and the actual shared
+GLSL penumbra scalar math (contact floor, cap, monotonicity and cascade units).
+The GL33-only executable also returned `UNSUPPORTED: soft shadows require
+Vulkan` for all three runtime commands.
+
+### Performance
+
+RTX 4060 Ti, driver 617.14; validation disabled for timings. Fixed Malden
+village camera, CSM 2048, AA Off, 100% render scale, VSync Off, RT/contact/AO/
+volumetrics Off. No RT opt-in environment variable was present; status showed
+zero BLAS/TLAS/instances. Two Off/On cycles per condition, each with four
+seconds settling and eight seconds measurement (four existing two-second
+GPU profiling windows). Each table cell is the median of eight windows.
+
+| Actual world/output extent | Sun | Original CSM, ms | Soft CSM, ms | Observed whole-frame delta |
+|---|---|---:|---:|---:|
+| 1920×1080 | Noon | 1.592 | 1.659 | +0.067 ms / 4.2% |
+| 1920×1080 | Dawn | 1.609 | 1.692 | +0.082 ms / 5.1% |
+| 2560×1440 | Noon | 1.848 | 1.925 | +0.077 ms / 4.1% |
+| 2560×1440 | Dawn | 1.867 | 1.956 | +0.090 ms / 4.8% |
+
+These are **whole-frame GPU timestamps, not isolated PCSS cost**. Automatic
+GPU clocks increased with the added load: 1080p noon 1155→1365 MHz, dawn
+1230→1500 MHz; 1440p noon 1680–1695→1995 MHz, dawn 1725–1785→2130–2145 MHz.
+Memory clocks were stable within each resolution (5001 / 9201 MHz reported).
+Consequently the observed delta understates added work at equal clocks; no
+fixed-clock cost or cross-GPU performance claim is made. The unchanged CSM
+depth pass also became faster with higher clocks. All sampled windows reported
+zero allocations/frame. There is no separate soft-shadow pass or new image
+memory. The 1440p window's actual render/output extent was verified by status
+on a 1080p desktop; this is not a native-1440p display-quality qualification.
+
+Raw profiling windows and clock readings are retained locally in
+`build/shadow-live/soft-perf1080` and `soft-perf1440` in the original checkout,
+as `soft-timing.json` and `soft-timing-dawn.json`.
+
+### Limitations
+
+This is a small-budget shadow-map approximation. The average blocker can mix
+several caster depths; the bounded search can miss thin distant blockers and
+the eight-texel cap deliberately limits very long low-sun penumbrae. Existing
+CSM caster coverage, rasterization bias, resolution and foliage alpha/LOD
+limitations remain. The contact floor and transition bands preserve detail
+but cannot make different cascade resolutions identical. Camera sweeps did
+not reveal new gross seams or frame-noise crawling in the checked views;
+subpixel foliage/fences can still alias with AA Off, and existing temporal AA
+has its own motion limitations. Ambient-heavy scenes can show a larger change
+in shadow intensity than penumbra width, as explained above. Hard RT edges
+remain hard. These checks do not establish artifact-free rendering for every
+mod, grazing angle, GPU or extreme shadow tuning.
+
 ## Optional screen-space contact shadows (2026-10-12)
 
 Built on `8b25bd1`, including the volumetric/MSAA follow-up below. Default **Off**:
@@ -66,7 +241,7 @@ by MSAA sample count. No contact result image/history is allocated.
 ### Gameplay evidence and regression checks
 
 Local muted developer launches used stock GOG 3.05 content, isolated profiles,
-Malden `02Infantry.Abel` and Everon `01TakeTheCar.Eden`. This is gameplay/render
+Malden `02Infantry.Abel` and Everon `05HeavyMetal.Eden`. This is gameplay/render
 qualification, not a Steam launch or mission-completion claim. Frozen cameras
 were compared Off → On → Off; physical input also moved soldiers approximately
 10 m on Malden and 16 m on Everon. Checked feet, jeep wheels, tank tracks,

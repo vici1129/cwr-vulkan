@@ -189,7 +189,15 @@ class VulkanContext
                std::max({_volumeFrame.atmosphereColor[0], _volumeFrame.atmosphereColor[1],
                          _volumeFrame.atmosphereColor[2]}) > .00001f;
     }
-    bool SeparateSunlight() const { return RTShadowsEnabled() || ContactShadowsEligible(); }
+    std::string SetSoftShadows(std::string_view mode);
+    bool SoftShadowsEnabled() const { return _softShadowsEnabled; }
+    bool SoftShadowsEligible() const
+    {
+        return _softShadowsEnabled && _volumeFrame.atmosphereSun[3] >= .001f &&
+               std::max({_volumeFrame.atmosphereColor[0], _volumeFrame.atmosphereColor[1],
+                         _volumeFrame.atmosphereColor[2]}) > .00001f;
+    }
+    bool SeparateSunlight() const { return RTShadowsEnabled() || ContactShadowsEligible() || SoftShadowsEligible(); }
     std::string SetRTReflections(std::string_view mode);
     void FailRTReflections(std::string_view reason);
     bool RTReflectionsEnabled() const { return _rtReflectionsEnabled && _rtaoAvailable; }
@@ -252,6 +260,7 @@ class VulkanContext
     std::shared_ptr<RTAOState> _rtao;
     bool _rtShadowsEnabled = false, _rtShadowTargets = false;
     bool _contactRequested = false, _contactEnabled = false, _contactDrew = false;
+    bool _softShadowsEnabled = false;
     uint64_t _contactDraws = 0;
     VkDescriptorSetLayout _contactSetLayout = VK_NULL_HANDLE;
     VkDescriptorPool _contactPool = VK_NULL_HANDLE;
