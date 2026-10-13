@@ -117,6 +117,10 @@ void EngineVK::SubmitSoftware(const std::vector<uint32_t>& indices)
     const float cutoff = shadow ? std::max(1, (GetShadowFactor() * 7) >> 4) / 255.f :
                                  state.cutoff;
     vk::ShapeLighting receiver;
+    receiver.rtWater[3] = _vk.RTGIEnabled() && _shadowWorld && !_waterSurface && image &&
+        alpha == AlphaStats::Opaque && !blend && cutoff == 0 &&
+        !(_softwareFlags & (NoZBuf | NoZWrite | IsColored | IsLight | DisableSun | NoDropdown |
+                            IsShadow | IsAlphaFog | SpecularTexture)) ? 1.f : 0.f;
     receiver.wetSurface = WetParameters(_softwareMip._texture, _softwareFlags);
     if (receiver.wetSurface[0] > 0 && GScene->MainLight())
     {
@@ -171,7 +175,7 @@ void EngineVK::SubmitSoftware(const std::vector<uint32_t>& indices)
                  (_softwareFlags & NoZBuf) == 0, nullptr, waterBump, 0, {0, -1, 0}, mesh.vertexOffset, mesh.indexOffset,
                  (_softwareFlags & NoZWrite) == 0,
                  receiver.shadowReceiver[0] || receiver.atmosphereSun[3] || receiver.rtSun[0] || receiver.rtWater[0] ||
-                         _temporalTerrain || localShadows || receiver.wetSurface[0]
+                         _temporalTerrain || localShadows || receiver.wetSurface[0] || receiver.rtWater[3]
                      ? &receiver
                      : nullptr,
                  shadow, !shadow && (_softwareFlags & IsLight) != 0);

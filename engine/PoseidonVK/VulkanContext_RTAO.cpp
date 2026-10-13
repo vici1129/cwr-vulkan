@@ -12,6 +12,10 @@
 #include <PoseidonVK/Shaders/rtwater_ms.comp.hpp>
 #include <PoseidonVK/Shaders/rtwater_filter.frag.hpp>
 #include <PoseidonVK/Shaders/rtwater_filter_ms.frag.hpp>
+#include <PoseidonVK/Shaders/rtgi.comp.hpp>
+#include <PoseidonVK/Shaders/rtgi_ms.comp.hpp>
+#include <PoseidonVK/Shaders/rtgi_filter.frag.hpp>
+#include <PoseidonVK/Shaders/rtgi_filter_ms.frag.hpp>
 #include <algorithm>
 #include <cstring>
 #include <cmath>
@@ -138,7 +142,7 @@ struct VulkanContext::RTAOState
     uint32_t alignment = 256;
     VkDescriptorSetLayout setLayout = VK_NULL_HANDLE;
     VkPipelineLayout layout = VK_NULL_HANDLE;
-    std::array<VkPipeline, 6> compute{}, filter{};
+    std::array<VkPipeline, 8> compute{}, filter{};
     struct Slot
     {
         struct DynamicMesh
@@ -159,6 +163,10 @@ struct VulkanContext::RTAOState
         DepthAttachment ao;
         DepthAttachment sunlight;
         DepthAttachment reflection;
+        DepthAttachment gi;
+        VkDescriptorSet giSet = VK_NULL_HANDLE;
+        bool giDispatched = false;
+        double giCpuMs = 0;
         std::shared_ptr<RTBuffer> reflectionLight;
         VkDescriptorSet waterSet = VK_NULL_HANDLE;
         VkExtent2D extent{};
@@ -192,9 +200,77 @@ struct VulkanContext::RTAOState
     bool hitDiagnostics = false, surfaceMeasured = false;
     bool waterDispatched = false;
     double waterRayMs = 0, waterFilterMs = 0;
+    std::array<uint32_t, 8> giCounts{};
+    uint64_t giFrames = 0;
+    bool giDispatched = false, giCompleted = false;
+    double giRayMs = 0, giFilterMs = 0, giCpuMs = 0;
     RTDynamicStats dynamic;
     std::map<uint64_t, VkTransformMatrixKHR> dynamicTransforms;
 };
+
+void VulkanContext::FailRTGI(std::string_view reason)
+{
+    _rtGIFailure = reason;
+    _rtGIEnabled = false;
+    _recreate = true;
+    ResetTemporalHistory();
+    if (_rtao)
+    {
+        _rtao->giDispatched = _rtao->giCompleted = false;
+        _rtao->scene.clear();
+        for (auto& slot : _rtao->slots) slot.previous.clear();
+    }
+    std::fprintf(stderr, "RTGI unavailable: %s; preserving ordinary lighting\n", _rtGIFailure.c_str());
+}
+
+std::string VulkanContext::SetRTGI(std::string_view mode)
+{
+    if (mode == "status")
+    {
+        std::ostringstream out;
+        out << "RTGI=" << (RTGIEnabled() ? "on" : "off") << " capability=" << _rtaoReason;
+        if (!_rtGIFailure.empty()) out << " fallback=" << _rtGIFailure;
+        if (_rtao)
+        {
+            const auto& rt = *_rtao;
+            const auto c = RTGIEnabled() && rt.giDispatched && rt.giCompleted ? rt.giCounts : std::array<uint32_t, 8>{};
+            out << " lastWorldDispatch=" << (RTGIEnabled() && rt.giDispatched ? "yes" : "no")
+                << " completedDispatches=" << rt.giFrames << " bounceRays=" << c[0] << " hits=" << c[1]
+                << " eligibleHits=" << c[2] << " rejectedMaterials=" << c[3]
+                << " sunRays=" << c[4] << " sunBlocked=" << c[5] << " eligibleReceivers=" << c[6]
+                << " dynamicHits=" << c[7];
+            if (RTGIEnabled() && rt.giCompleted && rt.timingSamples)
+                out << " GPUms(trace/filter/BLAS/TLAS)=" << rt.giRayMs << '/' << rt.giFilterMs << '/'
+                    << rt.blasMs << '/' << rt.tlasMs << " CPUrecordMs=" << rt.giCpuMs;
+            else out << " GPUtimings=unavailable";
+        }
+        else out << " lastWorldDispatch=no completedDispatches=0 bounceRays=0 hits=0 eligibleHits=0"
+                    " rejectedMaterials=0 sunRays=0 sunBlocked=0 eligibleReceivers=0 dynamicHits=0 GPUtimings=unavailable";
+        out << "; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; approximate stock albedo";
+        return out.str();
+    }
+    if (mode != "on" && mode != "off") return "INVALID: triRTGI on, off, status";
+    if (mode == "on" && !_rtaoAvailable) return "UNSUPPORTED: " + _rtaoReason;
+    if (mode == "on" && !_rtGIFailure.empty()) return "UNSUPPORTED: " + _rtGIFailure;
+    if (mode == "on")
+    {
+        VkPhysicalDeviceFeatures features{};
+        vkGetPhysicalDeviceFeatures(_physical, &features);
+        if (!features.independentBlend) return "UNSUPPORTED: RTGI requires independent MRT blending";
+    }
+    if (_rtGIEnabled != (mode == "on"))
+    {
+        _rtGIEnabled = mode == "on";
+        _recreate = true;
+        ResetTemporalHistory();
+        if (_rtao)
+        {
+            _rtao->giDispatched = _rtao->giCompleted = false;
+            if (!RaySceneEnabled()) _rtao->scene.clear();
+        }
+    }
+    return _rtGIEnabled ? "OK: one-bounce diffuse RTGI enabled (next frame)" : "OK: RTGI off";
+}
 
 std::string VulkanContext::SetRTDynamic(std::string_view mode)
 {
@@ -597,7 +673,7 @@ std::string VulkanContext::SetRTAO(std::string_view mode)
         }
         else
             out << " BLAS=0 TLAS=0 instances=0 completedPasses=0 rayQueriesExecuted=no";
-        out << "; shared static LOD0 scene radius=" << (RTShadowsEnabled() || RTReflectionsEnabled() ? 160 : 80)
+        out << "; shared static LOD0 scene radius=" << (RTShadowsEnabled() || RTHitDataEnabled() ? 160 : 80)
             << "m; dynamic=" << (_rtDynamicEnabled ? "on" : "off")
             << "; AO mask excludes terrain/foliage; static collection excludes animation/damage; blended "
                "effects/proxies excluded";
@@ -673,6 +749,10 @@ void VulkanContext::RetireRTAO()
         rt.lastShadedAlpha = counts[10];
         std::copy_n(counts + 15, 5, rt.surface.begin());
         rt.surfaceMeasured = slot.surfaceMeasured;
+        std::copy_n(counts + 20, 8, rt.giCounts.begin());
+        rt.giCompleted = slot.giDispatched;
+        rt.giFrames += slot.giDispatched;
+        rt.giCpuMs = slot.giCpuMs;
         rt.waterRays += counts[6];
         rt.shadedHits += counts[8];
         ++rt.completed;
@@ -682,8 +762,8 @@ void VulkanContext::RetireRTAO()
         std::copy_n(counts + 11, 4, rt.dynamic.hits.begin());
         if (slot.queries)
         {
-            uint64_t stamps[16]{};
-            if (vkGetQueryPoolResults(_device, slot.queries, 0, 16, sizeof(stamps), stamps, sizeof(uint64_t),
+            uint64_t stamps[20]{};
+            if (vkGetQueryPoolResults(_device, slot.queries, 0, 20, sizeof(stamps), stamps, sizeof(uint64_t),
                                       VK_QUERY_RESULT_64_BIT) == VK_SUCCESS)
             {
                 const uint64_t mask = _timestampBits == 64 ? UINT64_MAX : (uint64_t(1) << _timestampBits) - 1;
@@ -696,6 +776,12 @@ void VulkanContext::RetireRTAO()
                 rt.sunFilterMs = ms(10);
                 rt.waterRayMs = ms(12);
                 rt.waterFilterMs = ms(14);
+                rt.giRayMs = ms(16);
+                rt.giFilterMs = ms(18);
+                if (slot.giDispatched && rt.completed % 120 == 0)
+                    std::fprintf(stderr, "Vulkan RTGI GPU: trace=%.4f filter=%.4f CPUrecord=%.4f ms; rays=%u hits=%u eligible=%u rejected=%u sunRays=%u sunBlocked=%u receivers=%u dynamic=%u\n",
+                        rt.giRayMs, rt.giFilterMs, rt.giCpuMs, counts[20], counts[21], counts[22], counts[23],
+                        counts[24], counts[25], counts[26], counts[27]);
                 ++rt.timingSamples;
                 uint64_t frame[2]{};
                 if (_frames[_frame].frameQueries &&
@@ -749,6 +835,8 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
     rt.sunDispatched = false;
     slot.sunSamples = 0;
     rt.waterDispatched = false;
+    rt.giDispatched = slot.giDispatched = false;
+    slot.giCpuMs = 0;
     if (rt.scene.empty())
     {
         rt.dynamic = slot.dynamic;
@@ -783,7 +871,7 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
         layout.pPushConstantRanges = &push;
         Require(vkCreatePipelineLayout(_device, &layout, nullptr, &rt.layout), "create layout");
     }
-    if (std::any_of(rt.compute.begin(), rt.compute.begin() + (_rtWaterTargets ? 6 : 4), [](auto p) { return !p; }))
+    if (std::any_of(rt.compute.begin(), rt.compute.begin() + (RTGIEnabled() ? 8 : _rtWaterTargets ? 6 : 4), [](auto p) { return !p; }))
     {
         auto shader = [&](const uint32_t* code, size_t size)
         {
@@ -794,14 +882,14 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
             Require(vkCreateShaderModule(_device, &info, nullptr, &module), "create shader");
             return module;
         };
-        for (int i = 0; i < 6; ++i)
+        for (int i = 0; i < 8; ++i)
         {
-            if (rt.compute[i] || (i >= 4 && !_rtWaterTargets))
+            if (rt.compute[i] || (i >= 6 ? !RTGIEnabled() : i >= 4 && !_rtWaterTargets))
                 continue;
             const uint32_t* codes[]{Cwrrtao_comp,        Cwrrtao_ms_comp, Cwrrtshadow_comp,
-                                    Cwrrtshadow_ms_comp, Cwrrtwater_comp, Cwrrtwater_ms_comp};
+                                    Cwrrtshadow_ms_comp, Cwrrtwater_comp, Cwrrtwater_ms_comp, Cwrrtgi_comp, Cwrrtgi_ms_comp};
             const size_t sizes[]{sizeof(Cwrrtao_comp),        sizeof(Cwrrtao_ms_comp), sizeof(Cwrrtshadow_comp),
-                                 sizeof(Cwrrtshadow_ms_comp), sizeof(Cwrrtwater_comp), sizeof(Cwrrtwater_ms_comp)};
+                                 sizeof(Cwrrtshadow_ms_comp), sizeof(Cwrrtwater_comp), sizeof(Cwrrtwater_ms_comp), sizeof(Cwrrtgi_comp), sizeof(Cwrrtgi_ms_comp)};
             auto module = shader(codes[i], sizes[i]);
             VkComputePipelineCreateInfo info{VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO};
             info.layout = rt.layout;
@@ -812,29 +900,29 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
             const VkBool32 diagnostics = rt.hitDiagnostics ? VK_TRUE : VK_FALSE;
             const VkSpecializationMapEntry diagnosticEntry{0, 0, sizeof(diagnostics)};
             const VkSpecializationInfo specialization{1, &diagnosticEntry, sizeof(diagnostics), &diagnostics};
-            if (i >= 4)
+            if (i >= 4 && i < 6)
                 info.stage.pSpecializationInfo = &specialization;
             auto result = vkCreateComputePipelines(_device, VK_NULL_HANDLE, 1, &info, nullptr, &rt.compute[i]);
             vkDestroyShaderModule(_device, module, nullptr);
             Require(result, "create ray query pipeline");
         }
     }
-    if (std::any_of(rt.filter.begin(), rt.filter.begin() + (_rtWaterTargets ? 6 : 4), [](auto p) { return !p; }))
+    if (std::any_of(rt.filter.begin(), rt.filter.begin() + (RTGIEnabled() ? 8 : _rtWaterTargets ? 6 : 4), [](auto p) { return !p; }))
     {
         VkShaderModuleCreateInfo shader{VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO};
         shader.codeSize = sizeof(Cwrgamma_vert);
         shader.pCode = Cwrgamma_vert;
         VkShaderModule vertex = VK_NULL_HANDLE;
         Require(vkCreateShaderModule(_device, &shader, nullptr, &vertex), "create fullscreen vertex");
-        for (int i = 0; i < 6; ++i)
+        for (int i = 0; i < 8; ++i)
         {
-            if (rt.filter[i] || (i >= 4 && !_rtWaterTargets))
+            if (rt.filter[i] || (i >= 6 ? !RTGIEnabled() : i >= 4 && !_rtWaterTargets))
                 continue;
             const uint32_t* codes[]{Cwrrtao_filter_frag,        Cwrrtao_filter_ms_frag, Cwrrtshadow_filter_frag,
-                                    Cwrrtshadow_filter_ms_frag, Cwrrtwater_filter_frag, Cwrrtwater_filter_ms_frag};
+                                    Cwrrtshadow_filter_ms_frag, Cwrrtwater_filter_frag, Cwrrtwater_filter_ms_frag, Cwrrtgi_filter_frag, Cwrrtgi_filter_ms_frag};
             const size_t sizes[]{sizeof(Cwrrtao_filter_frag),     sizeof(Cwrrtao_filter_ms_frag),
                                  sizeof(Cwrrtshadow_filter_frag), sizeof(Cwrrtshadow_filter_ms_frag),
-                                 sizeof(Cwrrtwater_filter_frag),  sizeof(Cwrrtwater_filter_ms_frag)};
+                                 sizeof(Cwrrtwater_filter_frag),  sizeof(Cwrrtwater_filter_ms_frag), sizeof(Cwrrtgi_filter_frag), sizeof(Cwrrtgi_filter_ms_frag)};
             shader.codeSize = sizes[i];
             shader.pCode = codes[i];
             VkShaderModule fragment = VK_NULL_HANDLE;
@@ -884,6 +972,11 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
                 output.colorBlendOp = VK_BLEND_OP_ADD;
             }
             output.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+            if (i >= 6)
+            {
+                output.srcColorBlendFactor = output.dstColorBlendFactor = VK_BLEND_FACTOR_ONE;
+                output.colorBlendOp = VK_BLEND_OP_ADD;
+            }
             output.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT;
             VkPipelineColorBlendStateCreateInfo blend{VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO};
             blend.attachmentCount = 1;
@@ -916,12 +1009,12 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
     }
     if (!slot.pool)
     {
-        VkDescriptorPoolSize sizes[]{{VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 12},
-                                     {VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR, 3},
-                                     {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 3},
-                                     {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 9}};
+        VkDescriptorPoolSize sizes[]{{VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 16},
+                                     {VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR, 4},
+                                     {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 4},
+                                     {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 12}};
         VkDescriptorPoolCreateInfo pool{VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO};
-        pool.maxSets = 3;
+        pool.maxSets = 4;
         pool.poolSizeCount = 4;
         pool.pPoolSizes = sizes;
         Require(vkCreateDescriptorPool(_device, &pool, nullptr, &slot.pool), "create descriptor pool");
@@ -932,14 +1025,18 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
         Require(vkAllocateDescriptorSets(_device, &allocate, &slot.set), "allocate descriptors");
         Require(vkAllocateDescriptorSets(_device, &allocate, &slot.sunSet), "allocate sun descriptors");
         Require(vkAllocateDescriptorSets(_device, &allocate, &slot.waterSet), "allocate water descriptors");
+        Require(vkAllocateDescriptorSets(_device, &allocate, &slot.giSet), "allocate GI descriptors");
         CreateAAImage(slot.ao, VK_FORMAT_R32G32B32A32_SFLOAT, VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
                       VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_ASPECT_COLOR_BIT, half);
         slot.extent = half;
+        if (RTGIEnabled())
+            CreateAAImage(slot.gi, VK_FORMAT_R32G32B32A32_SFLOAT, VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+                          VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_ASPECT_COLOR_BIT, half);
         if (RTShadowsEnabled())
             CreateAAImage(slot.sunlight, VK_FORMAT_R32G32B32A32_SFLOAT,
                           VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_SAMPLE_COUNT_1_BIT,
                           VK_IMAGE_ASPECT_COLOR_BIT, _worldExtent);
-        if (_rtWaterTargets)
+        if (RTReflectionsEnabled())
             CreateAAImage(slot.reflection, VK_FORMAT_R32G32B32A32_SFLOAT,
                           VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_SAMPLE_COUNT_1_BIT,
                           VK_IMAGE_ASPECT_COLOR_BIT, _worldExtent);
@@ -951,18 +1048,18 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
         return result;
     };
     if (!slot.counters)
-        slot.counters = buffer(80, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, true);
+        slot.counters = buffer(112, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, true);
     if (!slot.materials)
         slot.materials = buffer(1024 * sizeof(uint64_t), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, true);
     if (!slot.reflectionLight)
         slot.reflectionLight = buffer(sizeof(_reflectionLighting), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, true);
     UploadMappedBuffer(slot.reflectionLight->buffer, _reflectionLighting.data(), sizeof(_reflectionLighting));
-    std::memset(slot.counters->buffer.mapped, 0, 80);
+    std::memset(slot.counters->buffer.mapped, 0, 112);
     if (!slot.queries && _timestampBits && _profile.enabled)
     {
         VkQueryPoolCreateInfo info{VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO};
         info.queryType = VK_QUERY_TYPE_TIMESTAMP;
-        info.queryCount = 16;
+        info.queryCount = 20;
         Require(vkCreateQueryPool(_device, &info, nullptr, &slot.queries), "create GPU timestamps");
     }
     FlushScreenBatch();
@@ -971,7 +1068,7 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
     _worldPassOpen = false;
     _commands = {};
     if (slot.queries)
-        vkCmdResetQueryPool(command, slot.queries, 0, 16);
+        vkCmdResetQueryPool(command, slot.queries, 0, 20);
     auto stamp = [&](uint32_t i)
     {
         if (slot.queries)
@@ -1190,16 +1287,17 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
     // until every TLAS that references them has completed and been replaced.
     std::erase_if(rt.cache, [&](const auto& item)
                   { return !item || item->used + (item->dynamicId ? FramesInFlight : 120) < rt.serial; });
-    // All three effects consume this frame slot's single shared TLAS: sunlight,
-    // water, then AO. Skipped timestamp intervals remain explicitly empty.
-    for (int effect : {1, 2, 0})
+    // Shared TLAS; compose GI after AO so AO does not count the bounce's
+    // visibility a second time. All contributions precede AA and tone mapping.
+    for (int effect : {1, 2, 0, 3})
     {
         // Contact-only sunlight must also precede reflections and AO when the
         // shared RT scene is used without hardware sunlight shadows.
         if (effect != 1 && !_contactDrew)
             DrawContactShadows(projection);
         const uint32_t rayStamp = 4 + effect * 4, filterStamp = rayStamp + 2;
-        if (effect == 2 ? !(RTReflectionsEnabled() && _rtWaterTargets)
+        if (effect == 3 ? !RTGIEnabled()
+            : effect == 2 ? !(RTReflectionsEnabled() && _rtWaterTargets)
             : effect    ? !(RTShadowsEnabled() && _rtShadowTargets)
                         : !RTAOEnabled())
         {
@@ -1209,9 +1307,10 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
             stamp(filterStamp + 1);
             continue;
         }
-        const auto set = effect == 2 ? slot.waterSet : effect ? slot.sunSet : slot.set;
-        auto& target = effect == 2 ? slot.reflection : effect ? slot.sunlight : slot.ao;
-        const auto dispatchExtent = effect ? _worldExtent : half;
+        const double cpuStart = _profile.enabled ? ProfileClock() : 0;
+        const auto set = effect == 3 ? slot.giSet : effect == 2 ? slot.waterSet : effect ? slot.sunSet : slot.set;
+        auto& target = effect == 3 ? slot.gi : effect == 2 ? slot.reflection : effect ? slot.sunlight : slot.ao;
+        const auto dispatchExtent = effect == 0 || effect == 3 ? half : _worldExtent;
         VkDescriptorImageInfo images[3]{
             {_aaSampler, _aaTargets[_image].sampledDepth, VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL},
             {VK_NULL_HANDLE, target.view, VK_IMAGE_LAYOUT_GENERAL},
@@ -1223,7 +1322,7 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
                                     _rtWaterTargets ? _aaTargets[_image].water.view : _aaTargets[_image].color.view,
                                     VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
         VkDescriptorBufferInfo reflectionLight{slot.reflectionLight->buffer.buffer, 0, VK_WHOLE_SIZE};
-        VkDescriptorBufferInfo counter{slot.counters->buffer.buffer, 0, 80};
+        VkDescriptorBufferInfo counter{slot.counters->buffer.buffer, 0, 112};
         VkDescriptorBufferInfo materialBuffer{slot.materials->buffer.buffer, 0, VK_WHOLE_SIZE};
         VkWriteDescriptorSetAccelerationStructureKHR as{
             VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR};
@@ -1272,6 +1371,8 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
         push.sun = _rtSun;
         if (effect)
             push.settings[3] = 50.f;
+        if (effect == 3)
+            push.settings = {25.f, .02f, .65f, 45.f};
         if (effect == 1)
         {
             // Spare component: preserve the 128-byte push ABI and all AO/water settings.
@@ -1320,7 +1421,12 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
         vkCmdDraw(command, 3, 1, 0, 0);
         vkCmdEndRenderPass(command);
         stamp(filterStamp + 1);
-        if (effect == 2)
+        if (effect == 3)
+        {
+            rt.giDispatched = slot.giDispatched = true;
+            slot.giCpuMs = _profile.enabled ? ProfileClock() - cpuStart : 0;
+        }
+        else if (effect == 2)
             rt.waterDispatched = true;
         else if (effect)
             rt.sunDispatched = true;
@@ -1343,6 +1449,11 @@ void VulkanContext::DestroyRTAOTargets() noexcept
         slot.set = VK_NULL_HANDLE;
         slot.sunSet = VK_NULL_HANDLE;
         slot.waterSet = VK_NULL_HANDLE;
+        slot.giSet = VK_NULL_HANDLE;
+        if (slot.gi.view) vkDestroyImageView(_device, slot.gi.view, nullptr);
+        if (slot.gi.image) vkDestroyImage(_device, slot.gi.image, nullptr);
+        if (slot.gi.memory) vkFreeMemory(_device, slot.gi.memory, nullptr);
+        slot.gi = {};
         if (slot.reflection.view)
             vkDestroyImageView(_device, slot.reflection.view, nullptr);
         if (slot.reflection.image)

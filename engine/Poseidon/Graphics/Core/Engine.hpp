@@ -407,6 +407,7 @@ class Engine : public IGraphicsEngine
     virtual Light* LocalShadowLight(int) const { return nullptr; }
     virtual bool LocalShadowCaster(int, Vector3Par, float) const { return false; }
     virtual RString SetRTReflections(RString) { return "UNSUPPORTED: RT water reflections require Vulkan"; }
+    virtual RString SetRTGI(RString) { return "UNSUPPORTED: RTGI requires Vulkan"; }
     virtual RString SetWaterRefraction(RString) { return "UNSUPPORTED: water refraction requires Vulkan"; }
     virtual RString SetRainRipples(RString) { return "UNSUPPORTED: rain ripples require Vulkan"; }
     virtual RString SetShoreFoam(RString) { return "UNSUPPORTED: shoreline foam requires Vulkan"; }

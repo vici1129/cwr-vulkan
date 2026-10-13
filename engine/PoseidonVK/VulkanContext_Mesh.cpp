@@ -400,6 +400,8 @@ void VulkanContext::DrawMesh(const std::shared_ptr<MeshBuffers>& mesh, uint32_t 
     if (lighting)
     {
         auto receiver = *lighting;
+        if (!RTGIEnabled() || !_worldActive || shadow || blend || !depthTest || !depthWrite || alphaCutoff > 0)
+            receiver.rtWater[3] = 0;
         if (!_worldActive || (!_rtWaterTargets && receiver.rainRipples[0] <= 0) || shadow || !depthTest)
             receiver.rtWater[0] = 0;
         if (!_worldActive || (!_rtShadowTargets && !SoftShadowsEligible() && !CloudShadowsActive()) || shadow || blend || !depthTest || !depthWrite)

@@ -1,5 +1,259 @@
 # Vulkan backend development
 
+## One-bounce diffuse RTGI prototype (2026-10-13)
+
+Built from public main `9d8886b` in an isolated worktree, preserving the original
+checkout's private DLSS/NGX changes. `triRTGI "on"`, `"off"`, `"status"` controls
+this default-Off, Vulkan-only experiment. Launch with `CWR_VK_RTAO=1` to opt into
+ray-query device capabilities; missing capabilities or independent MRT blending
+are reported as unsupported. Enabling GI does not select AO, RT sunlight,
+dynamic geometry, water effects, PBR or any AA mode. Resource failures disable
+GI and expose the reason. There is no persistent option or graphics-menu change.
+
+### Transport and receiver data
+
+One cosine-weighted hemisphere ray per eligible half-resolution sample uses the
+existing alpha-tested BLAS/TLAS scene and `hitSurface()`. Its direction is hashed
+from a 1/32 m world-space cell, without frame randomness. Receivers fade over
+31.5–45 m, secondary rays over 20–25 m. No recursive trace, sky-miss illumination,
+geometry expansion or new material assets are introduced. The existing 160 m
+hit-color scene and optional `triRTDynamic` geometry are reused unchanged.
+
+Hit albedo, incoming light and reflected radiance remain separate. Incoming
+light is `0.15 * rayAmbientLinear() + raySunlightLinear() * NdotL * visibility`.
+Only diffuse-eligible non-cutout hits contribute; unknown materials absorb the
+sample. Sunlight requires a positive geometric and shading-normal cosine plus
+an alpha-tested, 80 m shadow ray from the secondary surface. Existing weather
+sunlight/cloud visibility applies. The 45 + 25 + 80 m envelope fits within the
+existing 160 m scene radius, subject to its existing geometry/budget omissions.
+No fogged, tone-mapped, eye-adapted or previously GI-lit color feeds the bounce.
+
+The receiver shader already has the linear base texture before legacy lighting.
+The existing surface attachment can store RGB reflectance times fog
+transmittance with **negative view depth** in otherwise unused non-water pixels.
+Positive depth remains water; zero remains ineligible. This avoids a new full
+material G-buffer, normal target or geometry pass. Native and software opaque
+world draws explicitly opt in; alpha-tested/blended draws, special lighting,
+untextured draws and water do not. Unsupported visible draws invalidate the
+record. Projected shadows preserve receiver identity. Rain's existing negative
+red marker also invalidates GI. Cockpit, weapon overlays and HUD are rendered
+after composition. MSAA requires eligible, matching receiver/depth samples.
+
+Both approximate albedos are capped at 0.8 and transport gain is 0.65. The
+cosine-weighted PDF cancels the receiver Lambertian cosine/pi factor; no
+additional distance-squared attenuation is applied to radiance. These caps,
+distance tapers, reduced secondary ambient and gain are deliberate biased
+prototype bounds on uncalibrated stock lighting, not a calibrated GI solution.
+Receiver texture RGB omits exact material reflectance, detail modulation and
+baked-light separation. Hit terrain UVs and stock albedo retain the foundation's
+limitations. No metallic/roughness values are invented. Daylight weighting
+suppresses the entire contribution at night; local-light and moon bounce are
+outside this prototype.
+
+A 3x3 half-resolution neighborhood is filtered using reconstructed geometric
+normals, depth and receiver-plane distance, with hard rejection at corners and
+silhouettes. Receiver reflectance is applied **after** filtering to prevent
+color halos across receiver textures. The additive HDR pass follows AO, before
+volumetrics, existing TAA/FSR reconstruction and tone mapping. There is one new
+half-resolution RGBA32F image per fence slot and one compute/filter pair (plus
+the existing surface attachment when it was not otherwise needed). No separate
+temporal history, ReSTIR, SVGF or adaptive sampling is introduced. AA Off retains
+world-anchored grain; camera movement can cross sampling cells. TAA/FSR can
+soften it but cannot recover missing coverage or guarantee temporal convergence.
+
+`status` separates current dispatch from completed-fence counters: bounce rays,
+triangle hits, eligible hits, rejected materials, secondary sun rays/blockers,
+eligible receiver samples and dynamic hits. With `CWR_VK_PROFILE=1`, it reports
+trace/filter GPU timestamps, shared BLAS/TLAS costs and CPU recording time.
+Unavailable timing is explicit. These are latest completed samples, not averages.
+
+### Gameplay evidence and limitations
+
+Tested on Malden (`01TakeTheCar.ABEL`) and Everon (`06Ninjas.EDEN`) in the
+actual game, including first-person walking, turning, a vehicle interior and
+multiple rock/building/coastal views. These were direct diagnostic launches of
+the newly built executable, **not Steam-launch qualification**. Player damage
+was disabled; comparison views used the existing camera/time/weather commands,
+and stock Jeeps were spawned for dynamic coverage. No game assets were edited.
+Frozen-camera comparisons isolate lighting; they are not a completed mission or
+a continuous-motion benchmark.
+
+The following are matched **unretouched window captures** (1920x1080 client,
+including the window border), copied byte-for-byte. Open each pair at full size;
+the effect is intentionally subtle. All five pairs restore the original image
+exactly in the final Off leg of Off/On/Off.
+
+| Actual scene | GI Off | GI On | Observation |
+| --- | --- | --- | --- |
+| Malden shaded wall beside yellow/brown ground | [Off](evidence/rtgi/malden-wall-off.png) | [On](evidence/rtgi/malden-wall-on.png) | Small warm lift on the lower wall, not uniform exposure. |
+| Malden rock, combined RT/AO/PBR/atmosphere | [Off](evidence/rtgi/malden-rock-off.png) | [On](evidence/rtgi/malden-rock-on.png) | Restrained ground-colored bounce on the rock; existing shading remains dominant. |
+| Everon brick barn beside green ground | [Off](evidence/rtgi/everon-brick-off.png) | [On](evidence/rtgi/everon-brick-on.png) | Greener indirect on the shaded wall; not the same warm tint as Malden. |
+| Everon partially open, shaded barn | [Off](evidence/rtgi/everon-barn-off.png) | [On](evidence/rtgi/everon-barn-on.png) | Very little bounce; the interior does not become a light source. |
+| Malden water/pier with combined water effects | [Off](evidence/rtgi/malden-water-off.png) | [On](evidence/rtgi/malden-water-on.png) | Small land-only change; sea and reflections remain unchanged. |
+
+For scale, whole-image mean absolute RGB differences in 8-bit output levels were
+`(0.752, 0.526, 0.148)` for the Malden wall and `(0.166, 0.174, 0.036)` for
+the Everon brick barn. In the latter wall rectangle `(900,400)-(1450,600)`,
+the mean positive increment was `(0.722, 0.760, 0.116)`. This is some colored
+bounce, **not dramatic red spill from every brick**. Secondary albedo is sampled
+from the actual ray hit; there is no warm screen-space term. The sheltered barn
+blocked 26,034 of 27,290 secondary sun rays in its recorded frame, with only
+`(0.006, 0.007, 0.011)` whole-image change. Shadowed hits cannot bounce the
+unoccluded sun term. The reduced ambient approximation can still contribute.
+
+Both islands were compared at midday (12:00), sunset (18:00), fully overcast
+midday and midnight, on 5 July 1985. Malden's corresponding mean RGB differences
+were `(0.752,0.526,0.149)`, `(0.299,0.139,0.056)`,
+`(0.110,0.094,0.088)` and **zero**. Everon also produced zero at midnight:
+eligible receivers remained counted, but bounce rays were zero. No night glow
+or uniform brightening was observed. Thin/missing geometry is still a possible
+leak source; these views do not establish leak-free coverage of every building.
+
+AA Off, TAA, FSR Quality and MSAA4 were each compared with dynamic RT Off/On on
+both islands. Dynamic eligible hits changed (for example 8,742 in the Everon
+MSAA4 vehicle view); toggling GI did not toggle dynamic RT or another effect.
+AA Off has fine world-anchored grain, especially at close range. MSAA rejects
+mixed-coverage pixels conservatively and may leave unlit edge samples. Static
+AA-Off/MSAA4 Off/On/Off pairs returned pixel-exactly to Off. TAA/FSR reset/reuse
+the existing history; differing jitter phases left approximately 0.2-4 RGB
+levels of whole-image Off/Off variation in several captures. Those frames are
+compatibility checks, not exact GI-difference measurements or proof of temporal
+convergence. Camera motion changes the sampled surface cells; fine crawling
+remains a prototype limitation. No new history or denoiser was added to hide it.
+
+Combined gameplay exercised RT sunlight/soft RT sunlight, RTAO, textured water
+reflections, refraction/foam, atmosphere/volumetric fog/clouds and the limited
+PBR prototype. The actual Malden sea rectangle `(300,850)-(1900,1100)` was
+pixel-identical Off/On. HUD and vehicle-interior rendering remained visually
+unchanged; GI affected the world outside the vehicle. SSAO-only plus GI, resize
+to 1280x720 and minimize/restore also recovered with continuing ray dispatch.
+Blended particles/cutouts are excluded by receiver eligibility and invalidation;
+this is not exhaustive testing of every particle or cockpit asset. Existing
+baked lighting, approximate terrain UVs, missing/proxy/damaged geometry and
+bounded sun coverage limit accuracy. This establishes working bounded transport,
+not a production material model, robust temporal GI or a complete indoor solver.
+
+To reproduce the strongest comparisons, freeze simulation after setting the
+date/weather and use these existing script-camera views (OFP position order;
+the third position component is height above ground):
+
+```sqf
+setDate [1985,7,5,12,0]; triCheatWeather 0; 0 setFog 0; setAccTime 0;
+triAA "off";
+// Malden wall; on Everon substitute [4903,7090,1.7] / [4930,7107,1.7].
+giCam = "camera" camCreate [3092,6339,1.7];
+giCam cameraEffect ["internal","back"]; showCinemaBorder false;
+giCam camSetTarget [3080,6350,1.7]; giCam camCommit 0;
+triRTGI "off"; // Capture after settling, then repeat with "on", then "off".
+```
+
+### RTX 4060 Ti measurements
+
+Windows, NVIDIA driver **617.14**, Vulkan, SDR, AA Off, render scale 100%,
+`CWR_VK_RTAO=1`, `CWR_VK_PROFILE=1`, validation disabled for timing, VSync Off.
+Other optional ray/water/PBR effects were Off, showing GI's independent cost.
+Each entry is a median over a roughly six-second settled collection after a
+three-second warm-up. Resolutions were verified from the actual world targets.
+The rock view is an ordinary Malden mission location; the more complex town
+view had 424 TLAS instances / 37,448 instanced triangles with dynamic RT On.
+A nearby stock Jeep was present in both views. Cameras and simulation were
+frozen for repeatability, so these are steady scene costs, not animated BLAS
+update or cold-start costs.
+
+All times below are milliseconds. CPU commands include scene/geometry work;
+the narrower GI recording interval excludes shared collection and AS updates.
+
+| Resolution / scene | Dynamic RT | GI GPU trace | GI GPU filter | Whole GPU Off / On | CPU commands Off / On | GI CPU record |
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
+| 1080p rock | Off | 0.236 | 0.428 | 2.009 / 2.146 | 1.110 / 1.203 | 0.010 |
+| 1080p rock | On | 0.238 | 0.428 | 1.819 / 2.143 | 1.087 / 1.262 | 0.011 |
+| 1080p town | Off | 0.177 | 0.362 | 1.983 / 2.183 | 1.713 / 2.121 | 0.011 |
+| 1080p town | On | 0.195 | 0.359 | 1.934 / 2.181 | 1.698 / 2.173 | 0.011 |
+| 1440p rock | Off | 0.230 | 0.448 | 2.115 / 2.251 | 1.101 / 1.191 | 0.011 |
+| 1440p rock | On | 0.230 | 0.446 | 1.963 / 2.247 | 1.065 / 1.252 | 0.011 |
+| 1440p town | Off | 0.202 | 0.450 | 2.098 / 2.648 | 1.697 / 2.117 | 0.012 |
+| 1440p town | On | 0.223 | 0.451 | 2.092 / 2.668 | 1.697 / 2.163 | 0.011 |
+
+The isolated GI pair costs **0.54-0.68 ms** in these samples. Whole-GPU Off/On
+deltas are not additive pass budgets: GPU clocks were not locked, and changes
+in scheduling/clock state affect the other passes. In particular, nearly equal
+rock timings at different resolutions must not be read as resolution-independent
+scaling. CPU frame intervals stayed around 6.172-6.173 ms despite VSync Off and
+an engine cap of 240; this paced run does not demonstrate uncapped FPS impact.
+CPU command overhead was approximately 0.09-0.48 ms. Shared cached AS timestamp
+intervals were effectively empty (about 0.000064-0.000096 ms), **not** measured
+rebuild costs.
+
+A separate live first-person walk repeated eight bounded forward-key holds
+with simulation running and dynamic RT On, at both resolutions. Position
+receipts verified movement from approximately `[7129,8009]` to `[7143,8023]`.
+The repeated path is not frame-identical (AI/animation and player acceleration
+continue), so the medians below are representative gameplay overhead, not a
+deterministic A/B subtraction. This open view mostly misses useful bounce
+geometry and is **not** the visual-benefit benchmark.
+
+| Live Malden walk | GI GPU trace / filter | Whole GPU Off / On | CPU commands Off / On | CPU frame Off / On |
+| --- | ---: | ---: | ---: | ---: |
+| 1080p | 0.096 / 0.153 | 1.864 / 2.017 | 3.004 / 3.739 | 6.174 / 6.203 |
+| 1440p | 0.080 / 0.069 | 1.950 / 2.074 | 2.893 / 3.598 | 6.176 / 6.201 |
+
+GI CPU recording was 0.013 ms in both walking runs. Costs varied with view and
+clock state; a last-completed 1080p sample was trace/filter/BLAS/TLAS
+`0.137/0.512/0.350/0.159` ms, and the 1440p sample was
+`0.138/0.582/0.238/0.114` ms. This exposes the live AS cost hidden by the frozen
+cache case. Those frames traced 313,979 / 558,002 bounce rays, hit 3,632 / 6,188
+triangles, accepted 483 / 615 diffuse hits, rejected 3,149 / 5,573 materials,
+and included 131 / 176 eligible dynamic hits respectively. The lower 1440p
+median is not a scaling claim; do not extrapolate these short, paced trials to
+worst-case performance.
+
+Representative completed-frame counters from the same runs:
+
+| Resolution / scene | Dynamic | Bounce rays / eligible receivers | Triangle hits | Eligible hits | Rejected materials | Secondary sun rays / blocked | Dynamic eligible hits |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| 1080p rock | Off | 329107 | 116960 | 74795 | 42165 | 67430 / 2526 | 0 |
+| 1080p rock | On | 329107 | 117062 | 74897 | 42165 | 67470 / 2596 | 177 |
+| 1080p town | Off | 322317 | 152208 | 146740 | 5468 | 129246 / 3879 | 0 |
+| 1080p town | On | 322317 | 160207 | 154657 | 5550 | 127915 / 8455 | 21311 |
+| 1440p rock | Off | 585109 | 207873 | 132941 | 74932 | 119855 / 4428 | 0 |
+| 1440p rock | On | 585109 | 208089 | 133157 | 74932 | 119923 / 4556 | 354 |
+| 1440p town | Off | 573957 | 271366 | 261697 | 9669 | 230668 / 7062 | 0 |
+| 1440p town | On | 573957 | 285645 | 275848 | 9797 | 228334 / 15242 | 38155 |
+
+### Build and validation
+
+Focused Vulkan and GL33 game/test builds succeeded. Vulkan driver-free policy
+and lifetime tests passed **504 checks**, including default-Off, prerequisite
+rejection, invalid controls, dispatch truthfulness, independent AO selection
+and resource-failure reporting. The focused graphics/shader/decoder/factory/
+window tests passed **2,606 assertions / 92 cases** on Vulkan and **2,360 /
+88 cases** on GL33, with `CWR_STOCK_DATA` pointing to the authorized game data
+(no skipped stock-bank test). Both single-sample and MSAA GI shader variants
+compiled; compute SPIR-V validation passed.
+
+Live Vulkan validation ended with **zero errors and zero warnings** in the
+Malden matrix (29,942 submitted/presented frames), Malden walking/coast/rock
+(10,403), Everon matrix/gameplay (53,473), and final cockpit/SSAO/resize recovery
+(9,463 submitted / 9,462 presented). The one unpresented resize/recovery frame
+is not a validation error. A separate missing-opt-in launch explicitly rejected
+`triRTGI "on"`; GL33 likewise returned `UNSUPPORTED: RTGI requires Vulkan`
+and continued normal rendering. One earlier diagnostic script used an invalid
+command and exited cleanly in test mode; it is excluded from these results.
+
+Local full captures, command receipts, executable hashes, counter samples and
+timing logs are retained under `build/shadow-live/gi-*` in the original checkout;
+the matched representative images above are committed. Main visual-matrix and 1080p timing runs
+used executable SHA-256 `7FD4624AB333E3AF584C67AD146DCEFCE0043FE8E62EF00B64F81C1D7C9E2D9E`;
+the error-path-only SSAO fallback guard and 1440p/compatibility/walking runs used
+`992658277DB8E3957C66E24C26C54BD34285FA22EEEF47EF4A2AB50F4D154CDE`.
+The final status-only addition (zero eligible/material counters before any scene
+exists) was rebuilt as
+`04AED84E3588175453CC0C00F27DA08BCA988CCFE83F799BE133EC01AFDE3340` and
+passed another 7,645-frame live validation run with zero errors/warnings,
+independent-effect status checks, and pixel-exact Off/On/Off restoration.
+None of these builds includes private DLSS/NGX integration. Production RTGI remains
+explicitly incomplete in the roadmap.
+
 ## RT water hit-shading fast path (2026-10-13)
 
 Follow-up to `7514b69`: ordinary water now calls `reflectionSurface()`, which
@@ -27,8 +281,9 @@ Both specialized SPIR-V variants validate. Freezing/optimizing the disabled
 variant removes the world-to-object fetch, transpose and ten diagnostic
 atomic-add instruction sites (24 to 14 total sites in the water shader).
 BLAS/TLAS collection, caches, budgets, material coverage, color-demand gating,
-resource sizes and lifetimes are unchanged. Full diffuse inputs remain separate
-from legacy water lighting; **RTGI itself is still unimplemented**.
+resource sizes and lifetimes are unchanged. At this historical foundation
+milestone, full diffuse inputs remained separate from legacy water lighting and
+RTGI transport was not yet implemented; the prototype above adds that transport.
 
 ### Verification against the foundation
 

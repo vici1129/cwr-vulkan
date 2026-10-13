@@ -160,7 +160,7 @@ bool VulkanContext::CreateAAResources(VkFormat format)
 
     _refractionEnabled = _refractionRequested;
     _shoreFoamEnabled = _shoreFoamRequested;
-    _rtWaterTargets = WaterSurfaceEnabled();
+    _rtWaterTargets = WaterSurfaceEnabled() || RTGIEnabled();
     _rtShadowTargets = RTShadowsEnabled() || _rtWaterTargets || _contactEnabled;
     VkAttachmentDescription attachments[5]{};
     auto& color = attachments[0];
@@ -633,6 +633,9 @@ void VulkanContext::DrawAAPass(unsigned index, VkFramebuffer framebuffer, VkDesc
 void VulkanContext::FinishAAWorld(const std::array<float, 4>& projection)
 {
     DrawWaterRefraction(); // RT Fresnel reflections are composed over the transmitted bottom.
+    const bool ssaoBeforeGI = RTGIEnabled() && !RTAOEnabled();
+    if (ssaoBeforeGI)
+        DrawSSAO(projection); // Ambient occlusion precedes the visibility-tested bounce.
     _contactDrew = false;
     if (RaySceneEnabled())
     {
@@ -642,16 +645,19 @@ void VulkanContext::FinishAAWorld(const std::array<float, 4>& projection)
         }
         catch (const std::exception& error)
         {
-            if (!RTReflectionsEnabled())
+            if (RTGIEnabled())
+                FailRTGI(error.what());
+            else if (!RTReflectionsEnabled())
                 throw;
-            FailRTReflections(error.what());
+            else
+                FailRTReflections(error.what());
         }
     }
     // The RT sunlight branch composes both visibilities before water/AO. If it
     // did not run (including an empty RT scene), contact remains independent.
     if (!_contactDrew)
         DrawContactShadows(projection);
-    if (!RTAOEnabled())
+    if (!RTAOEnabled() && !ssaoBeforeGI)
         DrawSSAO(projection);
     if (!_worldActive)
         return;

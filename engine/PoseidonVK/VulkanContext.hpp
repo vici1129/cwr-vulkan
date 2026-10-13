@@ -211,6 +211,9 @@ class VulkanContext
     void DrawSSAO(const std::array<float, 4>& projection);
     std::string SetRTAO(std::string_view mode);
     bool RTAOEnabled() const { return _rtaoEnabled && _rtaoAvailable; }
+    std::string SetRTGI(std::string_view mode);
+    void FailRTGI(std::string_view reason);
+    bool RTGIEnabled() const { return _rtGIEnabled && _rtaoAvailable; }
     std::string SetRTShadows(std::string_view mode);
     bool RTShadowsEnabled() const { return _rtShadowsEnabled && _rtaoAvailable; }
     std::string SetSoftRTShadows(std::string_view mode);
@@ -267,10 +270,9 @@ class VulkanContext
     void SetWaterFrame(const std::array<float, 16>& camera, const std::array<float, 4>& projection,
                        const std::array<float, 4>& originTime = {})
     { _waterCamera = camera; _waterProjection = projection; _waterOriginTime = originTime; }
-    bool RaySceneEnabled() const { return RTAOEnabled() || RTShadowsEnabled() || RTReflectionsEnabled(); }
-    // Water is currently the only hit-color consumer. Add future diffuse transport
-    // here when implemented; AO/shadows alone must not upload opaque color textures.
-    bool RTHitDataEnabled() const { return RTReflectionsEnabled(); }
+    bool RaySceneEnabled() const { return RTAOEnabled() || RTShadowsEnabled() || RTReflectionsEnabled() || RTGIEnabled(); }
+    // AO/shadows alone must not upload opaque color textures.
+    bool RTHitDataEnabled() const { return RTReflectionsEnabled() || RTGIEnabled(); }
     void SetReflectionLighting(const std::array<std::array<float, 4>, 10>& data) { _reflectionLighting = data; }
     void SetRTSun(const std::array<float, 4>& sun) { _rtSun = sun; }
     void SetRTCoverage(uint32_t terrain, uint32_t foliage)
@@ -371,6 +373,8 @@ class VulkanContext
     std::array<float, 4> _rtSun{};
     uint32_t _rtTerrain = 0, _rtFoliage = 0;
     bool _rtaoRequested = false, _rtaoAvailable = false, _rtaoEnabled = false;
+    bool _rtGIEnabled = false;
+    std::string _rtGIFailure;
     bool _rtDynamicEnabled = false;
     std::string _rtaoReason = "restart with CWR_VK_RTAO=1 to opt into Vulkan ray-query capabilities";
     void InitRTAO();

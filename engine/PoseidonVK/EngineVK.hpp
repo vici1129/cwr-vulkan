@@ -57,6 +57,7 @@ class EngineVK final : public Engine
     bool UsesHDRLighting() const override { return true; }
     bool SetSSAO(bool enabled, float strength, float radius, float bias, float fade) override;
     RString SetRTAO(RString mode) override { return _vk.SetRTAO(static_cast<const char*>(mode)).c_str(); }
+    RString SetRTGI(RString mode) override { return _vk.SetRTGI(static_cast<const char*>(mode)).c_str(); }
     void CollectRTAOScene();
     RString SetRTDynamic(RString mode) override;
     void CaptureRayGeometry(Object&, const Shape&, int, const FrameBase&) override;

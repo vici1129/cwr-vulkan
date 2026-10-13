@@ -194,9 +194,12 @@ void EngineVK::BeginWorldEffects(bool enabled)
         }
         catch (const std::exception& error)
         {
-            if (!_vk.RTReflectionsEnabled())
+            if (_vk.RTGIEnabled())
+                _vk.FailRTGI(error.what());
+            else if (!_vk.RTReflectionsEnabled())
                 throw;
-            _vk.FailRTReflections(error.what());
+            else
+                _vk.FailRTReflections(error.what());
         }
         UpdateAtmosphere();
         UpdateEnvironment();

@@ -777,7 +777,9 @@ bool VulkanContext::RecreateSwapchain(uint32_t width, uint32_t height)
         }
         catch (const std::exception& error)
         {
-            if (RTReflectionsEnabled())
+            if (RTGIEnabled())
+                FailRTGI(error.what());
+            else if (RTReflectionsEnabled())
                 FailRTReflections(error.what());
             else if (_refractionRequested || _shoreFoamRequested)
                 FailWaterRefraction(error.what());

@@ -1,0 +1,89 @@
+#version 460
+#extension GL_EXT_ray_query : require
+#extension GL_EXT_buffer_reference2 : require
+#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
+#extension GL_GOOGLE_include_directive : require
+#include "rtao_depth.glsl"
+#include "rtgi_receiver.glsl"
+#include "ray_material.glsl"
+#include "ray_surface.glsl"
+#include "ray_lighting.glsl"
+#define WEATHER_SET 1
+#include "weather.glsl"
+layout(local_size_x=8,local_size_y=8) in;
+layout(set=0,binding=1) uniform accelerationStructureEXT scene;
+layout(set=0,binding=2,rgba32f) uniform writeonly image2D resultGI;
+layout(set=0,binding=3,std430) buffer Counters { uint count[28]; } counters;
+shared uint counts[8];
+vec4 traceGI(ivec2 pixel) {
+    ivec2 full=min(pixel*2+1,depthSize()-1);
+    vec4 receiver=giReceiver(full);
+    if(receiver.w>=0) return vec4(0);
+    vec3 p=positionAt(full),n=giNormal(full,p);
+    float distance=length(p);
+    if(distance>=ao.settings.w || dot(n,n)<.5) return vec4(0);
+    atomicAdd(counts[6],1);
+    vec4 result=vec4(0,0,0,p.z);
+    // No moon/night emission or eye-adaptation gain. Ambient is a small,
+    // explicitly approximate secondary incident term, only during daylight.
+    float daylight=clamp(ao.sun.w,0,1);
+    if(daylight<=.001) return result;
+    n=normalize(mat3(ao.camera)*n);
+    vec3 world=(ao.camera*vec4(p,1)).xyz;
+    vec3 tangent=normalize(cross(abs(n.y)<.95?vec3(0,1,0):vec3(1,0,0),n));
+    vec3 bitangent=cross(n,tangent);
+    uvec3 cell=uvec3(ivec3(floor(world*32)));
+    uint hash=cell.x*1597334677u^cell.y*3812015801u^cell.z*2798796415u;
+    hash^=hash>>16;hash*=2246822519u;hash^=hash>>13;
+    float u=(float(hash>>16)+.5)/65536;
+    float phi=6.2831853*(float(hash&65535u)+.5)/65536;
+    vec3 direction=tangent*cos(phi)*sqrt(u)+bitangent*sin(phi)*sqrt(u)+n*sqrt(1-u);
+    rayQueryEXT query;
+    rayQueryInitializeEXT(query,scene,0,255,world+n*ao.settings.y,.005,direction,ao.settings.x);
+    while(rayQueryProceedEXT(query)) {
+        if(rayQueryGetIntersectionTypeEXT(query,false)==gl_RayQueryCandidateIntersectionTriangleEXT && opaqueHit(query))
+            rayQueryConfirmIntersectionEXT(query);
+    }
+    atomicAdd(counts[0],1);
+    if(rayQueryGetIntersectionTypeEXT(query,true)!=gl_RayQueryCommittedIntersectionTriangleEXT) return result;
+    atomicAdd(counts[1],1);
+    HitSurface hit=hitSurface(query);
+    if(!hit.diffuseEligible) { atomicAdd(counts[3],1);return result; }
+    atomicAdd(counts[2],1);
+    if(hit.kind==3u) atomicAdd(counts[7],1);
+    vec3 sun=normalize(ao.sun.xyz);
+    float cosine=max(dot(hit.normal,sun),0);
+    // Never illuminate the reverse geometric side, even with a smoothed normal.
+    if(dot(hit.geometricNormal,sun)<=0) cosine=0;
+    float visibility=0;
+    if(cosine>0 && max(max(raySunlightLinear().r,raySunlightLinear().g),raySunlightLinear().b)>.00001) {
+        rayQueryEXT shadow;
+        rayQueryInitializeEXT(shadow,scene,gl_RayFlagsTerminateOnFirstHitEXT,255,
+            hit.position+hit.geometricNormal*.02,.005,sun,80.0);
+        while(rayQueryProceedEXT(shadow)) {
+            if(rayQueryGetIntersectionTypeEXT(shadow,false)==gl_RayQueryCandidateIntersectionTriangleEXT && opaqueHit(shadow))
+                rayQueryConfirmIntersectionEXT(shadow);
+        }
+        atomicAdd(counts[4],1);
+        bool blocked=rayQueryGetIntersectionTypeEXT(shadow,true)==gl_RayQueryCommittedIntersectionTriangleEXT;
+        if(blocked) atomicAdd(counts[5],1);
+        visibility=blocked?0:cloudSunlight(hit.position);
+    }
+    vec3 incident=rayAmbientLinear()*.15+raySunlightLinear()*cosine*visibility;
+    vec3 reflected=clamp(hit.albedo,vec3(0),vec3(.8))*incident;
+    // Cosine/PDF and Lambertian pi cancel for this single cosine-weighted
+    // sample. Legacy coefficients are uncalibrated; gain/range taper are biased
+    // prototype bounds, not an inverse-square factor on transported radiance.
+    float fade=(1-smoothstep(ao.settings.w*.7,ao.settings.w,distance))*
+               (1-smoothstep(ao.settings.x*.8,ao.settings.x,rayQueryGetIntersectionTEXT(query,true)));
+    result.rgb=reflected*(ao.settings.z*daylight*fade);
+    return result;
+}
+void main() {
+    if(gl_LocalInvocationIndex<8) counts[gl_LocalInvocationIndex]=0;
+    barrier();
+    ivec2 p=ivec2(gl_GlobalInvocationID.xy);
+    if(all(lessThan(p,imageSize(resultGI)))) imageStore(resultGI,p,traceGI(p));
+    barrier();
+    if(gl_LocalInvocationIndex<8) atomicAdd(counters.count[20+gl_LocalInvocationIndex],counts[gl_LocalInvocationIndex]);
+}

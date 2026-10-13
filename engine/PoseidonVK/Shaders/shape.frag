@@ -196,6 +196,11 @@ void main() {
     outColor.rgb = mix(fogColor, outColor.rgb, visibility);
 #ifdef RT_WATER
     outWater=vec4(0);
+    // Negative view depth tags opaque diffuse GI receivers. RGB is bounded
+    // base-texture reflectance times fog transmittance, never lit scene color.
+    // Detail/baked lighting and material tint are intentionally not inferred.
+    if(lighting.rtWater.w>.5)
+        outWater=vec4(clamp(texel.rgb,vec3(0),vec3(.8))*visibility,-1.0/gl_FragCoord.w);
     // Foam-only rain marker: MIN writes only R; depth, fog and the other normal
     // component survive. Refraction and RT still reject these rain-covered pixels.
     if(draw.reserved<-.5) outWater.x=-2-outColor.a;

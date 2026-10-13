@@ -158,6 +158,13 @@ void EngineVK::PrepareTriangleTL(const MipInfo& mip, const render::LegacySpec& s
     _sectionAlphaCutoff = state.cutoff;
     _sectionDepthTest = state.depthTest;
     _sectionDepthWrite = state.depthWrite;
+    // Spare water component marks diffuse receivers; it does not enable water.
+    _lighting.rtWater[3] = _vk.RTGIEnabled() && _shadowWorld && !_waterSurface &&
+        mip._texture && alpha == AlphaStats::Opaque && !_sectionBlend &&
+        _sectionDepthTest && _sectionDepthWrite && _sectionAlphaCutoff == 0 &&
+        _lighting.ambient[3] > 0 && _secondaryMode < 1.5f &&
+        !((_shapeFlags | render::MergeLegacy(spec)) &
+          (IsColored | IsLight | DisableSun | NoDropdown | IsShadow | IsAlphaFog | SpecularTexture)) ? 1.f : 0.f;
     _lighting.pbr = {};
     // Only the native opaque world path has the original surface normals and
     // separate light/material inputs. Never relabel CPU-lit or blended geometry.

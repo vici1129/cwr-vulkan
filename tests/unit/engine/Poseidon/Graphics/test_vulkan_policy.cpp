@@ -469,6 +469,18 @@ int main()
         Check(!context.SSAOEnabled(), "SSAO must be disabled by default");
         Check(context.SetSSAO(true, 0.7f, 1.2f, 0.03f, 80), "valid SSAO controls are accepted");
         Check(!context.RTAOEnabled(), "RTAO defaults off");
+        Check(!context.RTGIEnabled(), "RTGI defaults off");
+        Check(context.SetRTGI("on").starts_with("UNSUPPORTED:"), "GI requires opted-in ray-query capabilities");
+        Check(context.SetRTGI("invalid").starts_with("INVALID:"), "GI rejects invalid controls");
+        Check(context.SetRTGI("status").find("lastWorldDispatch=no") != std::string::npos,
+              "GI never claims execution from initialization");
+        Check(context.SetRTGI("off").starts_with("OK:") && !context.RaySceneEnabled() && context.SSAOEnabled(),
+              "GI off preserves independent AO selection");
+        context.FailRTGI("test GI resources unavailable");
+        Check(!context.RTGIEnabled() && !context.RaySceneEnabled() && context.SSAOEnabled(),
+              "GI resource failure preserves ordinary lighting and independent SSAO");
+        Check(context.SetRTGI("status").find("fallback=test GI resources unavailable") != std::string::npos,
+              "GI resource failure exposes the actual fallback reason");
         Check(!context.RTDynamicEnabled() && context.SetRTDynamic("status").starts_with("RTDynamic=off active=no"),
               "dynamic geometry defaults off independently of the ray effects");
         Check(context.SetRTDynamic("on").starts_with("UNSUPPORTED:"), "dynamic geometry requires opted-in RT hardware");
