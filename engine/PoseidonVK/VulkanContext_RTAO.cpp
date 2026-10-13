@@ -821,7 +821,7 @@ void VulkanContext::RetireRTAO()
     slot.buildScratch.clear();
 }
 
-void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
+void VulkanContext::DrawRTAO(const std::array<float, 4>& projection, bool& ssaoHandled)
 {
     if (!_frameOpen || !_worldActive || !RaySceneEnabled() || !_rtao)
         return;
@@ -1306,6 +1306,13 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
             stamp(filterStamp);
             stamp(filterStamp + 1);
             continue;
+        }
+        if (effect == 3 && !RTAOEnabled())
+        {
+            // Subtract captured sunlight before multiplying by SSAO, then add GI.
+            // Report completion even if a later GI failure takes the caller's fallback.
+            DrawSSAO(projection);
+            ssaoHandled = true;
         }
         const double cpuStart = _profile.enabled ? ProfileClock() : 0;
         const auto set = effect == 3 ? slot.giSet : effect == 2 ? slot.waterSet : effect ? slot.sunSet : slot.set;

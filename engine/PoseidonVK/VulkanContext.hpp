@@ -379,7 +379,7 @@ class VulkanContext
     std::string _rtaoReason = "restart with CWR_VK_RTAO=1 to opt into Vulkan ray-query capabilities";
     void InitRTAO();
     void RetireRTAO();
-    void DrawRTAO(const std::array<float, 4>& projection);
+    void DrawRTAO(const std::array<float, 4>& projection, bool& ssaoHandled);
     void DestroyRTAOTargets() noexcept;
     void DestroyRTAO() noexcept;
     friend struct VulkanCommandStateTest;

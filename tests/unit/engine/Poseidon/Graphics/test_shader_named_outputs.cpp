@@ -274,6 +274,37 @@ TEST_CASE("Vulkan AA native-resolution footprint excludes neighboring depth", "[
     }
 }
 
+TEST_CASE("RTGI keeps SSAO after shadow subtraction and before bounce addition", "[Graphics][Shaders][rtgi-order]")
+{
+    const auto root = std::filesystem::path(TESTS_ROOT_DIR).parent_path() / "engine" / "PoseidonVK";
+    const auto aa = ReadTextFile(root / "VulkanContext_AA.cpp");
+    const auto rt = ReadTextFile(root / "VulkanContext_RTAO.cpp");
+    // Pin the actual call sites, not only a second implementation of the math.
+    const auto finish = aa.find("void VulkanContext::FinishAAWorld(");
+    REQUIRE(finish != std::string::npos);
+    const auto world = aa.substr(finish);
+    REQUIRE(world.find("bool ssaoHandled = false;") != std::string::npos);
+    REQUIRE(world.find("DrawRTAO(projection, ssaoHandled);") < world.find("DrawSSAO(projection);"));
+    REQUIRE(world.find("if (!RTAOEnabled() && !ssaoHandled)") != std::string::npos);
+    REQUIRE(rt.find("for (int effect : {1, 2, 0, 3})") != std::string::npos);
+    REQUIRE(std::regex_search(rt, std::regex(
+        R"(if\s*\(effect == 3 && !RTAOEnabled\(\)\)\s*\{[\s\S]*?DrawSSAO\(projection\);\s*ssaoHandled = true;\s*\})")));
+    REQUIRE(rt.find("bool& ssaoHandled") != std::string::npos); // survives later exceptions
+
+    const float color = 1.f, shadow = .6f;
+    for (float ao : {0.f, .5f, 1.f})
+    {
+        const float off = (color - shadow) * ao;
+        for (float bounce : {0.f, .1f})
+        {
+            const float fixed = (color - shadow) * ao + bounce;
+            REQUIRE(std::abs((fixed - off) - bounce) < 1e-6f);
+        }
+        const float oldZeroBounce = color * ao - shadow;
+        REQUIRE(std::abs((oldZeroBounce - off) + shadow * (1.f - ao)) < 1e-6f);
+    }
+}
+
 TEST_CASE("Post-resolve RT corrections reject mixed MSAA coverage", "[Graphics][Shaders][vulkan-aa]")
 {
     using namespace RTCoverage;

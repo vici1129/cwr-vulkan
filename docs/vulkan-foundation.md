@@ -1,5 +1,26 @@
 # Vulkan backend development
 
+## RTGI / SSAO composition-order correction (2026-10-13)
+
+Corrects `c8a582f` with SSAO On, RTAO Off and RT sunlight shadows On: GI had
+moved SSAO ahead of the unattenuated sunlight subtraction, changing
+`(color - shadow) * AO` to `color * AO - shadow` even with zero bounce.
+SSAO now runs after sunlight/contact shadows and water composition, immediately
+before GI. A per-call completion flag preserves exactly-once SSAO fallback for
+empty scenes and failures before/after that point. GI-Off and RTAO paths retain
+their ordering; no shader, resource, sampling or lighting-parameter changes.
+
+Added source-order and arithmetic regression checks. Focused Vulkan/GL33 builds
+passed, with 504 policy checks and 2,622 / 2,376 graphics assertions respectively.
+A direct diagnostic Malden rock-view comparison reproduced 13,956 darkened
+pixels (maximum 16 channel levels) on the old executable, considering only
+pixels identical in both Off captures. The fixed, settled AA-Off/MSAA4 pairs
+restored Off pixel-exactly; only 23/24 pixels had residual one-level negative
+differences. RTAO coexistence was also exercised. The fixed run completed
+19,638 frames with zero Vulkan validation errors/warnings. Raw local evidence
+is retained in `build/shadow-live/gi-order-before` and `gi-order-after` in the
+original checkout; this is a targeted regression check, not a new full matrix.
+
 ## One-bounce diffuse RTGI prototype (2026-10-13)
 
 Built from public main `9d8886b` in an isolated worktree, preserving the original
