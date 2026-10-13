@@ -253,7 +253,7 @@ void EngineVK::DrawSectionTL(const Shape& shape, int begin, int end)
         color[i] *= _materialColor[i];
     if (!_vk.FrameOpen())
         return; // Minimized drawable: no acquired image, but unsupported states above still fail.
-    if (_lighting.pbr[0] > 0) _vk.RecordPBRDraw(_lighting.pbr[0]);
+    if (_lighting.pbr[0] > 0) _vk.RecordPBRDraw();
     _vk.DrawMesh(buffer->Buffers(), range.begin, range.end - range.begin, sizeof(VertexIndex) == 2, _shapeMVP, color,
                  _sectionTexture, _sectionSampler, _sectionAlphaCutoff, _sectionBlend, false, _sectionDepthTest, nullptr,
                  _sectionDetail, _secondaryMode, _bumpLight, 0, 0, _sectionDepthWrite, &_lighting, _sectionShadow);

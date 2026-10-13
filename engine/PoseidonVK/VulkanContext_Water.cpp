@@ -39,17 +39,18 @@ std::string VulkanContext::SetRainRipples(std::string_view mode, float rain)
 
 std::string VulkanContext::SetPBR(std::string_view mode)
 {
-    if (mode == "status") return std::string("PBR prototype=stock-dielectric-v1 requested=") +
+    if (mode == "status") return std::string("PBR prototype=stock-dielectric-v2 requested=") +
         (_pbrEnabled ? "on" : "off") +
         "; native opaque Shape only: data/skala_piskovec2.pac (matte rock), "
-        "data/sloupek_bily_orezly_.pac (painted signposts); "
+        "data/sloupek_bily_orezly_.pac (painted signposts), "
+        "data/strecha_tasky_vln.pac + data/strecha_tasky_vln90.pac (roof tiles r=0.90), "
+        "data/prkna_dark.pac (weathered wood r=0.85); "
         "F0=0.04, metallic=0; software/other materials legacy; no RT requirement; "
-        "native draws since toggle stone=" + std::to_string(_pbrDraws[0]) +
-        " paint=" + std::to_string(_pbrDraws[1]);
+        "native draws since toggle=" + std::to_string(_pbrDraws);
     if (mode != "on" && mode != "off") return "INVALID: triPBR on, off, status";
     if (_pbrEnabled != (mode == "on")) { ResetTemporalHistory(); _pbrDraws = {}; }
     _pbrEnabled = mode == "on";
-    return "OK: PBR stock-dielectric-v1 " + std::string(mode);
+    return "OK: PBR stock-dielectric-v2 " + std::string(mode);
 }
 
 std::string VulkanContext::SetWetSurfaces(std::string_view mode)

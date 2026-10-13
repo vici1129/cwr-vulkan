@@ -1,6 +1,185 @@
 # Vulkan backend development
 
+## Targeted PBR expansion: roof tiles and exterior wood (2026-10-13)
+
+Built from public main `cc08b1d` in the isolated public worktree. The original
+checkout's private DLSS/NGX and unrelated work are not changed or published.
+This extends the existing opt-in prototype, **not the whole PBR milestone**.
+`triPBR "on"`, `"off"`, `"status"` are unchanged; default remains Off, Vulkan
+only, without an RT requirement. Status now identifies `stock-dielectric-v2`,
+all five exact textures and a total native draw count since the last toggle.
+The old roughness-based stone/paint counter would mislabel the new rough surfaces,
+so it is replaced by that total; this is not a material registry.
+
+### Three additional textures, two material families
+
+Original `Dta/Data.pbo`, `Data3D.pbo` and Malden/Everon object tables were inspected
+read-only with PoseidonTools, including decoded pixels, model sections and LODs.
+The selection is deliberately smaller than a building conversion:
+
+| Exact stock texture | Assumption | Evidence / boundary |
+| --- | --- | --- |
+| `data\strecha_tasky_vln.pac` | Weathered, diffuse-dominant roof tiles; roughness 0.90 | Dedicated repeated tile image, not a wall/window atlas. Opaque native roof sections on stock `dum_mesto2l`, `cihlovej_dum` and related models. No glossy glaze or precise tile composition inferred. |
+| `data\strecha_tasky_vln90.pac` | Same roughness 0.90 | The stock rotated tile variant; selecting both avoids treating adjacent orientations of the same roofing differently. This is not a third distinct physical material. |
+| `data\prkna_dark.pac` | Dark weathered exterior wood; roughness 0.85 | Dedicated wood grain, used separately for roof-edge/fascia/eave geometry on `dum_mesto2l`, `dum_mesto`, farm buildings and barns. Not their wall, window or gutter textures. No varnish inferred. |
+
+All three use existing **F0=0.04, metallic=0**, independent of legacy specular
+power. These are conservative, unmeasured perceptual roughness assumptions, not
+recovered optical properties. The original rock at 0.85 and painted signpost
+default/mapping at 0.60 / 0.50–0.65 are unchanged. Exact extension and addon-path
+mismatches still fall back to legacy; there is no prefix or category matching.
+
+No BRDF, shader, uniform layout, lighting composition or GL33 code is changed.
+The existing GGX/Smith/Schlick native Shape branch still replaces legacy direct
+sun/specular, evaluates in linear HDR, and uses existing transformed normals,
+ambient/emissive, local-light visibility, CSM/RT/cloud sunlight, fog and tone
+mapping. It does not add light after shadows. Eligibility gates remain intact:
+CPU-lit geometry, blended/transparent textures, special/suppressed-light modes,
+terrain secondary modes, foliage and water do not become PBR. RT reflection-hit
+shading is unchanged. Existing wet surfaces still classify ground/roads, **not
+these roofs**; rainy tests verify coexistence, not a new wet-roof BRDF.
+
+### Rejected candidates and useful obstacles
+
+- `kamennazed.pac`: an identifiable stone/mortar wall with a brick cap strip,
+  but the actual Malden `zed_kamenna` sample took the CPU-lit software path.
+- `telegraf_sloup.pac`: identifiable weathered wood on utility/lamp poles, with
+  separate hardware textures, but the sampled Malden pole also used software
+  geometry. An initial wall/pole Off/On/Off capture changed zero pixels. Temporary
+  path instrumentation confirmed both routes and was removed, not shipped.
+- `drevo_dirkate.pac`: plausible weathered boards, but pallet LODs switch to
+  differently authored side/front/top cutout textures; not a useful first choice
+  for consistent coverage. `newplot.pac` combines fence metal, masonry and columns;
+  its mixed atlas and transparent lower LODs are excluded.
+- `beton_universal.pac` / concrete obstacles: no suitable placed obstacle sample
+  was established in the inspected Malden/Everon tables. No invented placement
+  or software-path promotion is used to justify selection.
+- Mixed building/vehicle atlases and interior suppressed-light furniture remain
+  excluded. No sufficiently justified dedicated metallic example was selected.
+
+### Visual and integration verification
+
+Actual stock `dum_mesto2l.p3d` placements include Malden object **37880** at raw
+world `(5425.9,48.0,2805.8)` and Everon **16968** at `(1262.9,70.3,5955.2)`.
+Stock single-player missions `01TakeTheCar.ABEL` and `06Ninjas.EDEN` were launched
+through the existing diagnostic harness, not claimed as Steam-route acceptance.
+Close diagnostic views include Malden `[5439,50,2811,-1,0.2,0]` and Everon
+`[1283,72,5952,-1,0.2,0.1]`; additional sides/grazing views check transformed
+instances and boundaries against neighboring legacy walls, gutters and roofs.
+
+Both islands were exercised at midday, sunrise/sunset, overcast, night, light/
+heavy rain and fog. Existing CSM, soft CSM, RT sunlight, soft RT, cloud shadows,
+atmosphere, local shadows and wet-ground effects were exercised. Live status
+confirmed populated CSM and actual RT ray dispatch/hits, not just enabled flags.
+AA Off, TAA, FSR Quality and MSAA4 were checked; Malden combined sunlight effects
+and Everon shadowed local lights provide the AA matrices. Internal FP16 HDR and
+SDR tone mapping work; requesting HDR10 used the existing SDR fallback because
+the current surface/display did not expose HDR10. Physical HDR10 is unverified.
+
+Night tests use the stock Jeep's existing headlights. Ordinary ground-facing
+headlights did not reach the roof: that correctly did not create a roof highlight.
+A separate frozen, upward-aimed Jeep fixture exercises the roof directly, with
+two active 1024-square shadow maps and populated casters. This is a diagnostic
+light-angle test, not a claim about a normal level-road headlight pose. No new
+light type, texture, reflector or asset edit is introduced.
+
+Representative images are matched, unretouched full-window PNGs. Both tile
+orientations and the dark wood fascia are visible in the Malden close view.
+
+| Example | Legacy | PBR |
+| --- | --- | --- |
+| Malden tiles and wood fascia, midday | [PNG](evidence/pbr-expansion/malden-wood-close-off.png) | [PNG](evidence/pbr-expansion/malden-wood-close-on.png) |
+| Malden sunrise | [PNG](evidence/pbr-expansion/malden-sunrise-off.png) | [PNG](evidence/pbr-expansion/malden-sunrise-on.png) |
+| Malden rain and wet-ground coexistence | [PNG](evidence/pbr-expansion/malden-heavy-off.png) | [PNG](evidence/pbr-expansion/malden-heavy-on.png) |
+| Everon roof, neighboring legacy surfaces | [PNG](evidence/pbr-expansion/everon-roof-wood-off.png) | [PNG](evidence/pbr-expansion/everon-roof-wood-on.png) |
+| Everon upward-aimed stock headlights/local shadows | [PNG](evidence/pbr-expansion/everon-headlight-front-off.png) | [PNG](evidence/pbr-expansion/everon-headlight-front-on.png) |
+
+Settled AA-Off/MSAA4 Off/On/Off captures restore exactly. The initial Malden
+`malden-tiles` capture includes changing mission UI; Everon's first sunrise
+transition also was not settled. Neither is a parity pass; the later settled
+sunrise/close captures restore identically. TAA/FSR retain expected jitter/history
+differences and are qualitative checks, not pixel-identical or exhaustive
+ghosting certification. Raw comparison records: [Malden](evidence/pbr-expansion/malden-pairs.jsonl),
+[Everon](evidence/pbr-expansion/everon-pairs.jsonl).
+
+In the Malden close pair, neighboring legacy wall `(1000,850)-(1200,1000)`,
+chimney `(810,415)-(865,490)` and sky `(200,100)-(500,250)` ROIs change **zero
+pixels**. The selected wood fascia and both roof orientations change. The original
+rock and painted post were rechecked in separate pairs, both with exact Off return.
+
+Vulkan and GL33 RelWithDebInfo builds pass. Focused `[vulkan-shape]`, `[vulkan-aa]`,
+`[ShadowMath]` tests pass: **1,580 assertions / 70 cases** for Vulkan and
+**1,540 / 69** for GL33; driver-free Vulkan policy/lifetime suite **496 checks**.
+The latter's intentional teardown-error fixture is not a live validation error.
+The runtime executable SHA-256 is
+`927436B4DA7537ECB6D973807DAB0717C57F8438F281D654F650006D5AEED01F`.
+Malden's matrix presented **59,301** frames and Everon's **71,502**, each with
+**zero Vulkan validation errors or warnings**. Everon exited through the harness;
+Malden exited normally after a player relocation crossed the stock mission's
+`VzdalujeSeMoc E4` / END4 boundary, not a renderer failure. A fresh in-area
+Malden physical-input run presented another **3,686** frames with zero validation
+errors/warnings and exited through the harness. Physical forward input moved the
+PBR-enabled soldiers about **4.9 m on each island**, with Caps Lock restored.
+That fresh no-RT-capabilities roof comparison restored the world exactly; a
+fading stock HUD panel differed only inside `(39,53)-(423,333)`, so it is not
+claimed as full-frame parity ([record](evidence/pbr-expansion/no-rt-pairs.jsonl)).
+GL33 launched, returned unsupported for all three PBR commands, and its
+Off/On/Off images changed **zero pixels** ([record](evidence/pbr-expansion/gl33-pairs.jsonl)).
+
+### Cost and remaining limitations
+
+Windows, RTX 4060 Ti 8 GB, driver 617.14, Core i7-12700F. Existing periodic GPU
+timestamps and CPU profiler, AA Off, 100% scale, vsync off, validation and RT
+capabilities disabled. No builds ran during timing. Each view uses four
+Off/On/On/Off blocks, discarding three seconds then sampling eight seconds per
+block. Values below are medians in milliseconds, measuring the whole `triPBR`
+toggle (including original materials), not an isolated marginal shader cost.
+
+The ordinary gameplay view is the actual first-person player camera in Everon
+at SQF `[1283,5990,0]`, direction 210, frozen after settling in the stock village.
+It contains roof tiles, wood trim, a painted signpost and neighboring legacy
+building/ground/vegetation/weapon surfaces: [Legacy](evidence/pbr-expansion/gameplay-off.png),
+[PBR](evidence/pbr-expansion/gameplay-on.png). The heavier roof close-up uses
+`triSetView [1280,74,5957,-1,0,0]`. No benchmark scene or new assets were created.
+
+| View / extent | GPU Off -> On | GPU delta | CPU frame Off -> On | CPU command Off -> On | Samples |
+| --- | --- | --- | --- | --- | --- |
+| Gameplay / 1920x1080 | 1.37190 -> 1.37245 | +0.00055 | 6.1740 -> 6.1740 | 0.9420 -> 0.9415 | [JSON](evidence/pbr-expansion/1080-gameplay.json) |
+| Roof close / 1920x1080 | 1.38940 -> 1.39935 | +0.00995 | 6.1720 -> 6.1720 | 0.7320 -> 0.7345 | [JSON](evidence/pbr-expansion/1080-close.json) |
+| Gameplay / 2560x1440 | 1.54595 -> 1.54630 | +0.00035 | 6.1745 -> 6.1750 | 0.9530 -> 0.9505 | [JSON](evidence/pbr-expansion/1440-gameplay.json) |
+| Roof close / 2560x1440 | 1.56295 -> 1.57450 | +0.01155 | 6.1725 -> 6.1720 | 0.7400 -> 0.7370 | [JSON](evidence/pbr-expansion/1440-close.json) |
+
+These small deltas are workload-specific: gameplay is within clock/driver noise;
+the close view costs about **0.010–0.012 ms GPU**, with no meaningful measured CPU
+increase. Allocations/frame remain **0.0**. The CPU frame is near the existing
+162 Hz pacing floor; negative command-time deltas are not claimed as speedups.
+The 1440p world targets and swapchain were verified as 2560x1440. The oversized
+window exceeds the 1080p desktop, so this is workload timing, not physical 1440p
+display/capture qualification. Local journals, raw captures and profiling logs
+are retained under the original checkout's `build/shadow-live/pbr2-*` directories.
+
+The useful visual benefit is modest, continuous material response on the roof
+planes and dark fascia, especially changing light angle, and per-fragment local
+light falloff instead of vertex-interpolated light across large roof triangles.
+There is no metallic cast or polished-plastic lobe. Wood occupies relatively few
+pixels at ordinary gameplay distances; this is not a dramatic visual conversion.
+
+The original tile image already contains strong baked ridge shading. PBR does
+not turn that into geometry or change its direction; flat original roof normals,
+UV seams, LOD simplification and low-resolution texture detail remain visible.
+The wood trim disappears in some lower model LODs; no replacement detail is
+invented. Legacy ambient and CSM darkness/sun-factor calibration remain artistic,
+not radiometric (default CSM tuning retains some direct light in shadow).
+No environment/indirect specular exists. Wider adoption is worthwhile selectively,
+not as a texture-name sweep: it needs reliable per-section identities across LODs,
+an explicit policy for authored baked lighting and special materials, and original
+normal/light inputs for software-lit geometry. Those obstacles are not addressed
+by making mixed atlases metallic or replacing the legacy renderer in this patch.
+
 ## PBR feasibility prototype: two stock dielectric surfaces (2026-10-13)
+
+Historical first-prototype record; the targeted expansion above supersedes its
+two-texture coverage/status description, not its original verification results.
 
 `triPBR "on"`, `"off"`, `"status"`. Default **Off**, Vulkan only, no hardware
 RT requirement, no persistent setting. Status identifies `stock-dielectric-v1`,

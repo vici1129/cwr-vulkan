@@ -25,8 +25,17 @@ TEST_CASE("PBR prototype only selects inspected stock dielectric textures", "[Gr
     REQUIRE(vk::PBRMaterial("data\\sloupek_bily_orezly_.pac", 5) == .65f);
     REQUIRE(vk::PBRMaterial("data\\sloupek_bily_orezly_.pac", 100000) == .5f);
     REQUIRE(vk::PBRMaterial("data\\sloupek_bily_orezly_.pac", -1) == .6f);
+    for (int power : {-1, 0, 5, 100000})
+    {
+        REQUIRE(vk::PBRMaterial("data\\strecha_tasky_vln.pac", power) == .90f);
+        REQUIRE(vk::PBRMaterial("data\\strecha_tasky_vln90.pac", power) == .90f);
+        REQUIRE(vk::PBRMaterial("data\\prkna_dark.pac", power) == .85f);
+    }
     for (auto name : {"data\\mutt_kapotag.pac", "data\\sloupek_bily_orezly_.paa", "addon\\sloupek_bily_orezly_.pac",
-                      "data\\redbarel.pac", "data\\beton_universal.pac", ""})
+                      "data\\redbarel.pac", "data\\beton_universal.pac", "data\\newplot.pac",
+                      "data\\newplot2.paa", "data\\paleta_front.pac", "data\\kamennazed.pac",
+                      "data\\telegraf_sloup.pac", "addon\\prkna_dark.pac", "data\\prkna_dark.paa",
+                      "addon\\strecha_tasky_vln.pac", "data\\strecha_tasky_vln90.paa", ""})
         REQUIRE(vk::PBRMaterial(name, 5) == 0);
 }
 

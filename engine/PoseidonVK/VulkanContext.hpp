@@ -254,7 +254,7 @@ class VulkanContext
     bool RainRipplesEnabled() const { return _rainRipplesEnabled; }
     std::string SetPBR(std::string_view mode);
     bool PBREnabled() const { return _pbrEnabled; }
-    void RecordPBRDraw(float roughness) { ++_pbrDraws[roughness > .8f ? 0 : 1]; }
+    void RecordPBRDraw() { ++_pbrDraws; }
     std::string SetWetSurfaces(std::string_view mode);
     std::string SetUnderwater(std::string_view mode);
     float WetRain() const { return _wetSurfacesEnabled ? _wetRain : 0.f; }
@@ -588,7 +588,7 @@ class VulkanContext
     bool _refractionRequested = false, _refractionEnabled = false, _waterCaptured = false, _waterRefracted = false;
     bool _shoreFoamRequested = false, _shoreFoamEnabled = false;
     bool _pbrEnabled = false;
-    std::array<uint64_t, 2> _pbrDraws{};
+    uint64_t _pbrDraws = 0;
     bool _wetSurfacesEnabled = false, _underwaterEnabled = false;
     float _wetRain = 0, _wetTime = -1;
     std::array<float, 12> _underwater{};
