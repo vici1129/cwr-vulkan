@@ -1,5 +1,23 @@
 # Vulkan backend development
 
+## Faithful texture-enhancement feasibility (2026-10-13)
+
+A local-only three-texture rock/roof experiment compared conservative 2x/4x
+resampling in actual Malden/Everon gameplay, with AA Off, TAA and FSR Quality,
+movement, existing modern lighting and 1080p/1440p profiling. The existing finest
+source mip and 16x anisotropic path work; no sampling correction was justified.
+The built-in loose bank-patch mechanism was sufficient, so no engine change or
+asset framework remains. Original assets and authored lower mip payloads were
+preserved; experimental derivatives and captures remain local.
+
+**Do not expand this method into a texture pack:** it smooths magnified texel
+contours but supplies no missing artwork and offers little normal-distance gain.
+For the three resident images, device allocation grows from 531,968 bytes to
+2,104,832 / 8,396,288 bytes at 2x / 4x; measured GPU differences were small and
+settled uploads remained zero. See the [full feasibility report](texture-enhancement-feasibility.md)
+for exact assets, methods, measurements, limitations and local evidence paths.
+Reflection hit appearance and high-frame-rate shimmer are not fully qualified.
+
 ## Focused RTGI gameplay coverage review (2026-10-13)
 
 Reviewed public main `8539d7d`, verified against the current remote, in an isolated

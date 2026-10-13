@@ -37,6 +37,13 @@ These are intentionally **last**, not prerequisites for the nearer-term mileston
 
 ## Working principles
 
+The [small faithful texture-enhancement feasibility pass](docs/texture-enhancement-feasibility.md)
+is closed without expansion: local 2x/4x rock/roof resampling gave limited
+close-up continuity gains but little normal-gameplay improvement. Existing
+sampling and bank patching are sufficient; no engine feature or redistributed
+texture pack was added. Better authorized source artwork or a convincingly
+faithful restoration method is needed before reconsidering broader enhancement.
+
 - Preserve stock missions, weather and visibility behavior, game data, the GL33 backend and ordinary rendering when an effect is disabled.
 - Extend existing Vulkan passes, CSM and shared ray-query geometry where practical; avoid new frameworks for a single effect.
 - Validate visually in real Malden/Everon gameplay, including movement, relevant AA modes and feature combinations. Measure GPU/CPU cost where it matters.
