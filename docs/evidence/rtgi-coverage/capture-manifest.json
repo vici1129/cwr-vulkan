@@ -1,0 +1,82 @@
+[
+  {
+    "path": "malden-rock-off.png",
+    "source": "C:\\Users\\KyouKyou\\Downloads\\cwr-vulkan\\build\\shadow-live\\gi-coverage-baseline-malden2\\rocks-off.png",
+    "sha256": "d455fa41449aef5b9dd962e854a33d4f37b522bd28805e050acb7ff5241a6d6f"
+  },
+  {
+    "path": "malden-rock-on.png",
+    "source": "C:\\Users\\KyouKyou\\Downloads\\cwr-vulkan\\build\\shadow-live\\gi-coverage-baseline-malden2\\rocks-on.png",
+    "sha256": "55eb14d2f743f5f4c04ca2544c56d760c96a2a4fe10c0978f314ee58de52934f"
+  },
+  {
+    "path": "malden-rock-restored.png",
+    "source": "C:\\Users\\KyouKyou\\Downloads\\cwr-vulkan\\build\\shadow-live\\gi-coverage-baseline-malden2\\rocks-restored.png",
+    "sha256": "5c9738f0f583c7b4133a15670f99cf58a998375331470a4592be58af83cc5211"
+  },
+  {
+    "path": "malden-wall-off.png",
+    "source": "C:\\Users\\KyouKyou\\Downloads\\cwr-vulkan\\build\\shadow-live\\gi-coverage-baseline-malden2\\shaded-wall-off.png",
+    "sha256": "173a066584e133970fb034edc03b1ab3216d2fc72e190f39eec0d86a5d5fced3"
+  },
+  {
+    "path": "malden-wall-on.png",
+    "source": "C:\\Users\\KyouKyou\\Downloads\\cwr-vulkan\\build\\shadow-live\\gi-coverage-baseline-malden2\\shaded-wall-on.png",
+    "sha256": "d32c062fce16fb0ecd10bde4641223e4b6b181c0f0b4c8b0a190e572714502e1"
+  },
+  {
+    "path": "malden-wall-restored.png",
+    "source": "C:\\Users\\KyouKyou\\Downloads\\cwr-vulkan\\build\\shadow-live\\gi-coverage-baseline-malden2\\shaded-wall-restored.png",
+    "sha256": "173a066584e133970fb034edc03b1ab3216d2fc72e190f39eec0d86a5d5fced3"
+  },
+  {
+    "path": "everon-brick-off.png",
+    "source": "C:\\Users\\KyouKyou\\Downloads\\cwr-vulkan\\build\\shadow-live\\gi-coverage-everon-clean\\brick-solid-off.png",
+    "sha256": "48c28a753589bfd08cfd3b01c218072ebd3a7873eed477f50e2ca90ca5203af0"
+  },
+  {
+    "path": "everon-brick-on.png",
+    "source": "C:\\Users\\KyouKyou\\Downloads\\cwr-vulkan\\build\\shadow-live\\gi-coverage-everon-clean\\brick-solid-on.png",
+    "sha256": "1f2c040b9ebfd6a2621b70e2d762a62e53d3e0540cb4f4a265a964bfcec18347"
+  },
+  {
+    "path": "everon-brick-restored.png",
+    "source": "C:\\Users\\KyouKyou\\Downloads\\cwr-vulkan\\build\\shadow-live\\gi-coverage-everon-clean\\brick-solid-restored.png",
+    "sha256": "48c28a753589bfd08cfd3b01c218072ebd3a7873eed477f50e2ca90ca5203af0"
+  },
+  {
+    "path": "everon-barn-off.png",
+    "source": "C:\\Users\\KyouKyou\\Downloads\\cwr-vulkan\\build\\shadow-live\\gi-coverage-baseline-everon\\barn-off.png",
+    "sha256": "85b26d45cd3c8ca97c7c9ff0cb193aa31bbf6742b401690a7cf559de68360a41"
+  },
+  {
+    "path": "everon-barn-on.png",
+    "source": "C:\\Users\\KyouKyou\\Downloads\\cwr-vulkan\\build\\shadow-live\\gi-coverage-baseline-everon\\barn-on.png",
+    "sha256": "18c29154fd6f3efee5329370eef269b5298c82038ccc4bc693ce96879f13f179"
+  },
+  {
+    "path": "everon-barn-restored.png",
+    "source": "C:\\Users\\KyouKyou\\Downloads\\cwr-vulkan\\build\\shadow-live\\gi-coverage-baseline-everon\\barn-restored.png",
+    "sha256": "85b26d45cd3c8ca97c7c9ff0cb193aa31bbf6742b401690a7cf559de68360a41"
+  },
+  {
+    "path": "malden-moving-rock.png",
+    "source": "C:\\Users\\KyouKyou\\Downloads\\cwr-vulkan\\build\\shadow-live\\gi-coverage-baseline-malden2\\malden-walk-taa-end.png",
+    "sha256": "a7d7594479242e5cb0d4339e817e3409a18caa6e9ba5f879beccee73db4b2309"
+  },
+  {
+    "path": "everon-moving-entrance.png",
+    "source": "C:\\Users\\KyouKyou\\Downloads\\cwr-vulkan\\build\\shadow-live\\gi-coverage-baseline-everon\\barn-entrance-off-on-strafe.png",
+    "sha256": "372bc92bcfbfc9c77804e0e51a1f7f4e19251b045f244acafbc043fdec409d84"
+  },
+  {
+    "path": "everon-moving-jeep.png",
+    "source": "C:\\Users\\KyouKyou\\Downloads\\cwr-vulkan\\build\\shadow-live\\gi-coverage-baseline-everon\\actors-4.png",
+    "sha256": "cfcb3399dedf69ad4f2513e9aec7de4c6cf21451cb816ae65d8102a6c3d1ed2d"
+  },
+  {
+    "path": "everon-jeep-settled.png",
+    "source": "C:\\Users\\KyouKyou\\Downloads\\cwr-vulkan\\build\\shadow-live\\gi-coverage-baseline-everon\\actors-settled.png",
+    "sha256": "2929cc99145e6cf0c3373801370f7d156a7ba7e86d4f7b40c711b67f17757427"
+  }
+]

@@ -1,5 +1,145 @@
 # Vulkan backend development
 
+## Focused RTGI gameplay coverage review (2026-10-13)
+
+Reviewed public main `8539d7d`, verified against the current remote, in an isolated
+worktree. **No rendering correction was justified by this pass.** The existing
+one-bounce implementation behaves reasonably in the sampled stock scenes, but
+its practical benefit is modest, especially in sheltered areas. This is a
+coverage assessment, not a new GI milestone or production qualification.
+No gain, saturation, range, material eligibility, history, geometry budget,
+default or setting was changed. The original checkout's private DLSS/NGX edits
+were left untouched.
+
+### Findings and evidence
+
+Stock `01TakeTheCar.ABEL` and `06Ninjas.EDEN` were launched through the existing
+local diagnostic launcher with isolated profiles and original assets. This was
+not Steam-route acceptance or mission completion. Developer positioning,
+day/time changes and invulnerability established the scenes. Actual keyboard
+strafing and mouse turns then exercised simulation with GI Off and On, including
+AA Off, TAA and FSR Quality on both islands. Malden rocks also received the
+existing four-AA movement check. Short paths changed player position by about
+2.5 m; the longer rock paths changed it by about 7.5 m. Paths and aim differed
+between repetitions, so moving frames are qualitative evidence, not matched
+pixel-error or performance comparisons.
+
+Representative raw movement frames: [Malden rock](evidence/rtgi-coverage/malden-moving-rock.png),
+[Everon entrance/yard](evidence/rtgi-coverage/everon-moving-entrance.png),
+[Jeep in motion](evidence/rtgi-coverage/everon-moving-jeep.png) and
+[Jeep settled](evidence/rtgi-coverage/everon-jeep-settled.png).
+Start/end positions and completed-frame counters are included in the
+[measurement record](evidence/rtgi-coverage/measurements.json).
+
+| Scene | Observed behavior and completed-frame diagnostics |
+|---|---|
+| Malden rock beside yellow ground, `[7215,7708,0]` | A small warm ground-colored lift. One settled sample had 348,995 receiver rays, 133,850 hits and 86,648 eligible hits. Movement retained valid hits and TAA/FSR history; fine non-temporal grain remains. |
+| Malden shaded house wall / fenced entrance, camera `[3092,6339,1.7]` toward `[3080,6350,1.7]` | Warm lift strongest low on the wall; the nearby fence, window openings and ground shadow did not acquire a broad glow. 147,479 of 155,516 secondary hits were eligible, so weak magnitude here is not explained by wholesale secondary-material rejection. |
+| Malden village foliage and buildings, player near `[7253,8020,0]` | Little useful bounce in foliage-heavy views. One moving sample rejected 9,589 of 9,960 hits. The existing policy deliberately excludes alpha-tested contributors; aggregate rejection is not evidence that these should all become diffuse emitters. |
+| Everon brick building beside green terrain, camera `[4903,7090,1.7]` toward `[4930,7107,1.7]` | Small green/yellow ground-colored lift on the lower shaded facade. The matched sample had 97,114 eligible hits out of 98,962, with 22,182 of 89,345 sunlight tests blocked. No uniform exposure or obvious wrong-color patch was found in the reviewed views. |
+| Everon open barn / sheltered entrance and adjoining stone-walled yard, `[5264,9372,0]` | Almost no visible GI inside the opening. The fixed entrance sample still had 34,519 eligible hits, but 26,035 of 27,290 secondary sunlight rays were blocked (95.4%). This supports limited incoming light as a major cause, rather than a failed GI dispatch. Actual movement and turns covered the doorway, adjacent wall and yard; no obvious broad light leak was observed in the sampled frames. |
+| Moving stock Jeep and soldier beside the Everon brick building | Script-assisted vehicle velocity and ordinary AI movement advanced their positions. A sampled frame recorded 7,514 dynamic bounce hits and 40,335 dynamic-unsafe history neighborhoods. The reviewed passage/settled captures showed no obvious persistent colored stain. This is not a high-frame-rate temporal-error measurement. |
+
+Source review followed receiver flags in `EngineVK_Mesh.cpp` and
+`EngineVK_Software.cpp`, raster/depth agreement in `rtgi_receiver.glsl`, secondary
+classification in `ray_surface.glsl`, and plane/history rejection in the GI
+filter/resolve shaders. Cutout and blended materials, suppressed-light surfaces
+and unsupported geometry remain deliberate exclusions. Receiver reflectance
+comes from the base texture, not lit scene color; secondary sunlight remains
+shadow-tested. No observed surface was traced to an accidental eligibility or
+classification error that justified relaxing those rules. Existing aggregate
+counters do **not** identify the reason for every individual rejected wall
+pixel; this review does not establish complete raster/RT material parity.
+
+The main remaining practical weakness is low benefit in sheltered and
+foliage-heavy gameplay. More brightness would not correct the causes above.
+Changing the one-bounce/material scope or weakening filtering without a
+demonstrated surface error would exceed this focused correction pass. No such
+change was made. Thin geometry, excluded proxies/damaged objects, approximate
+terrain UV/albedo, disocclusion noise and conservative dynamic history remain
+limitations; the sampled doorway checks do not certify all interiors as leak-free.
+
+Unretouched matched GI Off/On captures are linked below. These are **same-build
+comparisons**, not before/after-fix evidence; there is no implemented fix.
+Simulation was frozen only for these still comparisons, separately from the
+movement checks above. All are native 1080p game windows; window chrome is retained.
+
+| View | GI Off | GI On |
+|---|---|---|
+| Malden rock (TAA) | [Off](evidence/rtgi-coverage/malden-rock-off.png) | [On](evidence/rtgi-coverage/malden-rock-on.png) |
+| Malden wall (AA Off) | [Off](evidence/rtgi-coverage/malden-wall-off.png) | [On](evidence/rtgi-coverage/malden-wall-on.png) |
+| Everon brick (AA Off) | [Off](evidence/rtgi-coverage/everon-brick-off.png) | [On](evidence/rtgi-coverage/everon-brick-on.png) |
+| Everon barn (AA Off) | [Off](evidence/rtgi-coverage/everon-barn-off.png) | [On](evidence/rtgi-coverage/everon-barn-on.png) |
+
+The subsequent Off captures are pixel-exact with the initial Off images for
+the wall, brick and barn. The TAA rock pair has a tiny nonzero restoration
+difference (mean absolute RGB below 0.000008 display levels/channel), not an
+exact parity claim. An initial first-person Everon TAA still sequence retained
+camera/temporal differences and was excluded from these matched comparisons.
+See the [capture hashes](evidence/rtgi-coverage/capture-manifest.json) and
+[measurements](evidence/rtgi-coverage/measurements.json).
+
+### Focused performance and verification
+
+RTX 4060 Ti, driver 617.14, RelWithDebInfo, validation disabled during timings.
+The same frozen Malden house view used GI Off/On/On/Off, two seconds warm-up and
+four seconds sampling per state, VSync off, static RT and RT sunlight On, RTAO
+Off. Swapchain logs confirm 1920x1080 and 2560x1440; FSR Quality uses its normal
+lower internal resolution. Values are medians of the existing profiling samples,
+in milliseconds. GI total sums trace/filter/temporal pass medians; whole-GPU
+measurements include other work and are not interchangeable with that sum.
+
+| Output / AA | GI trace + filter + temporal | GI total | Whole GPU Off / On | CPU commands Off / On | GI CPU recording |
+|---|---:|---:|---:|---:|---:|
+| 1080p / Off | .138 + .180 + 0 | .318 | 1.808 / 1.991 | 1.782 / 1.796 | .0046 |
+| 1080p / TAA | .139 + .111 + .076 | .326 | 1.935 / 2.234 | 2.023 / 2.065 | .0066 |
+| 1080p / FSR Quality | .089 + .062 + .041 | .192 | 1.806 / 1.920 | 2.151 / 2.174 | .0065 |
+| 1440p / Off | .216 + .315 + 0 | .532 | 2.415 / 3.275 | 1.797 / 1.901 | .0047 |
+| 1440p / TAA | .219 + .204 + .131 | .554 | 3.069 / 3.701 | 2.114 / 2.250 | .0067 |
+| 1440p / FSR Quality | .116 + .087 + .060 | .263 | 2.513 / 2.813 | 2.161 / 2.202 | .0064 |
+
+CPU frame time remained externally paced at approximately 6.172-6.175 ms;
+these samples do not establish an uncapped FPS penalty. All sampled steady
+streaming allocation rates were zero. Short windows and automatic GPU clocks
+limit precision. These are current baseline costs, **not** a speedup or a
+before/after-regression measurement; no rendering implementation changed.
+
+Vulkan-enabled and GL33-only incremental builds succeeded at `8539d7d`.
+Focused `[ray-surface],[vulkan-aa],[Shaders]` tests passed in each configuration:
+33,459 assertions / 12 cases. The Vulkan driver-free policy/lifetime executable
+passed 504 checks; its intentional teardown validation-error injection is expected.
+Default GL33 launched the stock Malden mission without a renderer override,
+returned `UNSUPPORTED: RTGI requires Vulkan`, and exited normally through the
+harness. This is a GL33 startup/control smoke check, not another compatibility sweep.
+
+Live core/synchronization validation was enabled for the gameplay runs.
+The completed Malden run shut down normally with 44,933 submitted/presented
+frames and zero errors/warnings. A fresh rebuilt Everon replay repeated
+Off/On movement and turns near the barn in AA Off/TAA/FSR Quality, then brick
+captures and TAA day/night/weather transitions: 10,990 submitted/presented
+frames, normal harness exit, zero errors/warnings. Night had zero bounce and
+sunlight rays; history reset counts advanced on day/night/weather changes.
+The earlier barn night Off/On/Off comparison was pixel-exact; midday, sunset
+and overcast returned exactly to Off too.
+
+One initial Malden diagnostic exited before capture and was not used as
+gameplay evidence. The longer first Everon run ended in a malformed inspection
+expression (`str nearestObject ...`, unknown operator in test mode), exit 2;
+its zero-validation teardown is not counted as a normal gameplay exit. Its
+completed captures/counters remain useful, and the clean replay above provides
+the normal-exit result. No renderer crash was attributed to either launch.
+
+The initial public executable hash starts `6D907784748A415B`; rebuilding the same
+clean commit refreshed build metadata and produced `7FE02BF2B9A1B466`, used for
+both performance runs and the final validation replay. Build logs are in the
+existing clean `cwr-vulkan-rtgi/build/coverage-build-{vk,gl}.log`. Raw movement,
+actions, profiles, diagnostics and timing windows remain under the original
+checkout's ignored `build/shadow-live/gi-coverage-*` directories. The review
+worktree contains only this report, roadmap wording and evidence additions.
+No renderer, game assets, gameplay rules, AA controls or private integration
+files were edited. This investigation is closed with a documentation-only commit;
+no rendering fix is proposed by this review.
+
 ## RTGI short-history / filter quality milestone (2026-10-13)
 
 Built on `393e6eb` (including the SSAO ordering correction), compared against an

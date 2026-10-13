@@ -31,7 +31,7 @@ HDR10 surface negotiation and SDR fallback exist, but **physical HDR10 display o
 ## Final major experiments
 
 - **Broader physically based material rendering (PBR):** remains experimental after the limited prototype and targeted expansion. Establish reliable section/LOD identities, a policy for baked lighting and special materials, and access to original normals/light inputs on software-lit geometry before expanding coverage. The stock game does not supply a modern PBR material set; an asset-wide conversion is not justified by the current small selection.
-- **Production ray-traced global illumination (RTGI):** remains incomplete after the bounded one-bounce prototype. Further work needs reliable material/coverage policy, stronger evidence of gameplay benefit and improved temporal quality within a useful performance budget.
+- **Production ray-traced global illumination (RTGI):** remains incomplete after the bounded one-bounce prototype and temporal/filter milestone. A focused stock Malden/Everon gameplay review found modest believable bounce but little benefit under shelter; no demonstrated coverage/filtering error justified a narrow correction, so no rendering change was made. Current Off/On evidence, AA/movement checks, validation and 1080p/1440p costs are documented. Further work needs reliable material/coverage policy and stronger evidence of gameplay benefit within a useful performance budget; broader coverage or additional techniques are not justified by this review alone.
 
 These are intentionally **last**, not prerequisites for the nearer-term milestones. Non-water reflective materials belong with the material work rather than a premature general reflection system.
 

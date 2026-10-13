@@ -1,0 +1,833 @@
+{
+  "baseline": "8539d7df18c64cd67b259b219a042685e1b4b313",
+  "pairs": [
+    {
+      "name": "malden-rock",
+      "mean_absolute_rgb_difference": [
+        0.28256406321352906,
+        0.1784426257121254,
+        0.05948212293848584
+      ],
+      "restore_mean_absolute_rgb_difference": [
+        7.018318747707349e-06,
+        3.2752154155967628e-06,
+        4.210991248624409e-06
+      ],
+      "restore_bounds": [
+        86,
+        192,
+        1911,
+        936
+      ]
+    },
+    {
+      "name": "malden-wall",
+      "mean_absolute_rgb_difference": [
+        0.659661136855344,
+        0.4625942326263859,
+        0.12275039489740154
+      ],
+      "restore_mean_absolute_rgb_difference": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "restore_bounds": null
+    },
+    {
+      "name": "everon-brick",
+      "mean_absolute_rgb_difference": [
+        0.09641438774058797,
+        0.09970504345742968,
+        0.02256763787721124
+      ],
+      "restore_mean_absolute_rgb_difference": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "restore_bounds": null
+    },
+    {
+      "name": "everon-barn",
+      "mean_absolute_rgb_difference": [
+        0.005938433436393445,
+        0.00704779568644772,
+        0.010495661743238084
+      ],
+      "restore_mean_absolute_rgb_difference": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "restore_bounds": null
+    }
+  ],
+  "performance": [
+    {
+      "resolution": 1080,
+      "aa": "off",
+      "off": {
+        "gpu": 1.8077,
+        "cpu": 6.173,
+        "commands": 1.782,
+        "allocations": 0.0
+      },
+      "on": {
+        "trace": 0.1382,
+        "filter": 0.1798,
+        "temporal": 0.0,
+        "gpu": 1.9910999999999999,
+        "cpu": 6.174,
+        "record": 0.00455,
+        "commands": 1.7955,
+        "allocations": 0.0
+      }
+    },
+    {
+      "resolution": 1080,
+      "aa": "taa",
+      "off": {
+        "gpu": 1.9353500000000001,
+        "cpu": 6.173500000000001,
+        "commands": 2.0229999999999997,
+        "allocations": 0.0
+      },
+      "on": {
+        "trace": 0.1393,
+        "filter": 0.11085,
+        "temporal": 0.0758,
+        "gpu": 2.2337,
+        "cpu": 6.173,
+        "record": 0.0066,
+        "commands": 2.065,
+        "allocations": 0.0
+      }
+    },
+    {
+      "resolution": 1080,
+      "aa": "fsr-quality",
+      "off": {
+        "gpu": 1.8063,
+        "cpu": 6.172,
+        "commands": 2.1505,
+        "allocations": 0.0
+      },
+      "on": {
+        "trace": 0.0891,
+        "filter": 0.06195,
+        "temporal": 0.0413,
+        "gpu": 1.92015,
+        "cpu": 6.172,
+        "record": 0.0065,
+        "commands": 2.174,
+        "allocations": 0.0
+      }
+    },
+    {
+      "resolution": 1440,
+      "aa": "off",
+      "off": {
+        "gpu": 2.41535,
+        "cpu": 6.172,
+        "commands": 1.7965,
+        "allocations": 0.0
+      },
+      "on": {
+        "trace": 0.2161,
+        "filter": 0.3154,
+        "temporal": 0.0,
+        "gpu": 3.27545,
+        "cpu": 6.175,
+        "record": 0.004699999999999999,
+        "commands": 1.901,
+        "allocations": 0.0
+      }
+    },
+    {
+      "resolution": 1440,
+      "aa": "taa",
+      "off": {
+        "gpu": 3.0689,
+        "cpu": 6.173,
+        "commands": 2.1135,
+        "allocations": 0.0
+      },
+      "on": {
+        "trace": 0.2191,
+        "filter": 0.20405,
+        "temporal": 0.1306,
+        "gpu": 3.7006,
+        "cpu": 6.172,
+        "record": 0.00665,
+        "commands": 2.2495000000000003,
+        "allocations": 0.0
+      }
+    },
+    {
+      "resolution": 1440,
+      "aa": "fsr-quality",
+      "off": {
+        "gpu": 2.5131500000000004,
+        "cpu": 6.172,
+        "commands": 2.161,
+        "allocations": 0.0
+      },
+      "on": {
+        "trace": 0.1157,
+        "filter": 0.0873,
+        "temporal": 0.060450000000000004,
+        "gpu": 2.81325,
+        "cpu": 6.173,
+        "record": 0.0063999999999999994,
+        "commands": 2.202,
+        "allocations": 0.0
+      }
+    }
+  ],
+  "gameplay": {
+    "gi-coverage-baseline-malden2/quality-walking-malden.json": [
+      {
+        "aa": "off",
+        "start": {
+          "result": "[7215,7708,-0.00164795]",
+          "ok": true
+        },
+        "end": {
+          "result": "[7216.5,7700.47,-0.00157166]",
+          "ok": true
+        },
+        "status": {
+          "result": "\"RTGI=on capability=available lastWorldDispatch=yes completedDispatches=6162 bounceRays=216410 hits=63673 eligibleHits=47304 rejectedMaterials=16369 sunRays=42710 sunBlocked=1004 eligibleReceivers=216410 dynamicHits=779 GPUms(trace/filter/temporal/BLAS/TLAS)=0.132096/0.223232/0.000128/0.27168/0.098304 CPUrecordMs=0.1499 temporal=off history(accepted/rejected/clamped/dynamic)=0/0/0/0 historyResets=2 phase=0 historyBytes=0 historyAllocations=4; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; approximate stock albedo\"",
+          "ok": true
+        }
+      },
+      {
+        "aa": "taa",
+        "start": {
+          "result": "[7215,7708,-0.00157166]",
+          "ok": true
+        },
+        "end": {
+          "result": "[7215,7700.3,-0.00151062]",
+          "ok": true
+        },
+        "status": {
+          "result": "\"RTGI=on capability=available lastWorldDispatch=yes completedDispatches=8999 bounceRays=316895 hits=120160 eligibleHits=99904 rejectedMaterials=20256 sunRays=93831 sunBlocked=1510 eligibleReceivers=316895 dynamicHits=240 GPUms(trace/filter/temporal/BLAS/TLAS)=0.166912/0.15712/0.095744/0.260544/0.090624 CPUrecordMs=0.1266 temporal=on history(accepted/rejected/clamped/dynamic)=289616/27279/168639/9562 historyResets=3 phase=1 historyBytes=9830400 historyAllocations=6; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; approximate stock albedo\"",
+          "ok": true
+        }
+      },
+      {
+        "aa": "fsr-quality",
+        "start": {
+          "result": "[7215,7708,-0.00149536]",
+          "ok": true
+        },
+        "end": {
+          "result": "[7213.48,7700.46,-0.00141907]",
+          "ok": true
+        },
+        "status": {
+          "result": "\"RTGI=on capability=available lastWorldDispatch=yes completedDispatches=11920 bounceRays=159990 hits=47962 eligibleHits=40854 rejectedMaterials=7108 sunRays=37973 sunBlocked=1486 eligibleReceivers=159990 dynamicHits=81 GPUms(trace/filter/temporal/BLAS/TLAS)=0.106496/0.07904/0.049568/0.239296/0.0944 CPUrecordMs=0.1328 temporal=on history(accepted/rejected/clamped/dynamic)=141064/18926/50706/3056 historyResets=4 phase=2 historyBytes=3932160 historyAllocations=8; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; approximate stock albedo\"",
+          "ok": true
+        }
+      },
+      {
+        "aa": "msaa4",
+        "start": {
+          "result": "[7215,7708,-0.00140381]",
+          "ok": true
+        },
+        "end": {
+          "result": "[7212,7700.96,-0.00125122]",
+          "ok": true
+        },
+        "status": {
+          "result": "\"RTGI=on capability=available lastWorldDispatch=yes completedDispatches=15003 bounceRays=343739 hits=91762 eligibleHits=75321 rejectedMaterials=16441 sunRays=68380 sunBlocked=2720 eligibleReceivers=343739 dynamicHits=89 GPUms(trace/filter/temporal/BLAS/TLAS)=0.19968/0.309632/0/0.21168/0.081344 CPUrecordMs=0.1233 temporal=off history(accepted/rejected/clamped/dynamic)=0/0/0/0 historyResets=4 phase=0 historyBytes=0 historyAllocations=8; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; approximate stock albedo\"",
+          "ok": true
+        }
+      }
+    ],
+    "gi-coverage-baseline-malden2/village-wall-movement.json": [
+      {
+        "aa": "off",
+        "gi": "off",
+        "start": {
+          "result": "[7253,8020,-0.000411987]",
+          "ok": true
+        },
+        "end": {
+          "result": "[7252.3,8017.63,0]",
+          "ok": true
+        },
+        "status": {
+          "result": "\"RTGI=off capability=available lastWorldDispatch=no completedDispatches=26353 bounceRays=0 hits=0 eligibleHits=0 rejectedMaterials=0 sunRays=0 sunBlocked=0 eligibleReceivers=0 dynamicHits=0 GPUtimings=unavailable temporal=off history(accepted/rejected/clamped/dynamic)=0/0/0/0 historyResets=9 phase=7 historyBytes=0 historyAllocations=10; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; approximate stock albedo\"",
+          "ok": true
+        }
+      },
+      {
+        "aa": "off",
+        "gi": "on",
+        "start": {
+          "result": "[7253,8020,0]",
+          "ok": true
+        },
+        "end": {
+          "result": "[7256.55,8022.14,-0.00286865]",
+          "ok": true
+        },
+        "status": {
+          "result": "\"RTGI=on capability=available lastWorldDispatch=yes completedDispatches=26594 bounceRays=253756 hits=9960 eligibleHits=371 rejectedMaterials=9589 sunRays=256 sunBlocked=14 eligibleReceivers=253756 dynamicHits=116 GPUms(trace/filter/temporal/BLAS/TLAS)=0.098304/0.157376/0/0.218624/0.093184 CPUrecordMs=0.0904 temporal=off history(accepted/rejected/clamped/dynamic)=0/0/0/0 historyResets=9 phase=0 historyBytes=0 historyAllocations=10; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; approximate stock albedo\"",
+          "ok": true
+        }
+      },
+      {
+        "aa": "taa",
+        "gi": "off",
+        "start": {
+          "result": "[7253,8020,-0.00193787]",
+          "ok": true
+        },
+        "end": {
+          "result": "[7253.94,8017.73,-0.00183105]",
+          "ok": true
+        },
+        "status": {
+          "result": "\"RTGI=off capability=available lastWorldDispatch=no completedDispatches=26597 bounceRays=0 hits=0 eligibleHits=0 rejectedMaterials=0 sunRays=0 sunBlocked=0 eligibleReceivers=0 dynamicHits=0 GPUtimings=unavailable temporal=off history(accepted/rejected/clamped/dynamic)=0/0/0/0 historyResets=9 phase=0 historyBytes=0 historyAllocations=10; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; approximate stock albedo\"",
+          "ok": true
+        }
+      },
+      {
+        "aa": "taa",
+        "gi": "on",
+        "start": {
+          "result": "[7253.06,8019.93,-0.00138855]",
+          "ok": true
+        },
+        "end": {
+          "result": "[7253.43,8017.48,-0.0012207]",
+          "ok": true
+        },
+        "status": {
+          "result": "\"RTGI=on capability=available lastWorldDispatch=yes completedDispatches=26820 bounceRays=300942 hits=6730 eligibleHits=887 rejectedMaterials=5843 sunRays=695 sunBlocked=120 eligibleReceivers=300942 dynamicHits=184 GPUms(trace/filter/temporal/BLAS/TLAS)=0.08192/0.108352/0.07152/0.198048/0.095232 CPUrecordMs=0.1049 temporal=on history(accepted/rejected/clamped/dynamic)=261752/39190/945/2765 historyResets=10 phase=1 historyBytes=9830400 historyAllocations=12; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; approximate stock albedo\"",
+          "ok": true
+        }
+      },
+      {
+        "aa": "fsr-quality",
+        "gi": "off",
+        "start": {
+          "result": "[7253.05,8019.95,-0.000839233]",
+          "ok": true
+        },
+        "end": {
+          "result": "[7252.81,8017.5,-0.000686646]",
+          "ok": true
+        },
+        "status": {
+          "result": "\"RTGI=off capability=available lastWorldDispatch=no completedDispatches=26823 bounceRays=0 hits=0 eligibleHits=0 rejectedMaterials=0 sunRays=0 sunBlocked=0 eligibleReceivers=0 dynamicHits=0 GPUtimings=unavailable temporal=off history(accepted/rejected/clamped/dynamic)=0/0/0/0 historyResets=10 phase=2 historyBytes=0 historyAllocations=12; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; approximate stock albedo\"",
+          "ok": true
+        }
+      },
+      {
+        "aa": "fsr-quality",
+        "gi": "on",
+        "start": {
+          "result": "[7253,8020,-0.000396729]",
+          "ok": true
+        },
+        "end": {
+          "result": "[7252.29,8017.62,-0.000167847]",
+          "ok": true
+        },
+        "status": {
+          "result": "\"RTGI=on capability=available lastWorldDispatch=yes completedDispatches=27031 bounceRays=129793 hits=3227 eligibleHits=601 rejectedMaterials=2626 sunRays=403 sunBlocked=67 eligibleReceivers=129793 dynamicHits=146 GPUms(trace/filter/temporal/BLAS/TLAS)=0.044032/0.0504/0.034624/0.195872/0.095072 CPUrecordMs=0.1073 temporal=on history(accepted/rejected/clamped/dynamic)=113623/16170/742/2233 historyResets=11 phase=2 historyBytes=3932160 historyAllocations=14; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; approximate stock albedo\"",
+          "ok": true
+        }
+      }
+    ],
+    "gi-coverage-baseline-everon/brick-movement.json": [
+      {
+        "aa": "off",
+        "gi": "off",
+        "start": {
+          "result": "[4903,7085,-0.00137329]",
+          "ok": true
+        },
+        "end": {
+          "result": "[4905.46,7084.94,-0.00137329]",
+          "ok": true
+        },
+        "status": {
+          "result": "\"RTGI=off capability=available lastWorldDispatch=no completedDispatches=1 bounceRays=0 hits=0 eligibleHits=0 rejectedMaterials=0 sunRays=0 sunBlocked=0 eligibleReceivers=0 dynamicHits=0 GPUtimings=unavailable temporal=off history(accepted/rejected/clamped/dynamic)=0/0/0/0 historyResets=1 phase=1 historyBytes=0 historyAllocations=2; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; approximate stock albedo\"",
+          "ok": true
+        }
+      },
+      {
+        "aa": "off",
+        "gi": "on",
+        "start": {
+          "result": "[4903,7085,-0.00135803]",
+          "ok": true
+        },
+        "end": {
+          "result": "[4905.39,7084.31,-0.00134277]",
+          "ok": true
+        },
+        "status": {
+          "result": "\"RTGI=on capability=available lastWorldDispatch=yes completedDispatches=389 bounceRays=483626 hits=75521 eligibleHits=60667 rejectedMaterials=14854 sunRays=55857 sunBlocked=19569 eligibleReceivers=483626 dynamicHits=2561 GPUms(trace/filter/temporal/BLAS/TLAS)=0.12288/0.260768/0/0.219424/0.099328 CPUrecordMs=0.0759001 temporal=off history(accepted/rejected/clamped/dynamic)=0/0/0/0 historyResets=1 phase=0 historyBytes=0 historyAllocations=2; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; approximate stock albedo\"",
+          "ok": true
+        }
+      },
+      {
+        "aa": "taa",
+        "gi": "off",
+        "start": {
+          "result": "[4903,7085,-0.00134277]",
+          "ok": true
+        },
+        "end": {
+          "result": "[4905.09,7083.73,-0.00134277]",
+          "ok": true
+        },
+        "status": {
+          "result": "\"RTGI=off capability=available lastWorldDispatch=no completedDispatches=392 bounceRays=0 hits=0 eligibleHits=0 rejectedMaterials=0 sunRays=0 sunBlocked=0 eligibleReceivers=0 dynamicHits=0 GPUtimings=unavailable temporal=off history(accepted/rejected/clamped/dynamic)=0/0/0/0 historyResets=1 phase=0 historyBytes=0 historyAllocations=2; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; approximate stock albedo\"",
+          "ok": true
+        }
+      },
+      {
+        "aa": "taa",
+        "gi": "on",
+        "start": {
+          "result": "[4903,7085,-0.00132751]",
+          "ok": true
+        },
+        "end": {
+          "result": "[4904.85,7083.35,-0.00132751]",
+          "ok": true
+        },
+        "status": {
+          "result": "\"RTGI=on capability=available lastWorldDispatch=yes completedDispatches=816 bounceRays=486782 hits=83918 eligibleHits=61875 rejectedMaterials=22043 sunRays=56513 sunBlocked=16501 eligibleReceivers=486782 dynamicHits=2923 GPUms(trace/filter/temporal/BLAS/TLAS)=0.150528/0.158304/0.10192/0.223168/0.377184 CPUrecordMs=0.0922999 temporal=on history(accepted/rejected/clamped/dynamic)=412750/74032/66113/5847 historyResets=2 phase=2 historyBytes=9830400 historyAllocations=4; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; approximate stock albedo\"",
+          "ok": true
+        }
+      },
+      {
+        "aa": "fsr-quality",
+        "gi": "off",
+        "start": {
+          "result": "[4903,7085,-0.00132751]",
+          "ok": true
+        },
+        "end": {
+          "result": "[4904.57,7083.06,-0.00131226]",
+          "ok": true
+        },
+        "status": {
+          "result": "\"RTGI=off capability=available lastWorldDispatch=no completedDispatches=819 bounceRays=0 hits=0 eligibleHits=0 rejectedMaterials=0 sunRays=0 sunBlocked=0 eligibleReceivers=0 dynamicHits=0 GPUtimings=unavailable temporal=off history(accepted/rejected/clamped/dynamic)=0/0/0/0 historyResets=2 phase=3 historyBytes=0 historyAllocations=4; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; approximate stock albedo\"",
+          "ok": true
+        }
+      },
+      {
+        "aa": "fsr-quality",
+        "gi": "on",
+        "start": {
+          "result": "[4903,7085,-0.00128174]",
+          "ok": true
+        },
+        "end": {
+          "result": "[4904.04,7082.75,-0.00120544]",
+          "ok": true
+        },
+        "status": {
+          "result": "\"RTGI=on capability=available lastWorldDispatch=yes completedDispatches=1219 bounceRays=207489 hits=33635 eligibleHits=20322 rejectedMaterials=13313 sunRays=18215 sunBlocked=4407 eligibleReceivers=207489 dynamicHits=1445 GPUms(trace/filter/temporal/BLAS/TLAS)=0.080896/0.070656/0.0464/0.213088/0.096256 CPUrecordMs=0.0979 temporal=on history(accepted/rejected/clamped/dynamic)=179192/28297/28837/3560 historyResets=3 phase=2 historyBytes=3932160 historyAllocations=6; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; approximate stock albedo\"",
+          "ok": true
+        }
+      }
+    ],
+    "gi-coverage-baseline-everon/barn-entrance-movement.json": [
+      {
+        "aa": "off",
+        "gi": "off",
+        "start": {
+          "result": "[5264,9372,-0.000814438]",
+          "ok": true
+        },
+        "end": {
+          "result": "[5266.21,9373.11,-0.00152397]",
+          "ok": true
+        },
+        "status": {
+          "result": "\"RTGI=off capability=available lastWorldDispatch=no completedDispatches=11413 bounceRays=0 hits=0 eligibleHits=0 rejectedMaterials=0 sunRays=0 sunBlocked=0 eligibleReceivers=0 dynamicHits=0 GPUtimings=unavailable temporal=off history(accepted/rejected/clamped/dynamic)=0/0/0/0 historyResets=7 phase=3 historyBytes=0 historyAllocations=14; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; approximate stock albedo\"",
+          "ok": true
+        }
+      },
+      {
+        "aa": "off",
+        "gi": "on",
+        "start": {
+          "result": "[5264,9372,-0.000967026]",
+          "ok": true
+        },
+        "end": {
+          "result": "[5266.25,9372.99,-0.00166893]",
+          "ok": true
+        },
+        "status": {
+          "result": "\"RTGI=on capability=available lastWorldDispatch=yes completedDispatches=11915 bounceRays=169743 hits=86731 eligibleHits=76808 rejectedMaterials=9923 sunRays=64372 sunBlocked=15780 eligibleReceivers=169743 dynamicHits=145 GPUms(trace/filter/temporal/BLAS/TLAS)=0.146432/0.11264/6.4e-05/0.174496/0.08176 CPUrecordMs=0.0714999 temporal=off history(accepted/rejected/clamped/dynamic)=0/0/0/0 historyResets=7 phase=0 historyBytes=0 historyAllocations=14; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; approximate stock albedo\"",
+          "ok": true
+        }
+      },
+      {
+        "aa": "taa",
+        "gi": "off",
+        "start": {
+          "result": "[5264,9372,-0.00100708]",
+          "ok": true
+        },
+        "end": {
+          "result": "[5266.25,9372.96,-0.00177574]",
+          "ok": true
+        },
+        "status": {
+          "result": "\"RTGI=off capability=available lastWorldDispatch=no completedDispatches=11920 bounceRays=0 hits=0 eligibleHits=0 rejectedMaterials=0 sunRays=0 sunBlocked=0 eligibleReceivers=0 dynamicHits=0 GPUtimings=unavailable temporal=off history(accepted/rejected/clamped/dynamic)=0/0/0/0 historyResets=7 phase=0 historyBytes=0 historyAllocations=14; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; approximate stock albedo\"",
+          "ok": true
+        }
+      },
+      {
+        "aa": "taa",
+        "gi": "on",
+        "start": {
+          "result": "[5264,9372,-0.00109291]",
+          "ok": true
+        },
+        "end": {
+          "result": "[5266.28,9372.85,-0.00188828]",
+          "ok": true
+        },
+        "status": {
+          "result": "\"RTGI=on capability=available lastWorldDispatch=yes completedDispatches=12382 bounceRays=79786 hits=53992 eligibleHits=51609 rejectedMaterials=2383 sunRays=43575 sunBlocked=8305 eligibleReceivers=79786 dynamicHits=119 GPUms(trace/filter/temporal/BLAS/TLAS)=0.123904/0.04976/0.038112/0.183616/0.080896 CPUrecordMs=0.0949 temporal=on history(accepted/rejected/clamped/dynamic)=76991/2795/36664/632 historyResets=8 phase=0 historyBytes=9830400 historyAllocations=16; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; approximate stock albedo\"",
+          "ok": true
+        }
+      },
+      {
+        "aa": "fsr-quality",
+        "gi": "off",
+        "start": {
+          "result": "[5264,9372,-0.00128937]",
+          "ok": true
+        },
+        "end": {
+          "result": "[5266.37,9372.75,-0.00206184]",
+          "ok": true
+        },
+        "status": {
+          "result": "\"RTGI=off capability=available lastWorldDispatch=no completedDispatches=12385 bounceRays=0 hits=0 eligibleHits=0 rejectedMaterials=0 sunRays=0 sunBlocked=0 eligibleReceivers=0 dynamicHits=0 GPUtimings=unavailable temporal=off history(accepted/rejected/clamped/dynamic)=0/0/0/0 historyResets=8 phase=1 historyBytes=0 historyAllocations=16; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; approximate stock albedo\"",
+          "ok": true
+        }
+      },
+      {
+        "aa": "fsr-quality",
+        "gi": "on",
+        "start": {
+          "result": "[5264,9372,-0.00158119]",
+          "ok": true
+        },
+        "end": {
+          "result": "[5266.44,9372.54,-0.00239182]",
+          "ok": true
+        },
+        "status": {
+          "result": "\"RTGI=on capability=available lastWorldDispatch=yes completedDispatches=12913 bounceRays=8498 hits=4724 eligibleHits=3765 rejectedMaterials=959 sunRays=3695 sunBlocked=714 eligibleReceivers=8498 dynamicHits=3 GPUms(trace/filter/temporal/BLAS/TLAS)=0.04608/0.016384/0.016448/0.171648/0.079232 CPUrecordMs=0.0892 temporal=on history(accepted/rejected/clamped/dynamic)=8094/404/1639/54 historyResets=9 phase=2 historyBytes=3932160 historyAllocations=18; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; approximate stock albedo\"",
+          "ok": true
+        }
+      }
+    ],
+    "gi-coverage-baseline-everon/quality-dynamic.json": [
+      {
+        "frame": 0,
+        "jeep": {
+          "result": "[4908.43,7098.46,-0.0333252]",
+          "ok": true
+        },
+        "soldier": {
+          "result": "[4907.8,7095.31,-0.00137329]",
+          "ok": true
+        },
+        "status": {
+          "result": "\"RTGI=on capability=available lastWorldDispatch=yes completedDispatches=8394 bounceRays=405944 hits=105797 eligibleHits=102080 rejectedMaterials=3717 sunRays=90388 sunBlocked=20852 eligibleReceivers=405944 dynamicHits=7514 GPUms(trace/filter/temporal/BLAS/TLAS)=0.147456/0.138528/0.093888/0.241056/0.098304 CPUrecordMs=0.1009 temporal=on history(accepted/rejected/clamped/dynamic)=307189/98755/79052/40335 historyResets=6 phase=2 historyBytes=9830400 historyAllocations=12; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; approximate stock albedo\"",
+          "ok": true
+        }
+      },
+      {
+        "frame": 1,
+        "jeep": {
+          "result": "[4909.13,7098.49,-0.0255585]",
+          "ok": true
+        },
+        "soldier": {
+          "result": "[4907.67,7095.01,-0.00137329]",
+          "ok": true
+        },
+        "status": {
+          "result": "\"RTGI=on capability=available lastWorldDispatch=yes completedDispatches=8484 bounceRays=405302 hits=104926 eligibleHits=101145 rejectedMaterials=3781 sunRays=89969 sunBlocked=21307 eligibleReceivers=405302 dynamicHits=7122 GPUms(trace/filter/temporal/BLAS/TLAS)=0.16384/0.13824/0.094336/0.227072/0.09728 CPUrecordMs=0.0978 temporal=on history(accepted/rejected/clamped/dynamic)=304629/100673/81812/41423 historyResets=6 phase=4 historyBytes=9830400 historyAllocations=12; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; approximate stock albedo\"",
+          "ok": true
+        }
+      },
+      {
+        "frame": 2,
+        "jeep": {
+          "result": "[4909.85,7098.54,-0.0231628]",
+          "ok": true
+        },
+        "soldier": {
+          "result": "[4907.32,7094.02,-0.00137329]",
+          "ok": true
+        },
+        "status": {
+          "result": "\"RTGI=on capability=available lastWorldDispatch=yes completedDispatches=8579 bounceRays=402155 hits=103835 eligibleHits=99474 rejectedMaterials=4361 sunRays=88512 sunBlocked=21151 eligibleReceivers=402155 dynamicHits=6879 GPUms(trace/filter/temporal/BLAS/TLAS)=0.145408/0.139424/0.091488/0.242272/0.099328 CPUrecordMs=0.0982001 temporal=on history(accepted/rejected/clamped/dynamic)=315610/86545/81390/43255 historyResets=6 phase=3 historyBytes=9830400 historyAllocations=12; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; approximate stock albedo\"",
+          "ok": true
+        }
+      },
+      {
+        "frame": 3,
+        "jeep": {
+          "result": "[4910.52,7098.51,-0.032959]",
+          "ok": true
+        },
+        "soldier": {
+          "result": "[4906.19,7091.46,-0.00137329]",
+          "ok": true
+        },
+        "status": {
+          "result": "\"RTGI=on capability=available lastWorldDispatch=yes completedDispatches=8673 bounceRays=390381 hits=100927 eligibleHits=95690 rejectedMaterials=5237 sunRays=85435 sunBlocked=19244 eligibleReceivers=390381 dynamicHits=6346 GPUms(trace/filter/temporal/BLAS/TLAS)=0.144384/0.136352/0.090016/0.236672/0.09728 CPUrecordMs=0.0961 temporal=on history(accepted/rejected/clamped/dynamic)=310139/80242/82023/43210 historyResets=6 phase=1 historyBytes=9830400 historyAllocations=12; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; approximate stock albedo\"",
+          "ok": true
+        }
+      },
+      {
+        "frame": 4,
+        "jeep": {
+          "result": "[4911.14,7098.46,-0.0274353]",
+          "ok": true
+        },
+        "soldier": {
+          "result": "[4905.3,7089.43,-0.00137329]",
+          "ok": true
+        },
+        "status": {
+          "result": "\"RTGI=on capability=available lastWorldDispatch=yes completedDispatches=8763 bounceRays=391078 hits=102857 eligibleHits=100315 rejectedMaterials=2542 sunRays=89997 sunBlocked=20893 eligibleReceivers=391078 dynamicHits=6256 GPUms(trace/filter/temporal/BLAS/TLAS)=0.130048/0.136192/0.09024/0.23376/0.097024 CPUrecordMs=0.1023 temporal=on history(accepted/rejected/clamped/dynamic)=314727/76351/86066/37086 historyResets=6 phase=3 historyBytes=9830400 historyAllocations=12; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; approximate stock albedo\"",
+          "ok": true
+        }
+      },
+      {
+        "frame": 5,
+        "jeep": {
+          "result": "[4911.76,7098.44,-0.0325012]",
+          "ok": true
+        },
+        "soldier": {
+          "result": "[4904.72,7088.09,-0.00137329]",
+          "ok": true
+        },
+        "status": {
+          "result": "\"RTGI=on capability=available lastWorldDispatch=yes completedDispatches=8861 bounceRays=404846 hits=100762 eligibleHits=98273 rejectedMaterials=2489 sunRays=88243 sunBlocked=21757 eligibleReceivers=404846 dynamicHits=5991 GPUms(trace/filter/temporal/BLAS/TLAS)=0.135168/0.13856/0.091904/0.236128/0.098304 CPUrecordMs=0.1105 temporal=on history(accepted/rejected/clamped/dynamic)=339325/65521/91885/34885 historyResets=6 phase=5 historyBytes=9830400 historyAllocations=12; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; approximate stock albedo\"",
+          "ok": true
+        }
+      },
+      {
+        "frame": 6,
+        "jeep": {
+          "result": "[4912.44,7098.46,-0.032486]",
+          "ok": true
+        },
+        "soldier": {
+          "result": "[4904.31,7087.13,-0.00137329]",
+          "ok": true
+        },
+        "status": {
+          "result": "\"RTGI=on capability=available lastWorldDispatch=yes completedDispatches=8958 bounceRays=404699 hits=101385 eligibleHits=99018 rejectedMaterials=2367 sunRays=88888 sunBlocked=22368 eligibleReceivers=404699 dynamicHits=6170 GPUms(trace/filter/temporal/BLAS/TLAS)=0.13824/0.13824/0.091936/0.230144/0.099328 CPUrecordMs=0.1503 temporal=on history(accepted/rejected/clamped/dynamic)=337780/66919/89799/33989 historyResets=6 phase=6 historyBytes=9830400 historyAllocations=12; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; approximate stock albedo\"",
+          "ok": true
+        }
+      },
+      {
+        "frame": 7,
+        "jeep": {
+          "result": "[4913.13,7098.43,-0.0344849]",
+          "ok": true
+        },
+        "soldier": {
+          "result": "[4903.92,7086.19,-0.00137329]",
+          "ok": true
+        },
+        "status": {
+          "result": "\"RTGI=on capability=available lastWorldDispatch=yes completedDispatches=9057 bounceRays=404913 hits=99815 eligibleHits=97812 rejectedMaterials=2003 sunRays=88388 sunBlocked=22265 eligibleReceivers=404913 dynamicHits=5827 GPUms(trace/filter/temporal/BLAS/TLAS)=0.137216/0.13824/0.092064/0.24688/0.095264 CPUrecordMs=0.1737 temporal=on history(accepted/rejected/clamped/dynamic)=345387/59526/91864/31779 historyResets=6 phase=1 historyBytes=9830400 historyAllocations=12; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; approximate stock albedo\"",
+          "ok": true
+        }
+      },
+      {
+        "frame": 8,
+        "jeep": {
+          "result": "[4913.32,7098.4,-0.0371857]",
+          "ok": true
+        },
+        "soldier": {
+          "result": "[4903.51,7085.26,-0.00137329]",
+          "ok": true
+        },
+        "status": {
+          "result": "\"RTGI=on capability=available lastWorldDispatch=yes completedDispatches=9157 bounceRays=405994 hits=100564 eligibleHits=98312 rejectedMaterials=2252 sunRays=88273 sunBlocked=22238 eligibleReceivers=405994 dynamicHits=6154 GPUms(trace/filter/temporal/BLAS/TLAS)=0.136192/0.139136/0.091264/0.233824/0.098048 CPUrecordMs=0.1294 temporal=on history(accepted/rejected/clamped/dynamic)=346225/59769/93883/31998 historyResets=6 phase=5 historyBytes=9830400 historyAllocations=12; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; approximate stock albedo\"",
+          "ok": true
+        }
+      },
+      {
+        "frame": 9,
+        "jeep": {
+          "result": "[4913.32,7098.4,-0.0411072]",
+          "ok": true
+        },
+        "soldier": {
+          "result": "[4903.12,7084.34,-0.00137329]",
+          "ok": true
+        },
+        "status": {
+          "result": "\"RTGI=on capability=available lastWorldDispatch=yes completedDispatches=9259 bounceRays=405793 hits=101446 eligibleHits=99322 rejectedMaterials=2124 sunRays=89465 sunBlocked=22911 eligibleReceivers=405793 dynamicHits=5965 GPUms(trace/filter/temporal/BLAS/TLAS)=0.136192/0.139488/0.091424/0.562432/0.096992 CPUrecordMs=0.0897001 temporal=on history(accepted/rejected/clamped/dynamic)=342145/63648/91014/31526 historyResets=6 phase=3 historyBytes=9830400 historyAllocations=12; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; approximate stock albedo\"",
+          "ok": true
+        }
+      }
+    ],
+    "gi-coverage-everon-clean/entrance-movement.json": [
+      {
+        "aa": "off",
+        "gi": "off",
+        "start": {
+          "result": "[5264,9372,0.00101662]",
+          "ok": true
+        },
+        "end": {
+          "result": "[5265.11,9374.22,0.000614166]",
+          "ok": true
+        },
+        "status": {
+          "result": "\"RTGI=off capability=available lastWorldDispatch=no completedDispatches=0 bounceRays=0 hits=0 eligibleHits=0 rejectedMaterials=0 sunRays=0 sunBlocked=0 eligibleReceivers=0 dynamicHits=0 GPUtimings=unavailable temporal=off history(accepted/rejected/clamped/dynamic)=0/0/0/0 historyResets=0 phase=0 historyBytes=0 historyAllocations=0; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; approximate stock albedo\"",
+          "ok": true
+        }
+      },
+      {
+        "aa": "off",
+        "gi": "on",
+        "start": {
+          "result": "[5264,9372,0.000614166]",
+          "ok": true
+        },
+        "end": {
+          "result": "[5265.4,9374.03,-9.72748e-05]",
+          "ok": true
+        },
+        "status": {
+          "result": "\"RTGI=on capability=available lastWorldDispatch=yes completedDispatches=566 bounceRays=275568 hits=111414 eligibleHits=94660 rejectedMaterials=16754 sunRays=77109 sunBlocked=41034 eligibleReceivers=275568 dynamicHits=958 GPUms(trace/filter/temporal/BLAS/TLAS)=0.15872/0.14848/0.000128/0.46064/0.074752 CPUrecordMs=0.0991 temporal=off history(accepted/rejected/clamped/dynamic)=0/0/0/0 historyResets=0 phase=0 historyBytes=0 historyAllocations=0; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; approximate stock albedo\"",
+          "ok": true
+        }
+      },
+      {
+        "aa": "taa",
+        "gi": "off",
+        "start": {
+          "result": "[5264,9372,-4.95911e-05]",
+          "ok": true
+        },
+        "end": {
+          "result": "[5265.85,9373.67,-0.000757217]",
+          "ok": true
+        },
+        "status": {
+          "result": "\"RTGI=off capability=available lastWorldDispatch=no completedDispatches=569 bounceRays=0 hits=0 eligibleHits=0 rejectedMaterials=0 sunRays=0 sunBlocked=0 eligibleReceivers=0 dynamicHits=0 GPUtimings=unavailable temporal=off history(accepted/rejected/clamped/dynamic)=0/0/0/0 historyResets=0 phase=0 historyBytes=0 historyAllocations=0; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; approximate stock albedo\"",
+          "ok": true
+        }
+      },
+      {
+        "aa": "taa",
+        "gi": "on",
+        "start": {
+          "result": "[5264,9372,-0.000770569]",
+          "ok": true
+        },
+        "end": {
+          "result": "[5266.15,9373.23,-0.00150108]",
+          "ok": true
+        },
+        "status": {
+          "result": "\"RTGI=on capability=available lastWorldDispatch=yes completedDispatches=1067 bounceRays=318298 hits=120376 eligibleHits=98265 rejectedMaterials=22111 sunRays=81281 sunBlocked=29462 eligibleReceivers=318298 dynamicHits=827 GPUms(trace/filter/temporal/BLAS/TLAS)=0.173056/0.110144/0.076288/0.167456/0.078848 CPUrecordMs=0.0872999 temporal=on history(accepted/rejected/clamped/dynamic)=296292/22006/125441/2697 historyResets=1 phase=4 historyBytes=9830400 historyAllocations=2; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; approximate stock albedo\"",
+          "ok": true
+        }
+      },
+      {
+        "aa": "fsr-quality",
+        "gi": "off",
+        "start": {
+          "result": "[5264,9372,-0.00094223]",
+          "ok": true
+        },
+        "end": {
+          "result": "[5266.21,9373.07,-0.00169373]",
+          "ok": true
+        },
+        "status": {
+          "result": "\"RTGI=off capability=available lastWorldDispatch=no completedDispatches=1073 bounceRays=0 hits=0 eligibleHits=0 rejectedMaterials=0 sunRays=0 sunBlocked=0 eligibleReceivers=0 dynamicHits=0 GPUtimings=unavailable temporal=off history(accepted/rejected/clamped/dynamic)=0/0/0/0 historyResets=1 phase=0 historyBytes=0 historyAllocations=2; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; approximate stock albedo\"",
+          "ok": true
+        }
+      },
+      {
+        "aa": "fsr-quality",
+        "gi": "on",
+        "start": {
+          "result": "[5264,9372,-0.00097847]",
+          "ok": true
+        },
+        "end": {
+          "result": "[5266.24,9373.08,-0.00172615]",
+          "ok": true
+        },
+        "status": {
+          "result": "\"RTGI=on capability=available lastWorldDispatch=yes completedDispatches=1519 bounceRays=143856 hits=54217 eligibleHits=44347 rejectedMaterials=9870 sunRays=36334 sunBlocked=12705 eligibleReceivers=143856 dynamicHits=344 GPUms(trace/filter/temporal/BLAS/TLAS)=0.136192/0.054176/0.037824/0.180576/0.0816 CPUrecordMs=0.0965 temporal=on history(accepted/rejected/clamped/dynamic)=123420/20436/43054/1407 historyResets=2 phase=0 historyBytes=3932160 historyAllocations=4; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; approximate stock albedo\"",
+          "ok": true
+        }
+      }
+    ],
+    "gi-coverage-everon-clean/lighting.json": [
+      {
+        "name": "day",
+        "status": {
+          "result": "\"RTGI=on capability=available lastWorldDispatch=yes completedDispatches=2805 bounceRays=409270 hits=100531 eligibleHits=98545 rejectedMaterials=1986 sunRays=90715 sunBlocked=23311 eligibleReceivers=409270 dynamicHits=0 GPUms(trace/filter/temporal/BLAS/TLAS)=0.152576/0.182688/0.113664/9.6e-05/9.6e-05 CPUrecordMs=0.0827 temporal=on history(accepted/rejected/clamped/dynamic)=390557/18713/97738/0 historyResets=3 phase=3 historyBytes=9830400 historyAllocations=6; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; approximate stock albedo\"",
+          "ok": true
+        }
+      },
+      {
+        "name": "night",
+        "status": {
+          "result": "\"RTGI=on capability=available lastWorldDispatch=yes completedDispatches=3040 bounceRays=0 hits=0 eligibleHits=0 rejectedMaterials=0 sunRays=0 sunBlocked=0 eligibleReceivers=409259 dynamicHits=0 GPUms(trace/filter/temporal/BLAS/TLAS)=0.03584/0.136512/0.085632/6.4e-05/9.6e-05 CPUrecordMs=0.0782 temporal=on history(accepted/rejected/clamped/dynamic)=391369/17890/0/0 historyResets=4 phase=6 historyBytes=9830400 historyAllocations=6; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; approximate stock albedo\"",
+          "ok": true
+        }
+      },
+      {
+        "name": "day-restored",
+        "status": {
+          "result": "\"RTGI=on capability=available lastWorldDispatch=yes completedDispatches=3253 bounceRays=409270 hits=100531 eligibleHits=98545 rejectedMaterials=1986 sunRays=90715 sunBlocked=23311 eligibleReceivers=409270 dynamicHits=0 GPUms(trace/filter/temporal/BLAS/TLAS)=0.114688/0.13824/0.091776/6.4e-05/6.4e-05 CPUrecordMs=0.0756 temporal=on history(accepted/rejected/clamped/dynamic)=390557/18713/97738/0 historyResets=5 phase=3 historyBytes=9830400 historyAllocations=6; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; approximate stock albedo\"",
+          "ok": true
+        }
+      },
+      {
+        "name": "overcast",
+        "status": {
+          "result": "\"RTGI=on capability=available lastWorldDispatch=yes completedDispatches=3485 bounceRays=409269 hits=100560 eligibleHits=98574 rejectedMaterials=1986 sunRays=90766 sunBlocked=23331 eligibleReceivers=409269 dynamicHits=0 GPUms(trace/filter/temporal/BLAS/TLAS)=0.114688/0.138656/0.091328/6.4e-05/9.6e-05 CPUrecordMs=0.0824001 temporal=on history(accepted/rejected/clamped/dynamic)=390671/18598/91494/0 historyResets=6 phase=3 historyBytes=9830400 historyAllocations=6; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; approximate stock albedo\"",
+          "ok": true
+        }
+      },
+      {
+        "name": "clear",
+        "status": {
+          "result": "\"RTGI=on capability=available lastWorldDispatch=yes completedDispatches=3714 bounceRays=409318 hits=99618 eligibleHits=97526 rejectedMaterials=2092 sunRays=89741 sunBlocked=22764 eligibleReceivers=409318 dynamicHits=0 GPUms(trace/filter/temporal/BLAS/TLAS)=0.11264/0.138816/0.09248/6.4e-05/6.4e-05 CPUrecordMs=0.0772001 temporal=on history(accepted/rejected/clamped/dynamic)=391881/17437/99655/0 historyResets=7 phase=0 historyBytes=9830400 historyAllocations=6; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; approximate stock albedo\"",
+          "ok": true
+        }
+      }
+    ]
+  }
+}
