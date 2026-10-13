@@ -34,6 +34,77 @@ using std::sqrt;
 #include <PoseidonVK/Shaders/soft_rt_shadow_math.glsl>
 } // namespace SoftRTShadowMath
 
+namespace RayNormalMath
+{
+// Tiny test adapter: compile the shipped GLSL math, not a second implementation.
+struct vec3
+{
+    float x, y, z;
+    vec3 operator*(float s) const { return {x*s,y*s,z*s}; }
+    vec3 operator+(vec3 b) const { return {x+b.x,y+b.y,z+b.z}; }
+    vec3 operator-() const { return {-x,-y,-z}; }
+};
+struct vec4
+{
+    vec3 xyz;
+    float w;
+    vec4(vec3 v, float s): xyz(v), w(s) {}
+};
+struct mat3
+{
+    vec3 rows[3];
+    vec3 operator*(vec3 v) const {
+        return {rows[0].x*v.x+rows[0].y*v.y+rows[0].z*v.z,
+                rows[1].x*v.x+rows[1].y*v.y+rows[1].z*v.z,
+                rows[2].x*v.x+rows[2].y*v.y+rows[2].z*v.z};
+    }
+};
+mat3 transpose(mat3 m) {
+    return {{{m.rows[0].x,m.rows[1].x,m.rows[2].x},
+             {m.rows[0].y,m.rows[1].y,m.rows[2].y},
+             {m.rows[0].z,m.rows[1].z,m.rows[2].z}}};
+}
+float dot(vec3 a, vec3 b) { return a.x*b.x+a.y*b.y+a.z*b.z; }
+vec3 normalize(vec3 a) { return a*(1/std::sqrt(dot(a,a))); }
+bool any(bool b) { return b; }
+bool isnan(vec3 a) { return std::isnan(a.x)||std::isnan(a.y)||std::isnan(a.z); }
+bool isinf(vec3 a) { return std::isinf(a.x)||std::isinf(a.y)||std::isinf(a.z); }
+#include <PoseidonVK/Shaders/ray_normal.glsl>
+}
+
+TEST_CASE("Ray shading normals handle inverse transpose, winding and missing normals",
+          "[Graphics][Shaders][ray-surface]")
+{
+    using namespace RayNormalMath;
+    const vec3 face{0,1,0}, ray{0,-1,0}, weights{.2f,.3f,.5f};
+    const mat3 identity{{{1,0,0},{0,1,0},{0,0,1}}};
+    const mat3 scaled{{{.5f,0,0},{0,1,0},{0,0,2}}}; // model scale 2,1,.5
+    const vec3 n{1,1,1};
+    const auto result=rayShadingNormal(face,n,n,n,weights,scaled,ray);
+    const auto expected=normalize(vec3{.5f,1,2});
+    REQUIRE(result.w==1);
+    REQUIRE(dot(result.xyz,expected)>.99999f);
+    // Rotation with reflection/nonuniform scale: model [0,-1,0; -2,0,0; 0,0,.5].
+    const mat3 inverse{{{0,-.5f,0},{-1,0,0},{0,0,2}}};
+    const auto transformed=rayShadingNormal({-1,0,0},n,n,n,weights,inverse,{1,0,0});
+    REQUIRE(transformed.w==1);
+    REQUIRE(dot(transformed.xyz,normalize(vec3{-1,-.5f,2}))>.99999f);
+    const auto reversed=rayShadingNormal(face,-n,-n,-n,weights,scaled,ray);
+    REQUIRE(dot(reversed.xyz,result.xyz)>.99999f);
+    const auto back=rayShadingNormal(-face,n,n,n,weights,scaled,-ray);
+    REQUIRE(dot(back.xyz,-result.xyz)>.99999f);
+    const auto smooth=rayShadingNormal(face,{1,1,0},{0,1,1},{0,1,0},weights,identity,ray);
+    REQUIRE(dot(smooth.xyz,normalize(vec3{.2f,1,.3f}))>.99999f);
+    for (vec3 invalid : {vec3{0,0,0}, vec3{NAN,1,0}, vec3{INFINITY,1,0}, vec3{1e30f,1,0}})
+    {
+        const auto fallback=rayShadingNormal(face,invalid,n,n,weights,identity,ray);
+        REQUIRE(fallback.w==0);
+        REQUIRE(dot(fallback.xyz,face)==1);
+    }
+    REQUIRE(rayShadingNormal(face,{1,0,0},{1,0,0},{1,0,0},weights,identity,ray).w==0);
+    REQUIRE(rayShadingNormal(face,n,n,n,weights,identity,{1,-.1f,0}).w==0);
+}
+
 TEST_CASE("RT sun-disc samples are bounded, balanced and contact hardening", "[Graphics][Shaders][ShadowMath]")
 {
     using namespace SoftRTShadowMath;

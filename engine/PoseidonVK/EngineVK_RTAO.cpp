@@ -1,6 +1,7 @@
 #include <PoseidonVK/EngineVK.hpp>
 #include <PoseidonVK/VertexBufferVK.hpp>
 #include <PoseidonVK/RayTransformVK.hpp>
+#include <PoseidonVK/RaySurfaceVK.hpp>
 #include <Poseidon/World/Scene/Scene.hpp>
 #include <Poseidon/World/Scene/Camera/Camera.hpp>
 #include <Poseidon/World/Terrain/Landscape.hpp>
@@ -41,7 +42,7 @@ void EngineVK::BeginRTDynamic()
         return;
     const auto start = std::chrono::steady_clock::now();
     const auto camera = GScene->GetCamera()->Position();
-    const float radius = _vk.RTShadowsEnabled() || _vk.RTReflectionsEnabled() ? 160.f : 80.f;
+    const float radius = _vk.RTShadowsEnabled() || _vk.RTHitDataEnabled() ? 160.f : 80.f;
     std::set<uint64_t> seen;
     size_t scanned = 0;
     auto add = [&](Object* object)
@@ -151,7 +152,7 @@ void EngineVK::CaptureRayGeometry(Object& object, const Shape& shape, int level,
                 if (range.begin == range.end)
                     continue;
                 vk::RTAORange material{range.begin, range.end - range.begin};
-                material.sampler = vk::ShapeSampler(render::SplitLegacy(flags));
+                material.sampler = vk::ShapeSampler(render::SplitLegacy(flags)) | vk::RaySurfaceFlags(flags);
                 if ((flags & IsTransparent) || alpha == AlphaStats::Cutout)
                 {
                     if (!tex)
@@ -159,12 +160,12 @@ void EngineVK::CaptureRayGeometry(Object& object, const Shape& shape, int level,
                     material.alpha = tex->Image(_vk);
                     material.cutoff = flags & IsTransparent ? 192.f / 255 : .5f;
                 }
-                if (tex && (_vk.RTReflectionsEnabled() || material.alpha))
+                if (tex && (_vk.RTHitDataEnabled() || material.alpha))
                 {
                     const auto image = tex->Image(_vk);
                     const auto& pixels = tex->Pixels();
                     _vk.PrepareRTAOAlpha(image, pixels.width, pixels.height, pixels.rgba.data());
-                    if (_vk.RTReflectionsEnabled())
+                    if (_vk.RTHitDataEnabled())
                         material.color = image;
                 }
                 instance.ranges.push_back(std::move(material));
@@ -247,13 +248,13 @@ void EngineVK::CollectRTAOScene()
     const auto* camera = GScene->GetCamera();
     auto* land = GScene->GetLandscape();
     const auto position = camera->Position();
-    const bool reflections = _vk.RTReflectionsEnabled();
-    const bool shadows = _vk.RTShadowsEnabled() || reflections;
+    const bool hitData = _vk.RTHitDataEnabled();
+    const bool shadows = _vk.RTShadowsEnabled() || hitData;
     const float radius = shadows ? 160.f : 80.f;
     const auto sunDirection = -GScene->MainLight()->Direction().Normalized();
     const float daylight = std::clamp(1.f - GScene->MainLight()->NightEffect(), 0.f, 1.f);
     _vk.SetRTSun({sunDirection.X(), sunDirection.Y(), sunDirection.Z(), sunDirection.Y() > .01f ? daylight : 0.f});
-    if (reflections)
+    if (hitData)
     {
         const auto* sun = GScene->MainLight();
         const auto eye = GetAccomodateEye();
@@ -272,7 +273,8 @@ void EngineVK::CollectRTAOScene()
                                    rgba(_fogColor),
                                    _vk.EyeCoef(),
                                    {GScene->GetFogMinRange(),
-                                    1.f / std::max(1.f, GScene->GetFogMaxRange() - GScene->GetFogMinRange()), 0, 0}});
+                                    1.f / std::max(1.f, GScene->GetFogMaxRange() - GScene->GetFogMinRange()), 0, 0},
+                                   rgba(sun->Ambient()), rgba(sun->Diffuse())});
     }
     uint32_t foliageCount = 0, terrainCount = 0;
     // Existing spatial buckets, independent of visibility and the CSM toggle.
@@ -323,8 +325,9 @@ void EngineVK::CollectRTAOScene()
                     if (alpha == AlphaStats::Blend && (!shadows || !(flags & IsTransparent)))
                         continue;
                     vk::RTAORange candidate{uint32_t(s), 0};
-                    candidate.sampler = vk::ShapeSampler(render::SplitLegacy(flags));
-                    if (reflections)
+                    candidate.sampler = vk::ShapeSampler(render::SplitLegacy(flags)) |
+                                        vk::RaySurfaceFlags(flags | object->GetObjSpecial());
+                    if (hitData)
                         if (auto* tex = dynamic_cast<TextureVK*>(texture); tex && !tex->IsDynamic())
                         {
                             candidate.color = tex->Image(_vk);
@@ -344,7 +347,6 @@ void EngineVK::CollectRTAOScene()
                         candidate.alpha = vkTexture->Image(_vk);
                         const auto& pixels = vkTexture->Pixels();
                         _vk.PrepareRTAOAlpha(candidate.alpha, pixels.width, pixels.height, pixels.rgba.data());
-                        candidate.sampler = vk::ShapeSampler(render::SplitLegacy(flags));
                         candidate.cutoff = flags & IsTransparent ? 192.f / 255 : .5f;
                     }
                     (extended ? shadowOnly : instance.ranges).push_back(std::move(candidate));
@@ -413,7 +415,7 @@ void EngineVK::CollectRTAOScene()
                     for (int i = 0; i <= cells; ++i)
                         heights.push_back(land->SurfaceY((x * cells + i) * grid, (z * cells + j) * grid));
                 auto& patch = _rtTerrainPatches[key];
-                if (!patch.mesh || patch.heights != heights || patch.textured != reflections)
+                if (!patch.mesh || patch.heights != heights || patch.textured != hitData)
                 {
                     // Same immutable position/normal/UV layout as native shapes.
                     std::vector<std::array<float, 8>> vertices;
@@ -444,7 +446,7 @@ void EngineVK::CollectRTAOScene()
                         {
                             uint32_t a = j * stride + i;
                             TextureVK* texture = nullptr;
-                            if (reflections)
+                            if (hitData)
                                 texture = dynamic_cast<TextureVK*>(land->GetTexture(
                                     land->GetTexture(int((z * cells + j) * grid / land->GetLandGrid()),
                                                      int((x * cells + i) * grid / land->GetLandGrid()))));
@@ -452,10 +454,11 @@ void EngineVK::CollectRTAOScene()
                             group.insert(group.end(), {a, a + 1, a + stride, a + 1, a + stride + 1, a + stride});
                         }
                     patch.ranges.clear();
-                    patch.textured = reflections;
+                    patch.textured = hitData;
                     for (auto& [texture, group] : groups)
                     {
                         vk::RTAORange range{uint32_t(indices.size()), uint32_t(group.size())};
+                        range.sampler = vk::RayDiffuse | vk::RayTerrainUV;
                         if (texture && !texture->IsDynamic())
                         {
                             range.color = texture->Image(_vk);

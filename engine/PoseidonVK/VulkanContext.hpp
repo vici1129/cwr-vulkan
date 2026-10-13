@@ -105,9 +105,9 @@ struct RTAORange
 {
     uint32_t first = 0, count = 0;
     std::shared_ptr<TextureImage> alpha;
-    uint32_t sampler = 0;
+    uint32_t sampler = 0; // low three bits: sampler; high bits: RaySurfaceFlags
     float cutoff = 0;
-    std::shared_ptr<TextureImage> color; // existing decoded RGBA, only needed for reflection hit shading
+    std::shared_ptr<TextureImage> color; // existing decoded RGBA, uploaded only for a hit-color consumer
     bool operator==(const RTAORange&) const = default;
 };
 struct RTAOInstance
@@ -268,7 +268,10 @@ class VulkanContext
                        const std::array<float, 4>& originTime = {})
     { _waterCamera = camera; _waterProjection = projection; _waterOriginTime = originTime; }
     bool RaySceneEnabled() const { return RTAOEnabled() || RTShadowsEnabled() || RTReflectionsEnabled(); }
-    void SetReflectionLighting(const std::array<std::array<float, 4>, 8>& data) { _reflectionLighting = data; }
+    // Water is currently the only hit-color consumer. Add future diffuse transport
+    // here when implemented; AO/shadows alone must not upload opaque color textures.
+    bool RTHitDataEnabled() const { return RTReflectionsEnabled(); }
+    void SetReflectionLighting(const std::array<std::array<float, 4>, 10>& data) { _reflectionLighting = data; }
     void SetRTSun(const std::array<float, 4>& sun) { _rtSun = sun; }
     void SetRTCoverage(uint32_t terrain, uint32_t foliage)
     {
@@ -364,7 +367,7 @@ class VulkanContext
     bool _rtReflectionsEnabled = false, _rtWaterTargets = false;
     bool _rainRipplesEnabled = false;
     std::string _rtReflectionFailure;
-    std::array<std::array<float, 4>, 8> _reflectionLighting{};
+    std::array<std::array<float, 4>, 10> _reflectionLighting{};
     std::array<float, 4> _rtSun{};
     uint32_t _rtTerrain = 0, _rtFoliage = 0;
     bool _rtaoRequested = false, _rtaoAvailable = false, _rtaoEnabled = false;

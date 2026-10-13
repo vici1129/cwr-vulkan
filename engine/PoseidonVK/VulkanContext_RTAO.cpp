@@ -186,6 +186,7 @@ struct VulkanContext::RTAOState
     bool sunDispatched = false;
     uint64_t waterRays = 0, shadedHits = 0;
     uint32_t lastWaterRays = 0, lastWaterHits = 0, lastShaded = 0, lastShadedTerrain = 0, lastShadedAlpha = 0;
+    std::array<uint32_t, 5> surface{}; // eligible, vertex normal, face fallback, unavailable, invalid data
     bool waterDispatched = false;
     double waterRayMs = 0, waterFilterMs = 0;
     RTDynamicStats dynamic;
@@ -372,7 +373,10 @@ std::string VulkanContext::SetRTReflections(std::string_view mode)
                 << " totalShadedHits=" << _rtao->shadedHits
                 << " rayQueriesExecuted=" << (_rtao->waterRays ? "yes" : "no")
                 << " hitShadingExecuted=" << (_rtao->shadedHits ? "yes" : "no")
-                << " lastWorldDispatch=" << (_rtao->waterDispatched ? "yes" : "no");
+                << " lastWorldDispatch=" << (_rtao->waterDispatched ? "yes" : "no")
+                << " hitSurface(eligible/vertex/face/unavailable/invalid)="
+                << _rtao->surface[0] << '/' << _rtao->surface[1] << '/' << _rtao->surface[2] << '/'
+                << _rtao->surface[3] << '/' << _rtao->surface[4];
         else
             out << " waterRays=0 shadedHits=0 rayQueriesExecuted=no hitShadingExecuted=no";
         if (_rtao && _rtao->timingSamples)
@@ -656,6 +660,7 @@ void VulkanContext::RetireRTAO()
         rt.lastShaded = counts[8];
         rt.lastShadedTerrain = counts[9];
         rt.lastShadedAlpha = counts[10];
+        std::copy_n(counts + 15, 5, rt.surface.begin());
         rt.waterRays += counts[6];
         rt.shadedHits += counts[8];
         ++rt.completed;
@@ -929,13 +934,13 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
         return result;
     };
     if (!slot.counters)
-        slot.counters = buffer(64, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, true);
+        slot.counters = buffer(80, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, true);
     if (!slot.materials)
         slot.materials = buffer(1024 * sizeof(uint64_t), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, true);
     if (!slot.reflectionLight)
         slot.reflectionLight = buffer(sizeof(_reflectionLighting), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, true);
     UploadMappedBuffer(slot.reflectionLight->buffer, _reflectionLighting.data(), sizeof(_reflectionLighting));
-    std::memset(slot.counters->buffer.mapped, 0, 64);
+    std::memset(slot.counters->buffer.mapped, 0, 80);
     if (!slot.queries && _timestampBits && _profile.enabled)
     {
         VkQueryPoolCreateInfo info{VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO};
@@ -1201,7 +1206,7 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
                                     _rtWaterTargets ? _aaTargets[_image].water.view : _aaTargets[_image].color.view,
                                     VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
         VkDescriptorBufferInfo reflectionLight{slot.reflectionLight->buffer.buffer, 0, VK_WHOLE_SIZE};
-        VkDescriptorBufferInfo counter{slot.counters->buffer.buffer, 0, 64};
+        VkDescriptorBufferInfo counter{slot.counters->buffer.buffer, 0, 80};
         VkDescriptorBufferInfo materialBuffer{slot.materials->buffer.buffer, 0, VK_WHOLE_SIZE};
         VkWriteDescriptorSetAccelerationStructureKHR as{
             VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR};

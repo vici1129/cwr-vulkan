@@ -1,5 +1,162 @@
 # Vulkan backend development
 
+## RTGI hit-shading foundation (2026-10-13)
+
+Built from public main `f28723f` in an isolated worktree, preserving the original
+checkout's private DLSS/NGX work. This is a hit-input prerequisite, **not RTGI**:
+no indirect illumination, additional rays, new pass, temporal history, denoiser,
+new controls or broader geometry coverage.
+
+### Reusable intersection inputs
+
+`ray_material.glsl` holds the existing 64-byte ray-material ABI, index/UV fetch
+and alpha traversal. `ray_surface.glsl::hitSurface` consumes a **committed**
+triangle query from the same BLAS/TLAS scene. It returns:
+
+- World position reconstructed from triangle vertices, barycentrics and the
+  query's current object-to-world transform.
+- Separate geometric and shading normals facing the incident ray. The
+  geometric normal comes from transformed triangle edges. Shape normals use
+  the existing 32-byte position/negated-normal/UV layout, barycentric
+  interpolation and the transpose of the query's world-to-object matrix.
+  Reversed source normals/winding are aligned to the geometric hemisphere.
+  Nonfinite, zero, cancelling, near-tangent or ray-backfacing interpolated
+  normals fall back to the face normal. Terrain's placeholder up-normals are
+  explicitly excluded from interpolation.
+- UVs and linear texture color using the existing 16/32-bit indices, section
+  offsets, wrapping/clamping, point/bilinear filtering and decoded RGBA storage.
+  Texels are sRGB-decoded **before** bilinear interpolation. No texture
+  re-upload, new texture set or guessed white albedo is used.
+- A diffuse-albedo **proxy**, availability bits, the existing static/extended
+  alpha/terrain/dynamic scene kind, alpha-test and approximate-UV flags, and
+  `diffuseEligible`. Consumers must check availability/eligibility; zero
+  initialization does not mean a missing material is a known black surface.
+
+Ordinary supported base-texture lighting modes can supply the proxy. Unknown
+render flags, colored/tinted modes, suppressed sunlight, emissive/blended modes
+and specular-texture modes do not become diffuse materials. Actual texture RGB
+remains separately available for legacy water shading. Cutouts retain their
+existing alpha-tested traversal, UVs and color, but are **not diffuse-bounce
+eligible**: no leaf transmission or two-sided material response is invented.
+Missing color addresses/dimensions leave albedo unavailable.
+
+Coverage is exactly the existing local scene: stock terrain patches, eligible
+static rocks/buildings and supported live vehicles/on-foot soldiers when
+`triRTDynamic` is enabled. Crew/equipment proxies, destroyed objects, blended
+effects, dynamic textures and previously excluded shapes remain excluded.
+Terrain retains the existing land-grid UV jitter/interpolation and texture
+grouping; the UVs are explicitly approximate, without raster detail layers,
+terrain LOD blending or ray-footprint mip selection.
+
+`RTHitDataEnabled()` centralizes the demand for color and terrain material
+preparation. Water reflections are currently its only consumer; a subsequent
+bounce prototype can reuse this gate. AO-only and shadow-only collection still
+prepares only the alpha data needed for traversal, not opaque color textures.
+Previously uploaded pixels retain their existing texture-owned lifetime.
+Metadata occupies unused high sampler bits; low sampler bits and the 64-byte
+material stride are unchanged. BLAS/TLAS cache matching, geometry budgets,
+per-fence dynamic snapshots, retained texture ownership and retirement are
+unchanged. Dynamic attribute uploads already include current normals and UVs,
+even when only position changes require a BLAS rebuild.
+
+### Lighting boundary and preservation
+
+`ray_lighting.glsl` exposes the engine's ambient and diffuse sunlight separately,
+before `GetAccomodateEye()`, fog or night-eye response. Existing `ao.sun`
+provides direction and the daylight availability factor. The existing
+`legacyLightToLinear` conversion decodes display-authored coefficients below
+white and preserves linear headroom above white. These are **not calibrated
+radiometric inputs**. Albedo, ambient illumination, direct sunlight, visibility
+and directional response must remain separate in a future bounce evaluation.
+No BRDF, fog, eye adaptation or tone mapping is applied by the surface helper.
+
+Water now calls that helper but intentionally retains its original face-normal
+lighting, combined legacy-light conversion, cloud response, eye response, fog
+and composition. Its use of texture color does not depend on diffuse
+eligibility. `triPBR` is independent; no PBR allowlist, roughness or metalness
+is required or inferred. AO/sun traversal and GL33 rendering code are unchanged.
+
+The existing `triRTReflections "status"` adds completed-frame
+`hitSurface(eligible/vertex/face/unavailable/invalid)` counts from actual water
+rays. Invalid checks compare barycentric world position with the ray hit
+(1 cm tolerance at stock world coordinates), unit/hemisphere/ray-facing normals
+and finite bounded albedo. Face counts include terrain. Unavailable includes
+unsupported diffuse material modes; alpha ineligibility is also visible in the
+existing shaded-alpha count. These are read-only diagnostics, not a debug view.
+
+### Verification and cost
+
+Vulkan and GL33 builds pass. Focused shape/shader tests pass **1,636 assertions
+in 75 cases** and **1,596 in 74 cases**, respectively; driver-free Vulkan
+policy/lifetime tests pass **496 checks**. Tests compile the shipped normal
+math and exercise interpolation, nonuniform scale, reflected/rotated transforms,
+reversed normals, NaN/infinite/zero normals and conservative material flags.
+Shader builds cover single-sample and MSAA AO, sunlight and water variants.
+
+Actual `01TakeTheCar.ABEL` and `06Ninjas.EDEN` gameplay used the existing
+diagnostic launcher/harness, with developer coastal views and spawned stock
+vehicles/soldiers. Physical movement changed the player position on both
+islands; reload/map input and return to gameplay worked. This is not a mission
+completion or Steam-launch qualification. Representative water-hit frames:
+
+| Scene | Shaded hits | Terrain | Dynamic | Alpha-tested | Invalid |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Malden pier | 353,967 | 265,523 | 29,332 | 2,328 | 0 |
+| Everon close coast | 526,136 | 465,895 | 60,241 | 4,522 | 0 |
+
+The final executable also traced Malden's stock `data3d\skala.p3d` object 3808
+near world X/Z 9912.8/4358.0: 104,235 shaded hits (416 terrain),
+92,646 interpolated-normal hits and zero unavailable/invalid hits. The rock
+texture and transformed silhouette were visible in the reflection. PBR
+Off/On/Off changed only the above-water rock region and restored exactly;
+the reflected rock remained independent of PBR. This final validation run
+shut down at 8,938/8,938 submitted/presented with zero errors/warnings.
+
+Malden exercised moving/rotating vehicles and soldiers, dynamic Off/On/Off,
+AA Off/TAA/FSR Quality/MSAA4, PBR On/Off, water refraction/sky/foam, cloud,
+rain/wet/underwater/atmosphere and soft RT sunlight coexistence. Everon repeated
+dynamic, PBR and environmental checks; its frozen dynamic Off/On/Off restored
+the image exactly. Terrain slopes, pier/building textures and vehicle/soldier
+colors remained coherent in the reflections. The baseline/new coastal images
+were visually compared, not asserted pixel-identical across independent
+mission starts (water time and simulation poses differ). AO-only and
+shadow-only transitions still dispatched their existing rays with zero surface
+diagnostic counts. GL33 launched stock gameplay, rejected Vulkan-only controls
+and exited through the harness. Both Vulkan validation runs shut down with
+**zero errors/warnings** (16,865/16,865 and 9,278/9,278 submitted/presented).
+
+RTX 4060 Ti, driver 617.14, 1920x1080, AA Off, VSync Off, validation Off:
+existing timestamps/profile intervals over warmed ten-second windows at the
+Malden coast, compared with the clean `f28723f` executable:
+
+| Dynamic RT | Water trace/shade GPU, before / after | Whole GPU frame, before / after | CPU frame, before / after |
+| --- | --- | --- | --- |
+| Off | 0.478 / 0.806 ms | 2.348 / 2.498 ms | 7.037 / 7.272 ms |
+| On | 0.544 / 0.842 ms | 2.445 / 2.605 ms | 7.276 / 7.486 ms |
+
+These observations include full-hit normal reconstruction and diagnostic
+atomics/checks: about **0.30--0.33 ms additional water-pass GPU time**. Whole
+frame/CPU differences are noisy and not an isolated collection-cost estimate.
+No new steady allocations or texture uploads were reported in the warmed
+windows. The material/vertex stride, images, descriptors and allocation count
+are unchanged; counter payload grows 64 to 80 bytes and lighting payload 128
+to 160 bytes per fence slot (**96 bytes total for two slots**, excluding driver
+allocation granularity). Process private bytes were approximately 2.599/2.595 GB,
+with 785 handles in both runs; that variation is not a memory saving claim.
+
+Ignored evidence is under `build/shadow-live/hit-{malden-validation,everon-validation,
+rock-final-validation,baseline-perf,foundation-perf,gl33}`; builds/test logs are under the isolated
+`build/worktrees/cwr-rtgi-hit/build`. Nonuniform scaling and invalid-normal
+fallbacks have numerical coverage; no particular nonuniform stock instance or
+deliberately broken stock texture is claimed as live-tested.
+
+Remaining RTGI inputs/work: a bounded sampling/transport estimator, illumination
+and visibility at the hit, an explicit policy for baked lighting/mixed atlases
+and alpha surfaces, receiver/composition selection, and later temporal stability
+and filtering. Stock base RGB is only an approximate albedo, not a measured
+material set. This milestone does not establish an indirect-light energy scale
+or implement any bounce.
+
 ## Targeted PBR expansion: roof tiles and exterior wood (2026-10-13)
 
 Built from public main `cc08b1d` in the isolated public worktree. The original

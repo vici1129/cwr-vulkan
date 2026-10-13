@@ -14,9 +14,24 @@
 #include <PoseidonVK/LocalShadowVK.hpp>
 #include <PoseidonVK/WetSurfaceVK.hpp>
 #include <PoseidonVK/PBRMaterialVK.hpp>
+#include <PoseidonVK/RaySurfaceVK.hpp>
 #include <Poseidon/Graphics/Core/TLVertex.hpp>
 
 using namespace Poseidon;
+
+TEST_CASE("Ray diffuse metadata rejects unsupported lighting without changing sampler bits",
+          "[Graphics][vulkan-shape][ray-surface]")
+{
+    REQUIRE((vk::RaySurfaceFlags(0) & vk::RayDiffuse) != 0);
+    REQUIRE((vk::RaySurfaceFlags(IsTransparent) & vk::RayDiffuse) != 0); // traversal handles alpha; bounce excludes it
+    for (int flags : {DisableSun, IsColored, IsLight, IsAlpha, IsAlphaFog, SpecularTexture, IsWater})
+        REQUIRE((vk::RaySurfaceFlags(flags) & vk::RayDiffuse) == 0);
+    for (int flags : std::array<int, 6>{0, ClampU, ClampV, NoClamp, PointSampling, IsTransparent})
+    {
+        REQUIRE((vk::RaySurfaceFlags(flags) & 7) == 0);
+        REQUIRE((vk::RaySurfaceFlags(flags) & vk::RayVertexNormals) != 0);
+    }
+}
 
 TEST_CASE("PBR prototype only selects inspected stock dielectric textures", "[Graphics][vulkan-shape]")
 {

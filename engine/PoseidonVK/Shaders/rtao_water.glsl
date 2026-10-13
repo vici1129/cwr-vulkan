@@ -1,32 +1,9 @@
 // Closest-hit water reflection shading on the shared AO/sunlight TLAS.
-#include "color_space.glsl"
+#include "ray_surface.glsl"
 #define WEATHER_SET 1
 #define CLOUD_VOLUME
 #include "weather.glsl"
-layout(set=0,binding=8,std430) readonly buffer ReflectionLight {
-    vec4 ambient, diffuse, zenith, horizon, sunSky, fog, eye, parameters;
-} light;
-uint vertexIndex(Material m,uint index) {
-    uint word=Words(m.indices).data[m.index16!=0?index/2:index];
-    return m.index16!=0?(word>>((index&1)*16))&65535:word;
-}
-vec3 vertexPosition(Material m,uint index) {
-    uint offset=vertexIndex(m,index)*8;
-    return vec3(Floats(m.vertices).data[offset],Floats(m.vertices).data[offset+1],Floats(m.vertices).data[offset+2]);
-}
-vec4 colorTexel(Material m,ivec2 p) {
-    ivec2 size=ivec2(m.colorWidth,m.colorHeight);
-    p.x=(m.samplerFlags&1)!=0?clamp(p.x,0,size.x-1):((p.x%size.x)+size.x)%size.x;
-    p.y=(m.samplerFlags&2)!=0?clamp(p.y,0,size.y-1):((p.y%size.y)+size.y)%size.y;
-    return unpackUnorm4x8(Words(m.color).data[p.y*size.x+p.x]);
-}
-vec3 sampleColor(Material m,vec2 uv) {
-    vec2 p=uv*vec2(m.colorWidth,m.colorHeight)-.5;
-    if((m.samplerFlags&4)!=0) return toLinear(colorTexel(m,ivec2(floor(p+.5))).rgb);
-    ivec2 b=ivec2(floor(p)); vec2 f=fract(p);
-    return mix(mix(toLinear(colorTexel(m,b).rgb),toLinear(colorTexel(m,b+ivec2(1,0)).rgb),f.x),
-        mix(toLinear(colorTexel(m,b+ivec2(0,1)).rgb),toLinear(colorTexel(m,b+ivec2(1,1)).rgb),f.x),f.y);
-}
+#include "ray_lighting.glsl"
 vec3 eyeResponse(vec3 c) {
     vec3 p=toSRGB(c); float l=max(dot(p,light.eye.rgb),0);
     return toLinear(mix(vec3(l),p,clamp(l+light.eye.a,0,1)));
@@ -57,18 +34,32 @@ vec4 traceWater(ivec2 pixel) {
         atomicAdd(groupHits,1);
         uint custom=rayQueryGetIntersectionInstanceCustomIndexEXT(query,true);
         if((custom>>20)==3) atomicAdd(dynamicHits,1);
-        Material m=Materials(materials[custom&65535u]).m[rayQueryGetIntersectionGeometryIndexEXT(query,true)];
-        if(m.color!=uint64_t(0) && m.colorWidth>0 && m.colorHeight>0) {
-            uint first=m.first+rayQueryGetIntersectionPrimitiveIndexEXT(query,true)*3;
-            vec2 bary=rayQueryGetIntersectionBarycentricsEXT(query,true);
-            vec2 uv=vertexUV(m,first)*(1-bary.x-bary.y)+vertexUV(m,first+1)*bary.x+vertexUV(m,first+2)*bary.y;
-            mat4x3 model=rayQueryGetIntersectionObjectToWorldEXT(query,true);
-            vec3 a=model*vec4(vertexPosition(m,first),1), b=model*vec4(vertexPosition(m,first+1),1), c=model*vec4(vertexPosition(m,first+2),1);
-            vec3 normal=normalize(cross(b-a,c-a));
-            if(dot(normal,direction)>0) normal=-normal;
-            color=sampleColor(m,uv)*legacyLightToLinear(light.ambient.rgb+light.diffuse.rgb*max(dot(normal,ao.sun.xyz),0));
+        HitSurface surface=hitSurface(query);
+        if(surface.diffuseEligible) atomicAdd(surfaceEligible,1);
+        if((surface.available&HitNormal)!=0u) {
+            if((surface.available&HitVertexNormal)!=0u) atomicAdd(surfaceVertex,1);
+            else atomicAdd(surfaceFace,1);
+        }
+        if((surface.available&(HitPosition|HitNormal|HitUV|HitAlbedo))!=(HitPosition|HitNormal|HitUV|HitAlbedo))
+            atomicAdd(surfaceUnavailable,1);
+        // Cross-check transformed barycentric position against the actual ray.
+        // A centimetre tolerance accommodates large stock world coordinates.
+        vec3 rayPosition=rayQueryGetWorldRayOriginEXT(query)+direction*rayQueryGetIntersectionTEXT(query,true);
+        bool invalidNormal=(surface.available&HitNormal)!=0u &&
+            (!finiteVector(surface.normal) || abs(dot(surface.normal,surface.normal)-1)>.001 ||
+             dot(surface.normal,direction)>.001 || dot(surface.normal,surface.geometricNormal)<.099);
+        bool invalidAlbedo=(surface.available&HitAlbedo)!=0u &&
+            (!finiteVector(surface.albedo) || any(lessThan(surface.albedo,vec3(0))) ||
+             any(greaterThan(surface.albedo,vec3(1.001))));
+        if((surface.available&HitPosition)==0u || length(surface.position-rayPosition)>.01 || invalidNormal || invalidAlbedo)
+            atomicAdd(surfaceInvalid,1);
+        if((surface.available&(HitColor|HitNormal))==(HitColor|HitNormal)) {
+            // Preserve the legacy reflection response; future diffuse transport
+            // uses surface.normal and surface.albedo with diffuseEligible.
+            vec3 normal=surface.geometricNormal;
+            color=surface.textureColorLinear*legacyLightToLinear(light.ambient.rgb+light.diffuse.rgb*max(dot(normal,ao.sun.xyz),0));
             if(weather.sun.w>0) {
-                vec3 ambient=sampleColor(m,uv)*legacyLightToLinear(light.ambient.rgb);
+                vec3 ambient=surface.textureColorLinear*legacyLightToLinear(light.ambient.rgb);
                 color=ambient+max(color-ambient,vec3(0))*cloudSunlight(world+direction*rayQueryGetIntersectionTEXT(query,true));
             }
             float fog=clamp((rayQueryGetIntersectionTEXT(query,true)-light.parameters.x)*light.parameters.y,0,1);
@@ -76,7 +67,7 @@ vec4 traceWater(ivec2 pixel) {
             atomicAdd(shadedHits,1);
             if((custom>>20)==3) atomicAdd(dynamicShaded,1);
             if((custom>>20)==2) atomicAdd(terrainHits,1);
-            if(m.alpha!=uint64_t(0)) atomicAdd(alphaHits,1);
+            if((surface.available&HitAlphaTest)!=0u) atomicAdd(alphaHits,1);
         }
     }
     color=mix(toLinear(light.fog.rgb),color,water.z);
