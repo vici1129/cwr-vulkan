@@ -1,0 +1,266 @@
+[
+  {
+    "run": "quality-tuning-everon-baseline",
+    "scene": "village",
+    "exe_sha256": "9915FE7AFA03353E4F1C5D2CC8A08AE2AA336E059FE964BC7AA87CEAA26DB1ED",
+    "cloud_position": "0.512456",
+    "wet_rain": "0.000000",
+    "fog_ranges": [
+      "414.000031,1380.000000"
+    ],
+    "image_sha256": "7d3ee53621da6dff28ec9231f7032e15f033a9a5dda508aaf49966b6b1bdb884"
+  },
+  {
+    "run": "quality-tuning-everon-baseline",
+    "scene": "sunset",
+    "exe_sha256": "9915FE7AFA03353E4F1C5D2CC8A08AE2AA336E059FE964BC7AA87CEAA26DB1ED",
+    "cloud_position": "0.512456",
+    "wet_rain": "0.000000",
+    "fog_ranges": [
+      "414.000031,1380.000000"
+    ],
+    "image_sha256": "de2be5736968b1bda8a1106fe1f2b40210dc8ec1be7387e9cda203c5c755e52e"
+  },
+  {
+    "run": "quality-tuning-everon-baseline",
+    "scene": "rain",
+    "exe_sha256": "9915FE7AFA03353E4F1C5D2CC8A08AE2AA336E059FE964BC7AA87CEAA26DB1ED",
+    "cloud_position": "28.596565",
+    "wet_rain": "0.874125",
+    "fog_ranges": [
+      "110.366386,367.887939"
+    ],
+    "image_sha256": "8706012a135c00874c9dedbfff9b6006e06fb4437e6f3a48dde4847bf1caf87b"
+  },
+  {
+    "run": "quality-tuning-everon-baseline",
+    "scene": "coast",
+    "exe_sha256": "9915FE7AFA03353E4F1C5D2CC8A08AE2AA336E059FE964BC7AA87CEAA26DB1ED",
+    "cloud_position": "28.596565",
+    "wet_rain": "0.874125",
+    "fog_ranges": [
+      "414.000031,1380.000000"
+    ],
+    "image_sha256": "03806658916ad777f2d59246e2556fb1da6497edfbc83bd7ff25ac24b6240f11"
+  },
+  {
+    "run": "quality-tuning-everon-baseline",
+    "scene": "night",
+    "exe_sha256": "9915FE7AFA03353E4F1C5D2CC8A08AE2AA336E059FE964BC7AA87CEAA26DB1ED",
+    "cloud_position": "28.596565",
+    "wet_rain": "0.874125",
+    "fog_ranges": [
+      "315.000000,1050.000000"
+    ],
+    "image_sha256": "30d510893376d2ff9293c34d05f5917adfcb4c9fd1e97704e951d13fcd4236f1"
+  },
+  {
+    "run": "quality-tuning-everon-baseline",
+    "scene": "forest",
+    "exe_sha256": "9915FE7AFA03353E4F1C5D2CC8A08AE2AA336E059FE964BC7AA87CEAA26DB1ED",
+    "cloud_position": "28.596565",
+    "wet_rain": "0.874125",
+    "fog_ranges": [
+      "116.100006,387.000000"
+    ],
+    "image_sha256": "be0e8c90b585a8315f92f6aa4e859f5aca27669a7bff32b7cbdcc991c3538ec4"
+  },
+  {
+    "run": "quality-tuning-everon-candidate",
+    "scene": "village",
+    "exe_sha256": "E732D9A33F18684EB374495382FB44A3357AB229A5D419B266ADE0237EB493B5",
+    "cloud_position": "0.547106",
+    "wet_rain": "0.000000",
+    "fog_ranges": [
+      "414.000031,1380.000000"
+    ],
+    "image_sha256": "af29b6c8d8174c953583f21fc0371ddd95b8483c98a99363549ee5aceff3b14c"
+  },
+  {
+    "run": "quality-tuning-everon-candidate",
+    "scene": "sunset",
+    "exe_sha256": "E732D9A33F18684EB374495382FB44A3357AB229A5D419B266ADE0237EB493B5",
+    "cloud_position": "0.547106",
+    "wet_rain": "0.000000",
+    "fog_ranges": [
+      "414.000031,1380.000000"
+    ],
+    "image_sha256": "98595ba4dcef696f37daefe5eee2f27928c9ad3bd2111b9ddd61aef80c563d4f"
+  },
+  {
+    "run": "quality-tuning-everon-candidate",
+    "scene": "rain",
+    "exe_sha256": "E732D9A33F18684EB374495382FB44A3357AB229A5D419B266ADE0237EB493B5",
+    "cloud_position": "28.663216",
+    "wet_rain": "0.716271",
+    "fog_ranges": [
+      "149.997421,499.991394"
+    ],
+    "image_sha256": "eda9f747a918096d471f071ad411066ebb27f6111d69467d39b48e9683353b41"
+  },
+  {
+    "run": "quality-tuning-everon-candidate",
+    "scene": "coast",
+    "exe_sha256": "E732D9A33F18684EB374495382FB44A3357AB229A5D419B266ADE0237EB493B5",
+    "cloud_position": "28.663216",
+    "wet_rain": "0.716271",
+    "fog_ranges": [
+      "414.000031,1380.000000"
+    ],
+    "image_sha256": "14d048e1e6c6f8653a7a8ecc033bf2dad34cdcc544490ba0742df3c1b4c6f5b1"
+  },
+  {
+    "run": "quality-tuning-everon-candidate",
+    "scene": "night",
+    "exe_sha256": "E732D9A33F18684EB374495382FB44A3357AB229A5D419B266ADE0237EB493B5",
+    "cloud_position": "28.663216",
+    "wet_rain": "0.716271",
+    "fog_ranges": [
+      "315.000000,1050.000000"
+    ],
+    "image_sha256": "9d7cf44888d2a0d71bba3102ea9ed2c095d65748037c08d5d39ade60bb31d364"
+  },
+  {
+    "run": "quality-tuning-everon-candidate",
+    "scene": "forest",
+    "exe_sha256": "E732D9A33F18684EB374495382FB44A3357AB229A5D419B266ADE0237EB493B5",
+    "cloud_position": "28.663216",
+    "wet_rain": "0.716271",
+    "fog_ranges": [
+      "116.100006,387.000000"
+    ],
+    "image_sha256": "1f4568ff0187cb638317b2c746c4106fd3b7acc5de9a96a4a5a521a733839a57"
+  },
+  {
+    "run": "quality-tuning-malden-baseline",
+    "scene": "village",
+    "exe_sha256": "9915FE7AFA03353E4F1C5D2CC8A08AE2AA336E059FE964BC7AA87CEAA26DB1ED",
+    "cloud_position": "1.303248",
+    "wet_rain": "0.002075",
+    "fog_ranges": [
+      "414.000031,1380.000000"
+    ],
+    "image_sha256": "afece3a472a6642118a18165a9a52bda9fc6997ee17ea76a853b8a1462792880"
+  },
+  {
+    "run": "quality-tuning-malden-baseline",
+    "scene": "sunset",
+    "exe_sha256": "9915FE7AFA03353E4F1C5D2CC8A08AE2AA336E059FE964BC7AA87CEAA26DB1ED",
+    "cloud_position": "1.303248",
+    "wet_rain": "0.002075",
+    "fog_ranges": [
+      "414.000031,1380.000000"
+    ],
+    "image_sha256": "30e19481f327a32e07b8feb61f0b74cef3d50b397282d5bb73a8d4e2be8bb101"
+  },
+  {
+    "run": "quality-tuning-malden-baseline",
+    "scene": "rain",
+    "exe_sha256": "9915FE7AFA03353E4F1C5D2CC8A08AE2AA336E059FE964BC7AA87CEAA26DB1ED",
+    "cloud_position": "29.359364",
+    "wet_rain": "0.753055",
+    "fog_ranges": [
+      "140.877747,469.592468"
+    ],
+    "image_sha256": "3ea52c4ce140454a935bdea3d4a56b3e23d0c725cc1b2c38113bb13e6f380ba4"
+  },
+  {
+    "run": "quality-tuning-malden-baseline",
+    "scene": "coast",
+    "exe_sha256": "9915FE7AFA03353E4F1C5D2CC8A08AE2AA336E059FE964BC7AA87CEAA26DB1ED",
+    "cloud_position": "29.359364",
+    "wet_rain": "0.753055",
+    "fog_ranges": [
+      "414.000031,1380.000000"
+    ],
+    "image_sha256": "a06c588dabfb49c634a2ea7c66cefc19ee33bebd7a5f70fc898a91585f9855cf"
+  },
+  {
+    "run": "quality-tuning-malden-baseline",
+    "scene": "night",
+    "exe_sha256": "9915FE7AFA03353E4F1C5D2CC8A08AE2AA336E059FE964BC7AA87CEAA26DB1ED",
+    "cloud_position": "29.359364",
+    "wet_rain": "0.753055",
+    "fog_ranges": [
+      "315.000000,1050.000000"
+    ],
+    "image_sha256": "4569bc53922f3cda786cc1b3e7e4eda4e161a684cffc1a64fc33ae3782a90247"
+  },
+  {
+    "run": "quality-tuning-malden-baseline",
+    "scene": "forest",
+    "exe_sha256": "9915FE7AFA03353E4F1C5D2CC8A08AE2AA336E059FE964BC7AA87CEAA26DB1ED",
+    "cloud_position": "29.359364",
+    "wet_rain": "0.753055",
+    "fog_ranges": [
+      "116.100006,387.000000"
+    ],
+    "image_sha256": "715aa6a83398345467c7adcb90e746d4cfec907d18ba458fb082a2a6fdc85d09"
+  },
+  {
+    "run": "quality-tuning-malden-candidate",
+    "scene": "village",
+    "exe_sha256": "E732D9A33F18684EB374495382FB44A3357AB229A5D419B266ADE0237EB493B5",
+    "cloud_position": "0.865925",
+    "wet_rain": "0.000770",
+    "fog_ranges": [
+      "414.000031,1380.000000"
+    ],
+    "image_sha256": "e056ac49289cc424a22351c5c5a6921db92d3c7e795e6c1a627f93a993ff62e0"
+  },
+  {
+    "run": "quality-tuning-malden-candidate",
+    "scene": "sunset",
+    "exe_sha256": "E732D9A33F18684EB374495382FB44A3357AB229A5D419B266ADE0237EB493B5",
+    "cloud_position": "0.865925",
+    "wet_rain": "0.000770",
+    "fog_ranges": [
+      "414.000031,1380.000000"
+    ],
+    "image_sha256": "ba73b24a31440aab6fd7e14c88c2e806ee5a5b09fc76b4eca0de3a3fa6e86e51"
+  },
+  {
+    "run": "quality-tuning-malden-candidate",
+    "scene": "rain",
+    "exe_sha256": "E732D9A33F18684EB374495382FB44A3357AB229A5D419B266ADE0237EB493B5",
+    "cloud_position": "28.934034",
+    "wet_rain": "0.916262",
+    "fog_ranges": [
+      "99.499825,331.666077"
+    ],
+    "image_sha256": "41c82f4f0373879b5574061d0aa2fc204afe6303828e7818bb765857599c7d43"
+  },
+  {
+    "run": "quality-tuning-malden-candidate",
+    "scene": "coast",
+    "exe_sha256": "E732D9A33F18684EB374495382FB44A3357AB229A5D419B266ADE0237EB493B5",
+    "cloud_position": "28.934034",
+    "wet_rain": "0.916262",
+    "fog_ranges": [
+      "414.000031,1380.000000"
+    ],
+    "image_sha256": "b639dda63d1bbab935603fc918b9c504d06d45f9913d800ea525587bf9225f49"
+  },
+  {
+    "run": "quality-tuning-malden-candidate",
+    "scene": "night",
+    "exe_sha256": "E732D9A33F18684EB374495382FB44A3357AB229A5D419B266ADE0237EB493B5",
+    "cloud_position": "28.934034",
+    "wet_rain": "0.916262",
+    "fog_ranges": [
+      "315.000000,1050.000000"
+    ],
+    "image_sha256": "d2148981bcb04a2ce1be0570cb899ba67b1e05d59e83d8e25c9e7eb9c9614f94"
+  },
+  {
+    "run": "quality-tuning-malden-candidate",
+    "scene": "forest",
+    "exe_sha256": "E732D9A33F18684EB374495382FB44A3357AB229A5D419B266ADE0237EB493B5",
+    "cloud_position": "28.934034",
+    "wet_rain": "0.916262",
+    "fog_ranges": [
+      "116.100006,387.000000"
+    ],
+    "image_sha256": "70b28da8ed045908115863d5f839358d8b27405342c11208c54aaf6e4bf27876"
+  }
+]

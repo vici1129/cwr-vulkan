@@ -1,5 +1,17 @@
 # Vulkan backend development
 
+## Graphics quality and visual tuning pass (2026-10-14)
+
+[Graphics-quality design and evidence](graphics-quality.md) audits the existing
+effects and proposes compact Standard/Enhanced groups, optional RT sunlight,
+automatic bounded improvements and separate display/reconstruction controls.
+New RTX 4060 Ti measurements cover Malden/Everon daylight, sunset, rain,
+coastline and night at 1080p/1440p. RT water's visible transition and volumetric
+lighting's road interaction remain menu-exposure gates; bloom did not earn a
+first-menu toggle. Stronger numerical tuning was evaluated but not adopted.
+This pass changes documentation/evidence only: no menu, persistence, new rendering
+algorithm, SSR, asset change or private DLSS/NGX work is included.
+
 ## Faithful texture-enhancement feasibility (2026-10-13)
 
 A local-only three-texture rock/roof experiment compared conservative 2x/4x

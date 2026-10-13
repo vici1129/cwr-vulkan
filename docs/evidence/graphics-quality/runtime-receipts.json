@@ -1,0 +1,530 @@
+[
+  {
+    "run": "quality-aa-1440",
+    "sha256": "9915FE7AFA03353E4F1C5D2CC8A08AE2AA336E059FE964BC7AA87CEAA26DB1ED",
+    "validation_requested": false,
+    "shutdown": "Vulkan: shutdown complete; submitted=9429, presented=9429, validation errors=0, warnings=0"
+  },
+  {
+    "run": "quality-everon-1080-final",
+    "sha256": "9915FE7AFA03353E4F1C5D2CC8A08AE2AA336E059FE964BC7AA87CEAA26DB1ED",
+    "validation_requested": false,
+    "shutdown": "Vulkan: shutdown complete; submitted=40308, presented=40308, validation errors=0, warnings=0"
+  },
+  {
+    "run": "quality-everon-1440-final",
+    "sha256": "9915FE7AFA03353E4F1C5D2CC8A08AE2AA336E059FE964BC7AA87CEAA26DB1ED",
+    "validation_requested": false,
+    "shutdown": null
+  },
+  {
+    "run": "quality-everon-1440-resumed",
+    "sha256": "9915FE7AFA03353E4F1C5D2CC8A08AE2AA336E059FE964BC7AA87CEAA26DB1ED",
+    "validation_requested": false,
+    "shutdown": "Vulkan: shutdown complete; submitted=35943, presented=35943, validation errors=0, warnings=0"
+  },
+  {
+    "run": "quality-malden-1080",
+    "sha256": "9915FE7AFA03353E4F1C5D2CC8A08AE2AA336E059FE964BC7AA87CEAA26DB1ED",
+    "validation_requested": false,
+    "shutdown": "Vulkan: shutdown complete; submitted=19154, presented=19154, validation errors=0, warnings=0"
+  },
+  {
+    "run": "quality-malden-1080-final",
+    "sha256": "9915FE7AFA03353E4F1C5D2CC8A08AE2AA336E059FE964BC7AA87CEAA26DB1ED",
+    "validation_requested": false,
+    "shutdown": "Vulkan: shutdown complete; submitted=58492, presented=58492, validation errors=0, warnings=0"
+  },
+  {
+    "run": "quality-malden-1080b",
+    "sha256": "9915FE7AFA03353E4F1C5D2CC8A08AE2AA336E059FE964BC7AA87CEAA26DB1ED",
+    "validation_requested": false,
+    "shutdown": "Vulkan: shutdown complete; submitted=125447, presented=125447, validation errors=0, warnings=0"
+  },
+  {
+    "run": "quality-malden-1440-final",
+    "sha256": "9915FE7AFA03353E4F1C5D2CC8A08AE2AA336E059FE964BC7AA87CEAA26DB1ED",
+    "validation_requested": false,
+    "shutdown": "Vulkan: shutdown complete; submitted=102540, presented=102540, validation errors=0, warnings=0"
+  },
+  {
+    "run": "quality-tuning-everon-baseline",
+    "sha256": "9915FE7AFA03353E4F1C5D2CC8A08AE2AA336E059FE964BC7AA87CEAA26DB1ED",
+    "validation_requested": false,
+    "shutdown": "Vulkan: shutdown complete; submitted=4751, presented=4751, validation errors=0, warnings=0"
+  },
+  {
+    "run": "quality-tuning-everon-candidate",
+    "sha256": "E732D9A33F18684EB374495382FB44A3357AB229A5D419B266ADE0237EB493B5",
+    "validation_requested": false,
+    "shutdown": "Vulkan: shutdown complete; submitted=4767, presented=4767, validation errors=0, warnings=0"
+  },
+  {
+    "run": "quality-tuning-malden-baseline",
+    "sha256": "9915FE7AFA03353E4F1C5D2CC8A08AE2AA336E059FE964BC7AA87CEAA26DB1ED",
+    "validation_requested": false,
+    "shutdown": "Vulkan: shutdown complete; submitted=4723, presented=4723, validation errors=0, warnings=0"
+  },
+  {
+    "run": "quality-tuning-malden-candidate",
+    "sha256": "E732D9A33F18684EB374495382FB44A3357AB229A5D419B266ADE0237EB493B5",
+    "validation_requested": false,
+    "shutdown": "Vulkan: shutdown complete; submitted=4541, presented=4541, validation errors=0, warnings=0"
+  },
+  {
+    "run": "quality-validate-everon-rt",
+    "sha256": "0828F8249D579F98AFE4490F37A4959CB040CE96DB814D82740B64B4B11E88B1",
+    "validation_requested": true,
+    "shutdown": "Vulkan: shutdown complete; submitted=964, presented=964, validation errors=0, warnings=0",
+    "actions": [
+      {
+        "code": "player allowDammage false; setAccTime 0; setViewDistance 1400; hint ''; titleText ['','PLAIN']; triAA 'off'; triRenderScale 100; triSetVsync 0; triBloom 'threshold 1.25'; triBloom 'strength .15'",
+        "result": {
+          "result": "\"OK: bloom tuning updated\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triAtmosphere 'on'; triWetSurfaces 'on'; triUnderwater 'on'; triPBR 'on'; triBloom 'off'; triVolumetricFog 'off'; triSunShafts 'off'; triSoftShadows 'on'; triContactShadows 'on'; triLocalShadows 'on'; triVolumetricClouds 'on'; triCloudShadows 'on'; triWaterRefraction 'on'; triRainRipples 'on'; triShoreFoam 'on'; triRTShadows 'on'; triSoftRTShadows 'on'; triRTDynamic 'on'; triRTReflections 'on'; triSkyReflections 'on'; triRTAO 'off'; triRTGI 'off'; triSSAO [1,1.2,1.5,.03,80]; triEnableShadowMaps",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triClearView; player cameraEffect ['terminate','back']; player switchCamera 'INTERNAL'; player setDir 0; setDate [1985,7,5,12,0]; triCheatWeather .45; setAccTime 1",
+        "result": {
+          "result": "<null>",
+          "ok": true
+        }
+      },
+      {
+        "code": "triAA 'off'",
+        "result": {
+          "result": "\"OK: off (next frame)\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "getPos player",
+        "result": {
+          "result": "[7451.62,4719.19,-0.000305176]",
+          "ok": true
+        }
+      },
+      {
+        "code": "getPos player",
+        "result": {
+          "result": "[7447.78,4722.29,0.00105286]",
+          "ok": true
+        }
+      },
+      {
+        "code": "triAA 'taa'",
+        "result": {
+          "result": "\"OK: taa (next frame)\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "getPos player",
+        "result": {
+          "result": "[7447.78,4722.29,0.00105286]",
+          "ok": true
+        }
+      },
+      {
+        "code": "getPos player",
+        "result": {
+          "result": "[7444,4725.33,0.000907898]",
+          "ok": true
+        }
+      },
+      {
+        "code": "triAA 'fsr-quality'",
+        "result": {
+          "result": "\"OK: fsr-quality (next frame)\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "getPos player",
+        "result": {
+          "result": "[7444,4725.33,0.000907898]",
+          "ok": true
+        }
+      },
+      {
+        "code": "getPos player",
+        "result": {
+          "result": "[7440.18,4728.41,0.000900269]",
+          "ok": true
+        }
+      },
+      {
+        "code": "triAA 'msaa4'",
+        "result": {
+          "result": "\"OK: msaa4 (next frame)\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "getPos player",
+        "result": {
+          "result": "[7440.18,4728.41,0.000900269]",
+          "ok": true
+        }
+      },
+      {
+        "code": "getPos player",
+        "result": {
+          "result": "[7436.38,4731.48,0.00238037]",
+          "ok": true
+        }
+      },
+      {
+        "code": "setAccTime 0",
+        "result": {
+          "result": "<null>",
+          "ok": true
+        }
+      }
+    ],
+    "validation_startup": [
+      "Vulkan: instance created (API 1.2); validation=on, synchronization validation=on",
+      "Vulkan: shutdown complete; submitted=964, presented=964, validation errors=0, warnings=0"
+    ]
+  },
+  {
+    "run": "quality-validate-malden-no-rt",
+    "sha256": "0828F8249D579F98AFE4490F37A4959CB040CE96DB814D82740B64B4B11E88B1",
+    "validation_requested": true,
+    "shutdown": "Vulkan: shutdown complete; submitted=1108, presented=1108, validation errors=0, warnings=0",
+    "actions": [
+      {
+        "code": "player allowDammage false; setAccTime 0; setViewDistance 1400; hint ''; titleText ['','PLAIN']; triAA 'off'; triRenderScale 100; triSetVsync 0; triBloom 'threshold 1.25'; triBloom 'strength .15'",
+        "result": {
+          "result": "\"OK: bloom tuning updated\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triAtmosphere 'on'; triWetSurfaces 'on'; triUnderwater 'on'; triPBR 'on'; triBloom 'off'; triVolumetricFog 'off'; triSunShafts 'off'; triSoftShadows 'on'; triContactShadows 'on'; triLocalShadows 'on'; triVolumetricClouds 'on'; triCloudShadows 'on'; triWaterRefraction 'on'; triRainRipples 'on'; triShoreFoam 'on'; triRTShadows 'off'; triSoftRTShadows 'off'; triRTDynamic 'off'; triRTReflections 'off'; triSkyReflections 'off'; triRTAO 'off'; triRTGI 'off'; triSSAO [1,1.2,1.5,.03,80]; triEnableShadowMaps",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triClearView; player cameraEffect ['terminate','back']; player switchCamera 'INTERNAL'; player setDir 0; setDate [1985,7,5,12,0]; triCheatWeather .45; setAccTime 1",
+        "result": {
+          "result": "<null>",
+          "ok": true
+        }
+      },
+      {
+        "code": "triAA 'off'",
+        "result": {
+          "result": "\"OK: off (next frame)\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "getPos player",
+        "result": {
+          "result": "[7128.66,8009.27,-0.00144958]",
+          "ok": true
+        }
+      },
+      {
+        "code": "getPos player",
+        "result": {
+          "result": "[7131.52,8013.33,-0.00143433]",
+          "ok": true
+        }
+      },
+      {
+        "code": "triAA 'taa'",
+        "result": {
+          "result": "\"OK: taa (next frame)\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "getPos player",
+        "result": {
+          "result": "[7131.52,8013.33,-0.00143433]",
+          "ok": true
+        }
+      },
+      {
+        "code": "getPos player",
+        "result": {
+          "result": "[7134.31,8017.33,-0.00143433]",
+          "ok": true
+        }
+      },
+      {
+        "code": "triAA 'fsr-quality'",
+        "result": {
+          "result": "\"OK: fsr-quality (next frame)\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "getPos player",
+        "result": {
+          "result": "[7134.31,8017.33,-0.00143433]",
+          "ok": true
+        }
+      },
+      {
+        "code": "getPos player",
+        "result": {
+          "result": "[7137.19,8021.43,-0.00144958]",
+          "ok": true
+        }
+      },
+      {
+        "code": "triAA 'msaa4'",
+        "result": {
+          "result": "\"OK: msaa4 (next frame)\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "getPos player",
+        "result": {
+          "result": "[7137.19,8021.43,-0.00144958]",
+          "ok": true
+        }
+      },
+      {
+        "code": "getPos player",
+        "result": {
+          "result": "[7139.99,8025.43,-0.00144958]",
+          "ok": true
+        }
+      },
+      {
+        "code": "setAccTime 0",
+        "result": {
+          "result": "<null>",
+          "ok": true
+        }
+      },
+      {
+        "code": "player allowDammage false; setAccTime 0; setViewDistance 1400; hint ''; titleText ['','PLAIN']; triAA 'off'; triRenderScale 100; triSetVsync 0; triBloom 'threshold 1.25'; triBloom 'strength .15'",
+        "result": {
+          "result": "\"OK: bloom tuning updated\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triAtmosphere 'on'; triWetSurfaces 'on'; triUnderwater 'on'; triPBR 'on'; triBloom 'off'; triVolumetricFog 'off'; triSunShafts 'off'; triSoftShadows 'on'; triContactShadows 'on'; triLocalShadows 'on'; triVolumetricClouds 'on'; triCloudShadows 'on'; triWaterRefraction 'on'; triRainRipples 'on'; triShoreFoam 'on'; triRTShadows 'on'; triSoftRTShadows 'on'; triRTDynamic 'on'; triRTReflections 'on'; triSkyReflections 'on'; triRTAO 'off'; triRTGI 'off'; triSSAO [1,1.2,1.5,.03,80]; triEnableShadowMaps",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "setDate [1985,7,5,12,0]; triCheatWeather .45; triSetView [3500,-1,3240,1,0,0]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triAtmosphere 'status', triWetSurfaces 'status', triUnderwater 'status', triPBR 'status', triBloom 'status', triVolumetricFog 'status', triSunShafts 'status', triSoftShadows 'status', triContactShadows 'status', triLocalShadows 'status', triVolumetricClouds 'status', triCloudShadows 'status', triWaterRefraction 'status', triRainRipples 'status', triShoreFoam 'status', triRTShadows 'status', triSoftRTShadows 'status', triRTDynamic 'status', triRTReflections 'status', triSkyReflections 'status', triRTGI 'status', triAA 'status', triShadowTuning, time]",
+        "result": {
+          "result": "[\"enabled=on fog=original-transmittance-and-ranges domain=world-linear-HDR\",\"WetSurfaces requested=on rain=0.000007; classified ground and road edges only; no RT requirement\",\"Underwater requested=on depth=4.705624; world composite only; animated sea level; no RT requirement\",\"PBR prototype=stock-dielectric-v2 requested=on; native opaque Shape only: data/skala_piskovec2.pac (matte rock), data/sloupek_bily_orezly_.pac (painted signposts), data/strecha_tasky_vln.pac + data/strecha_tasky_vln90.pac (roof tiles r=0.90), data/prkna_dark.pac (weathered wood r=0.85); F0=0.04, metallic=0; software/other materials legacy; no RT requirement; native draws since toggle=6498\",\"requested=off active=off threshold=1.250000 knee=25% strength=0.150000 levels=0 base=0x0 domain=world-linear-HDR-after-AA-before-tonemap overlays=excluded\",\"requested=off active=off scattering=off draws=0 csm=ready csmReach=388.888916 sunlight=0.526876 fog=414.000031,1380.000000 half=0x0 steps=48 reach=400m history=world-AA shafts=exclusive\",\"requested=off active=off suppressed=no visibility=0.000000 weight=0.000000 sun=0.000000,0.000000 resolution=quarter samples=48 receivers=sky-openings history=none\",\"enabled=on csm=ready source=active blocker=13 filter=8x4 radius=1-8texels sunRadius=0.4deg RT=independent(triSoftRTShadows)\",\"requested=on active=on lastDraw=yes draws=743 sunlight=0.526876 world=1920x1080 reach=1.2m steps=16 fade=25-40m combine=min(CSM,RT,contact)\",\"requested=on active=0 max=2 resolution=1024 range=160m filter=3x3-PCF RT=not-required depthGPUms=0.000000 vertices=0,0\",\"requested=on active=on half=960x540 layers=3 steps=32x3 lightSteps=2 history=world-AA position=4.970255 fallback=\",\"requested=on active=on coverage=0.822414 position=4.970255 fallback=\",\"WaterRefraction requested=on active=on captured=yes composited=yes captures=742 composites=742 lastGPUms(capture/optics)=0.041984/0.039936 fallback=none; raster-only coastal terrain, missing bottom/underwater retains original water\",\"RainRipples requested=on active=off rain=0.000000; actual water only, simulation time, no RT requirement\",\"ShoreFoam requested=on active=on captured=yes composited=yes lastGPUms(shared capture/optics)=0.041984/0.039936 fallback=none; terrain coast only, simulation time, independent refraction, no RT requirement\",\"RTShadows=off capability=restart with CWR_VK_RTAO=1 to opt into Vulkan ray-query capabilities terrainPatches=0 foliageInstances=0 GPUtimings=unavailable totalRays=0 rayQueriesExecuted=no lastWorldDispatch=no; shared RTAO=off capability=restart with CWR_VK_RTAO=1 to opt into Vulkan ray-query capabilities BLAS=0 TLAS=0 instances=0 completedPasses=0 rayQueriesExecuted=no; shared static LOD0 scene radius=80m; dynamic=off; AO mask excludes terrain/foliage; static collection excludes animation/damage; blended effects/proxies excluded; sunlight-only native opaque/cutout and terrain receivers, CSM fallback retained\",\"SoftRTShadows=off eligible=no RTShadows=off capability=restart with CWR_VK_RTAO=1 to opt into Vulkan ray-query capabilities samples=1 sunHalfAngle=0.4deg sampling=world-anchored-disc PCSS=independent lastCompletedSamples=0 lastCompletedRays=0 lastWorldDispatch=no\",\"RTDynamic=off active=no capability=restart with CWR_VK_RTAO=1 to opt into Vulkan ray-query capabilities instances=0 updatedTransforms=0 BLASrebuilds=0 selected=0 rasterPoses=0 offscreenAnimate=0 unsupported=0 budgetExcluded=0 excludedProxies=0 vertices=0 uploadedBytes=0 hits(AO/sun/water/shaded)=0/0/0/0 CPUms(collection/build)=0/0 GPUtimings=unavailable; last completed frame; limits=32 objects/12 people/65536 vertices/2048 scanned; proxies/crew, destroyed objects, blended/dynamic textures and terrain-fitted models excluded\",\"RTReflections=off capability=restart with CWR_VK_RTAO=1 to opt into Vulkan ray-query capabilities waterRays=0 shadedHits=0 rayQueriesExecuted=no hitShadingExecuted=no hitSurface=unavailable (diagnostics disabled) GPUtimings=unavailable; shared RTAO=off capability=restart with CWR_VK_RTAO=1 to opt into Vulkan ray-query capabilities BLAS=0 TLAS=0 instances=0 completedPasses=0 rayQueriesExecuted=no; shared static LOD0 scene radius=80m; dynamic=off; AO mask excludes terrain/foliage; static collection excludes animation/damage; blended effects/proxies excluded; actual water only, 80m receivers/70m rays, textured hits and weather sky fallback\",\"requested=on active=off prerequisite=requires triRTReflections on and ray-query hardware opt-in position=4.970255 fallback=\",\"RTGI=off capability=restart with CWR_VK_RTAO=1 to opt into Vulkan ray-query capabilities lastWorldDispatch=no completedDispatches=0 bounceRays=0 hits=0 eligibleHits=0 rejectedMaterials=0 sunRays=0 sunBlocked=0 eligibleReceivers=0 dynamicHits=0 GPUtimings=unavailable; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; approximate stock albedo\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=128 fsrResets=1\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",13.279]",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7116,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triAtmosphere 'status', triWetSurfaces 'status', triUnderwater 'status', triPBR 'status', triBloom 'status', triVolumetricFog 'status', triSunShafts 'status', triSoftShadows 'status', triContactShadows 'status', triLocalShadows 'status', triVolumetricClouds 'status', triCloudShadows 'status', triWaterRefraction 'status', triRainRipples 'status', triShoreFoam 'status', triRTShadows 'status', triSoftRTShadows 'status', triRTDynamic 'status', triRTReflections 'status', triSkyReflections 'status', triRTGI 'status', triAA 'status', triShadowTuning, time]",
+        "result": {
+          "result": "[\"enabled=on fog=original-transmittance-and-ranges domain=world-linear-HDR\",\"WetSurfaces requested=on rain=0.000007; classified ground and road edges only; no RT requirement\",\"Underwater requested=on depth=0.000000; world composite only; animated sea level; no RT requirement\",\"PBR prototype=stock-dielectric-v2 requested=on; native opaque Shape only: data/skala_piskovec2.pac (matte rock), data/sloupek_bily_orezly_.pac (painted signposts), data/strecha_tasky_vln.pac + data/strecha_tasky_vln90.pac (roof tiles r=0.90), data/prkna_dark.pac (weathered wood r=0.85); F0=0.04, metallic=0; software/other materials legacy; no RT requirement; native draws since toggle=12736\",\"requested=off active=off threshold=1.250000 knee=25% strength=0.150000 levels=0 base=0x0 domain=world-linear-HDR-after-AA-before-tonemap overlays=excluded\",\"requested=off active=off scattering=off draws=0 csm=ready csmReach=388.888916 sunlight=0.526876 fog=414.000031,1380.000000 half=0x0 steps=48 reach=400m history=world-AA shafts=exclusive\",\"requested=off active=off suppressed=no visibility=1.000000 weight=0.000000 sun=0.000000,0.000000 resolution=quarter samples=48 receivers=sky-openings history=none\",\"enabled=on csm=ready source=active blocker=13 filter=8x4 radius=1-8texels sunRadius=0.4deg RT=independent(triSoftRTShadows)\",\"requested=on active=on lastDraw=yes draws=945 sunlight=0.526876 world=1920x1080 reach=1.2m steps=16 fade=25-40m combine=min(CSM,RT,contact)\",\"requested=on active=0 max=2 resolution=1024 range=160m filter=3x3-PCF RT=not-required depthGPUms=0.000000 vertices=0,0\",\"requested=on active=on half=960x540 layers=3 steps=32x3 lightSteps=2 history=world-AA position=4.970255 fallback=\",\"requested=on active=on coverage=0.822414 position=4.970255 fallback=\",\"WaterRefraction requested=on active=on captured=no composited=no captures=743 composites=743 lastGPUms(capture/optics)=0.041984/0.039936 fallback=none; raster-only coastal terrain, missing bottom/underwater retains original water\",\"RainRipples requested=on active=off rain=0.000000; actual water only, simulation time, no RT requirement\",\"ShoreFoam requested=on active=on captured=no composited=no lastGPUms(shared capture/optics)=0.041984/0.039936 fallback=none; terrain coast only, simulation time, independent refraction, no RT requirement\",\"RTShadows=off capability=restart with CWR_VK_RTAO=1 to opt into Vulkan ray-query capabilities terrainPatches=0 foliageInstances=0 GPUtimings=unavailable totalRays=0 rayQueriesExecuted=no lastWorldDispatch=no; shared RTAO=off capability=restart with CWR_VK_RTAO=1 to opt into Vulkan ray-query capabilities BLAS=0 TLAS=0 instances=0 completedPasses=0 rayQueriesExecuted=no; shared static LOD0 scene radius=80m; dynamic=off; AO mask excludes terrain/foliage; static collection excludes animation/damage; blended effects/proxies excluded; sunlight-only native opaque/cutout and terrain receivers, CSM fallback retained\",\"SoftRTShadows=off eligible=no RTShadows=off capability=restart with CWR_VK_RTAO=1 to opt into Vulkan ray-query capabilities samples=1 sunHalfAngle=0.4deg sampling=world-anchored-disc PCSS=independent lastCompletedSamples=0 lastCompletedRays=0 lastWorldDispatch=no\",\"RTDynamic=off active=no capability=restart with CWR_VK_RTAO=1 to opt into Vulkan ray-query capabilities instances=0 updatedTransforms=0 BLASrebuilds=0 selected=0 rasterPoses=0 offscreenAnimate=0 unsupported=0 budgetExcluded=0 excludedProxies=0 vertices=0 uploadedBytes=0 hits(AO/sun/water/shaded)=0/0/0/0 CPUms(collection/build)=0/0 GPUtimings=unavailable; last completed frame; limits=32 objects/12 people/65536 vertices/2048 scanned; proxies/crew, destroyed objects, blended/dynamic textures and terrain-fitted models excluded\",\"RTReflections=off capability=restart with CWR_VK_RTAO=1 to opt into Vulkan ray-query capabilities waterRays=0 shadedHits=0 rayQueriesExecuted=no hitShadingExecuted=no hitSurface=unavailable (diagnostics disabled) GPUtimings=unavailable; shared RTAO=off capability=restart with CWR_VK_RTAO=1 to opt into Vulkan ray-query capabilities BLAS=0 TLAS=0 instances=0 completedPasses=0 rayQueriesExecuted=no; shared static LOD0 scene radius=80m; dynamic=off; AO mask excludes terrain/foliage; static collection excludes animation/damage; blended effects/proxies excluded; actual water only, 80m receivers/70m rays, textured hits and weather sky fallback\",\"requested=on active=off prerequisite=requires triRTReflections on and ray-query hardware opt-in position=4.970255 fallback=\",\"RTGI=off capability=restart with CWR_VK_RTAO=1 to opt into Vulkan ray-query capabilities lastWorldDispatch=no completedDispatches=0 bounceRays=0 hits=0 eligibleHits=0 rejectedMaterials=0 sunRays=0 sunBlocked=0 eligibleReceivers=0 dynamicHits=0 GPUtimings=unavailable; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; approximate stock albedo\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=128 fsrResets=1\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",13.279]",
+          "ok": true
+        }
+      }
+    ],
+    "validation_startup": [
+      "Vulkan: instance created (API 1.2); validation=on, synchronization validation=on",
+      "Vulkan: shutdown complete; submitted=1108, presented=1108, validation errors=0, warnings=0"
+    ]
+  },
+  {
+    "run": "quality-validate-malden-rt",
+    "sha256": "0828F8249D579F98AFE4490F37A4959CB040CE96DB814D82740B64B4B11E88B1",
+    "validation_requested": true,
+    "shutdown": "Vulkan: shutdown complete; submitted=1609, presented=1609, validation errors=0, warnings=0",
+    "actions": [
+      {
+        "code": "player allowDammage false; setAccTime 0; setViewDistance 1400; hint ''; titleText ['','PLAIN']; triAA 'off'; triRenderScale 100; triSetVsync 0; triBloom 'threshold 1.25'; triBloom 'strength .15'",
+        "result": {
+          "result": "\"OK: bloom tuning updated\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triAtmosphere 'on'; triWetSurfaces 'on'; triUnderwater 'on'; triPBR 'on'; triBloom 'off'; triVolumetricFog 'off'; triSunShafts 'off'; triSoftShadows 'on'; triContactShadows 'on'; triLocalShadows 'on'; triVolumetricClouds 'on'; triCloudShadows 'on'; triWaterRefraction 'on'; triRainRipples 'on'; triShoreFoam 'on'; triRTShadows 'on'; triSoftRTShadows 'on'; triRTDynamic 'on'; triRTReflections 'on'; triSkyReflections 'on'; triRTAO 'off'; triRTGI 'off'; triSSAO [1,1.2,1.5,.03,80]; triEnableShadowMaps",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triClearView; player cameraEffect ['terminate','back']; player switchCamera 'INTERNAL'; player setDir 0; setDate [1985,7,5,12,0]; triCheatWeather .45; setAccTime 1",
+        "result": {
+          "result": "<null>",
+          "ok": true
+        }
+      },
+      {
+        "code": "triAA 'off'",
+        "result": {
+          "result": "\"OK: off (next frame)\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "getPos player",
+        "result": {
+          "result": "[7186.19,7909.55,-0.00314331]",
+          "ok": true
+        }
+      },
+      {
+        "code": "getPos player",
+        "result": {
+          "result": "[7188.96,7913.54,-0.00308228]",
+          "ok": true
+        }
+      },
+      {
+        "code": "triAA 'taa'",
+        "result": {
+          "result": "\"OK: taa (next frame)\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "getPos player",
+        "result": {
+          "result": "[7188.96,7913.54,-0.00308228]",
+          "ok": true
+        }
+      },
+      {
+        "code": "getPos player",
+        "result": {
+          "result": "[7191.92,7916.96,-0.00308228]",
+          "ok": true
+        }
+      },
+      {
+        "code": "triAA 'fsr-quality'",
+        "result": {
+          "result": "\"OK: fsr-quality (next frame)\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "getPos player",
+        "result": {
+          "result": "[7191.92,7916.96,-0.00308228]",
+          "ok": true
+        }
+      },
+      {
+        "code": "getPos player",
+        "result": {
+          "result": "[7193.51,7920.38,-0.00306702]",
+          "ok": true
+        }
+      },
+      {
+        "code": "triAA 'msaa4'",
+        "result": {
+          "result": "\"OK: msaa4 (next frame)\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "getPos player",
+        "result": {
+          "result": "[7193.51,7920.38,-0.00306702]",
+          "ok": true
+        }
+      },
+      {
+        "code": "getPos player",
+        "result": {
+          "result": "[7193.47,7924.38,-0.00306702]",
+          "ok": true
+        }
+      },
+      {
+        "code": "setAccTime 0",
+        "result": {
+          "result": "<null>",
+          "ok": true
+        }
+      },
+      {
+        "code": "player allowDammage false; setAccTime 0; setViewDistance 1400; hint ''; titleText ['','PLAIN']; triAA 'off'; triRenderScale 100; triSetVsync 0; triBloom 'threshold 1.25'; triBloom 'strength .15'",
+        "result": {
+          "result": "\"OK: bloom tuning updated\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triAtmosphere 'on'; triWetSurfaces 'on'; triUnderwater 'on'; triPBR 'on'; triBloom 'off'; triVolumetricFog 'off'; triSunShafts 'off'; triSoftShadows 'on'; triContactShadows 'on'; triLocalShadows 'on'; triVolumetricClouds 'on'; triCloudShadows 'on'; triWaterRefraction 'on'; triRainRipples 'on'; triShoreFoam 'on'; triRTShadows 'on'; triSoftRTShadows 'on'; triRTDynamic 'on'; triRTReflections 'on'; triSkyReflections 'on'; triRTAO 'off'; triRTGI 'off'; triSSAO [1,1.2,1.5,.03,80]; triEnableShadowMaps",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "setDate [1985,7,5,12,0]; triCheatWeather .45; triSetView [3500,-1,3240,1,0,0]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triAtmosphere 'status', triWetSurfaces 'status', triUnderwater 'status', triPBR 'status', triBloom 'status', triVolumetricFog 'status', triSunShafts 'status', triSoftShadows 'status', triContactShadows 'status', triLocalShadows 'status', triVolumetricClouds 'status', triCloudShadows 'status', triWaterRefraction 'status', triRainRipples 'status', triShoreFoam 'status', triRTShadows 'status', triSoftRTShadows 'status', triRTDynamic 'status', triRTReflections 'status', triSkyReflections 'status', triRTGI 'status', triAA 'status', triShadowTuning, time]",
+        "result": {
+          "result": "[\"enabled=on fog=original-transmittance-and-ranges domain=world-linear-HDR\",\"WetSurfaces requested=on rain=0.000005; classified ground and road edges only; no RT requirement\",\"Underwater requested=on depth=4.439365; world composite only; animated sea level; no RT requirement\",\"PBR prototype=stock-dielectric-v2 requested=on; native opaque Shape only: data/skala_piskovec2.pac (matte rock), data/sloupek_bily_orezly_.pac (painted signposts), data/strecha_tasky_vln.pac + data/strecha_tasky_vln90.pac (roof tiles r=0.90), data/prkna_dark.pac (weathered wood r=0.85); F0=0.04, metallic=0; software/other materials legacy; no RT requirement; native draws since toggle=5590\",\"requested=off active=off threshold=1.250000 knee=25% strength=0.150000 levels=0 base=0x0 domain=world-linear-HDR-after-AA-before-tonemap overlays=excluded\",\"requested=off active=off scattering=off draws=0 csm=ready csmReach=388.888916 sunlight=0.526876 fog=414.000031,1380.000000 half=0x0 steps=48 reach=400m history=world-AA shafts=exclusive\",\"requested=off active=off suppressed=no visibility=0.000000 weight=0.000000 sun=0.000000,0.000000 resolution=quarter samples=48 receivers=sky-openings history=none\",\"enabled=on csm=ready source=active blocker=13 filter=8x4 radius=1-8texels sunRadius=0.4deg RT=independent(triSoftRTShadows)\",\"requested=on active=on lastDraw=yes draws=1263 sunlight=0.526876 world=1920x1080 reach=1.2m steps=16 fade=25-40m combine=min(CSM,RT,contact)\",\"requested=on active=0 max=2 resolution=1024 range=160m filter=3x3-PCF RT=not-required depthGPUms=0.000000 vertices=0,0\",\"requested=on active=on half=960x540 layers=3 steps=32x3 lightSteps=2 history=world-AA position=4.785888 fallback=\",\"requested=on active=on coverage=0.822414 position=4.785888 fallback=\",\"WaterRefraction requested=on active=on captured=yes composited=yes captures=1262 composites=1262 lastGPUms(capture/optics)=0.043008/0.038912 fallback=none; raster-only coastal terrain, missing bottom/underwater retains original water\",\"RainRipples requested=on active=off rain=0.000000; actual water only, simulation time, no RT requirement\",\"ShoreFoam requested=on active=on captured=yes composited=yes lastGPUms(shared capture/optics)=0.043008/0.038912 fallback=none; terrain coast only, simulation time, independent refraction, no RT requirement\",\"RTShadows=on capability=available terrainPatches=9 foliageInstances=52 lastCompletedRays=4666892 lastCompletedHits=50701 totalRays=4987241168 rayQueriesExecuted=yes lastWorldDispatch=yes lastTerrainHits=0 lastAlphaHits=0 lastGPUms(rays/compose)=0.575488/0.262912; shared RTAO=off capability=available BLAS=61 cachedBLAS=61 TLAS=2 instances=76 instancedTriangles=10667 completedPasses=1261 lastCompletedRays=0 lastCompletedHits=0 totalRays=0 rayQueriesExecuted=no lastWorldDispatch=no BLASbuilds=3408 TLASbuilds=1141 lastGPUms(BLAS/TLAS/rays/filter/frame)=6.4e-05/9.6e-05/0/0/3.07546; shared static LOD0 scene radius=160m; dynamic=on; AO mask excludes terrain/foliage; static collection excludes animation/damage; blended effects/proxies excluded; sunlight-only native opaque/cutout and terrain receivers, CSM fallback retained\",\"SoftRTShadows=on eligible=yes RTShadows=on capability=available samples=4 sunHalfAngle=0.4deg sampling=world-anchored-disc PCSS=independent lastCompletedSamples=4 lastCompletedRays=4666892 lastCompletedHits=50701 lastWorldDispatch=yes lastGPUms(rays/compose)=0.575488/0.262912\",\"RTDynamic=on active=yes capability=available instances=0 updatedTransforms=0 BLASrebuilds=0 selected=0 rasterPoses=0 offscreenAnimate=0 unsupported=0 budgetExcluded=0 excludedProxies=0 vertices=0 uploadedBytes=0 hits(AO/sun/water/shaded)=0/0/0/0 CPUms(collection/build)=0.0023/0.0926 sharedGPUms(BLAS/TLAS/AO/sun/water)=6.4e-05/9.6e-05/0/0.575488/0.462848; last completed frame; limits=32 objects/12 people/65536 vertices/2048 scanned; proxies/crew, destroyed objects, blended/dynamic textures and terrain-fitted models excluded\",\"RTReflections=on capability=available waterRays=0 hits=0 shadedHits=0 shadedTerrain=0 shadedAlpha=0 totalWaterRays=0 totalShadedHits=0 rayQueriesExecuted=no hitShadingExecuted=no lastWorldDispatch=yes hitSurface=unavailable (diagnostics disabled) lastGPUms(traceShade/filter)=0.462848/0.020544; shared RTAO=off capability=available BLAS=61 cachedBLAS=61 TLAS=2 instances=76 instancedTriangles=10667 completedPasses=1261 lastCompletedRays=0 lastCompletedHits=0 totalRays=0 rayQueriesExecuted=no lastWorldDispatch=no BLASbuilds=3408 TLASbuilds=1141 lastGPUms(BLAS/TLAS/rays/filter/frame)=6.4e-05/9.6e-05/0/0/3.07546; shared static LOD0 scene radius=160m; dynamic=on; AO mask excludes terrain/foliage; static collection excludes animation/damage; blended effects/proxies excluded; actual water only, 80m receivers/70m rays, textured hits and weather sky fallback\",\"requested=on active=on prerequisite=available position=4.785888 fallback=\",\"RTGI=off capability=available lastWorldDispatch=no completedDispatches=0 bounceRays=0 hits=0 eligibleHits=0 rejectedMaterials=0 sunRays=0 sunBlocked=0 eligibleReceivers=0 dynamicHits=0 GPUtimings=unavailable temporal=off history(accepted/rejected/clamped/dynamic)=0/0/0/0 historyResets=0 phase=0 historyBytes=0 historyAllocations=0; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; approximate stock albedo\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=227 fsrResets=1\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.987]",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7116,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triAtmosphere 'status', triWetSurfaces 'status', triUnderwater 'status', triPBR 'status', triBloom 'status', triVolumetricFog 'status', triSunShafts 'status', triSoftShadows 'status', triContactShadows 'status', triLocalShadows 'status', triVolumetricClouds 'status', triCloudShadows 'status', triWaterRefraction 'status', triRainRipples 'status', triShoreFoam 'status', triRTShadows 'status', triSoftRTShadows 'status', triRTDynamic 'status', triRTReflections 'status', triSkyReflections 'status', triRTGI 'status', triAA 'status', triShadowTuning, time]",
+        "result": {
+          "result": "[\"enabled=on fog=original-transmittance-and-ranges domain=world-linear-HDR\",\"WetSurfaces requested=on rain=0.000005; classified ground and road edges only; no RT requirement\",\"Underwater requested=on depth=0.000000; world composite only; animated sea level; no RT requirement\",\"PBR prototype=stock-dielectric-v2 requested=on; native opaque Shape only: data/skala_piskovec2.pac (matte rock), data/sloupek_bily_orezly_.pac (painted signposts), data/strecha_tasky_vln.pac + data/strecha_tasky_vln90.pac (roof tiles r=0.90), data/prkna_dark.pac (weathered wood r=0.85); F0=0.04, metallic=0; software/other materials legacy; no RT requirement; native draws since toggle=11270\",\"requested=off active=off threshold=1.250000 knee=25% strength=0.150000 levels=0 base=0x0 domain=world-linear-HDR-after-AA-before-tonemap overlays=excluded\",\"requested=off active=off scattering=off draws=0 csm=ready csmReach=388.888916 sunlight=0.526876 fog=414.000031,1380.000000 half=0x0 steps=48 reach=400m history=world-AA shafts=exclusive\",\"requested=off active=off suppressed=no visibility=1.000000 weight=0.000000 sun=0.000000,0.000000 resolution=quarter samples=48 receivers=sky-openings history=none\",\"enabled=on csm=ready source=active blocker=13 filter=8x4 radius=1-8texels sunRadius=0.4deg RT=independent(triSoftRTShadows)\",\"requested=on active=on lastDraw=yes draws=1447 sunlight=0.526876 world=1920x1080 reach=1.2m steps=16 fade=25-40m combine=min(CSM,RT,contact)\",\"requested=on active=0 max=2 resolution=1024 range=160m filter=3x3-PCF RT=not-required depthGPUms=0.000000 vertices=0,0\",\"requested=on active=on half=960x540 layers=3 steps=32x3 lightSteps=2 history=world-AA position=4.785888 fallback=\",\"requested=on active=on coverage=0.822414 position=4.785888 fallback=\",\"WaterRefraction requested=on active=on captured=no composited=no captures=1263 composites=1263 lastGPUms(capture/optics)=0.041984/0.039936 fallback=none; raster-only coastal terrain, missing bottom/underwater retains original water\",\"RainRipples requested=on active=off rain=0.000000; actual water only, simulation time, no RT requirement\",\"ShoreFoam requested=on active=on captured=no composited=no lastGPUms(shared capture/optics)=0.041984/0.039936 fallback=none; terrain coast only, simulation time, independent refraction, no RT requirement\",\"RTShadows=on capability=available terrainPatches=9 foliageInstances=158 lastCompletedRays=2592220 lastCompletedHits=134753 totalRays=5470433664 rayQueriesExecuted=yes lastWorldDispatch=yes lastTerrainHits=0 lastAlphaHits=134706 lastGPUms(rays/compose)=0.49664/0.173888; shared RTAO=off capability=available BLAS=49 cachedBLAS=49 TLAS=2 instances=266 instancedTriangles=28929 completedPasses=1445 lastCompletedRays=0 lastCompletedHits=0 totalRays=0 rayQueriesExecuted=no lastWorldDispatch=no BLASbuilds=3437 TLASbuilds=1143 lastGPUms(BLAS/TLAS/rays/filter/frame)=6.4e-05/6.4e-05/0/0/2.81437; shared static LOD0 scene radius=160m; dynamic=on; AO mask excludes terrain/foliage; static collection excludes animation/damage; blended effects/proxies excluded; sunlight-only native opaque/cutout and terrain receivers, CSM fallback retained\",\"SoftRTShadows=on eligible=yes RTShadows=on capability=available samples=4 sunHalfAngle=0.4deg sampling=world-anchored-disc PCSS=independent lastCompletedSamples=4 lastCompletedRays=2592220 lastCompletedHits=134753 lastWorldDispatch=yes lastGPUms(rays/compose)=0.49664/0.173888\",\"RTDynamic=on active=yes capability=available instances=0 updatedTransforms=0 BLASrebuilds=0 selected=0 rasterPoses=0 offscreenAnimate=0 unsupported=0 budgetExcluded=0 excludedProxies=0 vertices=0 uploadedBytes=0 hits(AO/sun/water/shaded)=0/0/0/0 CPUms(collection/build)=0.0022/0.2968 sharedGPUms(BLAS/TLAS/AO/sun/water)=6.4e-05/6.4e-05/0/0.49664/0.474112; last completed frame; limits=32 objects/12 people/65536 vertices/2048 scanned; proxies/crew, destroyed objects, blended/dynamic textures and terrain-fitted models excluded\",\"RTReflections=on capability=available waterRays=0 hits=0 shadedHits=0 shadedTerrain=0 shadedAlpha=0 totalWaterRays=0 totalShadedHits=0 rayQueriesExecuted=no hitShadingExecuted=no lastWorldDispatch=yes hitSurface=unavailable (diagnostics disabled) lastGPUms(traceShade/filter)=0.474112/0.019872; shared RTAO=off capability=available BLAS=49 cachedBLAS=49 TLAS=2 instances=266 instancedTriangles=28929 completedPasses=1445 lastCompletedRays=0 lastCompletedHits=0 totalRays=0 rayQueriesExecuted=no lastWorldDispatch=no BLASbuilds=3437 TLASbuilds=1143 lastGPUms(BLAS/TLAS/rays/filter/frame)=6.4e-05/6.4e-05/0/0/2.81437; shared static LOD0 scene radius=160m; dynamic=on; AO mask excludes terrain/foliage; static collection excludes animation/damage; blended effects/proxies excluded; actual water only, 80m receivers/70m rays, textured hits and weather sky fallback\",\"requested=on active=on prerequisite=available position=4.785888 fallback=\",\"RTGI=off capability=available lastWorldDispatch=no completedDispatches=0 bounceRays=0 hits=0 eligibleHits=0 rejectedMaterials=0 sunRays=0 sunBlocked=0 eligibleReceivers=0 dynamicHits=0 GPUtimings=unavailable temporal=off history(accepted/rejected/clamped/dynamic)=0/0/0/0 historyResets=0 phase=0 historyBytes=0 historyAllocations=0; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; approximate stock albedo\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=227 fsrResets=1\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.987]",
+          "ok": true
+        }
+      }
+    ],
+    "validation_startup": [
+      "Vulkan: instance created (API 1.2); validation=on, synchronization validation=on",
+      "Vulkan: shutdown complete; submitted=1609, presented=1609, validation errors=0, warnings=0"
+    ]
+  }
+]

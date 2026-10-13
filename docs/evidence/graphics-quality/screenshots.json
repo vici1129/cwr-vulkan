@@ -1,0 +1,92 @@
+﻿[
+    {
+        "file":  "road-volume-on.png",
+        "source":  "quality-malden-1080b/isolate-all.png",
+        "sha256":  "A8BBA8A75F36FE6ABCD3B8F2EB13D895779B4FAE42B0D9A65418E0CEC4DA3D01",
+        "retouched":  false
+    },
+    {
+        "file":  "road-volume-off.png",
+        "source":  "quality-malden-1080b/isolate-no-volume.png",
+        "sha256":  "5585F786CB8D86E4F5272D40732D60951997C6E603EC392454182104FF4FFF59",
+        "retouched":  false
+    },
+    {
+        "file":  "everon-coast-enhanced.png",
+        "source":  "quality-everon-1080-final/coast-recommended.png",
+        "sha256":  "E10BC9084DA18C3F7521170CE53DCC263FE2E7B561933FCE62B08CD54818663B",
+        "retouched":  false
+    },
+    {
+        "file":  "everon-coast-rt.png",
+        "source":  "quality-everon-1080-final/coast-recommended-ray.png",
+        "sha256":  "1F43CF2A138D400DE2755632403EF395C87564397458BB001EFB7D1722DAF84F",
+        "retouched":  false
+    },
+    {
+        "file":  "malden-coast-rt.png",
+        "source":  "quality-malden-1080b/individual-rt-water-on.png",
+        "sha256":  "832FB41E1775372E80548109E6922F49F4A5224414AAB619D168EB41D22E2628",
+        "retouched":  false
+    },
+    {
+        "file":  "malden-sun-off.png",
+        "source":  "quality-malden-1080b/individual-rt-shadows-off.png",
+        "sha256":  "A42C4AB5D89E49DC9239D119DEEDB478FF37763B59030D994E736EB03D244A30",
+        "retouched":  false
+    },
+    {
+        "file":  "malden-sun-on.png",
+        "source":  "quality-malden-1080b/individual-rt-shadows-on.png",
+        "sha256":  "F546F99D46B3E244CB4F3D7D17DFB45FD1C7C6ABB04E974D5EEE04A3B28662F9",
+        "retouched":  false
+    },
+    {
+        "file":  "sunset-clouds-stock.png",
+        "source":  "quality-malden-1080b/individual-clouds-off.png",
+        "sha256":  "65E7C1DFA60F26633C62453CADFBF8BB8999073474A880F30FF87A2B4308B5E4",
+        "retouched":  false
+    },
+    {
+        "file":  "sunset-clouds-volume.png",
+        "source":  "quality-malden-1080b/individual-clouds-on.png",
+        "sha256":  "E4829D73CA06380F1318DF0337DC0B67BFB45C9E9D56477FAC6A40FC60097EC4",
+        "retouched":  false
+    },
+    {
+        "file":  "tuning-forest-baseline.png",
+        "source":  "quality-tuning-malden-baseline/shader-forest.png",
+        "sha256":  "715AA6A83398345467C7ADCB90E746D4CFEC907D18BA458FB082A2A6FDC85D09",
+        "retouched":  false
+    },
+    {
+        "file":  "tuning-forest-candidate.png",
+        "source":  "quality-tuning-malden-candidate/shader-forest.png",
+        "sha256":  "70B28DA8ED045908115863D5F839358D8B27405342C11208C54AAF6E4BF27876",
+        "retouched":  false
+    },
+    {
+        "file":  "tuning-sunset-baseline.png",
+        "source":  "quality-tuning-everon-baseline/shader-sunset.png",
+        "sha256":  "DE2BE5736968B1BDA8A1106FE1F2B40210DC8EC1BE7387E9CDA203C5C755E52E",
+        "retouched":  false
+    },
+    {
+        "file":  "tuning-sunset-candidate.png",
+        "source":  "quality-tuning-everon-candidate/shader-sunset.png",
+        "sha256":  "98595BA4DCEF696F37DAEFE5EEE2F27928C9AD3BD2111B9DDD61AEF80C563D4F",
+        "retouched":  false
+    },
+    {
+        "file":  "bloom-current.png",
+        "source":  "quality-malden-1080-final/bloom-coast-current.png",
+        "sha256":  "CC2CF4F5900C62A6B7C879E5870DCC2528CCF7B33C291D6ABA2E89987D41FFE9",
+        "retouched":  false
+    },
+    {
+        "file":  "bloom-stronger.png",
+        "source":  "quality-malden-1080-final/bloom-coast-stronger.png",
+        "sha256":  "0035BEFE8F513705AAE3A31C302E80D9917ED06AADAD868CBEDD279D65C86065",
+        "retouched":  false
+    }
+]

@@ -1,0 +1,127 @@
+[
+  {
+    "view": "bloom-coast",
+    "size": [
+      1922,
+      1112
+    ],
+    "stronger": {
+      "changed_pixels": 3399,
+      "mean_absolute_code_delta": [
+        0.0004641448131817127,
+        0.0005946855418890694,
+        0.0005914103264734726
+      ],
+      "max_channel_delta": 1
+    },
+    "restored": {
+      "changed_pixels": 0,
+      "mean_absolute_code_delta": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "max_channel_delta": 0
+    }
+  },
+  {
+    "view": "bloom-night",
+    "size": [
+      1922,
+      1112
+    ],
+    "stronger": {
+      "changed_pixels": 0,
+      "mean_absolute_code_delta": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "max_channel_delta": 0
+    },
+    "restored": {
+      "changed_pixels": 0,
+      "mean_absolute_code_delta": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "max_channel_delta": 0
+    }
+  },
+  {
+    "view": "bloom-rain",
+    "size": [
+      1922,
+      1112
+    ],
+    "stronger": {
+      "changed_pixels": 0,
+      "mean_absolute_code_delta": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "max_channel_delta": 0
+    },
+    "restored": {
+      "changed_pixels": 0,
+      "mean_absolute_code_delta": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "max_channel_delta": 0
+    }
+  },
+  {
+    "view": "bloom-sunset",
+    "size": [
+      1922,
+      1112
+    ],
+    "stronger": {
+      "changed_pixels": 0,
+      "mean_absolute_code_delta": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "max_channel_delta": 0
+    },
+    "restored": {
+      "changed_pixels": 0,
+      "mean_absolute_code_delta": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "max_channel_delta": 0
+    }
+  },
+  {
+    "view": "bloom-village",
+    "size": [
+      1922,
+      1112
+    ],
+    "stronger": {
+      "changed_pixels": 811,
+      "mean_absolute_code_delta": [
+        0.00010527478121561024,
+        0.0002695034399119622,
+        4.678879165138233e-06
+      ],
+      "max_channel_delta": 1
+    },
+    "restored": {
+      "changed_pixels": 0,
+      "mean_absolute_code_delta": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "max_channel_delta": 0
+    }
+  }
+]

@@ -1,0 +1,4370 @@
+[
+  {
+    "run": "quality-aa-1440",
+    "configuration": "coast-taa/recommended",
+    "gpu": {
+      "median": 3.4667,
+      "min": 3.466,
+      "max": 3.4668,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.811,
+      "min": 6.661,
+      "max": 7.034,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 5.881,
+      "min": 5.717,
+      "max": 5.961,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    },
+    "cloud_pass": 0.7764,
+    "contact_pass": 0.4139,
+    "ssao_pass": 0.1331
+  },
+  {
+    "run": "quality-aa-1440",
+    "configuration": "coast-fsr-quality/recommended",
+    "gpu": {
+      "median": 2.7153,
+      "min": 2.7146,
+      "max": 2.7154,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.309,
+      "min": 6.307,
+      "max": 6.326,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 6.033,
+      "min": 6.021,
+      "max": 6.08,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    },
+    "cloud_pass": 0.3959,
+    "contact_pass": 0.1859,
+    "ssao_pass": 0.062
+  },
+  {
+    "run": "quality-aa-1440",
+    "configuration": "coast-taa/recommended-sun",
+    "gpu": {
+      "median": 4.3556,
+      "min": 4.355,
+      "max": 4.3565,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.294,
+      "min": 6.27,
+      "max": 6.37,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 6.038,
+      "min": 6.03,
+      "max": 6.114,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    },
+    "cloud_pass": 0.7816,
+    "contact_pass": 0.4118,
+    "ssao_pass": 0.1343
+  },
+  {
+    "run": "quality-aa-1440",
+    "configuration": "coast-fsr-quality/recommended-sun",
+    "gpu": {
+      "median": 3.1036,
+      "min": 3.1018,
+      "max": 3.1039,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.342,
+      "min": 6.322,
+      "max": 6.36,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 6.052,
+      "min": 6.051,
+      "max": 6.087,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    },
+    "cloud_pass": 0.3958,
+    "contact_pass": 0.185,
+    "ssao_pass": 0.0621
+  },
+  {
+    "run": "quality-aa-1440",
+    "configuration": "coast-taa/recommended-ray",
+    "gpu": {
+      "median": 6.9742,
+      "min": 6.9399,
+      "max": 6.9884,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 7.007,
+      "min": 6.965,
+      "max": 7.015,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 6.303,
+      "min": 6.23,
+      "max": 6.386,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    },
+    "cloud_pass": 1.0115,
+    "contact_pass": 0.4123,
+    "ssao_pass": 0.1383
+  },
+  {
+    "run": "quality-aa-1440",
+    "configuration": "coast-fsr-quality/recommended-ray",
+    "gpu": {
+      "median": 4.0944,
+      "min": 4.0943,
+      "max": 4.0957,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.31,
+      "min": 6.296,
+      "max": 6.376,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 6.025,
+      "min": 5.994,
+      "max": 6.065,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    },
+    "cloud_pass": 0.3958,
+    "contact_pass": 0.1852,
+    "ssao_pass": 0.0632
+  },
+  {
+    "run": "quality-everon-1080-final",
+    "configuration": "village/standard",
+    "gpu": {
+      "median": 1.9671,
+      "min": 1.8928,
+      "max": 1.9999,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.172,
+      "min": 6.172,
+      "max": 6.173,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 1.448,
+      "min": 1.414,
+      "max": 1.471,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    }
+  },
+  {
+    "run": "quality-everon-1080-final",
+    "configuration": "village/recommended",
+    "gpu": {
+      "median": 2.2148,
+      "min": 2.193,
+      "max": 2.2189,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.172,
+      "min": 6.172,
+      "max": 6.172,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 1.397,
+      "min": 1.394,
+      "max": 1.405,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    },
+    "cloud_pass": 0.7044,
+    "contact_pass": 0.2317,
+    "ssao_pass": 0.1233
+  },
+  {
+    "run": "quality-everon-1080-final",
+    "configuration": "village/recommended-ray",
+    "gpu": {
+      "median": 2.8799,
+      "min": 2.8761,
+      "max": 2.88,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.172,
+      "min": 6.172,
+      "max": 6.177,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 1.587,
+      "min": 1.579,
+      "max": 1.594,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    },
+    "cloud_pass": 0.5975,
+    "contact_pass": 0.1936,
+    "ssao_pass": 0.1027
+  },
+  {
+    "run": "quality-everon-1080-final",
+    "configuration": "sunset/standard",
+    "gpu": {
+      "median": 1.1564,
+      "min": 0.8144,
+      "max": 1.8673,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.173,
+      "min": 6.172,
+      "max": 6.173,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 0.385,
+      "min": 0.38,
+      "max": 0.399,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    }
+  },
+  {
+    "run": "quality-everon-1080-final",
+    "configuration": "sunset/recommended",
+    "gpu": {
+      "median": 2.0086,
+      "min": 1.8526,
+      "max": 2.0793,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.172,
+      "min": 6.172,
+      "max": 6.175,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 0.259,
+      "min": 0.257,
+      "max": 0.265,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    },
+    "cloud_pass": 1.0557,
+    "ssao_pass": 0.0673
+  },
+  {
+    "run": "quality-everon-1080-final",
+    "configuration": "sunset/recommended-ray",
+    "gpu": {
+      "median": 2.2243,
+      "min": 2.2192,
+      "max": 2.2269,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.173,
+      "min": 6.172,
+      "max": 6.177,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 0.316,
+      "min": 0.304,
+      "max": 0.347,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    },
+    "cloud_pass": 0.6348,
+    "ssao_pass": 0.041
+  },
+  {
+    "run": "quality-everon-1080-final",
+    "configuration": "rain/standard",
+    "gpu": {
+      "median": 1.8527,
+      "min": 1.6443,
+      "max": 1.9631,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.173,
+      "min": 6.173,
+      "max": 6.176,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 0.762,
+      "min": 0.758,
+      "max": 0.765,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    }
+  },
+  {
+    "run": "quality-everon-1080-final",
+    "configuration": "rain/recommended",
+    "gpu": {
+      "median": 2.2077,
+      "min": 2.1762,
+      "max": 2.2083,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.173,
+      "min": 6.172,
+      "max": 6.174,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 0.718,
+      "min": 0.706,
+      "max": 0.731,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    },
+    "cloud_pass": 0.9726,
+    "ssao_pass": 0.1263
+  },
+  {
+    "run": "quality-everon-1080-final",
+    "configuration": "rain/recommended-ray",
+    "gpu": {
+      "median": 2.7579,
+      "min": 2.7578,
+      "max": 2.758,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.175,
+      "min": 6.174,
+      "max": 6.175,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 0.945,
+      "min": 0.935,
+      "max": 0.982,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    },
+    "cloud_pass": 0.7825,
+    "ssao_pass": 0.1048
+  },
+  {
+    "run": "quality-everon-1080-final",
+    "configuration": "coast/standard",
+    "gpu": {
+      "median": 1.7179,
+      "min": 1.4751,
+      "max": 1.8792,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.172,
+      "min": 6.172,
+      "max": 6.172,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 2.6615,
+      "min": 2.656,
+      "max": 2.696,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    }
+  },
+  {
+    "run": "quality-everon-1080-final",
+    "configuration": "coast/recommended",
+    "gpu": {
+      "median": 2.21345,
+      "min": 2.1245,
+      "max": 2.229,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.173,
+      "min": 6.172,
+      "max": 6.177,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 2.6494999999999997,
+      "min": 2.642,
+      "max": 2.654,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    },
+    "cloud_pass": 0.62625,
+    "contact_pass": 0.2723,
+    "ssao_pass": 0.09725
+  },
+  {
+    "run": "quality-everon-1080-final",
+    "configuration": "coast/recommended-ray",
+    "gpu": {
+      "median": 3.64805,
+      "min": 3.6471,
+      "max": 3.6485,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.1745,
+      "min": 6.172,
+      "max": 6.176,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 2.928,
+      "min": 2.867,
+      "max": 2.956,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    },
+    "cloud_pass": 0.53215,
+    "contact_pass": 0.2298,
+    "ssao_pass": 0.08315
+  },
+  {
+    "run": "quality-everon-1080-final",
+    "configuration": "night/standard",
+    "gpu": {
+      "median": 1.7375,
+      "min": 0.8677,
+      "max": 1.751,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.173,
+      "min": 6.172,
+      "max": 6.175,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 1.493,
+      "min": 1.475,
+      "max": 1.501,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    }
+  },
+  {
+    "run": "quality-everon-1080-final",
+    "configuration": "night/recommended",
+    "gpu": {
+      "median": 2.0257,
+      "min": 1.886,
+      "max": 2.0909,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.172,
+      "min": 6.172,
+      "max": 6.172,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 1.45,
+      "min": 1.447,
+      "max": 1.452,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    },
+    "cloud_pass": 0.8533,
+    "ssao_pass": 0.1793
+  },
+  {
+    "run": "quality-everon-1080-final",
+    "configuration": "night/recommended-ray",
+    "gpu": {
+      "median": 2.2309,
+      "min": 2.225,
+      "max": 2.2343,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.172,
+      "min": 6.172,
+      "max": 6.174,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 1.632,
+      "min": 1.628,
+      "max": 1.633,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    },
+    "cloud_pass": 0.5243,
+    "ssao_pass": 0.114
+  },
+  {
+    "run": "quality-everon-1440-final",
+    "configuration": "village/standard",
+    "gpu": {
+      "median": 2.0859,
+      "min": 2.0706,
+      "max": 2.0943,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.172,
+      "min": 6.172,
+      "max": 6.172,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 1.423,
+      "min": 1.423,
+      "max": 1.429,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    }
+  },
+  {
+    "run": "quality-everon-1440-final",
+    "configuration": "village/recommended",
+    "gpu": {
+      "median": 3.176,
+      "min": 3.1749,
+      "max": 3.1788,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.172,
+      "min": 6.172,
+      "max": 6.172,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 1.402,
+      "min": 1.399,
+      "max": 1.41,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    },
+    "cloud_pass": 0.9897,
+    "contact_pass": 0.3379,
+    "ssao_pass": 0.1784
+  },
+  {
+    "run": "quality-everon-1440-final",
+    "configuration": "village/recommended-ray",
+    "gpu": {
+      "median": 4.9039,
+      "min": 4.9033,
+      "max": 4.9042,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.172,
+      "min": 6.172,
+      "max": 6.175,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 1.676,
+      "min": 1.673,
+      "max": 1.7,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    },
+    "cloud_pass": 0.9914,
+    "contact_pass": 0.3366,
+    "ssao_pass": 0.1802
+  },
+  {
+    "run": "quality-everon-1440-final",
+    "configuration": "sunset/standard",
+    "gpu": {
+      "median": 1.5856,
+      "min": 1.2585,
+      "max": 1.7683,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.172,
+      "min": 6.172,
+      "max": 6.191,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 0.315,
+      "min": 0.306,
+      "max": 0.373,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    }
+  },
+  {
+    "run": "quality-everon-1440-final",
+    "configuration": "sunset/recommended",
+    "gpu": {
+      "median": 2.1913,
+      "min": 2.1403,
+      "max": 2.198,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.172,
+      "min": 6.172,
+      "max": 6.174,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 0.264,
+      "min": 0.263,
+      "max": 0.27,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    },
+    "cloud_pass": 1.1296,
+    "ssao_pass": 0.0732
+  },
+  {
+    "run": "quality-everon-1440-final",
+    "configuration": "sunset/recommended-ray",
+    "gpu": {
+      "median": 3.5875,
+      "min": 3.5866,
+      "max": 3.5877,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.173,
+      "min": 6.172,
+      "max": 6.176,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 0.339,
+      "min": 0.337,
+      "max": 0.493,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    },
+    "cloud_pass": 0.9923,
+    "ssao_pass": 0.0645
+  },
+  {
+    "run": "quality-everon-1440-final",
+    "configuration": "rain/standard",
+    "gpu": {
+      "median": 2.031,
+      "min": 1.9056,
+      "max": 2.0935,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.173,
+      "min": 6.172,
+      "max": 6.173,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 0.843,
+      "min": 0.835,
+      "max": 0.87,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    }
+  },
+  {
+    "run": "quality-everon-1440-final",
+    "configuration": "rain/recommended",
+    "gpu": {
+      "median": 3.1375,
+      "min": 3.1371,
+      "max": 3.1377,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.175,
+      "min": 6.173,
+      "max": 6.176,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 0.777,
+      "min": 0.765,
+      "max": 0.777,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    },
+    "cloud_pass": 1.3292,
+    "ssao_pass": 0.185
+  },
+  {
+    "run": "quality-everon-1440-final",
+    "configuration": "rain/recommended-ray",
+    "gpu": {
+      "median": 4.8266,
+      "min": 4.8252,
+      "max": 4.8278,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.174,
+      "min": 6.173,
+      "max": 6.175,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 1.065,
+      "min": 1.006,
+      "max": 1.08,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    },
+    "cloud_pass": 1.3301,
+    "ssao_pass": 0.1841
+  },
+  {
+    "run": "quality-everon-1440-final",
+    "configuration": "coast/standard",
+    "gpu": {
+      "median": 1.895,
+      "min": 1.6376,
+      "max": 2.1013,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.173,
+      "min": 6.172,
+      "max": 6.174,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 2.6825,
+      "min": 2.662,
+      "max": 2.701,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    }
+  },
+  {
+    "run": "quality-everon-1440-final",
+    "configuration": "coast/recommended",
+    "gpu": {
+      "median": 3.2321,
+      "min": 3.2278,
+      "max": 3.2372,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.174,
+      "min": 6.173,
+      "max": 6.177,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 2.7895000000000003,
+      "min": 2.708,
+      "max": 2.873,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    },
+    "cloud_pass": 0.8814500000000001,
+    "contact_pass": 0.4129,
+    "ssao_pass": 0.14075
+  },
+  {
+    "run": "quality-everon-1440-final",
+    "configuration": "coast/recommended-ray",
+    "gpu": {
+      "median": 6.702999999999999,
+      "min": 6.6489,
+      "max": 6.7801,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.7219999999999995,
+      "min": 6.659,
+      "max": 6.785,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 3.096,
+      "min": 3.055,
+      "max": 3.121,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    },
+    "cloud_pass": 1.1084999999999998,
+    "contact_pass": 0.4085,
+    "ssao_pass": 0.1465
+  },
+  {
+    "run": "quality-everon-1440-final",
+    "configuration": "night/standard",
+    "gpu": {
+      "median": 1.8397999999999999,
+      "min": 1.6173,
+      "max": 1.9431,
+      "samples": 4
+    },
+    "cpu_frame": {
+      "median": 6.172,
+      "min": 6.172,
+      "max": 6.172,
+      "samples": 4
+    },
+    "cpu_command": {
+      "median": 1.4849999999999999,
+      "min": 1.483,
+      "max": 1.494,
+      "samples": 4
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 4
+    }
+  },
+  {
+    "run": "quality-everon-1440-final",
+    "configuration": "night/recommended",
+    "gpu": {
+      "median": 2.1991,
+      "min": 2.1952,
+      "max": 2.2021,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.172,
+      "min": 6.172,
+      "max": 6.173,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 1.46,
+      "min": 1.451,
+      "max": 1.463,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    },
+    "cloud_pass": 0.9108,
+    "ssao_pass": 0.2002
+  },
+  {
+    "run": "quality-everon-1440-resumed",
+    "configuration": "village/standard",
+    "gpu": {
+      "median": 2.0921,
+      "min": 2.0918,
+      "max": 2.0927,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.172,
+      "min": 6.172,
+      "max": 6.172,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 1.412,
+      "min": 1.411,
+      "max": 1.427,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    }
+  },
+  {
+    "run": "quality-everon-1440-resumed",
+    "configuration": "village/recommended",
+    "gpu": {
+      "median": 3.1799,
+      "min": 3.1798,
+      "max": 3.1843,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.172,
+      "min": 6.172,
+      "max": 6.172,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 1.403,
+      "min": 1.401,
+      "max": 1.463,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    },
+    "cloud_pass": 0.9908,
+    "contact_pass": 0.3381,
+    "ssao_pass": 0.1784
+  },
+  {
+    "run": "quality-everon-1440-resumed",
+    "configuration": "village/recommended-ray",
+    "gpu": {
+      "median": 4.9168,
+      "min": 4.9152,
+      "max": 4.918,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.173,
+      "min": 6.172,
+      "max": 6.173,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 1.853,
+      "min": 1.809,
+      "max": 1.861,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    },
+    "cloud_pass": 0.9964,
+    "contact_pass": 0.3377,
+    "ssao_pass": 0.1805
+  },
+  {
+    "run": "quality-everon-1440-resumed",
+    "configuration": "sunset/standard",
+    "gpu": {
+      "median": 1.6449500000000001,
+      "min": 1.1043,
+      "max": 1.8651,
+      "samples": 4
+    },
+    "cpu_frame": {
+      "median": 6.172499999999999,
+      "min": 6.172,
+      "max": 6.176,
+      "samples": 4
+    },
+    "cpu_command": {
+      "median": 0.323,
+      "min": 0.297,
+      "max": 0.351,
+      "samples": 4
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 4
+    }
+  },
+  {
+    "run": "quality-everon-1440-resumed",
+    "configuration": "sunset/recommended",
+    "gpu": {
+      "median": 2.1804,
+      "min": 2.1275,
+      "max": 2.2132,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.172,
+      "min": 6.172,
+      "max": 6.178,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 0.273,
+      "min": 0.26,
+      "max": 0.282,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    },
+    "cloud_pass": 1.1299,
+    "ssao_pass": 0.0729
+  },
+  {
+    "run": "quality-everon-1440-resumed",
+    "configuration": "sunset/recommended-ray",
+    "gpu": {
+      "median": 3.581,
+      "min": 3.5803,
+      "max": 3.5832,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.173,
+      "min": 6.172,
+      "max": 6.173,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 0.371,
+      "min": 0.316,
+      "max": 0.445,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    },
+    "cloud_pass": 0.9935,
+    "ssao_pass": 0.0644
+  },
+  {
+    "run": "quality-everon-1440-resumed",
+    "configuration": "rain/standard",
+    "gpu": {
+      "median": 2.0039,
+      "min": 1.8445,
+      "max": 2.0828,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.173,
+      "min": 6.173,
+      "max": 6.173,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 0.809,
+      "min": 0.808,
+      "max": 0.83,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    }
+  },
+  {
+    "run": "quality-everon-1440-resumed",
+    "configuration": "rain/recommended",
+    "gpu": {
+      "median": 3.134,
+      "min": 3.1336,
+      "max": 3.1349,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.174,
+      "min": 6.172,
+      "max": 6.176,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 0.833,
+      "min": 0.826,
+      "max": 0.841,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    },
+    "cloud_pass": 1.3232,
+    "ssao_pass": 0.185
+  },
+  {
+    "run": "quality-everon-1440-resumed",
+    "configuration": "rain/recommended-ray",
+    "gpu": {
+      "median": 4.824,
+      "min": 4.8238,
+      "max": 4.8249,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.176,
+      "min": 6.175,
+      "max": 6.176,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 1.041,
+      "min": 1.034,
+      "max": 1.042,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    },
+    "cloud_pass": 1.3237,
+    "ssao_pass": 0.1839
+  },
+  {
+    "run": "quality-everon-1440-resumed",
+    "configuration": "coast/standard",
+    "gpu": {
+      "median": 2.057,
+      "min": 1.8419,
+      "max": 2.1143,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.172499999999999,
+      "min": 6.172,
+      "max": 6.174,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 2.6805,
+      "min": 2.662,
+      "max": 2.741,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    }
+  },
+  {
+    "run": "quality-everon-1440-resumed",
+    "configuration": "coast/recommended",
+    "gpu": {
+      "median": 3.2335,
+      "min": 3.2314,
+      "max": 3.2345,
+      "samples": 7
+    },
+    "cpu_frame": {
+      "median": 6.174,
+      "min": 6.173,
+      "max": 6.177,
+      "samples": 7
+    },
+    "cpu_command": {
+      "median": 2.879,
+      "min": 2.839,
+      "max": 2.935,
+      "samples": 7
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 7
+    },
+    "cloud_pass": 0.8807,
+    "contact_pass": 0.411,
+    "ssao_pass": 0.1406
+  },
+  {
+    "run": "quality-everon-1440-resumed",
+    "configuration": "coast/recommended-ray",
+    "gpu": {
+      "median": 6.62155,
+      "min": 6.5643,
+      "max": 6.8189,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.6345,
+      "min": 6.577,
+      "max": 6.916,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 3.2145,
+      "min": 3.122,
+      "max": 3.248,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    },
+    "cloud_pass": 1.0817999999999999,
+    "contact_pass": 0.40765,
+    "ssao_pass": 0.14685
+  },
+  {
+    "run": "quality-everon-1440-resumed",
+    "configuration": "night/standard",
+    "gpu": {
+      "median": 1.8717,
+      "min": 1.7569,
+      "max": 1.9317,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.172,
+      "min": 6.172,
+      "max": 6.173,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 1.482,
+      "min": 1.477,
+      "max": 1.487,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    }
+  },
+  {
+    "run": "quality-everon-1440-resumed",
+    "configuration": "night/recommended",
+    "gpu": {
+      "median": 2.2028,
+      "min": 2.1961,
+      "max": 2.2075,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.173,
+      "min": 6.172,
+      "max": 6.173,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 1.464,
+      "min": 1.452,
+      "max": 1.488,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    },
+    "cloud_pass": 0.9114,
+    "ssao_pass": 0.2011
+  },
+  {
+    "run": "quality-everon-1440-resumed",
+    "configuration": "night/recommended-ray",
+    "gpu": {
+      "median": 3.5877,
+      "min": 3.5874,
+      "max": 3.5884,
+      "samples": 4
+    },
+    "cpu_frame": {
+      "median": 6.172499999999999,
+      "min": 6.172,
+      "max": 6.173,
+      "samples": 4
+    },
+    "cpu_command": {
+      "median": 1.6465,
+      "min": 1.637,
+      "max": 1.693,
+      "samples": 4
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 4
+    },
+    "cloud_pass": 0.8165,
+    "ssao_pass": 0.18185
+  },
+  {
+    "run": "quality-malden-1080",
+    "configuration": "village/standard",
+    "gpu": {
+      "median": 1.7581,
+      "min": 1.429,
+      "max": 1.9309,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.173500000000001,
+      "min": 6.172,
+      "max": 6.176,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 2.7895000000000003,
+      "min": 2.755,
+      "max": 2.848,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    }
+  },
+  {
+    "run": "quality-malden-1080",
+    "configuration": "village/enhanced",
+    "gpu": {
+      "median": 2.8459000000000003,
+      "min": 2.8339,
+      "max": 2.8551,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.182,
+      "min": 6.176,
+      "max": 6.188,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 2.8155,
+      "min": 2.754,
+      "max": 2.877,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    },
+    "cloud_pass": 0.5306,
+    "volume_pass": 0.8908,
+    "bloom_pass": 0.07925,
+    "contact_pass": 0.1525,
+    "ssao_pass": 0.07735
+  },
+  {
+    "run": "quality-malden-1080",
+    "configuration": "village/ray",
+    "gpu": {
+      "median": 3.82045,
+      "min": 3.8155,
+      "max": 3.8238,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.1745,
+      "min": 6.174,
+      "max": 6.178,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 3.354,
+      "min": 3.241,
+      "max": 3.399,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    },
+    "cloud_pass": 0.53135,
+    "volume_pass": 0.8943,
+    "bloom_pass": 0.0797,
+    "contact_pass": 0.1567,
+    "ssao_pass": 0.07794999999999999
+  },
+  {
+    "run": "quality-malden-1080",
+    "configuration": "sunset/standard",
+    "gpu": {
+      "median": 1.4535999999999998,
+      "min": 0.8859,
+      "max": 2.0565,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.343,
+      "min": 6.252,
+      "max": 6.378,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 4.522,
+      "min": 4.345,
+      "max": 4.581,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    }
+  },
+  {
+    "run": "quality-malden-1080",
+    "configuration": "sunset/enhanced",
+    "gpu": {
+      "median": 2.06995,
+      "min": 1.8582,
+      "max": 2.1564,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.293,
+      "min": 6.261,
+      "max": 6.338,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 4.5135,
+      "min": 4.431,
+      "max": 4.544,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    },
+    "cloud_pass": 0.9545,
+    "bloom_pass": 0.1152,
+    "ssao_pass": 0.1018
+  },
+  {
+    "run": "quality-malden-1080",
+    "configuration": "sunset/ray",
+    "gpu": {
+      "median": 2.3655,
+      "min": 2.3642,
+      "max": 2.3661,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.373,
+      "min": 6.252,
+      "max": 6.446,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 4.7385,
+      "min": 4.608,
+      "max": 4.762,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    },
+    "cloud_pass": 0.60385,
+    "bloom_pass": 0.0788,
+    "ssao_pass": 0.0663
+  },
+  {
+    "run": "quality-malden-1080-final",
+    "configuration": "village/standard",
+    "gpu": {
+      "median": 1.9823,
+      "min": 1.9642,
+      "max": 1.985,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.174,
+      "min": 6.172,
+      "max": 6.176,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 2.788,
+      "min": 1.939,
+      "max": 2.789,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    }
+  },
+  {
+    "run": "quality-malden-1080-final",
+    "configuration": "village/recommended",
+    "gpu": {
+      "median": 2.1276,
+      "min": 2.0084,
+      "max": 2.174,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.173,
+      "min": 6.172,
+      "max": 6.173,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 2.77,
+      "min": 2.761,
+      "max": 2.793,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    },
+    "cloud_pass": 0.7211,
+    "contact_pass": 0.2051,
+    "ssao_pass": 0.1036
+  },
+  {
+    "run": "quality-malden-1080-final",
+    "configuration": "village/recommended-ray",
+    "gpu": {
+      "median": 2.6047,
+      "min": 2.6037,
+      "max": 2.6067,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.185,
+      "min": 6.181,
+      "max": 6.187,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 3.081,
+      "min": 3.043,
+      "max": 3.241,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    },
+    "cloud_pass": 0.5297,
+    "contact_pass": 0.1562,
+    "ssao_pass": 0.077
+  },
+  {
+    "run": "quality-malden-1080-final",
+    "configuration": "sunset/standard",
+    "gpu": {
+      "median": 1.1406,
+      "min": 0.8495,
+      "max": 1.4217,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.287,
+      "min": 6.267,
+      "max": 6.312,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 4.359,
+      "min": 4.346,
+      "max": 4.491,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    }
+  },
+  {
+    "run": "quality-malden-1080-final",
+    "configuration": "sunset/recommended",
+    "gpu": {
+      "median": 2.0466,
+      "min": 1.8531,
+      "max": 2.1569,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.305,
+      "min": 6.299,
+      "max": 6.321,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 4.509,
+      "min": 4.508,
+      "max": 4.513,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    },
+    "cloud_pass": 1.0082,
+    "ssao_pass": 0.1074
+  },
+  {
+    "run": "quality-malden-1080-final",
+    "configuration": "sunset/recommended-ray",
+    "gpu": {
+      "median": 2.3181,
+      "min": 2.306,
+      "max": 2.3347,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.378,
+      "min": 6.324,
+      "max": 6.403,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 4.688,
+      "min": 4.647,
+      "max": 4.718,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    },
+    "cloud_pass": 0.6044,
+    "ssao_pass": 0.0667
+  },
+  {
+    "run": "quality-malden-1080-final",
+    "configuration": "rain/standard",
+    "gpu": {
+      "median": 1.7465,
+      "min": 1.477,
+      "max": 1.9031,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.174,
+      "min": 6.173,
+      "max": 6.174,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 0.774,
+      "min": 0.756,
+      "max": 0.783,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    }
+  },
+  {
+    "run": "quality-malden-1080-final",
+    "configuration": "rain/recommended",
+    "gpu": {
+      "median": 2.1232,
+      "min": 1.986,
+      "max": 2.1635,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.173,
+      "min": 6.173,
+      "max": 6.173,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 0.73,
+      "min": 0.714,
+      "max": 0.742,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    },
+    "cloud_pass": 0.822,
+    "ssao_pass": 0.1102
+  },
+  {
+    "run": "quality-malden-1080-final",
+    "configuration": "rain/recommended-ray",
+    "gpu": {
+      "median": 2.4165,
+      "min": 2.4142,
+      "max": 2.4169,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.174,
+      "min": 6.172,
+      "max": 6.174,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 1.002,
+      "min": 0.998,
+      "max": 1.038,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    },
+    "cloud_pass": 0.5603,
+    "ssao_pass": 0.0779
+  },
+  {
+    "run": "quality-malden-1080-final",
+    "configuration": "coast/standard",
+    "gpu": {
+      "median": 1.72145,
+      "min": 1.3963,
+      "max": 1.9209,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.372999999999999,
+      "min": 6.285,
+      "max": 6.407,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 4.6455,
+      "min": 4.57,
+      "max": 4.797,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    }
+  },
+  {
+    "run": "quality-malden-1080-final",
+    "configuration": "coast/recommended",
+    "gpu": {
+      "median": 2.2519,
+      "min": 2.0974,
+      "max": 2.2992,
+      "samples": 7
+    },
+    "cpu_frame": {
+      "median": 6.368,
+      "min": 6.255,
+      "max": 6.462,
+      "samples": 7
+    },
+    "cpu_command": {
+      "median": 4.648,
+      "min": 4.519,
+      "max": 4.732,
+      "samples": 7
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 7
+    },
+    "cloud_pass": 0.6006,
+    "contact_pass": 0.2778,
+    "ssao_pass": 0.0928
+  },
+  {
+    "run": "quality-malden-1080-final",
+    "configuration": "coast/recommended-ray",
+    "gpu": {
+      "median": 3.68095,
+      "min": 3.6759,
+      "max": 3.6825,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.41,
+      "min": 6.284,
+      "max": 6.548,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 4.781000000000001,
+      "min": 4.662,
+      "max": 4.846,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    },
+    "cloud_pass": 0.508,
+    "contact_pass": 0.2326,
+    "ssao_pass": 0.0785
+  },
+  {
+    "run": "quality-malden-1080-final",
+    "configuration": "night/standard",
+    "gpu": {
+      "median": 1.2589,
+      "min": 0.9939,
+      "max": 1.8416,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.175,
+      "min": 6.173,
+      "max": 6.177,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 2.959,
+      "min": 2.935,
+      "max": 2.981,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    }
+  },
+  {
+    "run": "quality-malden-1080-final",
+    "configuration": "night/recommended",
+    "gpu": {
+      "median": 1.8343,
+      "min": 1.5882,
+      "max": 1.9654,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.174,
+      "min": 6.174,
+      "max": 6.174,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 2.921,
+      "min": 2.887,
+      "max": 2.948,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    },
+    "cloud_pass": 0.7591,
+    "ssao_pass": 0.1635
+  },
+  {
+    "run": "quality-malden-1080-final",
+    "configuration": "night/recommended-ray",
+    "gpu": {
+      "median": 2.1185,
+      "min": 2.0693,
+      "max": 2.1504,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.174,
+      "min": 6.173,
+      "max": 6.175,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 3.199,
+      "min": 3.186,
+      "max": 3.214,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    },
+    "cloud_pass": 0.4506,
+    "ssao_pass": 0.0999
+  },
+  {
+    "run": "quality-malden-1080-final",
+    "configuration": "town/standard",
+    "gpu": {
+      "median": 1.6761,
+      "min": 1.2829,
+      "max": 1.944,
+      "samples": 7
+    },
+    "cpu_frame": {
+      "median": 6.175,
+      "min": 6.173,
+      "max": 6.177,
+      "samples": 7
+    },
+    "cpu_command": {
+      "median": 3.219,
+      "min": 3.212,
+      "max": 3.235,
+      "samples": 7
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 7
+    }
+  },
+  {
+    "run": "quality-malden-1080-final",
+    "configuration": "town/recommended",
+    "gpu": {
+      "median": 2.2112,
+      "min": 2.1291,
+      "max": 2.2193,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.1745,
+      "min": 6.173,
+      "max": 6.179,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 3.2135,
+      "min": 3.179,
+      "max": 3.235,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    },
+    "cloud_pass": 0.5093,
+    "contact_pass": 0.21039999999999998,
+    "ssao_pass": 0.10685
+  },
+  {
+    "run": "quality-malden-1080-final",
+    "configuration": "town/recommended-ray",
+    "gpu": {
+      "median": 3.0054,
+      "min": 3.0026,
+      "max": 3.009,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.181,
+      "min": 6.177,
+      "max": 6.183,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 3.7885,
+      "min": 3.771,
+      "max": 3.831,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    },
+    "cloud_pass": 0.43145,
+    "contact_pass": 0.1765,
+    "ssao_pass": 0.08815
+  },
+  {
+    "run": "quality-malden-1080-final",
+    "configuration": "coast-taa/recommended",
+    "gpu": {
+      "median": 2.3775,
+      "min": 2.3708,
+      "max": 2.5003,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 7.001,
+      "min": 6.69,
+      "max": 7.06,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 5.804,
+      "min": 5.804,
+      "max": 5.903,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    },
+    "cloud_pass": 0.6011,
+    "contact_pass": 0.2662,
+    "ssao_pass": 0.0893
+  },
+  {
+    "run": "quality-malden-1080-final",
+    "configuration": "coast-fsr-quality/recommended",
+    "gpu": {
+      "median": 2.17425,
+      "min": 1.9389,
+      "max": 2.2074,
+      "samples": 4
+    },
+    "cpu_frame": {
+      "median": 6.3465,
+      "min": 6.261,
+      "max": 6.452,
+      "samples": 4
+    },
+    "cpu_command": {
+      "median": 6.053,
+      "min": 5.974,
+      "max": 6.149,
+      "samples": 4
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 4
+    },
+    "cloud_pass": 0.39885000000000004,
+    "contact_pass": 0.14235,
+    "ssao_pass": 0.04735
+  },
+  {
+    "run": "quality-malden-1080-final",
+    "configuration": "coast-taa/recommended-sun",
+    "gpu": {
+      "median": 2.6317,
+      "min": 2.6309,
+      "max": 2.632,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.251,
+      "min": 6.224,
+      "max": 6.254,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 5.988,
+      "min": 5.985,
+      "max": 5.993,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    },
+    "cloud_pass": 0.5298,
+    "contact_pass": 0.232,
+    "ssao_pass": 0.0763
+  },
+  {
+    "run": "quality-malden-1080-final",
+    "configuration": "coast-fsr-quality/recommended-sun",
+    "gpu": {
+      "median": 2.2605,
+      "min": 2.1788,
+      "max": 2.2746,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.393,
+      "min": 6.386,
+      "max": 6.393,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 6.112,
+      "min": 6.11,
+      "max": 6.116,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    },
+    "cloud_pass": 0.3577,
+    "contact_pass": 0.1294,
+    "ssao_pass": 0.044
+  },
+  {
+    "run": "quality-malden-1080-final",
+    "configuration": "coast-taa/recommended-ray",
+    "gpu": {
+      "median": 3.8616,
+      "min": 3.8614,
+      "max": 3.8622,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.25,
+      "min": 6.213,
+      "max": 6.278,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 5.989,
+      "min": 5.978,
+      "max": 5.991,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    },
+    "cloud_pass": 0.5306,
+    "contact_pass": 0.2323,
+    "ssao_pass": 0.0786
+  },
+  {
+    "run": "quality-malden-1080-final",
+    "configuration": "coast-fsr-quality/recommended-ray",
+    "gpu": {
+      "median": 2.5547,
+      "min": 2.5547,
+      "max": 2.555,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.375,
+      "min": 6.31,
+      "max": 6.435,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 6.053,
+      "min": 6.003,
+      "max": 6.095,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    },
+    "cloud_pass": 0.3068,
+    "contact_pass": 0.1084,
+    "ssao_pass": 0.0365
+  },
+  {
+    "run": "quality-malden-1080b",
+    "configuration": "town/standard",
+    "gpu": {
+      "median": 1.9598499999999999,
+      "min": 1.446,
+      "max": 2.0554,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.1745,
+      "min": 6.173,
+      "max": 6.179,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 3.2625,
+      "min": 3.192,
+      "max": 3.41,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    }
+  },
+  {
+    "run": "quality-malden-1080b",
+    "configuration": "town/enhanced",
+    "gpu": {
+      "median": 3.23405,
+      "min": 3.2318,
+      "max": 3.235,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.1765,
+      "min": 6.173,
+      "max": 6.178,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 3.4495,
+      "min": 3.314,
+      "max": 3.485,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    },
+    "cloud_pass": 0.5964,
+    "volume_pass": 0.8428,
+    "bloom_pass": 0.07944999999999999,
+    "contact_pass": 0.17654999999999998,
+    "ssao_pass": 0.08885
+  },
+  {
+    "run": "quality-malden-1080b",
+    "configuration": "town/ray",
+    "gpu": {
+      "median": 4.3325,
+      "min": 4.3313,
+      "max": 4.3338,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.181,
+      "min": 6.177,
+      "max": 6.19,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 3.788,
+      "min": 3.714,
+      "max": 3.823,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    },
+    "cloud_pass": 0.5984,
+    "volume_pass": 0.8488,
+    "bloom_pass": 0.0798,
+    "contact_pass": 0.1773,
+    "ssao_pass": 0.08945
+  },
+  {
+    "run": "quality-malden-1080b",
+    "configuration": "rain/standard",
+    "gpu": {
+      "median": 1.98015,
+      "min": 1.6313,
+      "max": 2.0162,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.172,
+      "min": 6.172,
+      "max": 6.176,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 1.0619999999999998,
+      "min": 1.023,
+      "max": 1.111,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    }
+  },
+  {
+    "run": "quality-malden-1080b",
+    "configuration": "rain/enhanced",
+    "gpu": {
+      "median": 2.14385,
+      "min": 1.9993,
+      "max": 2.1765,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.172,
+      "min": 6.172,
+      "max": 6.173,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 1.029,
+      "min": 0.995,
+      "max": 1.062,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    },
+    "cloud_pass": 0.79555,
+    "bloom_pass": 0.1048,
+    "ssao_pass": 0.1057
+  },
+  {
+    "run": "quality-malden-1080b",
+    "configuration": "rain/ray",
+    "gpu": {
+      "median": 2.50015,
+      "min": 2.4947,
+      "max": 2.5072,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.172499999999999,
+      "min": 6.172,
+      "max": 6.174,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 1.3315000000000001,
+      "min": 1.289,
+      "max": 1.366,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    },
+    "cloud_pass": 0.57195,
+    "bloom_pass": 0.0793,
+    "ssao_pass": 0.0783
+  },
+  {
+    "run": "quality-malden-1080b",
+    "configuration": "coast/standard",
+    "gpu": {
+      "median": 2.00325,
+      "min": 1.5422,
+      "max": 2.0726,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.343500000000001,
+      "min": 6.299,
+      "max": 6.387,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 4.68,
+      "min": 4.587,
+      "max": 4.709,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    }
+  },
+  {
+    "run": "quality-malden-1080b",
+    "configuration": "coast/enhanced",
+    "gpu": {
+      "median": 3.13265,
+      "min": 3.124,
+      "max": 3.1368,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.3260000000000005,
+      "min": 6.297,
+      "max": 6.36,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 4.6455,
+      "min": 4.537,
+      "max": 4.686,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    },
+    "cloud_pass": 0.51115,
+    "volume_pass": 0.8474999999999999,
+    "bloom_pass": 0.0799,
+    "contact_pass": 0.23504999999999998,
+    "ssao_pass": 0.07725
+  },
+  {
+    "run": "quality-malden-1080b",
+    "configuration": "coast/ray",
+    "gpu": {
+      "median": 4.8682,
+      "min": 4.8657,
+      "max": 4.8702,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.3825,
+      "min": 6.262,
+      "max": 6.468,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 4.7875,
+      "min": 4.64,
+      "max": 4.864,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    },
+    "cloud_pass": 0.5116,
+    "volume_pass": 0.85585,
+    "bloom_pass": 0.07985,
+    "contact_pass": 0.233,
+    "ssao_pass": 0.0795
+  },
+  {
+    "run": "quality-malden-1080b",
+    "configuration": "night/standard",
+    "gpu": {
+      "median": 1.3524500000000002,
+      "min": 0.79,
+      "max": 1.9119,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.173500000000001,
+      "min": 6.173,
+      "max": 6.177,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 2.817,
+      "min": 2.784,
+      "max": 2.857,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    }
+  },
+  {
+    "run": "quality-malden-1080b",
+    "configuration": "night/enhanced",
+    "gpu": {
+      "median": 1.82145,
+      "min": 1.636,
+      "max": 2.1297,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.172499999999999,
+      "min": 6.172,
+      "max": 6.174,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 2.7775,
+      "min": 2.751,
+      "max": 2.799,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    },
+    "cloud_pass": 0.66645,
+    "bloom_pass": 0.13635,
+    "ssao_pass": 0.14545
+  },
+  {
+    "run": "quality-malden-1080b",
+    "configuration": "night/ray",
+    "gpu": {
+      "median": 2.1695,
+      "min": 2.0562,
+      "max": 2.1974,
+      "samples": 7
+    },
+    "cpu_frame": {
+      "median": 6.173,
+      "min": 6.172,
+      "max": 6.174,
+      "samples": 7
+    },
+    "cpu_command": {
+      "median": 3.085,
+      "min": 3.076,
+      "max": 3.128,
+      "samples": 7
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 7
+    },
+    "cloud_pass": 0.4336,
+    "bloom_pass": 0.096,
+    "ssao_pass": 0.0971
+  },
+  {
+    "run": "quality-malden-1080b",
+    "configuration": "automatic/off",
+    "gpu": {
+      "median": 2.0064,
+      "min": 2.0032,
+      "max": 2.0342,
+      "samples": 7
+    },
+    "cpu_frame": {
+      "median": 6.173,
+      "min": 6.172,
+      "max": 6.175,
+      "samples": 7
+    },
+    "cpu_command": {
+      "median": 0.734,
+      "min": 0.702,
+      "max": 0.781,
+      "samples": 7
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 7
+    }
+  },
+  {
+    "run": "quality-malden-1080b",
+    "configuration": "automatic/on",
+    "gpu": {
+      "median": 1.75305,
+      "min": 1.4698,
+      "max": 1.9066,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.173,
+      "min": 6.172,
+      "max": 6.178,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 0.7244999999999999,
+      "min": 0.698,
+      "max": 0.799,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    }
+  },
+  {
+    "run": "quality-malden-1080b",
+    "configuration": "shadows/off",
+    "gpu": {
+      "median": 2.0134499999999997,
+      "min": 1.8548,
+      "max": 2.044,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.174,
+      "min": 6.172,
+      "max": 6.175,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 3.218,
+      "min": 3.212,
+      "max": 3.221,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    }
+  },
+  {
+    "run": "quality-malden-1080b",
+    "configuration": "shadows/on",
+    "gpu": {
+      "median": 1.8753,
+      "min": 1.4718,
+      "max": 2.0523,
+      "samples": 7
+    },
+    "cpu_frame": {
+      "median": 6.173,
+      "min": 6.172,
+      "max": 6.175,
+      "samples": 7
+    },
+    "cpu_command": {
+      "median": 3.233,
+      "min": 3.221,
+      "max": 3.283,
+      "samples": 7
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 7
+    },
+    "contact_pass": 0.3218
+  },
+  {
+    "run": "quality-malden-1080b",
+    "configuration": "rt-shadows/off",
+    "gpu": {
+      "median": 1.99145,
+      "min": 1.7232,
+      "max": 2.0433,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.1745,
+      "min": 6.172,
+      "max": 6.176,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 3.2270000000000003,
+      "min": 3.209,
+      "max": 3.347,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    }
+  },
+  {
+    "run": "quality-malden-1080b",
+    "configuration": "rt-shadows/on",
+    "gpu": {
+      "median": 2.1225,
+      "min": 2.0308,
+      "max": 2.1675,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.1935,
+      "min": 6.182,
+      "max": 6.198,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 3.692,
+      "min": 3.626,
+      "max": 3.73,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    }
+  },
+  {
+    "run": "quality-malden-1080b",
+    "configuration": "ao/off",
+    "gpu": {
+      "median": 2.02,
+      "min": 1.9596,
+      "max": 2.0382,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.174,
+      "min": 6.173,
+      "max": 6.175,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 3.2105,
+      "min": 3.193,
+      "max": 3.231,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    }
+  },
+  {
+    "run": "quality-malden-1080b",
+    "configuration": "ao/on",
+    "gpu": {
+      "median": 1.8931,
+      "min": 1.3458,
+      "max": 1.9962,
+      "samples": 7
+    },
+    "cpu_frame": {
+      "median": 6.175,
+      "min": 6.173,
+      "max": 6.176,
+      "samples": 7
+    },
+    "cpu_command": {
+      "median": 3.21,
+      "min": 3.207,
+      "max": 3.273,
+      "samples": 7
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 7
+    },
+    "ssao_pass": 0.1924
+  },
+  {
+    "run": "quality-malden-1080b",
+    "configuration": "bloom/off",
+    "gpu": {
+      "median": 1.63395,
+      "min": 1.0536,
+      "max": 1.7629,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.3145,
+      "min": 6.243,
+      "max": 6.361,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 4.470000000000001,
+      "min": 4.412,
+      "max": 4.558,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    }
+  },
+  {
+    "run": "quality-malden-1080b",
+    "configuration": "bloom/on",
+    "gpu": {
+      "median": 1.4518499999999999,
+      "min": 0.9719,
+      "max": 1.718,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.281,
+      "min": 6.24,
+      "max": 6.337,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 4.423,
+      "min": 4.372,
+      "max": 4.54,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    },
+    "bloom_pass": 0.207
+  },
+  {
+    "run": "quality-malden-1080b",
+    "configuration": "volume/off",
+    "gpu": {
+      "median": 1.7057,
+      "min": 0.9812,
+      "max": 2.183,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.3245000000000005,
+      "min": 6.315,
+      "max": 6.378,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 4.556,
+      "min": 4.381,
+      "max": 4.688,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    }
+  },
+  {
+    "run": "quality-malden-1080b",
+    "configuration": "volume/on",
+    "gpu": {
+      "median": 1.4137,
+      "min": 0.8885,
+      "max": 1.7177,
+      "samples": 7
+    },
+    "cpu_frame": {
+      "median": 6.324,
+      "min": 6.259,
+      "max": 6.38,
+      "samples": 7
+    },
+    "cpu_command": {
+      "median": 4.508,
+      "min": 4.345,
+      "max": 4.577,
+      "samples": 7
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 7
+    }
+  },
+  {
+    "run": "quality-malden-1080b",
+    "configuration": "clouds/off",
+    "gpu": {
+      "median": 1.75515,
+      "min": 0.9515,
+      "max": 1.8545,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.298,
+      "min": 6.242,
+      "max": 6.333,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 4.523,
+      "min": 4.321,
+      "max": 4.581,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    }
+  },
+  {
+    "run": "quality-malden-1080b",
+    "configuration": "clouds/on",
+    "gpu": {
+      "median": 1.92115,
+      "min": 1.5339,
+      "max": 2.0509,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.2765,
+      "min": 6.232,
+      "max": 6.294,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 4.467499999999999,
+      "min": 4.385,
+      "max": 4.504,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    },
+    "cloud_pass": 1.15875
+  },
+  {
+    "run": "quality-malden-1080b",
+    "configuration": "water/off",
+    "gpu": {
+      "median": 2.0401499999999997,
+      "min": 1.8317,
+      "max": 2.0706,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.3435,
+      "min": 6.276,
+      "max": 6.397,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 4.606,
+      "min": 4.574,
+      "max": 4.685,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    }
+  },
+  {
+    "run": "quality-malden-1080b",
+    "configuration": "water/on",
+    "gpu": {
+      "median": 1.954,
+      "min": 1.2955,
+      "max": 2.0595,
+      "samples": 7
+    },
+    "cpu_frame": {
+      "median": 6.312,
+      "min": 6.276,
+      "max": 6.37,
+      "samples": 7
+    },
+    "cpu_command": {
+      "median": 4.574,
+      "min": 4.46,
+      "max": 4.653,
+      "samples": 7
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 7
+    }
+  },
+  {
+    "run": "quality-malden-1080b",
+    "configuration": "rt-water/off",
+    "gpu": {
+      "median": 2.12405,
+      "min": 1.9901,
+      "max": 2.1576,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.351,
+      "min": 6.284,
+      "max": 6.391,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 4.6594999999999995,
+      "min": 4.538,
+      "max": 4.675,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    }
+  },
+  {
+    "run": "quality-malden-1080b",
+    "configuration": "rt-water/on",
+    "gpu": {
+      "median": 2.1247,
+      "min": 1.9658,
+      "max": 2.2344,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.553,
+      "min": 6.422,
+      "max": 6.678,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 4.85,
+      "min": 4.789,
+      "max": 4.955,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    }
+  },
+  {
+    "run": "quality-malden-1080b",
+    "configuration": "volume-active/off",
+    "gpu": {
+      "median": 1.9803,
+      "min": 1.6039,
+      "max": 2.0724,
+      "samples": 7
+    },
+    "cpu_frame": {
+      "median": 6.172,
+      "min": 6.172,
+      "max": 6.173,
+      "samples": 7
+    },
+    "cpu_command": {
+      "median": 1.122,
+      "min": 1.113,
+      "max": 1.135,
+      "samples": 7
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 7
+    }
+  },
+  {
+    "run": "quality-malden-1080b",
+    "configuration": "volume-active/on",
+    "gpu": {
+      "median": 2.2131,
+      "min": 2.1694,
+      "max": 2.2179,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.172,
+      "min": 6.172,
+      "max": 6.172,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 1.1269999999999998,
+      "min": 1.124,
+      "max": 1.132,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    },
+    "volume_pass": 0.8613
+  },
+  {
+    "run": "quality-malden-1440-final",
+    "configuration": "village/standard",
+    "gpu": {
+      "median": 2.0877,
+      "min": 2.0831,
+      "max": 2.0924,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.175,
+      "min": 6.172,
+      "max": 6.175,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 2.993,
+      "min": 2.792,
+      "max": 3.157,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    }
+  },
+  {
+    "run": "quality-malden-1440-final",
+    "configuration": "village/recommended",
+    "gpu": {
+      "median": 2.6592,
+      "min": 2.6584,
+      "max": 2.6601,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.174,
+      "min": 6.174,
+      "max": 6.176,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 2.765,
+      "min": 2.763,
+      "max": 2.766,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    },
+    "cloud_pass": 0.8802,
+    "contact_pass": 0.2502,
+    "ssao_pass": 0.1326
+  },
+  {
+    "run": "quality-malden-1440-final",
+    "configuration": "village/recommended-ray",
+    "gpu": {
+      "median": 4.3688,
+      "min": 4.3674,
+      "max": 4.37,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.174,
+      "min": 6.173,
+      "max": 6.176,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 3.284,
+      "min": 3.223,
+      "max": 3.337,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    },
+    "cloud_pass": 0.8826,
+    "contact_pass": 0.2658,
+    "ssao_pass": 0.1339
+  },
+  {
+    "run": "quality-malden-1440-final",
+    "configuration": "sunset/standard",
+    "gpu": {
+      "median": 1.751,
+      "min": 1.573,
+      "max": 1.8654,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.296,
+      "min": 6.238,
+      "max": 6.327,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 4.483,
+      "min": 4.446,
+      "max": 4.496,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    }
+  },
+  {
+    "run": "quality-malden-1440-final",
+    "configuration": "sunset/recommended",
+    "gpu": {
+      "median": 2.2922000000000002,
+      "min": 2.2373,
+      "max": 2.2968,
+      "samples": 4
+    },
+    "cpu_frame": {
+      "median": 6.4195,
+      "min": 6.311,
+      "max": 6.546,
+      "samples": 4
+    },
+    "cpu_command": {
+      "median": 4.638,
+      "min": 4.491,
+      "max": 4.912,
+      "samples": 4
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 4
+    },
+    "cloud_pass": 1.0917,
+    "ssao_pass": 0.12079999999999999
+  },
+  {
+    "run": "quality-malden-1440-final",
+    "configuration": "sunset/recommended-ray",
+    "gpu": {
+      "median": 3.8313,
+      "min": 3.8283,
+      "max": 3.8316,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.387,
+      "min": 6.387,
+      "max": 6.456,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 4.739,
+      "min": 4.711,
+      "max": 4.778,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    },
+    "cloud_pass": 1.0497,
+    "ssao_pass": 0.1165
+  },
+  {
+    "run": "quality-malden-1440-final",
+    "configuration": "rain/standard",
+    "gpu": {
+      "median": 1.9626,
+      "min": 1.7233,
+      "max": 2.0399,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.172,
+      "min": 6.172,
+      "max": 6.172,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 1.139,
+      "min": 1.137,
+      "max": 1.141,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    }
+  },
+  {
+    "run": "quality-malden-1440-final",
+    "configuration": "rain/recommended",
+    "gpu": {
+      "median": 2.6315,
+      "min": 2.6312,
+      "max": 2.6317,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.172,
+      "min": 6.172,
+      "max": 6.172,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 1.107,
+      "min": 1.106,
+      "max": 1.118,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    },
+    "cloud_pass": 0.9573,
+    "ssao_pass": 0.1369
+  },
+  {
+    "run": "quality-malden-1440-final",
+    "configuration": "rain/recommended-ray",
+    "gpu": {
+      "median": 4.3242,
+      "min": 4.322,
+      "max": 4.3267,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.197,
+      "min": 6.19,
+      "max": 6.203,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 1.441,
+      "min": 1.433,
+      "max": 1.523,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    },
+    "cloud_pass": 0.9593,
+    "ssao_pass": 0.1362
+  },
+  {
+    "run": "quality-malden-1440-final",
+    "configuration": "coast/standard",
+    "gpu": {
+      "median": 2.1089,
+      "min": 1.8786,
+      "max": 2.17,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.3740000000000006,
+      "min": 6.326,
+      "max": 6.437,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 4.6625,
+      "min": 4.627,
+      "max": 4.711,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    }
+  },
+  {
+    "run": "quality-malden-1440-final",
+    "configuration": "coast/recommended",
+    "gpu": {
+      "median": 3.1935,
+      "min": 3.1911,
+      "max": 3.1951,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.365,
+      "min": 6.327,
+      "max": 6.404,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 4.6745,
+      "min": 4.615,
+      "max": 4.706,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    },
+    "cloud_pass": 0.84275,
+    "contact_pass": 0.41435,
+    "ssao_pass": 0.1331
+  },
+  {
+    "run": "quality-malden-1440-final",
+    "configuration": "coast/recommended-ray",
+    "gpu": {
+      "median": 6.6629,
+      "min": 6.6604,
+      "max": 6.815,
+      "samples": 7
+    },
+    "cpu_frame": {
+      "median": 6.769,
+      "min": 6.678,
+      "max": 6.846,
+      "samples": 7
+    },
+    "cpu_command": {
+      "median": 4.971,
+      "min": 4.811,
+      "max": 5.15,
+      "samples": 7
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 7
+    },
+    "cloud_pass": 1.0342,
+    "contact_pass": 0.412,
+    "ssao_pass": 0.1383
+  },
+  {
+    "run": "quality-malden-1440-final",
+    "configuration": "night/standard",
+    "gpu": {
+      "median": 1.8493,
+      "min": 1.7355,
+      "max": 1.9165,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.174,
+      "min": 6.173,
+      "max": 6.176,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 2.809,
+      "min": 2.806,
+      "max": 2.865,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    }
+  },
+  {
+    "run": "quality-malden-1440-final",
+    "configuration": "night/recommended",
+    "gpu": {
+      "median": 2.0932,
+      "min": 2.0124,
+      "max": 2.1351,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.173,
+      "min": 6.173,
+      "max": 6.176,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 2.756,
+      "min": 2.755,
+      "max": 2.764,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    },
+    "cloud_pass": 0.8505,
+    "ssao_pass": 0.1949
+  },
+  {
+    "run": "quality-malden-1440-final",
+    "configuration": "night/recommended-ray",
+    "gpu": {
+      "median": 3.1254,
+      "min": 3.1245,
+      "max": 3.1254,
+      "samples": 3
+    },
+    "cpu_frame": {
+      "median": 6.177,
+      "min": 6.173,
+      "max": 6.177,
+      "samples": 3
+    },
+    "cpu_command": {
+      "median": 3.292,
+      "min": 3.277,
+      "max": 3.321,
+      "samples": 3
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 3
+    },
+    "cloud_pass": 0.5803,
+    "ssao_pass": 0.1333
+  },
+  {
+    "run": "quality-malden-1440-final",
+    "configuration": "town/standard",
+    "gpu": {
+      "median": 1.98155,
+      "min": 1.8419,
+      "max": 2.0585,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.1739999999999995,
+      "min": 6.172,
+      "max": 6.177,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 3.2095000000000002,
+      "min": 3.2,
+      "max": 3.218,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    }
+  },
+  {
+    "run": "quality-malden-1440-final",
+    "configuration": "town/recommended",
+    "gpu": {
+      "median": 3.0747999999999998,
+      "min": 3.0718,
+      "max": 3.0784,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.173500000000001,
+      "min": 6.173,
+      "max": 6.175,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 3.319,
+      "min": 3.267,
+      "max": 3.385,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    },
+    "cloud_pass": 0.7298,
+    "contact_pass": 0.30005000000000004,
+    "ssao_pass": 0.15275
+  },
+  {
+    "run": "quality-malden-1440-final",
+    "configuration": "town/recommended-ray",
+    "gpu": {
+      "median": 5.01095,
+      "min": 5.0097,
+      "max": 5.0122,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.1805,
+      "min": 6.178,
+      "max": 6.189,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 3.7554999999999996,
+      "min": 3.73,
+      "max": 3.811,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    },
+    "cloud_pass": 0.72955,
+    "contact_pass": 0.29815,
+    "ssao_pass": 0.1543
+  },
+  {
+    "run": "quality-malden-1440-final",
+    "configuration": "automatic/off",
+    "gpu": {
+      "median": 2.1093,
+      "min": 2.0997,
+      "max": 2.1127,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.173,
+      "min": 6.173,
+      "max": 6.174,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 0.805,
+      "min": 0.788,
+      "max": 0.847,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    }
+  },
+  {
+    "run": "quality-malden-1440-final",
+    "configuration": "automatic/on",
+    "gpu": {
+      "median": 2.1012500000000003,
+      "min": 1.8972,
+      "max": 2.1133,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.174,
+      "min": 6.172,
+      "max": 6.177,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 0.806,
+      "min": 0.783,
+      "max": 0.826,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    }
+  },
+  {
+    "run": "quality-malden-1440-final",
+    "configuration": "shadows/off",
+    "gpu": {
+      "median": 2.0523,
+      "min": 1.947,
+      "max": 2.079,
+      "samples": 7
+    },
+    "cpu_frame": {
+      "median": 6.175,
+      "min": 6.174,
+      "max": 6.177,
+      "samples": 7
+    },
+    "cpu_command": {
+      "median": 3.191,
+      "min": 3.182,
+      "max": 3.283,
+      "samples": 7
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 7
+    }
+  },
+  {
+    "run": "quality-malden-1440-final",
+    "configuration": "shadows/on",
+    "gpu": {
+      "median": 2.14365,
+      "min": 2.0147,
+      "max": 2.1838,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.1745,
+      "min": 6.172,
+      "max": 6.179,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 3.2104999999999997,
+      "min": 3.196,
+      "max": 3.217,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    },
+    "contact_pass": 0.37065000000000003
+  },
+  {
+    "run": "quality-malden-1440-final",
+    "configuration": "rt-shadows/off",
+    "gpu": {
+      "median": 2.04625,
+      "min": 1.8905,
+      "max": 2.0753,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.173500000000001,
+      "min": 6.173,
+      "max": 6.178,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 3.2030000000000003,
+      "min": 3.197,
+      "max": 3.215,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    }
+  },
+  {
+    "run": "quality-malden-1440-final",
+    "configuration": "rt-shadows/on",
+    "gpu": {
+      "median": 2.6563,
+      "min": 2.6531,
+      "max": 2.6595,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.1765,
+      "min": 6.174,
+      "max": 6.177,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 3.672,
+      "min": 3.663,
+      "max": 3.784,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    }
+  },
+  {
+    "run": "quality-malden-1440-final",
+    "configuration": "ao/off",
+    "gpu": {
+      "median": 2.0587,
+      "min": 2.0337,
+      "max": 2.0689,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.174,
+      "min": 6.173,
+      "max": 6.175,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 3.189,
+      "min": 3.174,
+      "max": 3.207,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    }
+  },
+  {
+    "run": "quality-malden-1440-final",
+    "configuration": "ao/on",
+    "gpu": {
+      "median": 2.0862,
+      "min": 2.0022,
+      "max": 2.1302,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.173,
+      "min": 6.173,
+      "max": 6.176,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 3.1895,
+      "min": 3.183,
+      "max": 3.204,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    },
+    "ssao_pass": 0.2234
+  },
+  {
+    "run": "quality-malden-1440-final",
+    "configuration": "bloom/off",
+    "gpu": {
+      "median": 1.92685,
+      "min": 1.6708,
+      "max": 2.0163,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.3235,
+      "min": 6.273,
+      "max": 6.384,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 4.5315,
+      "min": 4.501,
+      "max": 4.546,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    }
+  },
+  {
+    "run": "quality-malden-1440-final",
+    "configuration": "bloom/on",
+    "gpu": {
+      "median": 1.73055,
+      "min": 1.2892,
+      "max": 1.8968,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.261,
+      "min": 6.237,
+      "max": 6.329,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 4.415,
+      "min": 4.382,
+      "max": 4.556,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    },
+    "bloom_pass": 0.22565000000000002
+  },
+  {
+    "run": "quality-malden-1440-final",
+    "configuration": "volume-active/off",
+    "gpu": {
+      "median": 2.1618,
+      "min": 1.96,
+      "max": 2.1733,
+      "samples": 7
+    },
+    "cpu_frame": {
+      "median": 6.172,
+      "min": 6.172,
+      "max": 6.173,
+      "samples": 7
+    },
+    "cpu_command": {
+      "median": 1.112,
+      "min": 1.107,
+      "max": 1.128,
+      "samples": 7
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 7
+    }
+  },
+  {
+    "run": "quality-malden-1440-final",
+    "configuration": "volume-active/on",
+    "gpu": {
+      "median": 3.3692,
+      "min": 3.3672,
+      "max": 3.3703,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.172,
+      "min": 6.172,
+      "max": 6.172,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 1.1305,
+      "min": 1.126,
+      "max": 1.148,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    },
+    "volume_pass": 1.4007
+  },
+  {
+    "run": "quality-malden-1440-final",
+    "configuration": "clouds/off",
+    "gpu": {
+      "median": 1.76675,
+      "min": 1.5357,
+      "max": 1.9077,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.3015,
+      "min": 6.229,
+      "max": 6.371,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 4.462,
+      "min": 4.404,
+      "max": 4.558,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    }
+  },
+  {
+    "run": "quality-malden-1440-final",
+    "configuration": "clouds/on",
+    "gpu": {
+      "median": 2.1952,
+      "min": 2.0399,
+      "max": 2.201,
+      "samples": 7
+    },
+    "cpu_frame": {
+      "median": 6.253,
+      "min": 6.214,
+      "max": 6.363,
+      "samples": 7
+    },
+    "cpu_command": {
+      "median": 4.418,
+      "min": 4.306,
+      "max": 4.543,
+      "samples": 7
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 7
+    },
+    "cloud_pass": 1.312
+  },
+  {
+    "run": "quality-malden-1440-final",
+    "configuration": "water/off",
+    "gpu": {
+      "median": 2.1702500000000002,
+      "min": 2.1173,
+      "max": 2.1932,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.382,
+      "min": 6.355,
+      "max": 6.436,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 4.6594999999999995,
+      "min": 4.64,
+      "max": 4.711,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    }
+  },
+  {
+    "run": "quality-malden-1440-final",
+    "configuration": "water/on",
+    "gpu": {
+      "median": 2.1814999999999998,
+      "min": 2.1088,
+      "max": 2.2427,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.4185,
+      "min": 6.312,
+      "max": 6.54,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 4.718,
+      "min": 4.545,
+      "max": 4.849,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    }
+  },
+  {
+    "run": "quality-malden-1440-final",
+    "configuration": "rt-water/off",
+    "gpu": {
+      "median": 2.215,
+      "min": 2.0052,
+      "max": 2.239,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.3855,
+      "min": 6.31,
+      "max": 6.407,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 4.658,
+      "min": 4.608,
+      "max": 4.693,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    }
+  },
+  {
+    "run": "quality-malden-1440-final",
+    "configuration": "rt-water/on",
+    "gpu": {
+      "median": 2.82835,
+      "min": 2.8278,
+      "max": 2.8322,
+      "samples": 6
+    },
+    "cpu_frame": {
+      "median": 6.375,
+      "min": 6.333,
+      "max": 6.49,
+      "samples": 6
+    },
+    "cpu_command": {
+      "median": 4.745,
+      "min": 4.725,
+      "max": 4.86,
+      "samples": 6
+    },
+    "allocations": {
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "samples": 6
+    }
+  }
+]
