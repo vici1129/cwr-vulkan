@@ -1,6 +1,124 @@
 # Vulkan backend development
 
+## RT water hit-shading fast path (2026-10-13)
+
+Follow-up to `7514b69`: ordinary water now calls `reflectionSurface()`, which
+fetches the existing section/triangle, transformed geometric face normal,
+barycentric UV and linear sampled texture color. It does not reconstruct hit
+position or interpolated normals, fetch the inverse-transpose transform, classify
+diffuse eligibility, or run full-surface validation. Missing material/color,
+invalid UV and degenerate-face guards retain the sky fallback. Alpha traversal,
+geometric-normal lighting, texture filtering, fog and water composition are
+unchanged. Shared triangle, face-normal, UV and color helpers also serve the
+complete `hitSurface()` API; no second scene or material system is introduced.
+
+Full reconstruction and its existing real-ray checks remain available by launching
+with **`CWR_VK_RT_HIT_DIAGNOSTICS=1`**. This is a process-local developer opt-in,
+not a saved option or menu. Restart to change it. A specialization constant on
+the two existing water pipelines selects the full path and counters; it does
+not create additional pipelines/passes or perform both reconstructions per hit.
+Without the opt-in, `triRTReflections "status"` reports
+`hitSurface=unavailable (diagnostics disabled)`. Enabled diagnostics with no
+completed water dispatch report that condition instead of misleading zeros.
+Counts are associated with the existing completed fence slot. Original water,
+terrain, alpha and dynamic hit counters remain available in normal operation.
+
+Both specialized SPIR-V variants validate. Freezing/optimizing the disabled
+variant removes the world-to-object fetch, transpose and ten diagnostic
+atomic-add instruction sites (24 to 14 total sites in the water shader).
+BLAS/TLAS collection, caches, budgets, material coverage, color-demand gating,
+resource sizes and lifetimes are unchanged. Full diffuse inputs remain separate
+from legacy water lighting; **RTGI itself is still unimplemented**.
+
+### Verification against the foundation
+
+Vulkan/GL33 builds and focused tests pass: **1,636 assertions / 75 cases** and
+**1,596 / 74**, plus **497** Vulkan driver-free policy/lifetime checks. The
+additional policy check requires unavailable, rather than zero, disabled
+diagnostic counts. Existing shipped normal-math tests retain nonuniform-scale,
+reversed/invalid normal and material-fallback coverage.
+
+Actual Malden `01TakeTheCar.ABEL` and Everon `06Ninjas.EDEN` gameplay used the
+existing launcher/harness and isolated profiles. Player movement changed world
+position on both islands. Saved coastal states were loaded into the retained
+`7514b69` executable, optimized normal build and explicit diagnostic build.
+Each island exercised AA Off, TAA, FSR Quality and MSAA4, with dynamic RT Off/On.
+Terrain slopes, static pier/building surfaces, alpha-tested soldier/vehicle
+sections and dynamic reflections retained their textures and geometric lighting.
+In both islands, the sampled 1600x260 water region was pixel-identical to
+`7514b69` for AA Off and MSAA4, with dynamic RT Off and On, for both optimized
+paths. TAA/FSR were visually checked; independent history/jitter phases prevent
+claiming general cross-process pixel identity. Full diagnostic normals,
+positions and albedo reported **zero invalid hits** throughout the AA matrices.
+Unavailable diffuse materials in Malden remained explicitly unavailable, not
+invented albedo. Terrain retained its documented approximate UVs/face normals.
+
+Malden also exercised moving/rotating vehicles and soldiers, range/removal/damage
+and camera transitions, PBR On/Off, water/sky/refraction/foam, cloud/rain/wet/
+underwater/atmosphere and soft-sunlight coexistence. AO-only, sunlight-only and
+all-RT-off transitions retained their existing behavior; full counters became
+unavailable when no water diagnostic dispatch ran. Accepted optimized Vulkan
+validation runs on both islands shut down with **zero errors and warnings**.
+GL33 launched stock gameplay and exited normally. These are gameplay/rendering
+checks, not mission completion or Steam-launch qualification.
+
+### Coastal performance comparison
+
+RTX 4060 Ti, driver 617.14; AA Off, VSync Off, validation Off. All four
+executables/modes loaded the same saved Malden coastal state, camera and stock
+dynamic actors. The existing timestamps/profile logger supplied the measurements:
+three-second warmup per dynamic setting, then 40 status polls with 250 ms sleeps
+(approximately 12 seconds; 12 water samples and six frame-profile intervals).
+Values below are medians in **milliseconds**. Resolutions were confirmed from
+the active swapchain, not merely launch arguments.
+
+| Resolution | Dynamic RT | Build / mode | Water trace/shade GPU | Whole GPU frame | CPU frame |
+| --- | --- | --- | ---: | ---: | ---: |
+| 1920x1080 | Off | Pre-foundation `f28723f` | 0.485 | 2.447 | 7.104 |
+| 1920x1080 | Off | Foundation `7514b69` | 0.808 | 2.502 | 7.036 |
+| 1920x1080 | Off | Optimized normal | 0.482 | 2.395 | 7.058 |
+| 1920x1080 | Off | Optimized, diagnostics enabled | 0.807 | 2.500 | 7.022 |
+| 1920x1080 | On | Pre-foundation `f28723f` | 0.551 | 2.538 | 7.397 |
+| 1920x1080 | On | Foundation `7514b69` | 0.847 | 2.599 | 7.267 |
+| 1920x1080 | On | Optimized normal | 0.543 | 2.487 | 7.291 |
+| 1920x1080 | On | Optimized, diagnostics enabled | 0.858 | 2.611 | 7.320 |
+| 2560x1440 | Off | Pre-foundation `f28723f` | 0.837 | 3.386 | 7.134 |
+| 2560x1440 | Off | Foundation `7514b69` | 1.625 | 4.127 | 7.214 |
+| 2560x1440 | Off | Optimized normal | 0.837 | 3.389 | 7.120 |
+| 2560x1440 | Off | Optimized, diagnostics enabled | 1.679 | 4.132 | 7.165 |
+| 2560x1440 | On | Pre-foundation `f28723f` | 0.898 | 3.459 | 7.391 |
+| 2560x1440 | On | Foundation `7514b69` | 1.578 | 4.171 | 7.462 |
+| 2560x1440 | On | Optimized normal | 0.897 | 3.457 | 7.388 |
+| 2560x1440 | On | Optimized, diagnostics enabled | 1.631 | 4.203 | 7.367 |
+
+Normal water recovers about **0.30--0.33 ms at 1080p** and **0.68--0.79 ms at
+1440p** relative to the foundation, returning close to pre-foundation cost.
+Explicit diagnostics add about **0.32 ms / 0.73--0.84 ms** at these resolutions;
+they are deliberately not included in normal rendering. Sampled graphics clocks
+varied from 2115 to 2655 MHz in the 1080p runs and were 2850 MHz at the 1440p
+sample points. Whole-frame timing includes other work and scheduling; small CPU
+or sub-0.01 ms water differences are not isolated speedup claims or hard gates.
+
+All steady tail intervals reported **0.0 resource allocations/frame** and all
+sampled intervals reported zero texture uploads. Some first intervals contained
+0.2--0.3 allocations/frame around the transition, including pre-foundation,
+foundation, normal and diagnostic runs; later intervals were zero. There are no
+new GPU buffers/images/descriptors, and the foundation's 80-byte counter and
+160-byte lighting payloads are unchanged. Only small CPU diagnostic-state flags
+and existing pipeline specialization data were added; no frame allocation or
+new readback mechanism was introduced.
+
+Ignored evidence lives under `build/shadow-live/hitopt-*` (including the
+foundation/normal/diagnostic AA matrices, `hitopt-perf-{baseline,foundation,
+normal,diagnostics}-{1080,1440}` and `hitopt-gl33`). Each performance run retains
+its executable hash, status samples, screenshots and raw profiler intervals in
+`hit-perf.json`. The existing local qualification scripts were reused; no
+benchmarking framework or debug UI was added to the repository.
+
 ## RTGI hit-shading foundation (2026-10-13)
+
+The original `7514b69` milestone below used always-on full reconstruction and
+diagnostics in water; the fast path above supersedes that execution policy.
 
 Built from public main `f28723f` in an isolated worktree, preserving the original
 checkout's private DLSS/NGX work. This is a hit-input prerequisite, **not RTGI**:

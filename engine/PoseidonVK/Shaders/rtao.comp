@@ -20,6 +20,8 @@ shared uint shadedHits;
 shared uint dynamicHits;
 shared uint dynamicShaded;
 #ifdef WATER_REFLECTION
+// Fixed when the existing water pipeline is created, not a per-hit branch.
+layout(constant_id=0) const bool hitDiagnostics=false;
 shared uint surfaceEligible, surfaceVertex, surfaceFace, surfaceUnavailable, surfaceInvalid;
 #endif
 #include "ray_material.glsl"
@@ -156,7 +158,7 @@ vec4 traceAO(ivec2 pixel) {
 void main() {
     if(gl_LocalInvocationIndex==0) { groupRays=0; groupHits=0; terrainHits=0; alphaHits=0; shadedHits=0; dynamicHits=0; dynamicShaded=0; }
 #ifdef WATER_REFLECTION
-    if(gl_LocalInvocationIndex==0) { surfaceEligible=0; surfaceVertex=0; surfaceFace=0; surfaceUnavailable=0; surfaceInvalid=0; }
+    if(hitDiagnostics && gl_LocalInvocationIndex==0) { surfaceEligible=0; surfaceVertex=0; surfaceFace=0; surfaceUnavailable=0; surfaceInvalid=0; }
 #endif
     barrier();
     ivec2 p=ivec2(gl_GlobalInvocationID.xy);
@@ -172,9 +174,11 @@ void main() {
         atomicAdd(counters.waterRays,groupRays); atomicAdd(counters.waterHits,groupHits);
         atomicAdd(counters.shadedHits,shadedHits); atomicAdd(counters.shadedTerrain,terrainHits); atomicAdd(counters.shadedAlpha,alphaHits);
         atomicAdd(counters.dynamicWater,dynamicHits); atomicAdd(counters.dynamicShaded,dynamicShaded);
-        atomicAdd(counters.surfaceEligible,surfaceEligible); atomicAdd(counters.surfaceVertex,surfaceVertex);
-        atomicAdd(counters.surfaceFace,surfaceFace); atomicAdd(counters.surfaceUnavailable,surfaceUnavailable);
-        atomicAdd(counters.surfaceInvalid,surfaceInvalid);
+        if(hitDiagnostics) {
+            atomicAdd(counters.surfaceEligible,surfaceEligible); atomicAdd(counters.surfaceVertex,surfaceVertex);
+            atomicAdd(counters.surfaceFace,surfaceFace); atomicAdd(counters.surfaceUnavailable,surfaceUnavailable);
+            atomicAdd(counters.surfaceInvalid,surfaceInvalid);
+        }
 #elif defined(SUN_SHADOW)
         atomicAdd(counters.sunRays,groupRays); atomicAdd(counters.sunHits,groupHits);
         atomicAdd(counters.terrainHits,terrainHits); atomicAdd(counters.alphaHits,alphaHits);

@@ -489,6 +489,8 @@ int main()
         Check(context.SetSoftRTShadows("off").starts_with("OK:") && !context.SoftRTShadowsEnabled(),
               "soft RT off is safe without a device");
         Check(!context.RTReflectionsEnabled(), "RT water defaults off independently of AO and sunlight");
+        Check(context.SetRTReflections("status").find("hitSurface=unavailable (diagnostics disabled)") != std::string::npos,
+              "disabled hit diagnostics do not report misleading zero counts");
         Check(!context.PBREnabled() && context.SetPBR("status").find("requested=off") != std::string::npos,
               "PBR prototype defaults off");
         Check(context.SetPBR("on").starts_with("OK:") && context.PBREnabled() && !context.RaySceneEnabled(),

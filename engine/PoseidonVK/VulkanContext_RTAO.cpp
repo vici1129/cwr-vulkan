@@ -16,6 +16,7 @@
 #include <cstring>
 #include <cmath>
 #include <cstdio>
+#include <cstdlib>
 #include <set>
 #include <sstream>
 #include <stdexcept>
@@ -166,6 +167,7 @@ struct VulkanContext::RTAOState
         VkDescriptorSet sunSet = VK_NULL_HANDLE;
         VkQueryPool queries = VK_NULL_HANDLE;
         bool pending = false;
+        bool surfaceMeasured = false;
         uint32_t built = 0, tlasBuilt = 0;
         uint32_t sunSamples = 0;
     };
@@ -187,6 +189,7 @@ struct VulkanContext::RTAOState
     uint64_t waterRays = 0, shadedHits = 0;
     uint32_t lastWaterRays = 0, lastWaterHits = 0, lastShaded = 0, lastShadedTerrain = 0, lastShadedAlpha = 0;
     std::array<uint32_t, 5> surface{}; // eligible, vertex normal, face fallback, unavailable, invalid data
+    bool hitDiagnostics = false, surfaceMeasured = false;
     bool waterDispatched = false;
     double waterRayMs = 0, waterFilterMs = 0;
     RTDynamicStats dynamic;
@@ -373,12 +376,16 @@ std::string VulkanContext::SetRTReflections(std::string_view mode)
                 << " totalShadedHits=" << _rtao->shadedHits
                 << " rayQueriesExecuted=" << (_rtao->waterRays ? "yes" : "no")
                 << " hitShadingExecuted=" << (_rtao->shadedHits ? "yes" : "no")
-                << " lastWorldDispatch=" << (_rtao->waterDispatched ? "yes" : "no")
-                << " hitSurface(eligible/vertex/face/unavailable/invalid)="
+                << " lastWorldDispatch=" << (_rtao->waterDispatched ? "yes" : "no");
+        else
+            out << " waterRays=0 shadedHits=0 rayQueriesExecuted=no hitShadingExecuted=no";
+        if (_rtao && _rtao->hitDiagnostics && _rtao->surfaceMeasured && RTReflectionsEnabled())
+            out << " hitSurface(eligible/vertex/face/unavailable/invalid)="
                 << _rtao->surface[0] << '/' << _rtao->surface[1] << '/' << _rtao->surface[2] << '/'
                 << _rtao->surface[3] << '/' << _rtao->surface[4];
         else
-            out << " waterRays=0 shadedHits=0 rayQueriesExecuted=no hitShadingExecuted=no";
+            out << " hitSurface=unavailable (" << (_rtao && _rtao->hitDiagnostics
+                ? "no completed water diagnostic dispatch" : "diagnostics disabled") << ')';
         if (_rtao && _rtao->timingSamples)
             out << " lastGPUms(traceShade/filter)=" << _rtao->waterRayMs << '/' << _rtao->waterFilterMs;
         else
@@ -516,6 +523,10 @@ void VulkanContext::InitRTAO()
 {
     _rtao = std::make_shared<RTAOState>();
     auto& rt = *_rtao;
+    // Developer-only, process-local opt-in. Specialize the existing pipelines;
+    // production water does not execute full reconstruction or diagnostic atomics.
+    const auto* diagnostics = std::getenv("CWR_VK_RT_HIT_DIAGNOSTICS");
+    rt.hitDiagnostics = diagnostics && std::string_view(diagnostics) == "1";
 #define LOAD(member, name)                                                         \
     rt.member = reinterpret_cast<PFN_##name>(vkGetDeviceProcAddr(_device, #name)); \
     if (!rt.member)                                                                \
@@ -661,6 +672,7 @@ void VulkanContext::RetireRTAO()
         rt.lastShadedTerrain = counts[9];
         rt.lastShadedAlpha = counts[10];
         std::copy_n(counts + 15, 5, rt.surface.begin());
+        rt.surfaceMeasured = slot.surfaceMeasured;
         rt.waterRays += counts[6];
         rt.shadedHits += counts[8];
         ++rt.completed;
@@ -797,6 +809,11 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
             info.stage.stage = VK_SHADER_STAGE_COMPUTE_BIT;
             info.stage.module = module;
             info.stage.pName = "main";
+            const VkBool32 diagnostics = rt.hitDiagnostics ? VK_TRUE : VK_FALSE;
+            const VkSpecializationMapEntry diagnosticEntry{0, 0, sizeof(diagnostics)};
+            const VkSpecializationInfo specialization{1, &diagnosticEntry, sizeof(diagnostics), &diagnostics};
+            if (i >= 4)
+                info.stage.pSpecializationInfo = &specialization;
             auto result = vkCreateComputePipelines(_device, VK_NULL_HANDLE, 1, &info, nullptr, &rt.compute[i]);
             vkDestroyShaderModule(_device, module, nullptr);
             Require(result, "create ray query pipeline");
@@ -1310,6 +1327,7 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection)
         else
             rt.worldDispatched = true;
     }
+    slot.surfaceMeasured = rt.hitDiagnostics && rt.waterDispatched;
     slot.pending = true;
 }
 

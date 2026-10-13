@@ -34,28 +34,37 @@ vec4 traceWater(ivec2 pixel) {
         atomicAdd(groupHits,1);
         uint custom=rayQueryGetIntersectionInstanceCustomIndexEXT(query,true);
         if((custom>>20)==3) atomicAdd(dynamicHits,1);
-        HitSurface surface=hitSurface(query);
-        if(surface.diffuseEligible) atomicAdd(surfaceEligible,1);
-        if((surface.available&HitNormal)!=0u) {
-            if((surface.available&HitVertexNormal)!=0u) atomicAdd(surfaceVertex,1);
-            else atomicAdd(surfaceFace,1);
+        ReflectionSurface surface;
+        if(hitDiagnostics) {
+            HitSurface detailed=hitSurface(query);
+            if(detailed.diffuseEligible) atomicAdd(surfaceEligible,1);
+            if((detailed.available&HitNormal)!=0u) {
+                if((detailed.available&HitVertexNormal)!=0u) atomicAdd(surfaceVertex,1);
+                else atomicAdd(surfaceFace,1);
+            }
+            if((detailed.available&(HitPosition|HitNormal|HitUV|HitAlbedo))!=(HitPosition|HitNormal|HitUV|HitAlbedo))
+                atomicAdd(surfaceUnavailable,1);
+            // Cross-check transformed barycentric position against the actual ray.
+            // A centimetre tolerance accommodates large stock world coordinates.
+            vec3 rayPosition=rayQueryGetWorldRayOriginEXT(query)+direction*rayQueryGetIntersectionTEXT(query,true);
+            bool invalidNormal=(detailed.available&HitNormal)!=0u &&
+                (!finiteVector(detailed.normal) || abs(dot(detailed.normal,detailed.normal)-1)>.001 ||
+                 dot(detailed.normal,direction)>.001 || dot(detailed.normal,detailed.geometricNormal)<.099);
+            bool invalidAlbedo=(detailed.available&HitAlbedo)!=0u &&
+                (!finiteVector(detailed.albedo) || any(lessThan(detailed.albedo,vec3(0))) ||
+                 any(greaterThan(detailed.albedo,vec3(1.001))));
+            if((detailed.available&HitPosition)==0u || length(detailed.position-rayPosition)>.01 || invalidNormal || invalidAlbedo)
+                atomicAdd(surfaceInvalid,1);
+            surface.geometricNormal=detailed.geometricNormal;
+            surface.textureColorLinear=detailed.textureColorLinear;
+            surface.available=(detailed.available&(HitColor|HitNormal))==(HitColor|HitNormal);
+            surface.alphaTest=(detailed.available&HitAlphaTest)!=0u;
+        } else {
+            surface=reflectionSurface(query);
         }
-        if((surface.available&(HitPosition|HitNormal|HitUV|HitAlbedo))!=(HitPosition|HitNormal|HitUV|HitAlbedo))
-            atomicAdd(surfaceUnavailable,1);
-        // Cross-check transformed barycentric position against the actual ray.
-        // A centimetre tolerance accommodates large stock world coordinates.
-        vec3 rayPosition=rayQueryGetWorldRayOriginEXT(query)+direction*rayQueryGetIntersectionTEXT(query,true);
-        bool invalidNormal=(surface.available&HitNormal)!=0u &&
-            (!finiteVector(surface.normal) || abs(dot(surface.normal,surface.normal)-1)>.001 ||
-             dot(surface.normal,direction)>.001 || dot(surface.normal,surface.geometricNormal)<.099);
-        bool invalidAlbedo=(surface.available&HitAlbedo)!=0u &&
-            (!finiteVector(surface.albedo) || any(lessThan(surface.albedo,vec3(0))) ||
-             any(greaterThan(surface.albedo,vec3(1.001))));
-        if((surface.available&HitPosition)==0u || length(surface.position-rayPosition)>.01 || invalidNormal || invalidAlbedo)
-            atomicAdd(surfaceInvalid,1);
-        if((surface.available&(HitColor|HitNormal))==(HitColor|HitNormal)) {
+        if(surface.available) {
             // Preserve the legacy reflection response; future diffuse transport
-            // uses surface.normal and surface.albedo with diffuseEligible.
+            // uses hitSurface().normal and .albedo with diffuseEligible.
             vec3 normal=surface.geometricNormal;
             color=surface.textureColorLinear*legacyLightToLinear(light.ambient.rgb+light.diffuse.rgb*max(dot(normal,ao.sun.xyz),0));
             if(weather.sun.w>0) {
@@ -67,7 +76,7 @@ vec4 traceWater(ivec2 pixel) {
             atomicAdd(shadedHits,1);
             if((custom>>20)==3) atomicAdd(dynamicShaded,1);
             if((custom>>20)==2) atomicAdd(terrainHits,1);
-            if((surface.available&HitAlphaTest)!=0u) atomicAdd(alphaHits,1);
+            if(surface.alphaTest) atomicAdd(alphaHits,1);
         }
     }
     color=mix(toLinear(light.fog.rgb),color,water.z);
