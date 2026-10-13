@@ -1,5 +1,233 @@
 # Vulkan backend development
 
+## RTGI short-history / filter quality milestone (2026-10-13)
+
+Built on `393e6eb` (including the SSAO ordering correction), compared against an
+independently built exact `c8a582f`. The original checkout's private DLSS/NGX
+work remains untouched. This is still a default-Off one-bounce experiment,
+not production GI or a general denoiser. Controls and capability opt-in are
+unchanged; TAA/FSR are optional, not prerequisites for GI.
+
+### Implementation
+
+The old full-resolution nine-tap filter reconstructed each neighbor's position
+and depth normal. The ray pass now caches its already computed world normal and
+view depth in the existing RGBA32F result's alpha: 14 depth bits at 1/256 metre
+and two five-bit octahedral normal coordinates, exactly representable as a
+24-bit float integer. Its sign marks dynamic secondary hits or dynamic sunlight
+blockers. Zero still means ineligible. This is metadata in an existing image,
+not a new G-buffer, material target or geometry collection pass.
+
+AA Off/MSAA retain the original deterministic world-hash ray and nine spatial
+taps. Neighbors now need one cached-data fetch/position calculation rather than
+five depth reconstructions. The full-resolution receiver still reconstructs its
+own reliable geometric normal. Normal, view-depth and tangent-plane rejection
+keep unrelated surfaces separate. Receiver texture reflectance is still applied
+**after** filtering, in linear HDR before ordinary AA and tone mapping.
+
+TAA/FSR additionally use one small half-resolution compute resolve:
+
+- Nine cached-data, plane-aware spatial taps at half resolution, followed by
+  four bilateral bilinear taps in the full-resolution composition pass.
+- Two RGBA16F ping-pong histories store incident bounced radiance and effective
+  sample count. Existing motion XY (including jitter), expected previous depth
+  Z and reliability W reproject history. The preceding fence slot's existing
+  raw GI image supplies previous depth/normal; there is no extra metadata image.
+- Effective count saturates at four, limiting old weight to 75%. This is a short
+  exponential average, **not** a strict four-frame sliding window. Current local
+  min/max and 1.25-sigma bounds clamp old RGB before reuse.
+- Reject out-of-bounds reprojection, >2 cm / 0.2% previous-depth mismatch,
+  normal disagreement, invalid motion anywhere in the half-resolution footprint,
+  or dynamic-hit neighborhoods. Unsupported native animated receivers do not
+  accumulate. Conservatively rejected samples still display current spatial GI.
+- Reuse the existing TAA/FSR camera-cut/FOV reset. Also invalidate on GI toggles,
+  target recreation/resolution/AA changes, missed GI frames, empty scenes and
+  significant changes in original ambient/sun inputs, sun direction or weather.
+  Existing dynamic-RT toggles already reset temporal validity.
+- Eight deterministic rotations/shifts vary the one cosine-weighted sample only
+  in temporal modes. There are no extra hemisphere rays or recursive bounces.
+
+Transport is otherwise unchanged: 25 m rays, 45 m receiver cutoff, shadow-tested
+secondary sunlight, approximate stock albedo, daylight gating and the original
+gain/ambient coefficients. No brightness boost, new coverage, PBR conversion,
+material assets, UI setting, ReSTIR/SVGF or independent motion-vector system.
+
+`triRTGI "status"` now separates trace/filter/temporal GPU times and reports
+accepted/rejected/clamped/dynamic-unsafe history samples, reset count, sample
+phase, actual allocated history bytes and cumulative history-image allocations.
+GPU counters/timings are read after fence completion, not assumed from selection.
+
+### Fixed-scene performance
+
+RTX 4060 Ti, driver 617.14, public RelWithDebInfo builds, validation disabled for
+timings. Native 1920x1080 / 2560x1440 were verified in swapchain/world logs; FSR
+Quality uses its normal lower internal extent. Identical frozen midday camera
+poses, static RT, GI alone, two seconds warm-up then four-second measurement
+windows per setting. Values below are medians in milliseconds; total is the sum
+of pass medians, excluding shared BLAS/TLAS costs. Automatic GPU clocks and
+short runs mean these are representative measurements, not precision benchmarks.
+
+| Scene / output | AA | Old trace + filter | New trace + filter + temporal | Old / new GI total |
+|---|---|---:|---:|---:|
+| Malden rocks / 1080p | Off | .270 + .495 | .252 + .318 + 0 | .765 / .570 |
+| | TAA | .230 + .413 | .222 + .171 + .105 | .644 / .499 |
+| | FSR Quality | .131 + .197 | .121 + .077 + .050 | .328 / .248 |
+| | MSAA4 | .176 + .824 | .223 + .314 + 0 | 1.000 / .537 |
+| Malden building / 1080p | Off | .216 + .420 | .224 + .305 + 0 | .636 / .529 |
+| | TAA | .192 + .362 | .189 + .156 + .098 | .553 / .442 |
+| | FSR Quality | .121 + .176 | .115 + .077 + .050 | .296 / .242 |
+| | MSAA4 | .170 + .802 | .197 + .288 + 0 | .972 / .485 |
+| Malden rocks / 1440p | Off | .262 + .518 | .278 + .384 + 0 | .780 / .663 |
+| | TAA | .228 + .444 | .224 + .193 + .121 | .672 / .538 |
+| | FSR Quality | .127 + .199 | .126 + .085 + .054 | .326 / .266 |
+| | MSAA4 | .266 + 1.460 | .268 + .431 + 0 | 1.726 / .699 |
+| Malden building / 1440p | Off | .225 + .468 | .243 + .357 + 0 | .693 / .600 |
+| | TAA | .219 + .451 | .216 + .203 + .129 | .670 / .548 |
+| | FSR Quality | .125 + .202 | .128 + .087 + .058 | .327 / .273 |
+| | MSAA4 | .268 + 1.449 | .269 + .448 + 0 | 1.717 / .718 |
+
+The building scene includes houses, fences and foliage (423 RT instances,
+34,963 triangles), not a maximum-geometry stress test. TAA whole-frame GPU and
+CPU command recording remained comparable or lower:
+
+| Scene / output | Whole GPU old / new | CPU commands old / new | GI CPU recording old / new |
+|---|---:|---:|---:|
+| Rocks / 1080p | 1.824 / 1.492 | 1.500 / 1.519 | .012 / .014 |
+| Building / 1080p | 1.726 / 1.593 | 1.956 / 1.968 | .013 / .015 |
+| Rocks / 1440p | 2.108 / 1.961 | 1.489 / 1.504 | .012 / .014 |
+| Building / 1440p | 2.388 / 2.248 | 1.993 / 1.973 | .014 / .016 |
+
+These runs remained externally paced around 6.17 ms CPU frame time; do not
+interpret the pass savings as measured uncapped FPS gains. Whole-frame timings
+are noisier: e.g. 1080p building FSR was 1.521 / 1.636 ms despite lower GI time.
+Every fixed-scene steady measurement interval reported zero streaming resource
+allocations/frame. GI adds two one-time history allocations per temporal target
+lifetime, none per steady frame. Driver image allocation requirements were:
+
+| Output | TAA history bytes / MiB | FSR Quality history bytes / MiB |
+|---|---:|---:|
+| 1080p | 9,830,400 / 9.375 | 3,932,160 / 3.750 |
+| 1440p | 15,728,640 / 15.000 | 7,012,352 / 6.688 |
+
+AA Off/MSAA add no history images. Two extra timestamps and four counters per
+frame slot, a resolve pipeline and five extra descriptor bindings are the other
+small additions. Actual bytes include driver alignment; logical RGBA16F history
+storage is `2 * ceil(worldWidth/2) * ceil(worldHeight/2) * 8` bytes. Existing raw
+GI images are unchanged in size. Target recreation frees history; the cumulative
+allocation counter intentionally does not reset.
+
+### Movement, visual checks and remaining limits
+
+Actual player strafe input and mouse turns were exercised in `01TakeTheCar.ABEL`
+(Malden rocks, from `[7215,7708,0]`) and `06Ninjas.EDEN` (Everon brick building,
+from `[4903,7085,0]`), with simulation running and dynamic RT On. Teleporting only
+established the start; the measured movement was real keyboard input, about
+7.5 metres per trial. All four AA modes were exercised on both islands. These
+are short local diagnostic gameplay runs, not a mission-completion soak.
+
+| Moving scene / AA | Old trace / filter | New trace / filter / temporal | GI total old / new | Whole GPU old / new | CPU commands old / new |
+|---|---:|---:|---:|---:|---:|
+| Malden 1440p / Off | .215 / .464 | .222 / .326 / 0 | .678 / .549 | 2.016 / 1.905 | 2.010 / 1.851 |
+| Malden 1440p / TAA | .208 / .459 | .199 / .194 / .126 | .667 / .518 | 2.467 / 2.295 | 2.307 / 2.089 |
+| Malden 1440p / FSR Quality | .108 / .207 | .111 / .086 / .056 | .315 / .253 | 2.300 / 2.219 | 2.013 / 1.929 |
+| Malden 1440p / MSAA4 | .262 / 1.594 | .262 / .462 / 0 | 1.856 / .724 | 4.091 / 2.980 | 1.749 / 1.510 |
+| Everon 1080p / Off | .109 / .373 | .110 / .253 / 0 | .482 / .363 | 1.382 / 1.404 | 2.932 / 2.807 |
+| Everon 1080p / TAA | .118 / .382 | .121 / .155 / .102 | .500 / .377 | 1.536 / 1.497 | 2.999 / 2.881 |
+
+Movement values use the first four pass samples and first two whole-frame
+profiling windows during input, excluding subsequent PNG encoding waits.
+Capture overhead and non-identical simulation/frame phase limit precision.
+Everon FSR/MSAA trials diverged in view/trajectory and are retained in the
+[raw movement measurements](evidence/rtgi-quality/movement-measurements.json),
+but are deliberately not presented as like-for-like speedups. GI CPU recording
+was roughly .013–.020 ms; sampled streaming allocations/frame remained zero.
+
+A representative Malden TAA moving result had 562,008 bounce rays, 207,591 hits,
+175,478 eligible hits, 32,113 rejected materials, 530,627 accepted history samples
+and 31,381 rejections (12,920 dynamic-unsafe neighborhoods). Everon TAA recorded
+491,307 rays, 114,863 hits, 22,526 material rejections, 435,692 history accepts
+and 55,615 rejections. These are actual completed-frame counters, not budgets.
+
+The inspected wall/rock sequences show calmer fine bounce variation with TAA/FSR
+and preserved surface boundaries; the improvement is modest on heavily textured
+stock terrain where the existing AA already does much of the work. No obvious
+persistent colored trails or cross-silhouette halos were found in these short
+checks. This does not prove absence at every camera speed or frame rate. A
+continuous Malden wall ROI retained mean GI-added display RGB near
+`(1.98,1.43,.39)` before versus `(1.90,1.41,.44)` after, rather than becoming
+brighter. Its horizontal first-difference RMS decreased .645 to .603 channel
+levels. That is a spatial screenshot statistic, **not** a temporal-error metric.
+
+Additional live checks:
+
+- Moving Jeep and AI soldier beside the Everon building: actual positions
+  advanced, dynamic bounce hits were recorded, and about 39–41k affected
+  neighborhoods/frame refused history. No lingering visible color stain after
+  their passage in the reviewed captures. Native unsupported motion and the
+  sampled dynamic-hit sign are intentionally conservative; they trade smoothing
+  for responsiveness.
+- Midday, sunset, overcast, night, GI toggles, dynamic-RT toggles, large camera
+  jump to the open barn, reversed viewing direction, and 1080p→720p resize:
+  reset counters advanced and history targets resized. Night rays/hits were zero.
+  A settled night GI Off/On/Off comparison with SSAO On, RTAO Off and RT sunlight
+  On was pixel-exact (zero changed pixels), preserving the composition fix.
+- RTAO, soft RT sunlight, dynamic geometry, PBR, atmosphere, volumetric fog/clouds,
+  cloud shadows, water refraction/reflections and shoreline foam were selected
+  together in Off/TAA/FSR Quality/MSAA4. The Malden coast additionally verified
+  actual water execution: 1,097,619 water rays and 245,283 shaded hits in a sampled
+  frame, rather than counting an enabled but empty water pass as coverage.
+- GI-Off AA-Off/MSAA world-region pixels matched the exact old executable in
+  fixed Malden captures; sky-only differences came from cloud phase. Unmatched
+  temporal jitter/FSR captures are not claimed pixel-exact across processes.
+  No GI/history dispatch occurs with GI Off.
+
+Remaining limitations: AA Off/MSAA single-sample grain is essentially unchanged
+(the benefit there is cost), five-bit cached normals/depth quantization can
+conservatively drop taps, half-resolution filtering softens small bounce detail,
+and disocclusions/unsupported motion fall back to noisy current samples. The
+short RGB clamp is biased and may trim a rare bright bounce. Existing TAA/FSR
+can still contribute its own ghosting/softness. Dynamic contributors not sampled
+by the current ray cannot be identified perfectly; short history plus local
+clamping bounds their persistence, rather than promising perfect invalidation.
+Stock texture/LOD seams, first-person shoulder animation clipping and incomplete
+RT material/geometry coverage remain outside this milestone.
+
+### Evidence and verification
+
+Matched, unretouched TAA screenshots (same camera/settings; normal jitter and
+simulation phase are not frame-locked):
+
+| Scene | Old GI Off / On | New GI Off / On |
+|---|---|---|
+| Malden wall | [Off](evidence/rtgi-quality/wall-base-taa-off.png) / [On](evidence/rtgi-quality/wall-base-taa-on.png) | [Off](evidence/rtgi-quality/wall-new-taa-off.png) / [On](evidence/rtgi-quality/wall-new-taa-on.png) |
+| Everon brick building | [Off](evidence/rtgi-quality/brick-base-taa-off.png) / [On](evidence/rtgi-quality/brick-base-taa-on.png) | [Off](evidence/rtgi-quality/brick-new-taa-off.png) / [On](evidence/rtgi-quality/brick-new-taa-on.png) |
+
+Short Everon TAA movement sequences:
+[c8a582f](evidence/rtgi-quality/everon-base-taa-motion.webp) /
+[updated](evidence/rtgi-quality/everon-new-taa-motion.webp).
+These are 20 original frames sampled at 4 FPS across five seconds, encoded as
+lossless animated WebP, with every decoded RGB pixel checked against the raw
+capture. No retouching, amplification, resizing or frame interpolation. They
+are low-rate motion evidence, not a high-frame-rate flicker measurement.
+The original 40-frame/8-FPS sequences and logs remain locally under
+`build/shadow-live/gi-quality-*` in the original checkout. The 1440p desktop
+sequence helper clipped the off-screen window area; those sequences are not
+used as full-frame published evidence. WGC still captures cover the full window.
+File hashes are in the [capture manifest](evidence/rtgi-quality/capture-manifest.json).
+
+Focused Vulkan and GL33 builds passed; graphics/shader tests passed 35,503
+assertions / 95 cases and 35,257 / 91 cases respectively, including stock-data
+fixtures. The Vulkan driver-free policy suite passed 504 checks (its deliberate
+teardown-only validation-error injection is expected). Tests cover the shipped
+scalar history policy, phase diversity, exact metadata bit capacity, composition
+order and shader integration guards. All generated GI shader variants compiled.
+Final live Vulkan + synchronization validation runs completed 46,137 Everon
+frames and 9,833 Malden frames with **zero errors and zero warnings**.
+A separate launch without the ray-query opt-in rejected `triRTGI "on"` with
+the explicit `CWR_VK_RTAO=1` restart prerequisite; it did not silently enable RT.
+Measured executable SHA-256 prefixes: baseline `80065E313D005AFE`, updated
+`6D907784748A415B`. Production RTGI remains incomplete.
+
 ## RTGI / SSAO composition-order correction (2026-10-13)
 
 Corrects `c8a582f` with SSAO On, RTAO Off and RT sunlight shadows On: GI had

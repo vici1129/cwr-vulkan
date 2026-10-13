@@ -83,7 +83,7 @@ foreach(kind clouds clouds_composite clouds_composite_temporal fxaa smaa_edge sm
             ThirdParty/SMAA/SMAA.hlsl ThirdParty/FXAA/Fxaa3_11.h VERBATIM)
     list(APPEND VK_SHADER_HEADERS "${header}")
 endforeach()
-foreach(kind rtao rtao_ms rtao_filter rtao_filter_ms rtshadow rtshadow_ms rtshadow_filter rtshadow_filter_ms rtwater rtwater_ms rtwater_filter rtwater_filter_ms rtgi rtgi_ms rtgi_filter rtgi_filter_ms)
+foreach(kind rtao rtao_ms rtao_filter rtao_filter_ms rtshadow rtshadow_ms rtshadow_filter rtshadow_filter_ms rtwater rtwater_ms rtwater_filter rtwater_filter_ms rtgi rtgi_ms rtgi_filter rtgi_filter_ms rtgi_resolve)
     set(stage comp)
     if(kind MATCHES "filter")
         set(stage frag)
@@ -106,7 +106,7 @@ foreach(kind rtao rtao_ms rtao_filter rtao_filter_ms rtshadow rtshadow_ms rtshad
         COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/generated/PoseidonVK/Shaders"
         COMMAND "${Vulkan_GLSLANG_VALIDATOR_EXECUTABLE}" -V --target-env vulkan1.2 ${defines}
             --vn "Cwr${kind}_${stage}" -o "${header}" "${CMAKE_CURRENT_SOURCE_DIR}/Shaders/${source}.${stage}"
-        DEPENDS "Shaders/${source}.${stage}" Shaders/rtgi_receiver.glsl Shaders/rtao_depth.glsl Shaders/rtao_coverage.glsl Shaders/sunlight_depth.glsl Shaders/soft_rt_shadow_math.glsl Shaders/rtao_water.glsl Shaders/ray_material.glsl Shaders/ray_surface.glsl Shaders/ray_lighting.glsl Shaders/ray_normal.glsl Shaders/color_space.glsl Shaders/weather.glsl Shaders/cloud_volume.glsl VERBATIM)
+        DEPENDS "Shaders/${source}.${stage}" Shaders/rtgi_receiver.glsl Shaders/rtgi_sample.glsl Shaders/rtgi_history.glsl Shaders/rtao_depth.glsl Shaders/rtao_coverage.glsl Shaders/sunlight_depth.glsl Shaders/soft_rt_shadow_math.glsl Shaders/rtao_water.glsl Shaders/ray_material.glsl Shaders/ray_surface.glsl Shaders/ray_lighting.glsl Shaders/ray_normal.glsl Shaders/color_space.glsl Shaders/weather.glsl Shaders/cloud_volume.glsl VERBATIM)
     list(APPEND VK_SHADER_HEADERS "${header}")
 endforeach()
 foreach(kind contact_shadows contact_shadows_ms contact_shadows_rt contact_shadows_rt_ms)

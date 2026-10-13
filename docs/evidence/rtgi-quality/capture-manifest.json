@@ -1,0 +1,58 @@
+[
+  {
+    "file": "wall-base-taa-off.png",
+    "source": "gi-quality-base1080\\wall-taa-off.png",
+    "sha256": "f72f38c636076c92bcab8db9655edd43ecb9ac650e0c7373b7ac21a8c36d9ecf"
+  },
+  {
+    "file": "wall-base-taa-on.png",
+    "source": "gi-quality-base1080\\wall-taa-on.png",
+    "sha256": "0b8cea47224cd725521f5b55fca3e326ec941c1d2dacb952ea270f0b9d39034d"
+  },
+  {
+    "file": "brick-base-taa-off.png",
+    "source": "gi-quality-brickbase\\brick-taa-off.png",
+    "sha256": "f553a1bdb1fcfb2db7ed56ec380d1bb3d05084508c7043c350d2c0721e734c49"
+  },
+  {
+    "file": "brick-base-taa-on.png",
+    "source": "gi-quality-brickbase\\brick-taa-on.png",
+    "sha256": "7b466bee61cb3a12c0b12505b68bbaa52b7b572d2a4e6e7099f18e3817225756"
+  },
+  {
+    "file": "everon-base-taa-motion.webp",
+    "source": "gi-quality-everonbase1080\\everon-motion-taa",
+    "frames": 20,
+    "fps": 4,
+    "pixels_verified_lossless": true,
+    "sha256": "0351e24ba46db0acd40b4cb0f07fc2ba378512b72d4f3384910562157fd73019"
+  },
+  {
+    "file": "wall-new-taa-off.png",
+    "source": "gi-quality-new1080\\wall-taa-off.png",
+    "sha256": "4ba00d31fb7cd7b744bfe40f429788912d7ec86ec276c5c91d627708befc8a29"
+  },
+  {
+    "file": "wall-new-taa-on.png",
+    "source": "gi-quality-new1080\\wall-taa-on.png",
+    "sha256": "4a74b4e6015bf299b3d5b91875be8b9cd13264cc57296a66ae2b29aa75d923df"
+  },
+  {
+    "file": "brick-new-taa-off.png",
+    "source": "gi-quality-bricknew\\brick-taa-off.png",
+    "sha256": "10307ee740c9ac2c0ba7d4d820acfab3146c671e6cbb857aa66ef55c324f548e"
+  },
+  {
+    "file": "brick-new-taa-on.png",
+    "source": "gi-quality-bricknew\\brick-taa-on.png",
+    "sha256": "f31e45117855e0178779a77e544d0ae7e609aff2adc99042a822c1d563c6295c"
+  },
+  {
+    "file": "everon-new-taa-motion.webp",
+    "source": "gi-quality-everonnew1080\\everon-motion-taa",
+    "frames": 20,
+    "fps": 4,
+    "pixels_verified_lossless": true,
+    "sha256": "a14ce2950786ce49afecb50014584de6c8dc3bc3038c494c6a944da5ca0d8487"
+  }
+]

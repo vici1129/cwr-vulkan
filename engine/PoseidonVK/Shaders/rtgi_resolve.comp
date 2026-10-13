@@ -1,0 +1,71 @@
+#version 450
+#extension GL_GOOGLE_include_directive : require
+#include "rtao_depth.glsl"
+#include "rtgi_sample.glsl"
+#include "rtgi_history.glsl"
+layout(local_size_x=8,local_size_y=8) in;
+layout(set=0,binding=3,std430) buffer Counters { uint count[32]; } counters;
+layout(set=0,binding=4) uniform sampler2D rawGI;
+layout(set=0,binding=9) uniform sampler2D motionImage;
+layout(set=0,binding=10) uniform sampler2D historyGI;
+layout(set=0,binding=11,rgba16f) uniform writeonly image2D resultGI;
+layout(set=0,binding=13) uniform sampler2D previousRawGI;
+shared uint counts[4];
+vec4 resolveGI(ivec2 pixel) {
+    vec4 raw=texelFetch(rawGI,pixel,0);
+    if(raw.a==0) return vec4(0);
+    ivec2 size=textureSize(rawGI,0),full=min(pixel*2+1,depthSize()-1);
+    vec3 p=giPosition(full,giSampleDepth(raw.a)),worldNormal=giSampleNormal(raw.a);
+    vec3 n=transpose(mat3(ao.camera))*worldNormal;
+    vec3 sum=vec3(0),moment=vec3(0),low=vec3(1e6),high=vec3(0);
+    float weight=0;bool unsafe=raw.a<0;
+    for(int y=-1;y<=1;++y) for(int x=-1;x<=1;++x) {
+        ivec2 q=clamp(pixel+ivec2(x,y),ivec2(0),size-1);
+        vec4 v=texelFetch(rawGI,q,0);
+        float w=giPlaneWeight(p,n,worldNormal,min(q*2+1,depthSize()-1),v.a)*exp(-float(x*x+y*y)*.7);
+        if(w<=0) continue;
+        sum+=v.rgb*w;moment+=v.rgb*v.rgb*w;weight+=w;
+        low=min(low,v.rgb);high=max(high,v.rgb);unsafe=unsafe || v.a<0;
+    }
+    vec3 current=weight>.001?sum/weight:raw.rgb;
+    vec3 sigma=sqrt(max(moment/max(weight,.001)-current*current,vec3(0)));
+    low=max(low,current-1.25*sigma);high=min(high,current+1.25*sigma);
+    vec4 motion=texelFetch(motionImage,full,0);
+    bool supported=motion.w>.9 && motion.z>0;
+    // Expand unreliable coverage across this half-resolution footprint.
+    for(int y=-1;y<=0;++y) for(int x=-1;x<=0;++x)
+        supported=supported && texelFetch(motionImage,max(full+ivec2(x,y),ivec2(0)),0).w>.9;
+    vec2 previousPixel=((vec2(full)+.5)/vec2(depthSize())+motion.xy)*vec2(depthSize());
+    vec2 oldHalf=(previousPixel-1.5)*.5;
+    ivec2 base=ivec2(floor(oldHalf));vec2 f=fract(oldHalf);
+    vec3 oldSum=vec3(0);float oldWeight=0,oldLength=0;
+    bool valid=ao.jitter.w>.5 && supported && !unsafe;
+    if(valid) for(int y=0;y<=1;++y) for(int x=0;x<=1;++x) {
+        ivec2 q=base+ivec2(x,y);
+        if(any(lessThan(q,ivec2(0))) || any(greaterThanEqual(q,size))) continue;
+        vec4 old=texelFetch(historyGI,q,0);
+        float data=texelFetch(previousRawGI,q,0).a;
+        if(old.a<.5 || data<=0 || !giHistorySurface(giSampleDepth(data),motion.z,
+           dot(worldNormal,giSampleNormal(data)))) continue;
+        float w=(x==0?1-f.x:f.x)*(y==0?1-f.y:f.y);
+        oldSum+=old.rgb*w;oldLength+=old.a*w;oldWeight+=w;
+    }
+    float length=1;
+    if(oldWeight>.25) {
+        vec3 old=oldSum/oldWeight,clipped=clamp(old,low,high);
+        if(any(greaterThan(abs(clipped-old),vec3(.00001)))) atomicAdd(counts[2],1);
+        length=giHistoryLength(oldLength/oldWeight);
+        current=mix(current,clipped,giHistoryWeight(length)); // at most 75% history
+        atomicAdd(counts[0],1);
+    } else atomicAdd(counts[1],1);
+    if(unsafe) atomicAdd(counts[3],1);
+    return vec4(current,supported && !unsafe?length:0);
+}
+void main() {
+    if(gl_LocalInvocationIndex<4) counts[gl_LocalInvocationIndex]=0;
+    barrier();
+    ivec2 p=ivec2(gl_GlobalInvocationID.xy);
+    if(all(lessThan(p,imageSize(resultGI)))) imageStore(resultGI,p,resolveGI(p));
+    barrier();
+    if(gl_LocalInvocationIndex<4) atomicAdd(counters.count[28+gl_LocalInvocationIndex],counts[gl_LocalInvocationIndex]);
+}

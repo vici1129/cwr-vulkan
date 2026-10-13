@@ -16,6 +16,7 @@
 #include <PoseidonVK/Shaders/rtgi_ms.comp.hpp>
 #include <PoseidonVK/Shaders/rtgi_filter.frag.hpp>
 #include <PoseidonVK/Shaders/rtgi_filter_ms.frag.hpp>
+#include <PoseidonVK/Shaders/rtgi_resolve.comp.hpp>
 #include <algorithm>
 #include <cstring>
 #include <cmath>
@@ -143,6 +144,12 @@ struct VulkanContext::RTAOState
     VkDescriptorSetLayout setLayout = VK_NULL_HANDLE;
     VkPipelineLayout layout = VK_NULL_HANDLE;
     std::array<VkPipeline, 8> compute{}, filter{};
+    VkPipeline giResolve = VK_NULL_HANDLE;
+    std::array<DepthAttachment, 2> giHistory{};
+    unsigned giHistoryIndex = 0, giPreviousSlot = FramesInFlight, giPhase = 0, giLastFrame = 0;
+    bool giHistoryInitialized = false, giHistoryValid = false;
+    uint64_t giHistoryBytes = 0, giHistoryAllocations = 0, giHistoryResets = 0;
+    std::array<float, 12> giLighting{};
     struct Slot
     {
         struct DynamicMesh
@@ -166,6 +173,7 @@ struct VulkanContext::RTAOState
         DepthAttachment gi;
         VkDescriptorSet giSet = VK_NULL_HANDLE;
         bool giDispatched = false;
+        bool giTemporal = false;
         double giCpuMs = 0;
         std::shared_ptr<RTBuffer> reflectionLight;
         VkDescriptorSet waterSet = VK_NULL_HANDLE;
@@ -201,9 +209,10 @@ struct VulkanContext::RTAOState
     bool waterDispatched = false;
     double waterRayMs = 0, waterFilterMs = 0;
     std::array<uint32_t, 8> giCounts{};
+    std::array<uint32_t, 4> giHistoryCounts{};
     uint64_t giFrames = 0;
-    bool giDispatched = false, giCompleted = false;
-    double giRayMs = 0, giFilterMs = 0, giCpuMs = 0;
+    bool giDispatched = false, giCompleted = false, giTemporal = false;
+    double giRayMs = 0, giFilterMs = 0, giTemporalMs = 0, giCpuMs = 0;
     RTDynamicStats dynamic;
     std::map<uint64_t, VkTransformMatrixKHR> dynamicTransforms;
 };
@@ -217,6 +226,7 @@ void VulkanContext::FailRTGI(std::string_view reason)
     if (_rtao)
     {
         _rtao->giDispatched = _rtao->giCompleted = false;
+        _rtao->giHistoryValid = false;
         _rtao->scene.clear();
         for (auto& slot : _rtao->slots) slot.previous.clear();
     }
@@ -240,9 +250,15 @@ std::string VulkanContext::SetRTGI(std::string_view mode)
                 << " sunRays=" << c[4] << " sunBlocked=" << c[5] << " eligibleReceivers=" << c[6]
                 << " dynamicHits=" << c[7];
             if (RTGIEnabled() && rt.giCompleted && rt.timingSamples)
-                out << " GPUms(trace/filter/BLAS/TLAS)=" << rt.giRayMs << '/' << rt.giFilterMs << '/'
+                out << " GPUms(trace/filter/temporal/BLAS/TLAS)=" << rt.giRayMs << '/' << rt.giFilterMs << '/'
+                    << rt.giTemporalMs << '/'
                     << rt.blasMs << '/' << rt.tlasMs << " CPUrecordMs=" << rt.giCpuMs;
             else out << " GPUtimings=unavailable";
+            const auto h = RTGIEnabled() && rt.giCompleted && rt.giTemporal ? rt.giHistoryCounts : std::array<uint32_t, 4>{};
+            out << " temporal=" << (RTGIEnabled() && rt.giTemporal ? "on" : "off")
+                << " history(accepted/rejected/clamped/dynamic)=" << h[0] << '/' << h[1] << '/' << h[2] << '/' << h[3]
+                << " historyResets=" << rt.giHistoryResets << " phase=" << rt.giPhase
+                << " historyBytes=" << rt.giHistoryBytes << " historyAllocations=" << rt.giHistoryAllocations;
         }
         else out << " lastWorldDispatch=no completedDispatches=0 bounceRays=0 hits=0 eligibleHits=0"
                     " rejectedMaterials=0 sunRays=0 sunBlocked=0 eligibleReceivers=0 dynamicHits=0 GPUtimings=unavailable";
@@ -266,6 +282,7 @@ std::string VulkanContext::SetRTGI(std::string_view mode)
         if (_rtao)
         {
             _rtao->giDispatched = _rtao->giCompleted = false;
+            _rtao->giHistoryValid = false;
             if (!RaySceneEnabled()) _rtao->scene.clear();
         }
     }
@@ -751,6 +768,8 @@ void VulkanContext::RetireRTAO()
         rt.surfaceMeasured = slot.surfaceMeasured;
         std::copy_n(counts + 20, 8, rt.giCounts.begin());
         rt.giCompleted = slot.giDispatched;
+        rt.giTemporal = slot.giTemporal;
+        std::copy_n(counts + 28, 4, rt.giHistoryCounts.begin());
         rt.giFrames += slot.giDispatched;
         rt.giCpuMs = slot.giCpuMs;
         rt.waterRays += counts[6];
@@ -762,8 +781,8 @@ void VulkanContext::RetireRTAO()
         std::copy_n(counts + 11, 4, rt.dynamic.hits.begin());
         if (slot.queries)
         {
-            uint64_t stamps[20]{};
-            if (vkGetQueryPoolResults(_device, slot.queries, 0, 20, sizeof(stamps), stamps, sizeof(uint64_t),
+            uint64_t stamps[22]{};
+            if (vkGetQueryPoolResults(_device, slot.queries, 0, 22, sizeof(stamps), stamps, sizeof(uint64_t),
                                       VK_QUERY_RESULT_64_BIT) == VK_SUCCESS)
             {
                 const uint64_t mask = _timestampBits == 64 ? UINT64_MAX : (uint64_t(1) << _timestampBits) - 1;
@@ -778,9 +797,10 @@ void VulkanContext::RetireRTAO()
                 rt.waterFilterMs = ms(14);
                 rt.giRayMs = ms(16);
                 rt.giFilterMs = ms(18);
+                rt.giTemporalMs = ms(20);
                 if (slot.giDispatched && rt.completed % 120 == 0)
-                    std::fprintf(stderr, "Vulkan RTGI GPU: trace=%.4f filter=%.4f CPUrecord=%.4f ms; rays=%u hits=%u eligible=%u rejected=%u sunRays=%u sunBlocked=%u receivers=%u dynamic=%u\n",
-                        rt.giRayMs, rt.giFilterMs, rt.giCpuMs, counts[20], counts[21], counts[22], counts[23],
+                    std::fprintf(stderr, "Vulkan RTGI GPU: trace=%.4f filter=%.4f temporal=%.4f CPUrecord=%.4f ms; rays=%u hits=%u eligible=%u rejected=%u sunRays=%u sunBlocked=%u receivers=%u dynamic=%u\n",
+                        rt.giRayMs, rt.giFilterMs, rt.giTemporalMs, rt.giCpuMs, counts[20], counts[21], counts[22], counts[23],
                         counts[24], counts[25], counts[26], counts[27]);
                 ++rt.timingSamples;
                 uint64_t frame[2]{};
@@ -836,29 +856,34 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection, bool& ssaoH
     slot.sunSamples = 0;
     rt.waterDispatched = false;
     rt.giDispatched = slot.giDispatched = false;
+    slot.giTemporal = false;
     slot.giCpuMs = 0;
     if (rt.scene.empty())
     {
+        rt.giHistoryValid = false;
         rt.dynamic = slot.dynamic;
         return;
     }
     const VkExtent2D half{(_worldExtent.width + 1) / 2, (_worldExtent.height + 1) / 2};
+    const bool giTemporal = RTGIEnabled() && IsTemporal(_aaMode);
     if (!rt.layout)
     {
         if (rt.setLayout)
             vkDestroyDescriptorSetLayout(_device, rt.setLayout, nullptr);
         rt.setLayout = VK_NULL_HANDLE;
-        VkDescriptorSetLayoutBinding bindings[9]{};
+        VkDescriptorSetLayoutBinding bindings[14]{};
         const VkDescriptorType types[]{
             VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR,
             VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,          VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
             VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
             VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-            VK_DESCRIPTOR_TYPE_STORAGE_BUFFER};
-        for (uint32_t i = 0; i < 9; ++i)
+            VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+            VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
+            VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER};
+        for (uint32_t i = 0; i < 14; ++i)
             bindings[i] = {i, types[i], 1, VK_SHADER_STAGE_COMPUTE_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, nullptr};
         VkDescriptorSetLayoutCreateInfo set{VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO};
-        set.bindingCount = 9;
+        set.bindingCount = 14;
         set.pBindings = bindings;
         Require(vkCreateDescriptorSetLayout(_device, &set, nullptr, &rt.setLayout), "create descriptors");
         const VkPushConstantRange push{VK_SHADER_STAGE_COMPUTE_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(Push)};
@@ -871,7 +896,8 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection, bool& ssaoH
         layout.pPushConstantRanges = &push;
         Require(vkCreatePipelineLayout(_device, &layout, nullptr, &rt.layout), "create layout");
     }
-    if (std::any_of(rt.compute.begin(), rt.compute.begin() + (RTGIEnabled() ? 8 : _rtWaterTargets ? 6 : 4), [](auto p) { return !p; }))
+    if (std::any_of(rt.compute.begin(), rt.compute.begin() + (RTGIEnabled() ? 8 : _rtWaterTargets ? 6 : 4), [](auto p) { return !p; }) ||
+        (giTemporal && !rt.giResolve))
     {
         auto shader = [&](const uint32_t* code, size_t size)
         {
@@ -905,6 +931,19 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection, bool& ssaoH
             auto result = vkCreateComputePipelines(_device, VK_NULL_HANDLE, 1, &info, nullptr, &rt.compute[i]);
             vkDestroyShaderModule(_device, module, nullptr);
             Require(result, "create ray query pipeline");
+        }
+        if (giTemporal && !rt.giResolve)
+        {
+            auto module = shader(Cwrrtgi_resolve_comp, sizeof(Cwrrtgi_resolve_comp));
+            VkComputePipelineCreateInfo info{VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO};
+            info.layout = rt.layout;
+            info.stage = {VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO};
+            info.stage.stage = VK_SHADER_STAGE_COMPUTE_BIT;
+            info.stage.module = module;
+            info.stage.pName = "main";
+            const auto result = vkCreateComputePipelines(_device, VK_NULL_HANDLE, 1, &info, nullptr, &rt.giResolve);
+            vkDestroyShaderModule(_device, module, nullptr);
+            Require(result, "create GI history pipeline");
         }
     }
     if (std::any_of(rt.filter.begin(), rt.filter.begin() + (RTGIEnabled() ? 8 : _rtWaterTargets ? 6 : 4), [](auto p) { return !p; }))
@@ -1009,9 +1048,9 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection, bool& ssaoH
     }
     if (!slot.pool)
     {
-        VkDescriptorPoolSize sizes[]{{VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 16},
+        VkDescriptorPoolSize sizes[]{{VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 32},
                                      {VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR, 4},
-                                     {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 4},
+                                     {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 8},
                                      {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 12}};
         VkDescriptorPoolCreateInfo pool{VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO};
         pool.maxSets = 4;
@@ -1041,6 +1080,38 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection, bool& ssaoH
                           VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_SAMPLE_COUNT_1_BIT,
                           VK_IMAGE_ASPECT_COLOR_BIT, _worldExtent);
     }
+    if (giTemporal && !rt.giHistory[0].image)
+    {
+        for (auto& history : rt.giHistory)
+        {
+            CreateAAImage(history, VK_FORMAT_R16G16B16A16_SFLOAT,
+                          VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+                          VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_ASPECT_COLOR_BIT, half);
+            VkMemoryRequirements memory{};
+            vkGetImageMemoryRequirements(_device, history.image, &memory);
+            rt.giHistoryBytes += memory.size;
+            ++rt.giHistoryAllocations;
+        }
+    }
+    std::array<float, 12> giLighting{};
+    for (int i = 0; i < 6; ++i) giLighting[i] = _reflectionLighting[8 + i / 3][i % 3];
+    std::copy(_rtSun.begin(), _rtSun.end(), giLighting.begin() + 6);
+    giLighting[10] = _weatherLighting.cloudColor[3];
+    giLighting[11] = _weatherLighting.sun[3];
+    bool lightingChanged = false;
+    for (int i = 0; i < 12; ++i)
+    {
+        const float threshold = i < 6 ? std::max(.002f, std::abs(rt.giLighting[i]) * .05f) : i < 10 ? .01f : .05f;
+        lightingChanged |= std::abs(giLighting[i] - rt.giLighting[i]) > threshold;
+    }
+    // Camera cuts/FOV changes already invalidate TAA/FSR. Also reject a missed
+    // GI frame, new lighting/weather, or the absence of the preceding raw slot.
+    if (!_taaValid || lightingChanged || rt.giPreviousSlot >= FramesInFlight || rt.giPreviousSlot == _frame ||
+        _taaFrame != rt.giLastFrame + 1)
+        rt.giHistoryValid = false;
+    if (giTemporal && !rt.giHistoryValid) ++rt.giHistoryResets;
+    if (!giTemporal) rt.giHistoryValid = false;
+    rt.giLighting = giLighting;
     auto buffer = [&](VkDeviceSize size, VkBufferUsageFlags usage, bool host = false)
     {
         auto result = std::make_shared<RTBuffer>();
@@ -1048,18 +1119,18 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection, bool& ssaoH
         return result;
     };
     if (!slot.counters)
-        slot.counters = buffer(112, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, true);
+        slot.counters = buffer(128, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, true);
     if (!slot.materials)
         slot.materials = buffer(1024 * sizeof(uint64_t), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, true);
     if (!slot.reflectionLight)
         slot.reflectionLight = buffer(sizeof(_reflectionLighting), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, true);
     UploadMappedBuffer(slot.reflectionLight->buffer, _reflectionLighting.data(), sizeof(_reflectionLighting));
-    std::memset(slot.counters->buffer.mapped, 0, 112);
+    std::memset(slot.counters->buffer.mapped, 0, 128);
     if (!slot.queries && _timestampBits && _profile.enabled)
     {
         VkQueryPoolCreateInfo info{VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO};
         info.queryType = VK_QUERY_TYPE_TIMESTAMP;
-        info.queryCount = 20;
+        info.queryCount = 22;
         Require(vkCreateQueryPool(_device, &info, nullptr, &slot.queries), "create GPU timestamps");
     }
     FlushScreenBatch();
@@ -1068,7 +1139,7 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection, bool& ssaoH
     _worldPassOpen = false;
     _commands = {};
     if (slot.queries)
-        vkCmdResetQueryPool(command, slot.queries, 0, 20);
+        vkCmdResetQueryPool(command, slot.queries, 0, 22);
     auto stamp = [&](uint32_t i)
     {
         if (slot.queries)
@@ -1305,6 +1376,7 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection, bool& ssaoH
             stamp(rayStamp + 1);
             stamp(filterStamp);
             stamp(filterStamp + 1);
+            if (effect == 3) { stamp(20); stamp(21); }
             continue;
         }
         if (effect == 3 && !RTAOEnabled())
@@ -1329,7 +1401,7 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection, bool& ssaoH
                                     _rtWaterTargets ? _aaTargets[_image].water.view : _aaTargets[_image].color.view,
                                     VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
         VkDescriptorBufferInfo reflectionLight{slot.reflectionLight->buffer.buffer, 0, VK_WHOLE_SIZE};
-        VkDescriptorBufferInfo counter{slot.counters->buffer.buffer, 0, 112};
+        VkDescriptorBufferInfo counter{slot.counters->buffer.buffer, 0, 128};
         VkDescriptorBufferInfo materialBuffer{slot.materials->buffer.buffer, 0, VK_WHOLE_SIZE};
         VkWriteDescriptorSetAccelerationStructureKHR as{
             VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR};
@@ -1362,14 +1434,58 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection, bool& ssaoH
         writes[8].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
         writes[8].pBufferInfo = &reflectionLight;
         vkUpdateDescriptorSets(_device, 9, writes, 0, nullptr);
+        if (effect == 3)
+        {
+            const auto oldRaw = rt.giPreviousSlot < FramesInFlight && rt.slots[rt.giPreviousSlot].gi.view ?
+                rt.slots[rt.giPreviousSlot].gi.view : slot.gi.view;
+            const auto output = giTemporal ? rt.giHistory[rt.giHistoryIndex].view : slot.gi.view;
+            VkDescriptorImageInfo giImages[]{
+                {_aaSampler, giTemporal ? _aaTargets[_image].motion.view : slot.gi.view,
+                 giTemporal ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL : VK_IMAGE_LAYOUT_GENERAL},
+                {_aaSampler, giTemporal ? rt.giHistory[1 - rt.giHistoryIndex].view : slot.gi.view, VK_IMAGE_LAYOUT_GENERAL},
+                {VK_NULL_HANDLE, output, VK_IMAGE_LAYOUT_GENERAL},
+                {_aaSampler, output, VK_IMAGE_LAYOUT_GENERAL},
+                {_aaSampler, oldRaw, VK_IMAGE_LAYOUT_GENERAL}};
+            VkWriteDescriptorSet giWrites[5]{};
+            for (unsigned i = 0; i < 5; ++i)
+            {
+                giWrites[i] = {VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET};
+                giWrites[i].dstSet = set;
+                giWrites[i].dstBinding = 9 + i;
+                giWrites[i].descriptorCount = 1;
+                giWrites[i].descriptorType = i == 2 ? VK_DESCRIPTOR_TYPE_STORAGE_IMAGE : VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+                giWrites[i].pImageInfo = &giImages[i];
+            }
+            vkUpdateDescriptorSets(_device, 5, giWrites, 0, nullptr);
+            if (giTemporal)
+            {
+                VkImageMemoryBarrier histories[2]{};
+                for (unsigned i = 0; i < 2; ++i)
+                {
+                    auto& b = histories[i];
+                    b = {VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER};
+                    b.oldLayout = rt.giHistoryInitialized ? VK_IMAGE_LAYOUT_GENERAL : VK_IMAGE_LAYOUT_UNDEFINED;
+                    b.newLayout = VK_IMAGE_LAYOUT_GENERAL;
+                    b.srcAccessMask = rt.giHistoryInitialized ? VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT : 0;
+                    b.dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
+                    b.srcQueueFamilyIndex = b.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+                    b.image = rt.giHistory[i].image;
+                    b.subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
+                }
+                vkCmdPipelineBarrier(command, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+                    VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, 0, nullptr, 0, nullptr, 2, histories);
+                rt.giHistoryInitialized = true;
+            }
+        }
         VkImageMemoryBarrier image{VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER};
         image.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         image.newLayout = VK_IMAGE_LAYOUT_GENERAL;
         image.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+        image.srcAccessMask = effect == 3 ? VK_ACCESS_SHADER_READ_BIT : 0;
         image.srcQueueFamilyIndex = image.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
         image.image = target.image;
         image.subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
-        vkCmdPipelineBarrier(command, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, 0,
+        vkCmdPipelineBarrier(command, effect == 3 ? VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT : VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, 0,
                              nullptr, 0, nullptr, 1, &image);
         const int ms = (_worldSamples != VK_SAMPLE_COUNT_1_BIT) + effect * 2;
         Push push;
@@ -1379,7 +1495,12 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection, bool& ssaoH
         if (effect)
             push.settings[3] = 50.f;
         if (effect == 3)
+        {
             push.settings = {25.f, .02f, .65f, 45.f};
+            rt.giPhase = _taaFrame % 8;
+            push.jitter[2] = giTemporal ? float(1 + rt.giPhase) : 0.f;
+            push.jitter[3] = giTemporal && rt.giHistoryValid ? 1.f : 0.f;
+        }
         if (effect == 1)
         {
             // Spare component: preserve the 128-byte push ABI and all AO/water settings.
@@ -1402,10 +1523,27 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection, bool& ssaoH
         stamp(rayStamp + 1);
         VkMemoryBarrier ready{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
         ready.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
-        ready.dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_HOST_READ_BIT;
+        ready.dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_HOST_READ_BIT;
         vkCmdPipelineBarrier(command, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
-                             VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_HOST_BIT, 0, 1, &ready, 0,
+                             VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_HOST_BIT, 0, 1, &ready, 0,
                              nullptr, 0, nullptr);
+        if (effect == 3)
+        {
+            stamp(20);
+            if (giTemporal)
+            {
+                vkCmdBindPipeline(command, VK_PIPELINE_BIND_POINT_COMPUTE, rt.giResolve);
+                vkCmdDispatch(command, (half.width + 7) / 8, (half.height + 7) / 8, 1);
+                vkCmdPipelineBarrier(command, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+                    VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_HOST_BIT,
+                    0, 1, &ready, 0, nullptr, 0, nullptr);
+                rt.giHistoryValid = true;
+                rt.giLastFrame = _taaFrame;
+                rt.giHistoryIndex = 1 - rt.giHistoryIndex;
+                rt.giPreviousSlot = _frame;
+            }
+            stamp(21);
+        }
         stamp(filterStamp);
         if (effect == 1 && ContactShadowsEligible())
         {
@@ -1431,6 +1569,7 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection, bool& ssaoH
         if (effect == 3)
         {
             rt.giDispatched = slot.giDispatched = true;
+            slot.giTemporal = giTemporal;
             slot.giCpuMs = _profile.enabled ? ProfileClock() - cpuStart : 0;
         }
         else if (effect == 2)
@@ -1484,6 +1623,17 @@ void VulkanContext::DestroyRTAOTargets() noexcept
         slot.ao = {};
         slot.extent = {};
     }
+    for (auto& history : _rtao->giHistory)
+    {
+        if (history.view) vkDestroyImageView(_device, history.view, nullptr);
+        if (history.image) vkDestroyImage(_device, history.image, nullptr);
+        if (history.memory) vkFreeMemory(_device, history.memory, nullptr);
+        history = {};
+    }
+    _rtao->giHistoryBytes = 0;
+    _rtao->giHistoryValid = _rtao->giHistoryInitialized = false;
+    _rtao->giHistoryIndex = 0;
+    _rtao->giPreviousSlot = FramesInFlight;
     for (auto& pipeline : _rtao->filter)
     {
         if (pipeline)
@@ -1507,6 +1657,7 @@ void VulkanContext::DestroyRTAO() noexcept
     for (auto pipeline : _rtao->compute)
         if (pipeline)
             vkDestroyPipeline(_device, pipeline, nullptr);
+    if (_rtao->giResolve) vkDestroyPipeline(_device, _rtao->giResolve, nullptr);
     if (_rtao->layout)
         vkDestroyPipelineLayout(_device, _rtao->layout, nullptr);
     if (_rtao->setLayout)

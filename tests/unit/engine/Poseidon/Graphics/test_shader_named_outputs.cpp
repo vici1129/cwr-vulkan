@@ -72,6 +72,50 @@ bool isinf(vec3 a) { return std::isinf(a.x)||std::isinf(a.y)||std::isinf(a.z); }
 #include <PoseidonVK/Shaders/ray_normal.glsl>
 }
 
+namespace RTGIHistoryMath
+{
+using std::abs;
+using std::min;
+using std::max;
+#include <PoseidonVK/Shaders/rtgi_history.glsl>
+}
+
+TEST_CASE("RTGI history rejects changed surfaces and bounds accumulation", "[Graphics][Shaders][rtgi-history]")
+{
+    using namespace RTGIHistoryMath;
+    REQUIRE(giHistorySurface(10,10,1));
+    REQUIRE(giHistorySurface(10.01f,10,.96f));
+    REQUIRE_FALSE(giHistorySurface(10.03f,10,1));
+    REQUIRE_FALSE(giHistorySurface(10,10,.94f));
+    REQUIRE_FALSE(giHistorySurface(0,0,1));
+    REQUIRE(giHistorySurface(44.08f,44,1));
+    REQUIRE_FALSE(giHistorySurface(44.1f,44,1));
+    float length=1;
+    for (int frame=0; frame<32; ++frame)
+    {
+        length=giHistoryLength(length);
+        REQUIRE(length<=4);
+        REQUIRE(giHistoryWeight(length)<=.75f);
+    }
+    REQUIRE(length==4);
+    REQUIRE(giHistoryWeight(1)==0);
+    // Eight distinct deterministic directions; non-temporal phase zero is unchanged.
+    REQUIRE(giSampleShift(0)==0);
+    REQUIRE(giSampleRotation(0)==0);
+    for (int a=0; a<8; ++a) for (int b=a+1; b<8; ++b)
+    {
+        const float delta=std::abs(giSampleShift(float(a))-giSampleShift(float(b)));
+        REQUIRE(std::abs(delta-std::round(delta))>.01f);
+    }
+    // Packed 14+5+5 bits are exactly representable in the existing float channel.
+    for (unsigned z=1; z<16384; ++z)
+    {
+        unsigned bits=(z<<10)|1023;
+        REQUIRE(unsigned(float(bits))==bits);
+        REQUIRE((unsigned(std::abs(-float(bits)))>>10)==z);
+    }
+}
+
 TEST_CASE("Ray shading normals handle inverse transpose, winding and missing normals",
           "[Graphics][Shaders][ray-surface]")
 {
@@ -303,6 +347,27 @@ TEST_CASE("RTGI keeps SSAO after shadow subtraction and before bounce addition",
         const float oldZeroBounce = color * ao - shadow;
         REQUIRE(std::abs((oldZeroBounce - off) + shadow * (1.f - ao)) < 1e-6f);
     }
+}
+
+TEST_CASE("RTGI filters incident radiance before receiver reflectance with bounded history", "[Graphics][Shaders][rtgi-history]")
+{
+    const auto root = std::filesystem::path(TESTS_ROOT_DIR).parent_path() / "engine" / "PoseidonVK";
+    const auto filter = ReadTextFile(root / "Shaders/rtgi_filter.frag");
+    const auto resolve = ReadTextFile(root / "Shaders/rtgi_resolve.comp");
+    const auto trace = ReadTextFile(root / "Shaders/rtgi.comp");
+    const auto host = ReadTextFile(root / "VulkanContext_RTAO.cpp");
+    REQUIRE(filter.find("receiver.rgb*sum/weight") != std::string::npos);
+    REQUIRE(filter.find("positionAt(other)") == std::string::npos);
+    REQUIRE(filter.find("giNormal(other") == std::string::npos);
+    REQUIRE(resolve.find("previousRawGI") != std::string::npos);
+    REQUIRE(resolve.find("clamp(old,low,high)") != std::string::npos);
+    REQUIRE(resolve.find("supported && !unsafe") != std::string::npos);
+    REQUIRE(resolve.find("giReceiver") == std::string::npos);
+    REQUIRE(trace.find("if(ao.jitter.z>0)") != std::string::npos);
+    REQUIRE(trace.find("if(hit.kind==3u) result.a=-result.a;") < trace.find("if(!hit.diffuseEligible)"));
+    REQUIRE(host.find("RTGIEnabled() && IsTemporal(_aaMode)") != std::string::npos);
+    REQUIRE(host.find("_taaFrame != rt.giLastFrame + 1") != std::string::npos);
+    REQUIRE(host.find("if (!_taaValid || lightingChanged") != std::string::npos);
 }
 
 TEST_CASE("Post-resolve RT corrections reject mixed MSAA coverage", "[Graphics][Shaders][vulkan-aa]")
