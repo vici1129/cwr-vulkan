@@ -6,6 +6,7 @@
 #define __ENGINE_HPP
 
 #include <Poseidon/Core/Types.hpp>
+#include <Poseidon/Graphics/Core/GraphicsQuality.hpp>
 #include <Poseidon/Foundation/Math/Math3D.hpp>
 #include <Poseidon/Graphics/Rendering/Colors.hpp>
 #include <Poseidon/Graphics/Rendering/Draw/Font.hpp>
@@ -395,6 +396,12 @@ class Engine : public IGraphicsEngine
     virtual bool UsesHDRLighting() const { return false; }
     virtual bool SetWorldRenderScale(int) { return false; }
     virtual bool SetSSAO(bool, float, float, float, float) { return false; }
+    virtual bool HasVulkanGraphics() const { return false; }
+    virtual GraphicsQuality GetGraphicsQuality() const { return {}; }
+    virtual RString GraphicsQualityRTUnavailable() const { return "Ray Traced Shadows require Vulkan."; }
+    virtual bool ApplyGraphicsQuality(const GraphicsQuality&) { return false; }
+    virtual bool GraphicsQualityPending() const { return false; }
+    virtual RString GraphicsQualityError() const { return "Vulkan graphics are unavailable."; }
     virtual RString SetRTAO(RString) { return "UNSUPPORTED: RTAO requires Vulkan"; }
     virtual RString SetRTShadows(RString) { return "UNSUPPORTED: RT shadows require Vulkan"; }
     virtual RString SetSoftRTShadows(RString) { return "UNSUPPORTED: soft RT shadows require Vulkan"; }

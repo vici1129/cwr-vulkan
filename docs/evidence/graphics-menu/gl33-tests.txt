@@ -1,0 +1,4 @@
+Filters: [VulkanQuality],[GraphicsPage],[GraphicsConfig]
+Randomness seeded to: 2027857912
+===============================================================================
+All tests passed (469 assertions in 41 test cases)

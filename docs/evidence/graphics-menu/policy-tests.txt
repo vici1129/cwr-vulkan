@@ -1,0 +1,14 @@
+Vulkan: instance created (API 1.0); validation=off, synchronization validation=off
+Vulkan: shutdown complete; submitted=0, presented=0, validation errors=0, warnings=0
+Vulkan: instance created (API 1.0); validation=on, synchronization validation=off
+Vulkan: shutdown complete; submitted=0, presented=0, validation errors=0, warnings=0
+Vulkan: instance created (API 1.0); validation=off, synchronization validation=off
+Vulkan: shutdown complete; submitted=0, presented=0, validation errors=0, warnings=0
+Vulkan: instance created (API 1.0); validation=off, synchronization validation=off
+Vulkan: shutdown complete; submitted=0, presented=0, validation errors=0, warnings=0
+Vulkan: instance created (API 1.0); validation=off, synchronization validation=off
+Vulkan validation ERROR [TEST-teardown-only]: Intentional driver-free destruction error
+Vulkan: shutdown complete; submitted=0, presented=0, validation errors=1, warnings=0
+RTGI unavailable: test GI resources unavailable; preserving ordinary lighting
+RT water unavailable: test resource unavailable; preserving ordinary water
+Vulkan driver-free policy/lifetime guards: 517 checks passed

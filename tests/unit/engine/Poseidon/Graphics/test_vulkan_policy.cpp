@@ -466,6 +466,26 @@ int main()
         Check(ShapeRasterization(true).cullMode == VK_CULL_MODE_NONE,
               "projected shadows retain their existing uncullled rasterization");
         VulkanContext context;
+        {
+            VulkanContext quality;
+            using Poseidon::GraphicsQuality;
+            Check(quality.SetGraphicsQuality(GraphicsQuality::Enhanced()).empty(), "enhanced raster quality accepted");
+            Check(quality.GetGraphicsQuality() == GraphicsQuality::Enhanced(), "enhanced enables exactly its four groups");
+            Check(!quality.RTShadowsEnabled() && !quality.RTGIEnabled() && !quality.RTAOEnabled() &&
+                  !quality.RTReflectionsEnabled() && !quality.VolumetricFogEnabled(), "preset excludes deferred and RT features");
+            const auto enhanced = quality.GetGraphicsQuality();
+            Check(!quality.SetGraphicsQuality({2, 0, 0, false}).empty(), "uninitialized RT rejected");
+            Check(quality.GetGraphicsQuality() == enhanced, "unsupported bundle changes nothing");
+            Check(!quality.SetGraphicsQuality({3, 0, 0, false}).empty(), "invalid group rejected");
+            Check(quality.GetGraphicsQuality() == enhanced, "invalid bundle changes nothing");
+            Check(quality.SetGraphicsQuality({0, 1, 0, true}).empty(), "independent raster groups accepted");
+            Check(quality.GetGraphicsQuality() == GraphicsQuality{0, 1, 0, true}, "independent groups retain values");
+            Check(quality.GetGraphicsQuality().Preset() == 2, "mixed groups derive Custom");
+            quality.SetSoftShadows("on");
+            Check(quality.GetGraphicsQuality().shadows == -1, "developer partial groups are reported honestly");
+            Check(quality.SetGraphicsQuality({}).empty(), "return to Standard accepted");
+            Check(quality.GetGraphicsQuality() == GraphicsQuality{}, "Standard disables optional groups and AO");
+        }
         Check(!context.SSAOEnabled(), "SSAO must be disabled by default");
         Check(context.SetSSAO(true, 0.7f, 1.2f, 0.03f, 80), "valid SSAO controls are accepted");
         Check(!context.RTAOEnabled(), "RTAO defaults off");

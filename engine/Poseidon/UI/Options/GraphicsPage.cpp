@@ -1,8 +1,10 @@
 #include <Poseidon/UI/Options/GraphicsPage.hpp>
 #include <Poseidon/UI/Options/OptionsShell.hpp>
+#include <Poseidon/UI/OptionsUICommon.hpp>
 
 #include <Poseidon/Core/Global.hpp>
 #include <Poseidon/Graphics/Core/Engine.hpp>
+#include <Poseidon/World/Scene/Scene.hpp>
 #include <Poseidon/UI/Settings/GraphicsApply.hpp>
 #include <Poseidon/UI/Locale/Stringtable/Stringtable.hpp>
 #include <Poseidon/Foundation/Common/GamePaths.hpp>
@@ -182,6 +184,12 @@ const char* GraphicsPage::CloseDescription()
 
 const char* GraphicsPage::GraphicsProvider::RowLabel(int row) const
 {
+    if (GEngine && GEngine->HasVulkanGraphics())
+    {
+        if (row == kRowPreset) return "Video options";
+        if (row == kRowShadow) return "Object shadows";
+        if (row == kRowParticles) return "Particles";
+    }
     static_assert(sizeof(kRows) / sizeof(kRows[0]) == kRowCount, "GraphicsPage row table out of sync with kRowCount");
     if (row < 0 || row >= kRowCount)
         return "";
@@ -190,6 +198,14 @@ const char* GraphicsPage::GraphicsProvider::RowLabel(int row) const
 
 const char* GraphicsPage::GraphicsProvider::RowDescription(int row) const
 {
+    if (GEngine && GEngine->HasVulkanGraphics())
+    {
+        if (row == kRowPreset) return "Original Video options: resolution, refresh rate, view distance and terrain detail.";
+        if (row == kRowShadow) return "Object and vehicle casters are enabled by Vulkan Shadow Quality.";
+        if (row == kRowParticles) return "Original smoke, dust and muzzle flashes.";
+        if (row == kRowAntiAliasing || row == kRowSupersampling)
+            return "Vulkan AA/upscaling and render scale remain developer commands in this milestone; FSR needs its startup opt-in.";
+    }
     if (row < 0 || row >= kRowCount)
         return "";
     return LocalizeStringWithFallback(kRows[row].desc, kRows[row].descEn);
@@ -197,6 +213,11 @@ const char* GraphicsPage::GraphicsProvider::RowDescription(int row) const
 
 OptionsScrollList::RowDef GraphicsPage::GraphicsProvider::RowFor(int row) const
 {
+    if (GEngine && GEngine->HasVulkanGraphics())
+    {
+        if (row == kRowPreset) return {-1, nullptr, 0};
+        if (row == kRowShadow || row == kRowParticles) return {532, m_page->m_offOnCStrs.data(), 2};
+    }
     switch (row)
     {
         case kRowPreset:
@@ -231,6 +252,11 @@ OptionsScrollList::RowDef GraphicsPage::GraphicsProvider::RowFor(int row) const
 
 OptionsScrollList::Kind GraphicsPage::GraphicsProvider::RowKind(int row) const
 {
+    if (GEngine && GEngine->HasVulkanGraphics())
+    {
+        if (row == kRowPreset) return OptionsScrollList::KindAction;
+        if (row == kRowShadow || row == kRowParticles) return OptionsScrollList::KindBoolean;
+    }
     if (row == kRowAdvanced)
         return OptionsScrollList::KindHeader;
     if (row == kRowMultitexturing)
@@ -243,6 +269,11 @@ int GraphicsPage::GraphicsProvider::RowValue(int row) const
     if (!m_page)
         return 0;
     const GraphicsConfig& c = m_page->m_cfg;
+    if (GEngine && GEngine->HasVulkanGraphics())
+    {
+        if (row == kRowShadow) return c.shadowQuality != GraphicsConfig::TierOff;
+        if (row == kRowParticles) return c.particlesQuality != GraphicsConfig::TierOff;
+    }
     switch (row)
     {
         case kRowPreset:
@@ -307,6 +338,18 @@ void GraphicsPage::GraphicsProvider::SetRowValue(int row, int v)
 {
     if (!m_page)
         return;
+    if (IsDisabled(row)) return;
+    if (GEngine && GEngine->HasVulkanGraphics())
+    {
+        if (row == kRowPreset) return;
+        if (row == kRowShadow || row == kRowParticles)
+        {
+            auto& tier = row == kRowShadow ? m_page->m_cfg.shadowQuality : m_page->m_cfg.particlesQuality;
+            tier = v ? GraphicsConfig::TierHigh : GraphicsConfig::TierOff;
+            ApplyGraphicsConfigToEngine(m_page->m_cfg);
+            return;
+        }
+    }
     GraphicsConfig& c = m_page->m_cfg;
     bool tierTouched = false;
     switch (row)
@@ -404,6 +447,9 @@ void GraphicsPage::Mount(OptionsShell& shell)
     // instance falls back to class defaults — same as PresetUltra.
     if (!m_cfg.Load(GraphicsCfgPath()))
         m_cfg.LoadDefaults();
+    if (GEngine && GEngine->HasVulkanGraphics() && GScene)
+        m_cfg.shadowQuality = GScene->GetObjectShadows() && GScene->GetVehicleShadows()
+                                ? GraphicsConfig::TierHigh : GraphicsConfig::TierOff;
     // Ensure the displayed Preset is consistent with the tiers loaded
     // from disk; a hand-edited file might set preset=Ultra with mismatched
     // tiers, in which case we derive Custom.
@@ -411,6 +457,18 @@ void GraphicsPage::Mount(OptionsShell& shell)
 
     RefreshLocalizedChoices();
     ScrollListPage::Mount(shell);
+}
+
+bool GraphicsPage::GraphicsProvider::IsDisabled(int row) const
+{
+    return GEngine && GEngine->HasVulkanGraphics() &&
+           (row == kRowShadow || row == kRowAntiAliasing || row == kRowSupersampling);
+}
+
+void GraphicsPage::GraphicsProvider::OnRowAction(int row, Display& host)
+{
+    if (row == kRowPreset && GEngine && GEngine->HasVulkanGraphics())
+        host.CreateChild(new DisplayOptionsVideo(&host, host.SimulationEnabled()));
 }
 
 void GraphicsPage::OnReshown(OptionsShell& shell)

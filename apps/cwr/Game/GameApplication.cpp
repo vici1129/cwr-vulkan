@@ -410,6 +410,16 @@ void LoadAndApplyGraphicsConfig()
         LOG_INFO(Graphics, "LoadGraphicsConfig: normalized invalid fields (not persisted)");
 
     ApplyGraphicsConfigToEngine(cfg);
+    if (GEngine && GEngine->HasVulkanGraphics())
+    {
+        auto quality = cfg.vulkan;
+        // Device capability is fixed at startup. Keep the saved preference on
+        // disk, but present the actual raster fallback in this process.
+        if (quality.shadows == 2 && GEngine->GraphicsQualityRTUnavailable().GetLength())
+            quality.shadows = 1;
+        if (!GEngine->ApplyGraphicsQuality(quality))
+            LOG_WARN(Graphics, "Saved Vulkan graphics rejected: {}", static_cast<const char*>(GEngine->GraphicsQualityError()));
+    }
 
     LOG_DEBUG(Graphics,
               "LoadGraphicsConfig: preset={} terrain={} objectLod={} shadow={} particles={} "

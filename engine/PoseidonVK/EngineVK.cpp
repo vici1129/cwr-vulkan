@@ -64,6 +64,10 @@ EngineVK::EngineVK(const GraphicsEngineParams& params) : _textures(_vk)
         VkSurfaceKHR surface = VK_NULL_HANDLE;
         RequireSDL(SDL_Vulkan_CreateSurface(_window, _vk.Instance(), nullptr, &surface), "create Vulkan surface");
         _vk.CreateDevice(surface);
+        _vk.SetAtmosphere("on");
+        _vk.SetWetSurfaces("on");
+        _vk.SetUnderwater("on");
+        _vk.SetPBR("on");
         _drawableWidth = _width;
         _drawableHeight = _height;
         // No acquire/present at construction; a zero drawable defers creation.
@@ -106,6 +110,8 @@ void EngineVK::StopAfterFailure(const std::exception& error)
 {
     LOG_ERROR(Graphics, "Vulkan: backend stopped: {}", error.what());
     _failed = true;
+    _qualityPending = false;
+    _qualityError = error.what();
     // Do not reuse fences/semaphores following failed recording or submission.
     Shutdown();
 }
@@ -138,6 +144,22 @@ void EngineVK::InitDraw(bool clear, PackedColor color)
             return;
         if (width != _drawableWidth || height != _drawableHeight)
             OnWindowResized(width, height);
+        if (_qualityPending)
+        {
+            // All group requests share one rebuild, outside an open frame.
+            if (!_vk.PrepareSwapchain(uint32_t(std::max(width, 0)), uint32_t(std::max(height, 0))))
+                return;
+            _qualityPending = false;
+            _qualityError.clear();
+            if (GetGraphicsQuality() != _qualityRequested)
+            {
+                _qualityError = _vk.GraphicsQualityFailure();
+                if (_qualityError.empty()) _qualityError = "The renderer could not activate the complete selection.";
+            }
+            LOG_INFO(Graphics, "Vulkan graphics apply: shadows={} clouds={} water={} AO={} result={}",
+                     _qualityRequested.shadows, _qualityRequested.clouds, _qualityRequested.water,
+                     _qualityRequested.ao, _qualityError.empty() ? "OK" : _qualityError);
+        }
         if (!_vk.BeginFrame(static_cast<uint32_t>(std::max(width, 0)), static_cast<uint32_t>(std::max(height, 0))))
             return;
         const auto extent = _vk.Extent();
@@ -237,6 +259,42 @@ void EngineVK::FinishWorldEffects()
 bool EngineVK::SetSSAO(bool enabled, float strength, float radius, float bias, float fade)
 {
     return _vk.SetSSAO(enabled, strength, radius, bias, fade);
+}
+
+GraphicsQuality EngineVK::GetGraphicsQuality() const
+{
+    auto result = _vk.GetGraphicsQuality();
+    if (!_shadowTuning.enabled || _shadowTuning.cascadeCount != 4 || _shadowTuning.resolution != 2048)
+        result.shadows = -1;
+    if (GScene && (!GScene->GetObjectShadows() || !GScene->GetVehicleShadows()))
+        result.shadows = -1;
+    return result;
+}
+
+bool EngineVK::ApplyGraphicsQuality(const GraphicsQuality& quality)
+{
+    if (_qualityPending || _failed)
+    {
+        _qualityError = _failed ? "The Vulkan renderer has stopped." : "Wait for the current graphics change to finish.";
+        return false;
+    }
+    _qualityError = _vk.SetGraphicsQuality(quality);
+    if (!_qualityError.empty()) return false;
+    auto tuning = _shadowTuning;
+    tuning.enabled = true;
+    tuning.cascadeCount = 4;
+    tuning.resolution = 2048;
+    SetShadowMapTuning(tuning);
+    // The original caster gates also feed CSM. A migrated Shadows Off
+    // preference must not turn a successfully selected group into empty maps.
+    if (GScene)
+    {
+        GScene->SetObjectShadows(true);
+        GScene->SetVehicleShadows(true);
+    }
+    _qualityRequested = quality;
+    _qualityPending = true;
+    return true;
 }
 
 void EngineVK::FinishDraw()

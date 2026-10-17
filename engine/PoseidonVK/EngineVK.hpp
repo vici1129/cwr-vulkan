@@ -56,6 +56,15 @@ class EngineVK final : public Engine
     RString SetSkyReflections(RString mode) override { return _vk.SetSkyReflections(static_cast<const char*>(mode)).c_str(); }
     bool UsesHDRLighting() const override { return true; }
     bool SetSSAO(bool enabled, float strength, float radius, float bias, float fade) override;
+    bool HasVulkanGraphics() const override { return true; }
+    GraphicsQuality GetGraphicsQuality() const override;
+    RString GraphicsQualityRTUnavailable() const override { return _vk.GraphicsQualityRTUnavailable().c_str(); }
+    bool ApplyGraphicsQuality(const GraphicsQuality& quality) override;
+    bool GraphicsQualityPending() const override { return _qualityPending; }
+    RString GraphicsQualityError() const override { return _qualityError.c_str(); }
+    bool _qualityPending = false;
+    GraphicsQuality _qualityRequested;
+    std::string _qualityError;
     RString SetRTAO(RString mode) override { return _vk.SetRTAO(static_cast<const char*>(mode)).c_str(); }
     RString SetRTGI(RString mode) override { return _vk.SetRTGI(static_cast<const char*>(mode)).c_str(); }
     void CollectRTAOScene();

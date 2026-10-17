@@ -473,6 +473,7 @@ list(APPEND POSEIDON_TEST_SOURCES
     UI/test_gamepad_page.cpp
     UI/test_gamepad_tuning_page.cpp
     UI/test_graphics_page.cpp
+    UI/test_vulkan_quality_page.cpp
     UI/test_html_body_text.cpp
     UI/test_html_text_wrap.cpp
     UI/test_kbm_page.cpp

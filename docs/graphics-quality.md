@@ -1,5 +1,65 @@
 # Graphics quality and visual tuning
 
+## Player menu (2026-10-18)
+
+The first Vulkan graphics menu implements the exact group mappings below. Open
+Options > Graphics in the current notebook, or Options > Video in the legacy
+flow. The nine-row Vulkan panel uses the existing notebook appearance, focus,
+keyboard/controller navigation and mouse controls. **Display & detail** retains
+the existing VSync, frame cap, brightness, gamma, terrain, object and particle
+controls; its **Video options** entry opens the original mod-provided Video
+layout, including resolution, refresh rate and view distance. GL33 keeps its
+original Graphics/Video pages and behavior. No original PBO or asset is edited.
+
+Overall **Standard** selects Standard shadows/clouds/water and AO Off;
+**Enhanced** selects Enhanced shadows/clouds/water and AO On. A matching set of
+individual choices is recognized as its preset; all other combinations show
+**Custom**. New Vulkan settings default to Standard. Existing display/detail
+preferences are independent of these presets. Developer-created partial groups
+are displayed as Custom; select a supported group or preset before applying.
+All supported shadow choices enable the original object/vehicle caster gates
+needed by CSM, including profiles migrated from the old Shadows Off setting.
+Disabling these gates through legacy controls is observed as a Custom shadow
+group; the new Shadow Quality control owns their enabled state when applied.
+
+Selections are staged: browsing does no resource recreation. **Apply** sends one
+complete bundle, coalesces deferred resources into the next frame's rebuild,
+checks renderer acceptance/fallback, then saves the four `vulkanShadows`,
+`vulkanClouds`, `vulkanWater`, `vulkanAO` fields in the existing per-user
+`graphics.cfg`. **OK** does the same and returns; **Cancel/Escape** discards
+unapplied selections. During activation, controls wait for completion. Rejected
+requests and resource failures show an error and actual renderer choices without
+saving the failed bundle. A file-write failure is reported and Apply can retry.
+These semantics cover this Vulkan panel; the retained display/detail pages keep
+their existing live-preview/confirmation behavior.
+
+Saved Vulkan choices are requested during the existing graphics configuration
+boot path, after device creation and before ordinary world rendering. The four
+automatic Vulkan effects (atmosphere, classified wet surfaces, underwater optics,
+allowlisted PBR) start enabled with their existing parameters and gates. They do
+not affect GL33. `tri` effect commands remain available and process-local; the
+menu observes their actual group state when it opens and after external changes.
+Player presets do not change bloom, volumetric sunlight, sun shafts, RT water,
+RTGI, RTAO, AA/upscaling, render scale, or internal artistic tuning. Existing
+shared RT scene consumers retain dynamic geometry when sunlight RT is disabled.
+
+**Ray Traced Shadows require initialized ray-query capability.** Without it the
+shadow selector offers only Standard/Enhanced and its hint explains the
+`CWR_VK_RTAO=1` startup/restart requirement or hardware limitation. A previously
+saved RT preference falls back to Enhanced shadows for that process; the saved
+preference is preserved until the player explicitly applies another choice.
+Availability is based on device negotiation and independent MRT blending, never
+GPU brand. This menu does not change the device bootstrap. Player-friendly RT
+startup opt-in is a focused follow-up. Vulkan AA/upscaling and render-scale UI
+modernization are also deferred; the old GL33-only AA/scale rows are disabled
+with an explanation under Vulkan. FSR retains its existing build and
+`CWR_VK_FSR=1` startup requirements.
+
+The measurements and visual gates below remain the authoritative mappings and
+qualification record. The original report describes the pre-menu state.
+Menu implementation checks and unretouched screenshots are recorded in the
+[menu verification evidence](evidence/graphics-menu/README.md).
+
 This pass starts at public main `cdf53e1` and proposes a compact Vulkan settings
 design. It does not implement a menu or persistence. GL33 and the private
 DLSS/NGX checkout are outside the change set. All screenshots are actual stock

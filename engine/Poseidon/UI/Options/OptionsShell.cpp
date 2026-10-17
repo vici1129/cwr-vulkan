@@ -25,12 +25,14 @@ void StartRandomCutscene(RString);
 namespace Poseidon
 {
 
-OptionsShell::OptionsShell(ControlsContainer* parent, bool enableSimulation, bool credits)
+OptionsShell::OptionsShell(ControlsContainer* parent, bool enableSimulation, bool credits,
+                           std::unique_ptr<OptionsPage> initialPage)
     : Display(parent), _credits(credits)
 {
     _enableSimulation = enableSimulation;
     Load("RscOptionsShell");
-    PushPage(std::make_unique<IndexPage>());
+    if (initialPage) PushPage(std::move(initialPage));
+    else PushPage(std::make_unique<IndexPage>());
     _langUiCbToken = RegisterLanguageChangedCallback(
         [this]()
         {

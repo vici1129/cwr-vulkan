@@ -2094,7 +2094,7 @@ void DisplayOptions::OnButtonClicked(int idc)
         }
         break;
         case IDC_OPTIONS_VIDEO:
-            CreateChild(new DisplayOptionsVideo(this, _enableSimulation));
+            OpenVideoOptions(this, _enableSimulation);
             break;
         case IDC_OPTIONS_AUDIO:
             CreateChild(new DisplayOptionsAudio(this, _enableSimulation));

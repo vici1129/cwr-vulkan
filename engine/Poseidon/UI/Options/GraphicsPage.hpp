@@ -83,6 +83,8 @@ private:
 		void SetRowValue(int row, int v) override;
 		const char* SliderValueText(int row) const override;
 		OptionsScrollList::Kind RowKind(int row) const override;
+		bool IsDisabled(int row) const override;
+		void OnRowAction(int row, Display& host) override;
 
 	private:
 		GraphicsPage* m_page = nullptr;

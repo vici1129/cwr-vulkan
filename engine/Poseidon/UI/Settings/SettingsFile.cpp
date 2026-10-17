@@ -31,8 +31,7 @@ bool WriteSettingsFile(const std::string& path, const ParamFile& cfg)
     if (p.has_parent_path())
         std::filesystem::create_directories(p.parent_path(), ec);
 
-    cfg.Save(RString(path.c_str()));
-    return SettingsFileExists(path);
+    return cfg.Save(RString(path.c_str())) == LSOK;
 }
 
 } // namespace Poseidon

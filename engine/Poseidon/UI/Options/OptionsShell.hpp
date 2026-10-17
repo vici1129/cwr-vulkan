@@ -40,7 +40,8 @@ public:
 	// Mirrors DisplayOptions(parent, enableSim, credits).
 	// `credits` controls whether the Index's Credits nav row is visible
 	// (hidden for the in-game Interrupt menu).
-	OptionsShell(ControlsContainer* parent, bool enableSimulation, bool credits);
+	OptionsShell(ControlsContainer* parent, bool enableSimulation, bool credits,
+                 std::unique_ptr<OptionsPage> initialPage = {});
 	// Convenience overload for non-game callers (PoseidonOptionsTest)
 	// that don't have an enableSimulation/credits context — defaults
 	// to the same values DisplayMain passes for the in-game flow.

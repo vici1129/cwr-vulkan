@@ -262,6 +262,8 @@ class DisplayCredits : public Display
     DisplayCredits(ControlsContainer* parent) : Display(parent) { Load("RscDisplayCredits"); }
 };
 
+void OpenVideoOptions(ControlsContainer* parent, bool enableSimulation);
+
 class DisplayOptionsVideo : public Display
 {
   public:

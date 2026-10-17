@@ -261,6 +261,14 @@ bool GraphicsConfig::Load(const std::string& path)
     if (auto* e = cfg.FindEntry("gamma"))
         gamma = (float)*e;
 
+    vulkan.shadows = cfg.ReadValue("vulkanShadows", 0);
+    vulkan.clouds = cfg.ReadValue("vulkanClouds", 0);
+    vulkan.water = cfg.ReadValue("vulkanWater", 0);
+    vulkan.ao = cfg.ReadValue("vulkanAO", 0) != 0;
+    if (vulkan.shadows < 0 || vulkan.shadows > 2) vulkan.shadows = 0;
+    if (vulkan.clouds < 0 || vulkan.clouds > 1) vulkan.clouds = 0;
+    if (vulkan.water < 0 || vulkan.water > 1) vulkan.water = 0;
+
     return true;
 }
 
@@ -281,6 +289,10 @@ bool GraphicsConfig::Save(const std::string& path) const
     cfg.Add("brightness", brightness);
     cfg.Add("gamma", gamma);
     cfg.Add("version", version);
+    cfg.Add("vulkanShadows", vulkan.shadows);
+    cfg.Add("vulkanClouds", vulkan.clouds);
+    cfg.Add("vulkanWater", vulkan.water);
+    cfg.Add("vulkanAO", vulkan.ao ? 1 : 0);
 
     return WriteSettingsFile(path, cfg);
 }

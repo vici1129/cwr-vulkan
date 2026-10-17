@@ -20,6 +20,13 @@ In short: the code is free software, the name is not, and the game data comes se
 
 ## CWRR Vulkan rendering roadmap
 
+Vulkan graphics can now be configured in **Options > Graphics** (or the legacy
+**Options > Video** flow): Standard/Enhanced presets, grouped shadows, clouds,
+water and ambient occlusion, with Apply/OK/Cancel and persistent settings.
+See [graphics settings and capability requirements](docs/graphics-quality.md).
+Ray Traced Shadows require the existing `CWR_VK_RTAO=1` startup opt-in and a
+supported, initialized Vulkan ray-query device; presets never enable RT.
+
 This independent community fork's proposed graphics milestones are in [ROADMAP.md](ROADMAP.md). Technical notes and real-gameplay results are in [docs/vulkan-foundation.md](docs/vulkan-foundation.md). This is not an official Bohemia Interactive roadmap.
 
 ## Quick Start

@@ -29,6 +29,7 @@
 // unreliable on modern thermal-throttled CPUs.
 
 #include <string>
+#include <Poseidon/Graphics/Core/GraphicsQuality.hpp>
 
 
 namespace Poseidon
@@ -64,6 +65,7 @@ public:
 	};
 
 	// Persistable fields.
+	GraphicsQuality vulkan;
 	Preset    qualityPreset    = PresetUltra;
 	Tier      terrainDetail    = TierUltra;     // → grid 6.25 m
 	Tier      objectLod        = TierUltra;

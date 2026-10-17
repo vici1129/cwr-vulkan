@@ -5,6 +5,7 @@
 #include <PoseidonVK/ShapeLightingData.hpp>
 #include <PoseidonVK/ScreenBatchVK.hpp>
 #include <PoseidonVK/AntiAliasingVK.hpp>
+#include <Poseidon/Graphics/Core/GraphicsQuality.hpp>
 #include <array>
 #include <algorithm>
 #include <atomic>
@@ -208,6 +209,10 @@ class VulkanContext
     void EndFrame();
     bool SetSSAO(bool enabled, float strength, float radius, float bias, float fade);
     bool SSAOEnabled() const { return _ssaoEnabled; }
+    GraphicsQuality GetGraphicsQuality() const;
+    std::string GraphicsQualityRTUnavailable() const;
+    std::string SetGraphicsQuality(const GraphicsQuality& quality);
+    std::string GraphicsQualityFailure() const;
     void DrawSSAO(const std::array<float, 4>& projection);
     std::string SetRTAO(std::string_view mode);
     bool RTAOEnabled() const { return _rtaoEnabled && _rtaoAvailable; }

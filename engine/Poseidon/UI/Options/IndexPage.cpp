@@ -9,6 +9,7 @@
 #include <Poseidon/UI/Options/DisplayPage.hpp>
 #include <Poseidon/UI/Options/DifficultyPage.hpp>
 #include <Poseidon/UI/Options/GraphicsPage.hpp>
+#include <Poseidon/UI/Options/VulkanQualityPage.hpp>
 #include <Poseidon/UI/Options/GamePage.hpp>
 
 #include <Poseidon/UI/OptionsUICommon.hpp>
@@ -82,7 +83,8 @@ bool IndexPage::OnNav(OptionsShell& shell, int idc)
             shell.PushPage(std::make_unique<DisplayPage>());
             return true;
         case 1103: // Graphics
-            shell.PushPage(std::make_unique<GraphicsPage>());
+            if (GEngine && GEngine->HasVulkanGraphics()) shell.PushPage(std::make_unique<VulkanQualityPage>());
+            else shell.PushPage(std::make_unique<GraphicsPage>());
             return true;
         case 1104: // Game
             shell.PushPage(std::make_unique<GamePage>());

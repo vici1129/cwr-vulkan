@@ -678,6 +678,13 @@ void Scene::LoadConfig()
     }
 
     SetPreferredViewDistance(GetSelectedPreferredViewDistance());
+    // Scene/profile creation follows the engine's graphics.cfg boot request.
+    // Every supported Vulkan shadow group needs these original caster gates.
+    if (GEngine && GEngine->HasVulkanGraphics())
+    {
+        SetObjectShadows(true);
+        SetVehicleShadows(true);
+    }
 }
 
 void Scene::SaveConfig() const

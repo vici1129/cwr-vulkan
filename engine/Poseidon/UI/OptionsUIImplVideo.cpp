@@ -44,6 +44,8 @@
 #include <Poseidon/Game/Commands/GameStateExt.hpp>
 #include <Poseidon/Foundation/Strings/StrFormat.hpp>
 #include <Poseidon/UI/OptionsUICommon.hpp>
+#include <Poseidon/UI/Options/OptionsShell.hpp>
+#include <Poseidon/UI/Options/VulkanQualityPage.hpp>
 
 // Defined at global scope in World/World.cpp.
 void ShowCinemaBorder(bool show);
@@ -52,6 +54,15 @@ extern void ReleaseVBuffers();
 extern void RestoreVBuffers();
 namespace Poseidon
 {
+
+// Keep mod-provided legacy Video layouts intact; the Vulkan panel owns its
+// notebook and returns to the original display for display/detail controls.
+void OpenVideoOptions(ControlsContainer* parent, bool enableSimulation)
+{
+    if (GEngine && GEngine->HasVulkanGraphics())
+        parent->CreateChild(new OptionsShell(parent, enableSimulation, false, std::make_unique<VulkanQualityPage>()));
+    else parent->CreateChild(new DisplayOptionsVideo(parent, enableSimulation));
+}
 
 void SetHWTL(bool val)
 {
