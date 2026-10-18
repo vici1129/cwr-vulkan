@@ -327,6 +327,8 @@ void OptionsShell::OnCtrlClosed(int idc)
 void OptionsShell::OnChildDestroyed(int idd, int exit)
 {
     Display::OnChildDestroyed(idd, exit);
+    if (auto* page = TopPage())
+        page->OnChildDestroyed(*this, idd, exit);
 
     // Mirror DisplayOptions::OnChildDestroyed: when the credits
     // cutscene's DisplayIntro tears down, drop the credits world and

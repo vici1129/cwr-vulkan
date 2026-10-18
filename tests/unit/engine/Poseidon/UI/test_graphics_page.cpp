@@ -1,5 +1,10 @@
 #include <Poseidon/UI/Options/GraphicsPage.hpp>
 #include <Poseidon/UI/Options/OptionsScrollList.hpp>
+#include <Poseidon/UI/Options/OptionsShell.hpp>
+#include <Poseidon/Graphics/Dummy/EngineDummy.hpp>
+#include <Poseidon/World/Scene/Scene.hpp>
+#include <Poseidon/Core/Game/GameLoop.hpp>
+#include <Poseidon/Core/resincl.hpp>
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 
@@ -14,7 +19,72 @@ class TestableGraphicsPage : public GraphicsPage
   public:
     OptionsScrollList::Provider& Provider() { return ProviderRef(); }
 };
+
+class ChildReturnGraphicsPage : public TestableGraphicsPage
+{
+  public:
+    void Mount(OptionsShell&) override {} // No resources or settings files in this isolated test.
+    void Unmount(OptionsShell&) override {}
+};
+
+struct VideoReturnEngine : EngineDummy
+{
+    float gamma = 1.2f;
+    bool HasVulkanGraphics() const override { return true; }
+    void SetGamma(float value) override { gamma = value; }
+    float GetGamma() const override { return gamma; }
+};
+
+struct VideoReturnScope
+{
+    Engine* oldEngine = GEngine;
+    Scene* oldScene = GScene;
+    int oldCap = gUserFpsCap;
+    VideoReturnEngine engine;
+    VideoReturnScope() { GEngine = &engine; GScene = nullptr; }
+    ~VideoReturnScope() { GEngine = oldEngine; GScene = oldScene; gUserFpsCap = oldCap; }
+};
 } // namespace
+
+TEST_CASE("GraphicsPage retains accepted Video settings after changing FPS cap", "[UI][GraphicsPage]")
+{
+    VideoReturnScope scope;
+    auto page = std::make_unique<ChildReturnGraphicsPage>();
+    auto* raw = page.get();
+    OptionsShell shell(nullptr, true, false, std::move(page));
+
+    scope.engine.SetGamma(.8f);
+    scope.engine.SetBrightness(1.3f);
+    scope.engine.SetMultitexturing(false);
+    shell.OnChildDestroyed(IDD_OPTIONS_AUDIO, IDC_OK);
+    CHECK(std::string(raw->Provider().SliderValueText(8)) == "1.2");
+    shell.OnChildDestroyed(IDD_OPTIONS_VIDEO, IDC_OK);
+    CHECK(std::string(raw->Provider().SliderValueText(8)) == "0.8");
+    CHECK(std::string(raw->Provider().SliderValueText(7)) == "1.3");
+    CHECK(raw->Provider().RowValue(12) == 0);
+
+    raw->Provider().SetRowValue(6, 2); // 60 FPS; reapplies the parent config.
+    CHECK(scope.engine.GetGamma() == Catch::Approx(.8f));
+    CHECK(scope.engine.GetBrightness() == Catch::Approx(1.3f));
+    CHECK_FALSE(scope.engine.IsMultitexturing());
+    CHECK(gUserFpsCap == 60);
+}
+
+TEST_CASE("GraphicsPage observes the values restored by Video Cancel", "[UI][GraphicsPage]")
+{
+    VideoReturnScope scope;
+    auto page = std::make_unique<ChildReturnGraphicsPage>();
+    auto* raw = page.get();
+    OptionsShell shell(nullptr, true, false, std::move(page));
+
+    raw->Provider().SetRowValue(8, 50); // Parent's live gamma is now 1.4.
+    scope.engine.SetGamma(.7f); // Child preview.
+    scope.engine.SetGamma(1.4f); // Child Cancel restores its entry snapshot.
+    shell.OnChildDestroyed(IDD_OPTIONS_VIDEO, IDC_CANCEL);
+    CHECK(std::string(raw->Provider().SliderValueText(8)) == "1.4");
+    raw->Provider().SetRowValue(6, 3);
+    CHECK(scope.engine.GetGamma() == Catch::Approx(1.4f));
+}
 TEST_CASE("GraphicsPage brightness slider conversion clamps into range", "[UI][GraphicsPage]")
 {
     CHECK(GraphicsPage::BrightnessToSlider(0.1f) == 0);

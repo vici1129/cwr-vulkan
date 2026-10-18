@@ -44,6 +44,7 @@ public:
 
 	void Mount(OptionsShell& shell) override;
 	void OnReshown(OptionsShell& shell) override;
+	void OnChildDestroyed(OptionsShell& shell, int idd, int exit) override;
 	void Unmount(OptionsShell& shell) override;
 
 protected:

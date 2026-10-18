@@ -478,6 +478,34 @@ void GraphicsPage::OnReshown(OptionsShell& shell)
     ScrollListPage::OnReshown(shell);
 }
 
+void GraphicsPage::OnChildDestroyed(OptionsShell& shell, int idd, int /*exit*/)
+{
+    if (idd != IDD_OPTIONS_VIDEO) return;
+    // Video edits live state; OK does not write graphics.cfg, and Cancel has
+    // already restored its snapshot. Merge only the overlapping settings so
+    // a later row change or Unmount cannot reapply/persist our stale snapshot.
+    if (GEngine)
+    {
+        m_cfg.gamma = GEngine->GetGamma();
+        m_cfg.brightness = GEngine->GetBrightness();
+        m_cfg.multitexturing = GEngine->IsMultitexturing();
+    }
+    if (GScene)
+    {
+        for (int tier = GraphicsConfig::TierLow; tier <= GraphicsConfig::TierExtreme; ++tier)
+            if (std::fabs(TerrainGridForTier(static_cast<GraphicsConfig::Tier>(tier)) -
+                          GScene->GetPreferredTerrainGrid()) < .001f)
+                m_cfg.terrainDetail = static_cast<GraphicsConfig::Tier>(tier);
+        const bool shadows = GScene->GetObjectShadows() && GScene->GetVehicleShadows();
+        if (shadows != (m_cfg.shadowQuality != GraphicsConfig::TierOff))
+            m_cfg.shadowQuality = shadows ? GraphicsConfig::TierHigh : GraphicsConfig::TierOff;
+        if (GScene->GetCloudlets() != (m_cfg.particlesQuality != GraphicsConfig::TierOff))
+            m_cfg.particlesQuality = GScene->GetCloudlets() ? GraphicsConfig::TierHigh : GraphicsConfig::TierOff;
+    }
+    m_cfg.qualityPreset = m_cfg.DerivePresetFromTiers();
+    OnReshown(shell);
+}
+
 void GraphicsPage::RefreshLocalizedChoices()
 {
     m_presetLabels[0] = LocalizeString("STR_DISP_MAIN_OPT_VALUE_LOW");

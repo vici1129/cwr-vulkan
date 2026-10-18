@@ -71,6 +71,14 @@ validation errors and warnings**.
 
 ## Screenshots
 
+Nested Video return regression fix: the parent now merges overlapping live
+settings when its Video child closes, after either OK or Cancel. Vulkan/GL33
+builds and **485 focused assertions / 46 cases** pass on both builds. An isolated
+live Malden check retains gamma 1.1 and brightness 1.7 after OK, a later FPS-cap
+change and parent closure; Cancel discards a gamma 1.2 preview. Restart confirms
+gamma 1.1, brightness 1.7 and a 30 FPS cap. Local logs: `video-return-fix` and
+`video-return-restart` under `build/shadow-live/`.
+
 - [Standard on Malden](standard.png)
 - [Enhanced applied on Everon](enhanced.png)
 - [Explicit Ray Traced component on Everon](ray-traced.png)

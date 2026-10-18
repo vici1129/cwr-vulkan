@@ -73,6 +73,7 @@ public:
 	// stretched label doesn't double up); pages that depend on that
 	// state should override and re-apply.  Default no-op.
 	virtual void OnReshown(OptionsShell& /*shell*/) {}
+	virtual void OnChildDestroyed(OptionsShell& /*shell*/, int /*idd*/, int /*exit*/) {}
 
 	// Input dispatch from the shell.  Return true to mark the event as
 	// handled (the shell stops walking the stack).
