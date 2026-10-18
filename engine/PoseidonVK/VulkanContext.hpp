@@ -138,7 +138,7 @@ struct ShadowAlphaBatch
 // Cached terrain is local to a stable grid origin, not the moving camera.
 inline std::array<float, 5> ShadowTerrainKey(int x, int z, float grid, int cells, float terrainGrid)
 {
-    // SurfaceY depends on the actual subdivision even when sampling is clamped to 8 m.
+    // The patch follows the landscape subdivision, including live detail changes.
     return {float(x), float(z), grid, float(cells), terrainGrid};
 }
 inline std::array<float, 16> TranslateShadowMatrix(const float* matrix, const std::array<float, 3>& offset)
@@ -174,7 +174,7 @@ class VulkanContext
     void EndShadowPass();
     void RenderShadowDepth(const float* matrices, int count, int resolution, std::span<const float> solid,
                            std::span<const float> alpha, std::span<const ShadowAlphaBatch> batches,
-                           const std::shared_ptr<MeshBuffers>& terrain = {}, uint32_t terrainVertices = 0,
+                           const std::shared_ptr<MeshBuffers>& terrain = {}, uint32_t terrainIndices = 0,
                            const std::array<float, 3>& terrainOffset = {}, int localSlot = -1);
     std::string SetLocalShadows(std::string_view mode);
     bool LocalShadowsEnabled() const { return _localShadowsEnabled; }
@@ -527,7 +527,7 @@ class VulkanContext
     VkDescriptorSetLayout _lightingLayout = VK_NULL_HANDLE;
     VkRenderPass _csmPass = VK_NULL_HANDLE;
     VkPipelineLayout _csmLayout = VK_NULL_HANDLE;
-    std::array<VkPipeline, 4> _csmPipelines{}; // sunlight solid/cutout, local solid/cutout
+    std::array<VkPipeline, 5> _csmPipelines{}; // sunlight solid/cutout, local solid/cutout, terrain
     VkSampler _csmSampler = VK_NULL_HANDLE;
     VkImageView _csmFallbackView = VK_NULL_HANDLE;
     VkDescriptorPool _csmFallbackPool = VK_NULL_HANDLE;

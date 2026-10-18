@@ -1,0 +1,2105 @@
+{
+  "volume-banding-baseline-repeat-1080": {
+    "session": {
+      "arguments": [
+        "-C",
+        "<source-checkout>/game-local/Remastered",
+        "--nosound",
+        "--window",
+        "--width",
+        "1920",
+        "--height",
+        "1080",
+        "--timeout",
+        "3600",
+        "--lang",
+        "English",
+        "--no-splash",
+        "--render",
+        "vk",
+        "--test-mission",
+        "<source-checkout>/game-local/Remastered/Missions/01TakeTheCar.ABEL",
+        "--harness",
+        "19501"
+      ],
+      "run": "<source-checkout>\\build\\shadow-live\\volume-banding-baseline-repeat-1080",
+      "pid": 25780,
+      "exe": "<source-checkout>\\build\\shadow-live\\volume-banding-baseline-runtime\\PoseidonGame.exe",
+      "sha256": "442D285339F79252610B1F732F79A49D7FB373EE5D8770649093872754AEEA1F"
+    },
+    "shutdown": {
+      "submitted": 16184,
+      "presented": 16184,
+      "errors": 0,
+      "warnings": 0
+    },
+    "validation_startup": [
+      "Vulkan: instance created (API 1.2); validation=off, synchronization validation=off"
+    ],
+    "loader_diagnostics": [
+      "Vulkan loader ERROR [Loader Message]: loader_get_json: Failed to open JSON file C:\\Program Files (x86)\\Epic Games\\Epic Online Services\\managedArtifacts\\98bc04bc842e4906993fd6d6644ffb8d\\EOSOverlayVkLayer-Win64.json",
+      "Vulkan loader WARNING [Loader Message]: Layer \"VK_LAYER_NV_optimus\" forced disabled because name matches filter of env var 'VK_LOADER_LAYERS_DISABLE'.",
+      "Vulkan loader WARNING [Loader Message]: Layer \"VK_LAYER_NV_present\" forced disabled because name matches filter of env var 'VK_LOADER_LAYERS_DISABLE'.",
+      "Vulkan loader WARNING [Loader Message]: Layer \"VK_LAYER_VALVE_steam_overlay\" forced disabled because name matches filter of env var 'VK_LOADER_LAYERS_DISABLE'.",
+      "Vulkan loader WARNING [Loader Message]: Layer \"VK_LAYER_VALVE_steam_fossilize\" forced disabled because name matches filter of env var 'VK_LOADER_LAYERS_DISABLE'.",
+      "Vulkan loader WARNING [Loader Message]: Layer \"VK_LAYER_BEAMLINE_core_i386\" forced disabled because name matches filter of env var 'VK_LOADER_LAYERS_DISABLE'.",
+      "Vulkan loader WARNING [Loader Message]: Layer \"VK_LAYER_BEAMLINE_core_x86_64\" forced disabled because name matches filter of env var 'VK_LOADER_LAYERS_DISABLE'."
+    ],
+    "actions": [
+      {
+        "code": "player allowDammage false; setAccTime 0; setTerrainGrid 12.5; setViewDistance 1400; hint ''; titleText ['','PLAIN']; triAA 'off'; triRenderScale 100; triSetVsync 0",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triAtmosphere 'on'; triWetSurfaces 'on'; triUnderwater 'on'; triPBR 'on'; triBloom 'off'; triVolumetricFog 'off'; triSunShafts 'off'; triSoftShadows 'off'; triContactShadows 'off'; triLocalShadows 'off'; triVolumetricClouds 'off'; triCloudShadows 'off'; triWaterRefraction 'off'; triRainRipples 'off'; triShoreFoam 'off'; triRTShadows 'off'; triSoftRTShadows 'off'; triRTDynamic 'off'; triRTReflections 'off'; triSkyReflections 'off'; triRTAO 'off'; triRTGI 'off'; triSSAO [0,1.2,1.5,.03,80]; triEnableShadowMaps; triShadowSetDarkness .35; triShadowSetBias .00002",
+        "result": {
+          "result": "\"OK:0.000020\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "setTerrainGrid 3.125",
+        "result": {
+          "result": "<null>",
+          "ok": true
+        }
+      },
+      {
+        "code": "setAccTime 0; setDate [1985,7,5,12,0]; triCheatWeather 0.45; 0 setRain 0; 0 setFog 0; triSetView [7116, 78, 6100, 0, -0.12, 1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'on'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time,triCloudShadows 'status',triWetSurfaces 'status']",
+        "result": {
+          "result": "[\"requested=on active=on scattering=on draws=1484 csm=ready csmReach=388.888916 sunlight=0.526876 fog=414.000031,1380.000000 half=960x540 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,1.999,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.003470; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time,triCloudShadows 'status',triWetSurfaces 'status']",
+        "result": {
+          "result": "[\"requested=on active=on scattering=on draws=2986 csm=ready csmReach=388.888916 sunlight=0.526876 fog=414.000031,1380.000000 half=960x540 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,1.999,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.003470; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      },
+      {
+        "code": "player allowDammage false; setAccTime 0; setTerrainGrid 12.5; setViewDistance 1400; hint ''; titleText ['','PLAIN']; triAA 'off'; triRenderScale 100; triSetVsync 0",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triAtmosphere 'on'; triWetSurfaces 'on'; triUnderwater 'on'; triPBR 'on'; triBloom 'off'; triVolumetricFog 'off'; triSunShafts 'off'; triSoftShadows 'off'; triContactShadows 'off'; triLocalShadows 'off'; triVolumetricClouds 'off'; triCloudShadows 'off'; triWaterRefraction 'off'; triRainRipples 'off'; triShoreFoam 'off'; triRTShadows 'off'; triSoftRTShadows 'off'; triRTDynamic 'off'; triRTReflections 'off'; triSkyReflections 'off'; triRTAO 'off'; triRTGI 'off'; triSSAO [0,1.2,1.5,.03,80]; triEnableShadowMaps; triShadowSetDarkness .35; triShadowSetBias .00002",
+        "result": {
+          "result": "\"OK:0.000020\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "setAccTime 0; setDate [1985,7,5,12,0]; triCheatWeather 0.45; 0 setRain 0; 0 setFog 0; triSetView [7116, 78, 6100, 0, -0.12, 1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'off'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time,triCloudShadows 'status',triWetSurfaces 'status']",
+        "result": {
+          "result": "[\"requested=off active=off scattering=off draws=3103 csm=ready csmReach=388.888916 sunlight=0.526876 fog=414.000031,1380.000000 half=0x0 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,1.999,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.003470; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'on'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time,triCloudShadows 'status',triWetSurfaces 'status']",
+        "result": {
+          "result": "[\"requested=on active=on scattering=on draws=4589 csm=ready csmReach=388.888916 sunlight=0.526876 fog=414.000031,1380.000000 half=960x540 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,1.999,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.003470; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'on'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time,triCloudShadows 'status',triWetSurfaces 'status']",
+        "result": {
+          "result": "[\"requested=on active=on scattering=on draws=6171 csm=ready csmReach=388.888916 sunlight=0.526876 fog=414.000031,1380.000000 half=960x540 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,1.999,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.003470; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'off'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time,triCloudShadows 'status',triWetSurfaces 'status']",
+        "result": {
+          "result": "[\"requested=off active=off scattering=off draws=6180 csm=ready csmReach=388.888916 sunlight=0.526876 fog=414.000031,1380.000000 half=0x0 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,1.999,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.003470; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      },
+      {
+        "code": "setAccTime 0; setDate [1985,7,5,6,0]; triCheatWeather 0; 0 setRain 0; 0 setFog 0.6; triSetView [6800, 79, 5500, 1, 0.05, 0]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'off'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time,triCloudShadows 'status',triWetSurfaces 'status']",
+        "result": {
+          "result": "[\"requested=off active=off scattering=off draws=6180 csm=ready csmReach=388.888916 sunlight=0.918954 fog=116.100006,387.000000 half=0x0 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,1.999,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.003470; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'on'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time,triCloudShadows 'status',triWetSurfaces 'status']",
+        "result": {
+          "result": "[\"requested=on active=on scattering=on draws=7664 csm=ready csmReach=388.888916 sunlight=0.918954 fog=116.100006,387.000000 half=960x540 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,1.999,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.003470; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'on'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time,triCloudShadows 'status',triWetSurfaces 'status']",
+        "result": {
+          "result": "[\"requested=on active=on scattering=on draws=9252 csm=ready csmReach=388.888916 sunlight=0.918954 fog=116.100006,387.000000 half=960x540 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,1.999,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.003470; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'off'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time,triCloudShadows 'status',triWetSurfaces 'status']",
+        "result": {
+          "result": "[\"requested=off active=off scattering=off draws=9262 csm=ready csmReach=388.888916 sunlight=0.918954 fog=116.100006,387.000000 half=0x0 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,1.999,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.003470; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      }
+    ],
+    "local_capture_sha256": {
+      "forest-off.png": "f184a1bb567036b142f648a88105bf168cb354fd0bbb3751e6d49c7e3be27f91",
+      "forest-on.png": "87cd9b414a59bf2608ca3eab21cebcc0abe00db7ba05221f6516c01eb5496e13",
+      "road-fine-on.png": "730c8c6203b729b61f37f499bd019d5f533db5be194ee4f0281f525b544382e1",
+      "road-off.png": "ce73c6a861ce520574a7d5077abfdb2ccd059c60f9600bf8d032d68d5726e35a",
+      "road-on.png": "b07f5d35abab2faa0c12bc6bb45b7893b1c32a565315074ce08fcba0fa150924"
+    }
+  },
+  "volume-banding-baseline-1440": {
+    "session": {
+      "arguments": [
+        "-C",
+        "<source-checkout>/game-local/Remastered",
+        "--nosound",
+        "--window",
+        "--width",
+        "2560",
+        "--height",
+        "1440",
+        "--timeout",
+        "3600",
+        "--lang",
+        "English",
+        "--no-splash",
+        "--render",
+        "vk",
+        "--test-mission",
+        "<source-checkout>/game-local/Remastered/Missions/01TakeTheCar.ABEL",
+        "--harness",
+        "19501"
+      ],
+      "run": "<source-checkout>\\build\\shadow-live\\volume-banding-baseline-1440",
+      "pid": 6840,
+      "exe": "<source-checkout>\\build\\shadow-live\\volume-banding-baseline-runtime\\PoseidonGame.exe",
+      "sha256": "442D285339F79252610B1F732F79A49D7FB373EE5D8770649093872754AEEA1F"
+    },
+    "shutdown": {
+      "submitted": 15216,
+      "presented": 15216,
+      "errors": 0,
+      "warnings": 0
+    },
+    "validation_startup": [
+      "Vulkan: instance created (API 1.2); validation=off, synchronization validation=off"
+    ],
+    "loader_diagnostics": [
+      "Vulkan loader ERROR [Loader Message]: loader_get_json: Failed to open JSON file C:\\Program Files (x86)\\Epic Games\\Epic Online Services\\managedArtifacts\\98bc04bc842e4906993fd6d6644ffb8d\\EOSOverlayVkLayer-Win64.json",
+      "Vulkan loader WARNING [Loader Message]: Layer \"VK_LAYER_NV_optimus\" forced disabled because name matches filter of env var 'VK_LOADER_LAYERS_DISABLE'.",
+      "Vulkan loader WARNING [Loader Message]: Layer \"VK_LAYER_NV_present\" forced disabled because name matches filter of env var 'VK_LOADER_LAYERS_DISABLE'.",
+      "Vulkan loader WARNING [Loader Message]: Layer \"VK_LAYER_VALVE_steam_overlay\" forced disabled because name matches filter of env var 'VK_LOADER_LAYERS_DISABLE'.",
+      "Vulkan loader WARNING [Loader Message]: Layer \"VK_LAYER_VALVE_steam_fossilize\" forced disabled because name matches filter of env var 'VK_LOADER_LAYERS_DISABLE'.",
+      "Vulkan loader WARNING [Loader Message]: Layer \"VK_LAYER_BEAMLINE_core_i386\" forced disabled because name matches filter of env var 'VK_LOADER_LAYERS_DISABLE'.",
+      "Vulkan loader WARNING [Loader Message]: Layer \"VK_LAYER_BEAMLINE_core_x86_64\" forced disabled because name matches filter of env var 'VK_LOADER_LAYERS_DISABLE'."
+    ],
+    "actions": [
+      {
+        "code": "player allowDammage false; setAccTime 0; setViewDistance 1400; hint ''; titleText ['','PLAIN']; triAA 'off'; triRenderScale 100; triSetVsync 0",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triAtmosphere 'on'; triWetSurfaces 'on'; triUnderwater 'on'; triPBR 'on'; triBloom 'off'; triVolumetricFog 'off'; triSunShafts 'off'; triSoftShadows 'off'; triContactShadows 'off'; triLocalShadows 'off'; triVolumetricClouds 'off'; triCloudShadows 'off'; triWaterRefraction 'off'; triRainRipples 'off'; triShoreFoam 'off'; triRTShadows 'off'; triSoftRTShadows 'off'; triRTDynamic 'off'; triRTReflections 'off'; triSkyReflections 'off'; triRTAO 'off'; triRTGI 'off'; triSSAO [0,1.2,1.5,.03,80]; triEnableShadowMaps; triShadowSetDarkness .35; triShadowSetBias .00002",
+        "result": {
+          "result": "\"OK:0.000020\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "setAccTime 0; setDate [1985,7,5,12,0]; triCheatWeather 0.45; 0 setRain 0; 0 setFog 0; triSetView [7116, 78, 6100, 0, -0.12, 1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'off'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time]",
+        "result": {
+          "result": "[\"requested=off active=off scattering=off draws=0 csm=ready csmReach=388.888916 sunlight=0.526876 fog=414.000031,1380.000000 half=0x0 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=2560x1440 output=2560x1440 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,10.617]",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'on'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time]",
+        "result": {
+          "result": "[\"requested=on active=on scattering=on draws=1481 csm=ready csmReach=388.888916 sunlight=0.526876 fog=414.000031,1380.000000 half=1280x720 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=2560x1440 output=2560x1440 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,10.617]",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'on'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time]",
+        "result": {
+          "result": "[\"requested=on active=on scattering=on draws=3084 csm=ready csmReach=388.888916 sunlight=0.526876 fog=414.000031,1380.000000 half=1280x720 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=2560x1440 output=2560x1440 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,10.617]",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'off'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time]",
+        "result": {
+          "result": "[\"requested=off active=off scattering=off draws=3092 csm=ready csmReach=388.888916 sunlight=0.526876 fog=414.000031,1380.000000 half=0x0 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=2560x1440 output=2560x1440 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,10.617]",
+          "ok": true
+        }
+      },
+      {
+        "code": "setAccTime 0; setDate [1985,7,5,6,0]; triCheatWeather 0; 0 setRain 0; 0 setFog 0.6; triSetView [6800, 79, 5500, 1, 0.05, 0]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'off'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time]",
+        "result": {
+          "result": "[\"requested=off active=off scattering=off draws=3092 csm=ready csmReach=388.888916 sunlight=0.918954 fog=116.100006,387.000000 half=0x0 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=2560x1440 output=2560x1440 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,10.617]",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'on'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time]",
+        "result": {
+          "result": "[\"requested=on active=on scattering=on draws=4570 csm=ready csmReach=388.888916 sunlight=0.918954 fog=116.100006,387.000000 half=1280x720 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=2560x1440 output=2560x1440 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,10.617]",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'on'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time]",
+        "result": {
+          "result": "[\"requested=on active=on scattering=on draws=6173 csm=ready csmReach=388.888916 sunlight=0.918954 fog=116.100006,387.000000 half=1280x720 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=2560x1440 output=2560x1440 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,10.617]",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'off'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time]",
+        "result": {
+          "result": "[\"requested=off active=off scattering=off draws=6181 csm=ready csmReach=388.888916 sunlight=0.918954 fog=116.100006,387.000000 half=0x0 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=2560x1440 output=2560x1440 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,10.617]",
+          "ok": true
+        }
+      }
+    ],
+    "local_capture_sha256": {
+      "forest-off.png": "337c80833150d8d13b35b6839dedf6f5887c6c3ce162ea30adaf57b784d7c82a",
+      "forest-on.png": "78afc0cf297a0874e4bf93e7974551b45a8baa8e7bbf24b5f6706fc0b69ec43d",
+      "road-off.png": "166cf8edda24f3d4b2b3709b27595c71c5983eff88a8041305c40b2544f61ed8",
+      "road-on.png": "01fac86a48afcb2e75991c9fe570e7613fd459506004fdea252e564e3e4fa301"
+    }
+  },
+  "volume-banding-indexed-1080": {
+    "session": {
+      "arguments": [
+        "-C",
+        "<source-checkout>/game-local/Remastered",
+        "--nosound",
+        "--window",
+        "--width",
+        "1920",
+        "--height",
+        "1080",
+        "--timeout",
+        "3600",
+        "--lang",
+        "English",
+        "--no-splash",
+        "--render",
+        "vk",
+        "--test-mission",
+        "<source-checkout>/game-local/Remastered/Missions/01TakeTheCar.ABEL",
+        "--harness",
+        "19501"
+      ],
+      "run": "<source-checkout>\\build\\shadow-live\\volume-banding-indexed-1080",
+      "pid": 26024,
+      "exe": "<source-checkout>\\dist\\vulkan-local\\PoseidonGame.exe",
+      "sha256": "431A152705C81084445F4F19C4941625C679F9F1EE06F4436AB0BA4D49B39A5E"
+    },
+    "shutdown": {
+      "submitted": 20258,
+      "presented": 20258,
+      "errors": 0,
+      "warnings": 0
+    },
+    "validation_startup": [
+      "Vulkan: instance created (API 1.2); validation=off, synchronization validation=off"
+    ],
+    "loader_diagnostics": [
+      "Vulkan loader ERROR [Loader Message]: loader_get_json: Failed to open JSON file C:\\Program Files (x86)\\Epic Games\\Epic Online Services\\managedArtifacts\\98bc04bc842e4906993fd6d6644ffb8d\\EOSOverlayVkLayer-Win64.json",
+      "Vulkan loader WARNING [Loader Message]: Layer \"VK_LAYER_NV_optimus\" forced disabled because name matches filter of env var 'VK_LOADER_LAYERS_DISABLE'.",
+      "Vulkan loader WARNING [Loader Message]: Layer \"VK_LAYER_NV_present\" forced disabled because name matches filter of env var 'VK_LOADER_LAYERS_DISABLE'.",
+      "Vulkan loader WARNING [Loader Message]: Layer \"VK_LAYER_VALVE_steam_overlay\" forced disabled because name matches filter of env var 'VK_LOADER_LAYERS_DISABLE'.",
+      "Vulkan loader WARNING [Loader Message]: Layer \"VK_LAYER_VALVE_steam_fossilize\" forced disabled because name matches filter of env var 'VK_LOADER_LAYERS_DISABLE'.",
+      "Vulkan loader WARNING [Loader Message]: Layer \"VK_LAYER_BEAMLINE_core_i386\" forced disabled because name matches filter of env var 'VK_LOADER_LAYERS_DISABLE'.",
+      "Vulkan loader WARNING [Loader Message]: Layer \"VK_LAYER_BEAMLINE_core_x86_64\" forced disabled because name matches filter of env var 'VK_LOADER_LAYERS_DISABLE'."
+    ],
+    "actions": [
+      {
+        "code": "player allowDammage false; setAccTime 0; setTerrainGrid 12.5; setViewDistance 1400; hint ''; titleText ['','PLAIN']; triAA 'off'; triRenderScale 100; triSetVsync 0",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triAtmosphere 'on'; triWetSurfaces 'on'; triUnderwater 'on'; triPBR 'on'; triBloom 'off'; triVolumetricFog 'off'; triSunShafts 'off'; triSoftShadows 'off'; triContactShadows 'off'; triLocalShadows 'off'; triVolumetricClouds 'off'; triCloudShadows 'off'; triWaterRefraction 'off'; triRainRipples 'off'; triShoreFoam 'off'; triRTShadows 'off'; triSoftRTShadows 'off'; triRTDynamic 'off'; triRTReflections 'off'; triSkyReflections 'off'; triRTAO 'off'; triRTGI 'off'; triSSAO [0,1.2,1.5,.03,80]; triEnableShadowMaps; triShadowSetDarkness .35; triShadowSetBias .00002",
+        "result": {
+          "result": "\"OK:0.000020\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "setTerrainGrid 3.125",
+        "result": {
+          "result": "<null>",
+          "ok": true
+        }
+      },
+      {
+        "code": "setAccTime 0; setDate [1985,7,5,12,0]; triCheatWeather 0.45; 0 setRain 0; 0 setFog 0; triSetView [7116, 78, 6100, 0, -0.12, 1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'on'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time,triCloudShadows 'status',triWetSurfaces 'status']",
+        "result": {
+          "result": "[\"requested=on active=on scattering=on draws=1481 csm=ready csmReach=388.888916 sunlight=0.526876 fog=414.000031,1380.000000 half=960x540 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,1.93,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.005752; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time,triCloudShadows 'status',triWetSurfaces 'status']",
+        "result": {
+          "result": "[\"requested=on active=on scattering=on draws=2984 csm=ready csmReach=388.888916 sunlight=0.526876 fog=414.000031,1380.000000 half=960x540 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,1.93,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.005752; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      },
+      {
+        "code": "player allowDammage false; setAccTime 0; setTerrainGrid 12.5; setViewDistance 1400; hint ''; titleText ['','PLAIN']; triAA 'off'; triRenderScale 100; triSetVsync 0",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triAtmosphere 'on'; triWetSurfaces 'on'; triUnderwater 'on'; triPBR 'on'; triBloom 'off'; triVolumetricFog 'off'; triSunShafts 'off'; triSoftShadows 'off'; triContactShadows 'off'; triLocalShadows 'off'; triVolumetricClouds 'off'; triCloudShadows 'off'; triWaterRefraction 'off'; triRainRipples 'off'; triShoreFoam 'off'; triRTShadows 'off'; triSoftRTShadows 'off'; triRTDynamic 'off'; triRTReflections 'off'; triSkyReflections 'off'; triRTAO 'off'; triRTGI 'off'; triSSAO [0,1.2,1.5,.03,80]; triEnableShadowMaps; triShadowSetDarkness .35; triShadowSetBias .00002",
+        "result": {
+          "result": "\"OK:0.000020\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "setAccTime 0; setDate [1985,7,5,12,0]; triCheatWeather 0.45; 0 setRain 0; 0 setFog 0; triSetView [7116, 78, 6100, 0, -0.12, 1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'off'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time,triCloudShadows 'status',triWetSurfaces 'status']",
+        "result": {
+          "result": "[\"requested=off active=off scattering=off draws=4270 csm=ready csmReach=388.888916 sunlight=0.526876 fog=414.000031,1380.000000 half=0x0 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,1.93,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.005752; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'on'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time,triCloudShadows 'status',triWetSurfaces 'status']",
+        "result": {
+          "result": "[\"requested=on active=on scattering=on draws=5756 csm=ready csmReach=388.888916 sunlight=0.526876 fog=414.000031,1380.000000 half=960x540 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,1.93,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.005752; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'on'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time,triCloudShadows 'status',triWetSurfaces 'status']",
+        "result": {
+          "result": "[\"requested=on active=on scattering=on draws=7343 csm=ready csmReach=388.888916 sunlight=0.526876 fog=414.000031,1380.000000 half=960x540 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,1.93,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.005752; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'off'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time,triCloudShadows 'status',triWetSurfaces 'status']",
+        "result": {
+          "result": "[\"requested=off active=off scattering=off draws=7350 csm=ready csmReach=388.888916 sunlight=0.526876 fog=414.000031,1380.000000 half=0x0 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,1.93,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.005752; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      },
+      {
+        "code": "setAccTime 0; setDate [1985,7,5,6,0]; triCheatWeather 0; 0 setRain 0; 0 setFog 0.6; triSetView [6800, 79, 5500, 1, 0.05, 0]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'off'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time,triCloudShadows 'status',triWetSurfaces 'status']",
+        "result": {
+          "result": "[\"requested=off active=off scattering=off draws=7350 csm=ready csmReach=388.888916 sunlight=0.918954 fog=116.100006,387.000000 half=0x0 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,1.93,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.005752; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'on'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time,triCloudShadows 'status',triWetSurfaces 'status']",
+        "result": {
+          "result": "[\"requested=on active=on scattering=on draws=8836 csm=ready csmReach=388.888916 sunlight=0.918954 fog=116.100006,387.000000 half=960x540 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,1.93,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.005752; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'on'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time,triCloudShadows 'status',triWetSurfaces 'status']",
+        "result": {
+          "result": "[\"requested=on active=on scattering=on draws=10419 csm=ready csmReach=388.888916 sunlight=0.918954 fog=116.100006,387.000000 half=960x540 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,1.93,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.005752; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'off'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time,triCloudShadows 'status',triWetSurfaces 'status']",
+        "result": {
+          "result": "[\"requested=off active=off scattering=off draws=10425 csm=ready csmReach=388.888916 sunlight=0.918954 fog=116.100006,387.000000 half=0x0 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,1.93,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.005752; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      }
+    ],
+    "local_capture_sha256": {
+      "forest-off.png": "2e1df74f9708e9523deca117abd4286f3137b52d05722821e5bc115c907e6c12",
+      "forest-on.png": "9b9051fde8cb0a6b8c1da4d34737221b2cea830a9e6594c3d459e1d220b24cbf",
+      "road-fine-on.png": "fa9916109391d2b0393f3aaca6a9fc6efb58a1afee7c842861412ef87a366a13",
+      "road-off.png": "3c3c56a8ba5d5c71bc265e82433283d456cbca06f145fb8cbcde9dc8dea53576",
+      "road-on.png": "4a226316eabf90944fe332f9f44f11a5d22b46971ca80c06eba0e6df2de94cc8"
+    }
+  },
+  "volume-banding-indexed-1440": {
+    "session": {
+      "arguments": [
+        "-C",
+        "<source-checkout>/game-local/Remastered",
+        "--nosound",
+        "--window",
+        "--width",
+        "2560",
+        "--height",
+        "1440",
+        "--timeout",
+        "3600",
+        "--lang",
+        "English",
+        "--no-splash",
+        "--render",
+        "vk",
+        "--test-mission",
+        "<source-checkout>/game-local/Remastered/Missions/01TakeTheCar.ABEL",
+        "--harness",
+        "19501"
+      ],
+      "run": "<source-checkout>\\build\\shadow-live\\volume-banding-indexed-1440",
+      "pid": 13748,
+      "exe": "<source-checkout>\\dist\\vulkan-local\\PoseidonGame.exe",
+      "sha256": "431A152705C81084445F4F19C4941625C679F9F1EE06F4436AB0BA4D49B39A5E"
+    },
+    "shutdown": {
+      "submitted": 14784,
+      "presented": 14784,
+      "errors": 0,
+      "warnings": 0
+    },
+    "validation_startup": [
+      "Vulkan: instance created (API 1.2); validation=off, synchronization validation=off"
+    ],
+    "loader_diagnostics": [
+      "Vulkan loader ERROR [Loader Message]: loader_get_json: Failed to open JSON file C:\\Program Files (x86)\\Epic Games\\Epic Online Services\\managedArtifacts\\98bc04bc842e4906993fd6d6644ffb8d\\EOSOverlayVkLayer-Win64.json",
+      "Vulkan loader WARNING [Loader Message]: Layer \"VK_LAYER_NV_optimus\" forced disabled because name matches filter of env var 'VK_LOADER_LAYERS_DISABLE'.",
+      "Vulkan loader WARNING [Loader Message]: Layer \"VK_LAYER_NV_present\" forced disabled because name matches filter of env var 'VK_LOADER_LAYERS_DISABLE'.",
+      "Vulkan loader WARNING [Loader Message]: Layer \"VK_LAYER_VALVE_steam_overlay\" forced disabled because name matches filter of env var 'VK_LOADER_LAYERS_DISABLE'.",
+      "Vulkan loader WARNING [Loader Message]: Layer \"VK_LAYER_VALVE_steam_fossilize\" forced disabled because name matches filter of env var 'VK_LOADER_LAYERS_DISABLE'.",
+      "Vulkan loader WARNING [Loader Message]: Layer \"VK_LAYER_BEAMLINE_core_i386\" forced disabled because name matches filter of env var 'VK_LOADER_LAYERS_DISABLE'.",
+      "Vulkan loader WARNING [Loader Message]: Layer \"VK_LAYER_BEAMLINE_core_x86_64\" forced disabled because name matches filter of env var 'VK_LOADER_LAYERS_DISABLE'."
+    ],
+    "actions": [
+      {
+        "code": "player allowDammage false; setAccTime 0; setTerrainGrid 12.5; setViewDistance 1400; hint ''; titleText ['','PLAIN']; triAA 'off'; triRenderScale 100; triSetVsync 0",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triAtmosphere 'on'; triWetSurfaces 'on'; triUnderwater 'on'; triPBR 'on'; triBloom 'off'; triVolumetricFog 'off'; triSunShafts 'off'; triSoftShadows 'off'; triContactShadows 'off'; triLocalShadows 'off'; triVolumetricClouds 'off'; triCloudShadows 'off'; triWaterRefraction 'off'; triRainRipples 'off'; triShoreFoam 'off'; triRTShadows 'off'; triSoftRTShadows 'off'; triRTDynamic 'off'; triRTReflections 'off'; triSkyReflections 'off'; triRTAO 'off'; triRTGI 'off'; triSSAO [0,1.2,1.5,.03,80]; triEnableShadowMaps; triShadowSetDarkness .35; triShadowSetBias .00002",
+        "result": {
+          "result": "\"OK:0.000020\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "setAccTime 0; setDate [1985,7,5,12,0]; triCheatWeather 0.45; 0 setRain 0; 0 setFog 0; triSetView [7116, 78, 6100, 0, -0.12, 1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'off'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time,triCloudShadows 'status',triWetSurfaces 'status']",
+        "result": {
+          "result": "[\"requested=off active=off scattering=off draws=0 csm=ready csmReach=388.888916 sunlight=0.526876 fog=414.000031,1380.000000 half=0x0 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=2560x1440 output=2560x1440 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,2.054,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.003547; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'on'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time,triCloudShadows 'status',triWetSurfaces 'status']",
+        "result": {
+          "result": "[\"requested=on active=on scattering=on draws=1474 csm=ready csmReach=388.888916 sunlight=0.526876 fog=414.000031,1380.000000 half=1280x720 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=2560x1440 output=2560x1440 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,2.054,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.003547; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'on'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time,triCloudShadows 'status',triWetSurfaces 'status']",
+        "result": {
+          "result": "[\"requested=on active=on scattering=on draws=3069 csm=ready csmReach=388.888916 sunlight=0.526876 fog=414.000031,1380.000000 half=1280x720 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=2560x1440 output=2560x1440 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,2.054,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.003547; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'off'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time,triCloudShadows 'status',triWetSurfaces 'status']",
+        "result": {
+          "result": "[\"requested=off active=off scattering=off draws=3076 csm=ready csmReach=388.888916 sunlight=0.526876 fog=414.000031,1380.000000 half=0x0 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=2560x1440 output=2560x1440 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,2.054,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.003547; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      },
+      {
+        "code": "setAccTime 0; setDate [1985,7,5,6,0]; triCheatWeather 0; 0 setRain 0; 0 setFog 0.6; triSetView [6800, 79, 5500, 1, 0.05, 0]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'off'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time,triCloudShadows 'status',triWetSurfaces 'status']",
+        "result": {
+          "result": "[\"requested=off active=off scattering=off draws=3076 csm=ready csmReach=388.888916 sunlight=0.918954 fog=116.100006,387.000000 half=0x0 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=2560x1440 output=2560x1440 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,2.054,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.003547; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'on'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time,triCloudShadows 'status',triWetSurfaces 'status']",
+        "result": {
+          "result": "[\"requested=on active=on scattering=on draws=4540 csm=ready csmReach=388.888916 sunlight=0.918954 fog=116.100006,387.000000 half=1280x720 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=2560x1440 output=2560x1440 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,2.054,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.003547; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'on'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time,triCloudShadows 'status',triWetSurfaces 'status']",
+        "result": {
+          "result": "[\"requested=on active=on scattering=on draws=6141 csm=ready csmReach=388.888916 sunlight=0.918954 fog=116.100006,387.000000 half=1280x720 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=2560x1440 output=2560x1440 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,2.054,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.003547; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'off'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time,triCloudShadows 'status',triWetSurfaces 'status']",
+        "result": {
+          "result": "[\"requested=off active=off scattering=off draws=6148 csm=ready csmReach=388.888916 sunlight=0.918954 fog=116.100006,387.000000 half=0x0 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=2560x1440 output=2560x1440 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,2.054,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.003547; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      }
+    ],
+    "local_capture_sha256": {
+      "forest-off.png": "adf85e5b0bedfd035e5dadb6ceb07b21bd8de3eeb308740a67d0364595e453d2",
+      "forest-on.png": "4586020a7922ca53cfcd4024df40d5fb7e1b108d286a93268ab34346cdf1e408",
+      "road-off.png": "9fe567f915aa5ec29a16a34c892f3c487b61c9f4b5a5caf6775c00d8144630eb",
+      "road-on.png": "40a4eb39f258db2ca52bad656832286407767a599ad36a4419233702c1802169"
+    }
+  },
+  "volume-banding-baseline-everon": {
+    "session": {
+      "arguments": [
+        "-C",
+        "<source-checkout>/game-local/Remastered",
+        "--nosound",
+        "--window",
+        "--width",
+        "1920",
+        "--height",
+        "1080",
+        "--timeout",
+        "3600",
+        "--lang",
+        "English",
+        "--no-splash",
+        "--render",
+        "vk",
+        "--test-mission",
+        "<source-checkout>/game-local/Remastered/Missions/05HeavyMetal.Eden",
+        "--harness",
+        "19501"
+      ],
+      "run": "<source-checkout>\\build\\shadow-live\\volume-banding-baseline-everon",
+      "pid": 20724,
+      "exe": "<source-checkout>\\build\\shadow-live\\volume-banding-baseline-runtime\\PoseidonGame.exe",
+      "sha256": "442D285339F79252610B1F732F79A49D7FB373EE5D8770649093872754AEEA1F"
+    },
+    "shutdown": {
+      "submitted": 6466,
+      "presented": 6466,
+      "errors": 0,
+      "warnings": 0
+    },
+    "validation_startup": [
+      "Vulkan: instance created (API 1.2); validation=off, synchronization validation=off"
+    ],
+    "loader_diagnostics": [
+      "Vulkan loader ERROR [Loader Message]: loader_get_json: Failed to open JSON file C:\\Program Files (x86)\\Epic Games\\Epic Online Services\\managedArtifacts\\98bc04bc842e4906993fd6d6644ffb8d\\EOSOverlayVkLayer-Win64.json",
+      "Vulkan loader WARNING [Loader Message]: Layer \"VK_LAYER_NV_optimus\" forced disabled because name matches filter of env var 'VK_LOADER_LAYERS_DISABLE'.",
+      "Vulkan loader WARNING [Loader Message]: Layer \"VK_LAYER_NV_present\" forced disabled because name matches filter of env var 'VK_LOADER_LAYERS_DISABLE'.",
+      "Vulkan loader WARNING [Loader Message]: Layer \"VK_LAYER_VALVE_steam_overlay\" forced disabled because name matches filter of env var 'VK_LOADER_LAYERS_DISABLE'.",
+      "Vulkan loader WARNING [Loader Message]: Layer \"VK_LAYER_VALVE_steam_fossilize\" forced disabled because name matches filter of env var 'VK_LOADER_LAYERS_DISABLE'.",
+      "Vulkan loader WARNING [Loader Message]: Layer \"VK_LAYER_BEAMLINE_core_i386\" forced disabled because name matches filter of env var 'VK_LOADER_LAYERS_DISABLE'.",
+      "Vulkan loader WARNING [Loader Message]: Layer \"VK_LAYER_BEAMLINE_core_x86_64\" forced disabled because name matches filter of env var 'VK_LOADER_LAYERS_DISABLE'."
+    ],
+    "actions": [
+      {
+        "code": "player allowDammage false; setAccTime 0; setTerrainGrid 12.5; setViewDistance 1400; hint ''; titleText ['','PLAIN']; triAA 'off'; triRenderScale 100; triSetVsync 0",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triAtmosphere 'on'; triWetSurfaces 'on'; triUnderwater 'on'; triPBR 'on'; triBloom 'off'; triVolumetricFog 'off'; triSunShafts 'off'; triSoftShadows 'off'; triContactShadows 'off'; triLocalShadows 'off'; triVolumetricClouds 'off'; triCloudShadows 'off'; triWaterRefraction 'off'; triRainRipples 'off'; triShoreFoam 'off'; triRTShadows 'off'; triSoftRTShadows 'off'; triRTDynamic 'off'; triRTReflections 'off'; triSkyReflections 'off'; triRTAO 'off'; triRTGI 'off'; triSSAO [0,1.2,1.5,.03,80]; triEnableShadowMaps; triShadowSetDarkness .35; triShadowSetBias .00002",
+        "result": {
+          "result": "\"OK:0.000020\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "setAccTime 0; setDate [1985,7,5,12,0]; triCheatWeather 0.45; 0 setRain 0; 0 setFog 0; triSetView [9448, 28, 1580, -1, 0.02, 0]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'off'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time,triCloudShadows 'status',triWetSurfaces 'status']",
+        "result": {
+          "result": "[\"requested=off active=off scattering=off draws=0 csm=ready csmReach=388.888916 sunlight=0.526876 fog=414.000031,1380.000000 half=0x0 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,1.026,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.000000; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'on'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time,triCloudShadows 'status',triWetSurfaces 'status']",
+        "result": {
+          "result": "[\"requested=on active=on scattering=on draws=1483 csm=ready csmReach=388.888916 sunlight=0.526876 fog=414.000031,1380.000000 half=960x540 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,1.026,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.000000; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'on'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time,triCloudShadows 'status',triWetSurfaces 'status']",
+        "result": {
+          "result": "[\"requested=on active=on scattering=on draws=3069 csm=ready csmReach=388.888916 sunlight=0.526876 fog=414.000031,1380.000000 half=960x540 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,1.026,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.000000; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'off'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time,triCloudShadows 'status',triWetSurfaces 'status']",
+        "result": {
+          "result": "[\"requested=off active=off scattering=off draws=3077 csm=ready csmReach=388.888916 sunlight=0.526876 fog=414.000031,1380.000000 half=0x0 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,1.026,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.000000; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      }
+    ],
+    "local_capture_sha256": {
+      "everon-off.png": "7676a4e2bb71ef95bfb370f0aeec7fdee09714a19310319d54bd7b530754af73",
+      "everon-on.png": "8c540805aaaf75d7d18f971ba01f89dff6f1d48617b9f1be3131cf6e11e002e5"
+    }
+  },
+  "volume-banding-fixed-everon": {
+    "session": {
+      "arguments": [
+        "-C",
+        "<source-checkout>/game-local/Remastered",
+        "--nosound",
+        "--window",
+        "--width",
+        "1920",
+        "--height",
+        "1080",
+        "--timeout",
+        "3600",
+        "--lang",
+        "English",
+        "--no-splash",
+        "--render",
+        "vk",
+        "--test-mission",
+        "<source-checkout>/game-local/Remastered/Missions/05HeavyMetal.Eden",
+        "--harness",
+        "19501"
+      ],
+      "run": "<source-checkout>\\build\\shadow-live\\volume-banding-fixed-everon",
+      "pid": 25684,
+      "exe": "<source-checkout>\\dist\\vulkan-local\\PoseidonGame.exe",
+      "sha256": "431A152705C81084445F4F19C4941625C679F9F1EE06F4436AB0BA4D49B39A5E"
+    },
+    "shutdown": {
+      "submitted": 6583,
+      "presented": 6583,
+      "errors": 0,
+      "warnings": 0
+    },
+    "validation_startup": [
+      "Vulkan: instance created (API 1.2); validation=off, synchronization validation=off"
+    ],
+    "loader_diagnostics": [
+      "Vulkan loader ERROR [Loader Message]: loader_get_json: Failed to open JSON file C:\\Program Files (x86)\\Epic Games\\Epic Online Services\\managedArtifacts\\98bc04bc842e4906993fd6d6644ffb8d\\EOSOverlayVkLayer-Win64.json",
+      "Vulkan loader WARNING [Loader Message]: Layer \"VK_LAYER_NV_optimus\" forced disabled because name matches filter of env var 'VK_LOADER_LAYERS_DISABLE'.",
+      "Vulkan loader WARNING [Loader Message]: Layer \"VK_LAYER_NV_present\" forced disabled because name matches filter of env var 'VK_LOADER_LAYERS_DISABLE'.",
+      "Vulkan loader WARNING [Loader Message]: Layer \"VK_LAYER_VALVE_steam_overlay\" forced disabled because name matches filter of env var 'VK_LOADER_LAYERS_DISABLE'.",
+      "Vulkan loader WARNING [Loader Message]: Layer \"VK_LAYER_VALVE_steam_fossilize\" forced disabled because name matches filter of env var 'VK_LOADER_LAYERS_DISABLE'.",
+      "Vulkan loader WARNING [Loader Message]: Layer \"VK_LAYER_BEAMLINE_core_i386\" forced disabled because name matches filter of env var 'VK_LOADER_LAYERS_DISABLE'.",
+      "Vulkan loader WARNING [Loader Message]: Layer \"VK_LAYER_BEAMLINE_core_x86_64\" forced disabled because name matches filter of env var 'VK_LOADER_LAYERS_DISABLE'."
+    ],
+    "actions": [
+      {
+        "code": "player allowDammage false; setAccTime 0; setTerrainGrid 12.5; setViewDistance 1400; hint ''; titleText ['','PLAIN']; triAA 'off'; triRenderScale 100; triSetVsync 0",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triAtmosphere 'on'; triWetSurfaces 'on'; triUnderwater 'on'; triPBR 'on'; triBloom 'off'; triVolumetricFog 'off'; triSunShafts 'off'; triSoftShadows 'off'; triContactShadows 'off'; triLocalShadows 'off'; triVolumetricClouds 'off'; triCloudShadows 'off'; triWaterRefraction 'off'; triRainRipples 'off'; triShoreFoam 'off'; triRTShadows 'off'; triSoftRTShadows 'off'; triRTDynamic 'off'; triRTReflections 'off'; triSkyReflections 'off'; triRTAO 'off'; triRTGI 'off'; triSSAO [0,1.2,1.5,.03,80]; triEnableShadowMaps; triShadowSetDarkness .35; triShadowSetBias .00002",
+        "result": {
+          "result": "\"OK:0.000020\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "setAccTime 0; setDate [1985,7,5,12,0]; triCheatWeather 0.45; 0 setRain 0; 0 setFog 0; triSetView [9448, 28, 1580, -1, 0.02, 0]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'off'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time,triCloudShadows 'status',triWetSurfaces 'status']",
+        "result": {
+          "result": "[\"requested=off active=off scattering=off draws=0 csm=ready csmReach=388.888916 sunlight=0.526876 fog=414.000031,1380.000000 half=0x0 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,1.723,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.000000; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'on'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time,triCloudShadows 'status',triWetSurfaces 'status']",
+        "result": {
+          "result": "[\"requested=on active=on scattering=on draws=1482 csm=ready csmReach=388.888916 sunlight=0.526876 fog=414.000031,1380.000000 half=960x540 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,1.723,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.000000; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'on'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time,triCloudShadows 'status',triWetSurfaces 'status']",
+        "result": {
+          "result": "[\"requested=on active=on scattering=on draws=3070 csm=ready csmReach=388.888916 sunlight=0.526876 fog=414.000031,1380.000000 half=960x540 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,1.723,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.000000; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'off'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time,triCloudShadows 'status',triWetSurfaces 'status']",
+        "result": {
+          "result": "[\"requested=off active=off scattering=off draws=3080 csm=ready csmReach=388.888916 sunlight=0.526876 fog=414.000031,1380.000000 half=0x0 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,1.723,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.000000; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      }
+    ],
+    "local_capture_sha256": {
+      "everon-off.png": "0bcc8a37581e6af74be1f24ddcab2bce9767e0fc230df6f98a28416a80230de5",
+      "everon-on.png": "e7187242b26667309aab115a151b0f8b014418c79ed9150722d60d5b75fff4f9"
+    }
+  },
+  "volume-banding-validate": {
+    "session": {
+      "arguments": [
+        "-C",
+        "<source-checkout>/game-local/Remastered",
+        "--nosound",
+        "--window",
+        "--width",
+        "1920",
+        "--height",
+        "1080",
+        "--timeout",
+        "3600",
+        "--lang",
+        "English",
+        "--no-splash",
+        "--render",
+        "vk",
+        "--vk-validation",
+        "--test-mission",
+        "<source-checkout>/game-local/Remastered/Missions/01TakeTheCar.ABEL",
+        "--harness",
+        "19501"
+      ],
+      "run": "<source-checkout>\\build\\shadow-live\\volume-banding-validate",
+      "pid": 6096,
+      "exe": "<source-checkout>\\dist\\vulkan-local\\PoseidonGame.exe",
+      "sha256": "431A152705C81084445F4F19C4941625C679F9F1EE06F4436AB0BA4D49B39A5E"
+    },
+    "shutdown": {
+      "submitted": 20323,
+      "presented": 20323,
+      "errors": 0,
+      "warnings": 0
+    },
+    "validation_startup": [
+      "Vulkan: instance created (API 1.2); validation=on, synchronization validation=on"
+    ],
+    "loader_diagnostics": [
+      "Vulkan loader ERROR [Loader Message]: loader_get_json: Failed to open JSON file C:\\Program Files (x86)\\Epic Games\\Epic Online Services\\managedArtifacts\\98bc04bc842e4906993fd6d6644ffb8d\\EOSOverlayVkLayer-Win64.json",
+      "Vulkan loader WARNING [Loader Message]: Layer \"VK_LAYER_NV_optimus\" forced disabled because name matches filter of env var 'VK_LOADER_LAYERS_DISABLE'.",
+      "Vulkan loader WARNING [Loader Message]: Layer \"VK_LAYER_NV_present\" forced disabled because name matches filter of env var 'VK_LOADER_LAYERS_DISABLE'.",
+      "Vulkan loader WARNING [Loader Message]: Layer \"VK_LAYER_VALVE_steam_overlay\" forced disabled because name matches filter of env var 'VK_LOADER_LAYERS_DISABLE'.",
+      "Vulkan loader WARNING [Loader Message]: Layer \"VK_LAYER_VALVE_steam_fossilize\" forced disabled because name matches filter of env var 'VK_LOADER_LAYERS_DISABLE'.",
+      "Vulkan loader WARNING [Loader Message]: Layer \"VK_LAYER_BEAMLINE_core_i386\" forced disabled because name matches filter of env var 'VK_LOADER_LAYERS_DISABLE'.",
+      "Vulkan loader WARNING [Loader Message]: Layer \"VK_LAYER_BEAMLINE_core_x86_64\" forced disabled because name matches filter of env var 'VK_LOADER_LAYERS_DISABLE'."
+    ],
+    "actions": [
+      {
+        "code": "player allowDammage false; setAccTime 0; setTerrainGrid 12.5; setViewDistance 1400; hint ''; titleText ['','PLAIN']; triAA 'off'; triRenderScale 100; triSetVsync 0",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triAtmosphere 'on'; triWetSurfaces 'on'; triUnderwater 'on'; triPBR 'on'; triBloom 'off'; triVolumetricFog 'off'; triSunShafts 'off'; triSoftShadows 'off'; triContactShadows 'off'; triLocalShadows 'off'; triVolumetricClouds 'off'; triCloudShadows 'off'; triWaterRefraction 'off'; triRainRipples 'off'; triShoreFoam 'off'; triRTShadows 'off'; triSoftRTShadows 'off'; triRTDynamic 'off'; triRTReflections 'off'; triSkyReflections 'off'; triRTAO 'off'; triRTGI 'off'; triSSAO [0,1.2,1.5,.03,80]; triEnableShadowMaps; triShadowSetDarkness .35; triShadowSetBias .00002",
+        "result": {
+          "result": "\"OK:0.000020\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triClearView; player switchCamera 'INTERNAL'; setAccTime 1; setDate [1985,7,5,12,0]; triCheatWeather .45; 0 setFog 0; triVolumetricFog 'on'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triAA 'taa'",
+        "result": {
+          "result": "\"OK: taa (next frame)\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "getPos player",
+        "result": {
+          "result": "[7277.32,7878.13,-0.00210571]",
+          "ok": true
+        }
+      },
+      {
+        "code": "player allowDammage false; setAccTime 0; setTerrainGrid 12.5; setViewDistance 1400; hint ''; titleText ['','PLAIN']; triAA 'off'; triRenderScale 100; triSetVsync 0",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triAtmosphere 'on'; triWetSurfaces 'on'; triUnderwater 'on'; triPBR 'on'; triBloom 'off'; triVolumetricFog 'off'; triSunShafts 'off'; triSoftShadows 'off'; triContactShadows 'off'; triLocalShadows 'off'; triVolumetricClouds 'off'; triCloudShadows 'off'; triWaterRefraction 'off'; triRainRipples 'off'; triShoreFoam 'off'; triRTShadows 'off'; triSoftRTShadows 'off'; triRTDynamic 'off'; triRTReflections 'off'; triSkyReflections 'off'; triRTAO 'off'; triRTGI 'off'; triSSAO [0,1.2,1.5,.03,80]; triEnableShadowMaps; triShadowSetDarkness .35; triShadowSetBias .00002",
+        "result": {
+          "result": "\"OK:0.000020\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triClearView; player switchCamera 'INTERNAL'; setAccTime 1; setDate [1985,7,5,12,0]; triCheatWeather .45; 0 setFog 0; triVolumetricFog 'on'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triAA 'taa'",
+        "result": {
+          "result": "\"OK: taa (next frame)\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "getPos player",
+        "result": {
+          "result": "[7277.32,7878.13,-0.00210571]",
+          "ok": true
+        }
+      },
+      {
+        "code": "getPos player",
+        "result": {
+          "result": "[7280.32,7881.71,-0.00212097]",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time,triCloudShadows 'status',triWetSurfaces 'status']",
+        "result": {
+          "result": "[\"requested=on active=on scattering=on draws=1270 csm=ready csmReach=388.888916 sunlight=0.526876 fog=414.000031,1380.000000 half=960x540 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=taa requested=taa scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,29.618,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.000000; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      },
+      {
+        "code": "triAA 'fsr-quality'",
+        "result": {
+          "result": "\"OK: fsr-quality (next frame)\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "getPos player",
+        "result": {
+          "result": "[7280.43,7881.84,-0.00215149]",
+          "ok": true
+        }
+      },
+      {
+        "code": "getPos player",
+        "result": {
+          "result": "[7283.47,7885.46,-0.00216675]",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time,triCloudShadows 'status',triWetSurfaces 'status']",
+        "result": {
+          "result": "[\"requested=on active=on scattering=on draws=1431 csm=ready csmReach=388.888916 sunlight=0.526876 fog=414.000031,1380.000000 half=640x360 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=fsr-quality requested=fsr-quality scale=100 requestedScale=100 sampleMask=15 world=1280x720 output=1920x1080 fsr=available fsrDispatches=159 fsrResets=1\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,33.368,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.000000; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      },
+      {
+        "code": "setAccTime 0",
+        "result": {
+          "result": "<null>",
+          "ok": true
+        }
+      },
+      {
+        "code": "triAA 'taa'; setTerrainGrid 3.125",
+        "result": {
+          "result": "<null>",
+          "ok": true
+        }
+      },
+      {
+        "code": "setAccTime 0; setDate [1985,7,5,12,0]; triCheatWeather 0.45; 0 setRain 0; 0 setFog 0; triSetView [7116, 78, 6100, 0, -0.12, 1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'on'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7116.0,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7117.2,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7118.4,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7119.6,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7120.8,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7122.0,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7123.2,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7124.4,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7125.6,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7126.8,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7128.0,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7129.2,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7130.4,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7131.6,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7132.8,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7134.0,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7135.2,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7136.4,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7137.6,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7138.8,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7140.0,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7141.2,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7142.4,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7143.6,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7144.8,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7146.0,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7147.2,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7148.4,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7149.6,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7150.8,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time,triCloudShadows 'status',triWetSurfaces 'status']",
+        "result": {
+          "result": "[\"requested=on active=on scattering=on draws=2190 csm=ready csmReach=388.888916 sunlight=0.526876 fog=414.000031,1380.000000 half=960x540 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=taa requested=taa scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=174 fsrResets=1\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,33.673,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.000000; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      },
+      {
+        "code": "triAA 'fsr-quality'; setTerrainGrid 3.125",
+        "result": {
+          "result": "<null>",
+          "ok": true
+        }
+      },
+      {
+        "code": "setAccTime 0; setDate [1985,7,5,12,0]; triCheatWeather 0.45; 0 setRain 0; 0 setFog 0; triSetView [7116, 78, 6100, 0, -0.12, 1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'on'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7116.0,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7117.2,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7118.4,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7119.6,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7120.8,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7122.0,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7123.2,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7124.4,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7125.6,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7126.8,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7128.0,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7129.2,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7130.4,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7131.6,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7132.8,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7134.0,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7135.2,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7136.4,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7137.6,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7138.8,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7140.0,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7141.2,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7142.4,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7143.6,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7144.8,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7146.0,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7147.2,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7148.4,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7149.6,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSetView [7150.8,78,6100,0,-.12,1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time,triCloudShadows 'status',triWetSurfaces 'status']",
+        "result": {
+          "result": "[\"requested=on active=on scattering=on draws=2770 csm=ready csmReach=388.888916 sunlight=0.526876 fog=414.000031,1380.000000 half=640x360 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=fsr-quality requested=fsr-quality scale=100 requestedScale=100 sampleMask=15 world=1280x720 output=1920x1080 fsr=available fsrDispatches=753 fsrResets=3\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,33.673,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.000000; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      },
+      {
+        "code": "triAA 'taa'; setTerrainGrid 12.5",
+        "result": {
+          "result": "<null>",
+          "ok": true
+        }
+      },
+      {
+        "code": "setAccTime 0; setDate [1985,7,5,6,0]; triCheatWeather 0; 0 setRain 0; 0 setFog 0.6; triSetView [6800, 79, 5500, 1, 0.05, 0]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'on'; triSoftShadows 'on'; triContactShadows 'on'",
+        "result": {
+          "result": "\"OK: contact shadows requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time,triCloudShadows 'status',triWetSurfaces 'status']",
+        "result": {
+          "result": "[\"requested=on active=on scattering=on draws=3286 csm=ready csmReach=388.888916 sunlight=0.918954 fog=116.100006,387.000000 half=960x540 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=taa requested=taa scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=754 fsrResets=3\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,33.673,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.000000; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSoftShadows 'off'; triContactShadows 'off'",
+        "result": {
+          "result": "\"OK: contact shadows requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "setAccTime 0; setDate [1985,7,5,12,0]; triCheatWeather 0.45; 0 setRain 0; 0 setFog 0; triSetView [7116, 78, 6100, 0, -0.12, 1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "setDate [1985,7,5,6,0]; triCheatWeather 0; 0 setFog 0.6; 0 setRain 0; setAccTime 1",
+        "result": {
+          "result": "<null>",
+          "ok": true
+        }
+      },
+      {
+        "code": "setAccTime 0",
+        "result": {
+          "result": "<null>",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time,triCloudShadows 'status',triWetSurfaces 'status']",
+        "result": {
+          "result": "[\"requested=on active=on scattering=on draws=3968 csm=ready csmReach=388.888916 sunlight=0.918954 fog=116.100006,387.000000 half=960x540 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=taa requested=taa scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=754 fsrResets=3\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,36.69,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.000000; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      },
+      {
+        "code": "setDate [1985,7,5,12,0]; triCheatWeather 0.45; 0 setFog 0; 0 setRain 0; setAccTime 1",
+        "result": {
+          "result": "<null>",
+          "ok": true
+        }
+      },
+      {
+        "code": "setAccTime 0",
+        "result": {
+          "result": "<null>",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time,triCloudShadows 'status',triWetSurfaces 'status']",
+        "result": {
+          "result": "[\"requested=on active=on scattering=on draws=4248 csm=ready csmReach=388.888916 sunlight=0.526876 fog=414.000031,1380.000000 half=960x540 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=taa requested=taa scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=754 fsrResets=3\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,39.691,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.000000; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      },
+      {
+        "code": "setDate [1985,7,5,12,0]; triCheatWeather 1; 0 setFog 0.6; 0 setRain 1; setAccTime 1",
+        "result": {
+          "result": "<null>",
+          "ok": true
+        }
+      },
+      {
+        "code": "setAccTime 0",
+        "result": {
+          "result": "<null>",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time,triCloudShadows 'status',triWetSurfaces 'status']",
+        "result": {
+          "result": "[\"requested=on active=on scattering=off draws=4249 csm=ready csmReach=388.888916 sunlight=0.000000 fog=33.864830,112.882767 half=960x540 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=taa requested=taa scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=754 fsrResets=3\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,42.722,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.776588; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      },
+      {
+        "code": "setDate [1985,7,5,19,30]; triCheatWeather 0.45; 0 setFog 0; 0 setRain 0; setAccTime 1",
+        "result": {
+          "result": "<null>",
+          "ok": true
+        }
+      },
+      {
+        "code": "setAccTime 0",
+        "result": {
+          "result": "<null>",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time,triCloudShadows 'status',triWetSurfaces 'status']",
+        "result": {
+          "result": "[\"requested=on active=on scattering=off draws=4249 csm=unavailable csmReach=0.000000 sunlight=0.000000 fog=414.000031,1380.000000 half=960x540 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=taa requested=taa scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=754 fsrResets=3\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,45.718,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.173627; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      },
+      {
+        "code": "setDate [1985,7,5,0,0]; triCheatWeather 0; 0 setFog 0; 0 setRain 0; setAccTime 1",
+        "result": {
+          "result": "<null>",
+          "ok": true
+        }
+      },
+      {
+        "code": "setAccTime 0",
+        "result": {
+          "result": "<null>",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time,triCloudShadows 'status',triWetSurfaces 'status']",
+        "result": {
+          "result": "[\"requested=on active=on scattering=off draws=4249 csm=unavailable csmReach=0.000000 sunlight=0.000000 fog=315.000000,1050.000000 half=960x540 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=taa requested=taa scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=754 fsrResets=3\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,48.736,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.038394; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      },
+      {
+        "code": "setDate [1985,7,5,6,0]; triCheatWeather 0; 0 setFog 0.6; 0 setRain 0; setAccTime 1",
+        "result": {
+          "result": "<null>",
+          "ok": true
+        }
+      },
+      {
+        "code": "setAccTime 0",
+        "result": {
+          "result": "<null>",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time,triCloudShadows 'status',triWetSurfaces 'status']",
+        "result": {
+          "result": "[\"requested=on active=on scattering=on draws=4865 csm=ready csmReach=388.888916 sunlight=0.918954 fog=116.100006,387.000000 half=960x540 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=taa requested=taa scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=754 fsrResets=3\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,51.749,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.008511; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      },
+      {
+        "code": "setAccTime 0; setDate [1985,7,5,18,30]; triCheatWeather 0; 0 setRain 0; 0 setFog .1; triSetView [7116,78,6100,0,-.12,1]; triShadowSetDarkness .35",
+        "result": {
+          "result": "\"OK:0.350\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'status'",
+        "result": {
+          "result": "\"requested=on active=on scattering=on draws=14324 csm=ready csmReach=388.888916 sunlight=0.918954 fog=347.859375,1159.531250 half=960x540 steps=48 reach=400m history=world-AA shafts=exclusive\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'off'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'on'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      }
+    ],
+    "local_capture_sha256": {
+      "forest-enhanced.png": "a304580bb5ed1dfef57d5e97c2edca84afd676ef4c5fd04d33465499c2aaf9c5",
+      "hill-low-sun-volume-off.png": "803e52fd6a6fbb3d84ae1a047203800769d33c4540082b7c0788334a11ea0402",
+      "hill-low-sun.png": "99c718f3c15bcd4ccc82e60144a04d0a45ef820461e42850eeefe0dde7229e02",
+      "sweep-fsr-quality-0.png": "88e0460e84e90a9525d0138f01b0c18652c391f1229b8b2198f6a4a906d2fc34",
+      "sweep-fsr-quality-18.png": "455b1beaf00d3ce8ba50c8fbb29c39b442ff8fa629fdc38f58bbb80ab3d41e43",
+      "sweep-fsr-quality-29.png": "de93346ccc5490fe374a6400d805d7cf6f406ec09ee6a74c029a0d56880dc4b0",
+      "sweep-fsr-quality-9.png": "b97fe1564657b22f935c176edb81d35fc8b473313d0ada1f678f64f30af004c0",
+      "sweep-taa-0.png": "69a86abcfd60c539c938635e34a2c449d5717248a7a683e199cb9f8dc0633f83",
+      "sweep-taa-18.png": "aa5ef45c0208a7f37ef58a69904df7595d98d6d9cb19c9e90c12495d95a2c5d5",
+      "sweep-taa-29.png": "9def9358b121a16ef1f38d4b1e1818eff77d37459b5fae04d001dbac26928fd8",
+      "sweep-taa-9.png": "d6ac4bd6671f998e010af9dfb03c63518bf2c4b0fc8d3528294619c66625e7f8",
+      "transition-dawn-restored.png": "36692e488fb1bb8c5115593321f8d4733abd77c714a89d32676493c091f05bd1",
+      "transition-dawn.png": "e2552c7e442ad68a835efd4c9b74f3e04fd3db0d59581cfc6c33123eac978d1d",
+      "transition-night.png": "2df7e71bbae94df0c373d0d879d3a8faacf6867bc64fa94fa10537d3f05d3580",
+      "transition-noon.png": "975ccc9ed6564c4a5300148e781adcf96d12eff98f78ab250d87cc23c1d04822",
+      "transition-rain.png": "9a041f3d2a7b2fbe6a450606de5f93bc4dec00e316371cd4961ec034f90b395f",
+      "transition-sunset.png": "61bc74220ba62ed8e6215ec11b996135f37640b753710058e288ee3f790811e1",
+      "walk-fsr-quality.png": "1de17166b2e5a0fafdda8b0352112b751493498644ad83181071c4ad403f7c40",
+      "walk-taa.png": "ad5125bbc77e37d4dd7b9fc0161226a2dc67e965476ad2195b6446284ddac151"
+    },
+    "checks": [
+      {
+        "input": "taa",
+        "before": {
+          "result": "[7277.32,7878.13,-0.00210571]",
+          "ok": true
+        },
+        "after": {
+          "result": "[7280.32,7881.71,-0.00212097]",
+          "ok": true
+        }
+      },
+      {
+        "label": "walk-taa",
+        "status": {
+          "result": "[\"requested=on active=on scattering=on draws=1270 csm=ready csmReach=388.888916 sunlight=0.526876 fog=414.000031,1380.000000 half=960x540 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=taa requested=taa scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,29.618,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.000000; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      },
+      {
+        "input": "fsr-quality",
+        "before": {
+          "result": "[7280.43,7881.84,-0.00215149]",
+          "ok": true
+        },
+        "after": {
+          "result": "[7283.47,7885.46,-0.00216675]",
+          "ok": true
+        }
+      },
+      {
+        "label": "walk-fsr-quality",
+        "status": {
+          "result": "[\"requested=on active=on scattering=on draws=1431 csm=ready csmReach=388.888916 sunlight=0.526876 fog=414.000031,1380.000000 half=640x360 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=fsr-quality requested=fsr-quality scale=100 requestedScale=100 sampleMask=15 world=1280x720 output=1920x1080 fsr=available fsrDispatches=159 fsrResets=1\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,33.368,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.000000; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      },
+      {
+        "label": "sweep-taa",
+        "status": {
+          "result": "[\"requested=on active=on scattering=on draws=2190 csm=ready csmReach=388.888916 sunlight=0.526876 fog=414.000031,1380.000000 half=960x540 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=taa requested=taa scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=174 fsrResets=1\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,33.673,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.000000; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      },
+      {
+        "label": "sweep-fsr-quality",
+        "status": {
+          "result": "[\"requested=on active=on scattering=on draws=2770 csm=ready csmReach=388.888916 sunlight=0.526876 fog=414.000031,1380.000000 half=640x360 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=fsr-quality requested=fsr-quality scale=100 requestedScale=100 sampleMask=15 world=1280x720 output=1920x1080 fsr=available fsrDispatches=753 fsrResets=3\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,33.673,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.000000; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      },
+      {
+        "label": "forest-enhanced",
+        "status": {
+          "result": "[\"requested=on active=on scattering=on draws=3286 csm=ready csmReach=388.888916 sunlight=0.918954 fog=116.100006,387.000000 half=960x540 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=taa requested=taa scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=754 fsrResets=3\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,33.673,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.000000; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      },
+      {
+        "label": "dawn",
+        "status": {
+          "result": "[\"requested=on active=on scattering=on draws=3968 csm=ready csmReach=388.888916 sunlight=0.918954 fog=116.100006,387.000000 half=960x540 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=taa requested=taa scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=754 fsrResets=3\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,36.69,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.000000; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      },
+      {
+        "label": "noon",
+        "status": {
+          "result": "[\"requested=on active=on scattering=on draws=4248 csm=ready csmReach=388.888916 sunlight=0.526876 fog=414.000031,1380.000000 half=960x540 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=taa requested=taa scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=754 fsrResets=3\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,39.691,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.000000; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      },
+      {
+        "label": "rain",
+        "status": {
+          "result": "[\"requested=on active=on scattering=off draws=4249 csm=ready csmReach=388.888916 sunlight=0.000000 fog=33.864830,112.882767 half=960x540 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=taa requested=taa scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=754 fsrResets=3\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,42.722,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.776588; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      },
+      {
+        "label": "sunset",
+        "status": {
+          "result": "[\"requested=on active=on scattering=off draws=4249 csm=unavailable csmReach=0.000000 sunlight=0.000000 fog=414.000031,1380.000000 half=960x540 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=taa requested=taa scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=754 fsrResets=3\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,45.718,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.173627; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      },
+      {
+        "label": "night",
+        "status": {
+          "result": "[\"requested=on active=on scattering=off draws=4249 csm=unavailable csmReach=0.000000 sunlight=0.000000 fog=315.000000,1050.000000 half=960x540 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=taa requested=taa scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=754 fsrResets=3\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,48.736,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.038394; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      },
+      {
+        "label": "dawn-restored",
+        "status": {
+          "result": "[\"requested=on active=on scattering=on draws=4865 csm=ready csmReach=388.888916 sunlight=0.918954 fog=116.100006,387.000000 half=960x540 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=taa requested=taa scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=754 fsrResets=3\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,51.749,\"requested=off active=off coverage=0.000000 position=0.000000 fallback=\",\"WetSurfaces requested=on rain=0.008511; classified ground and road edges only; no RT requirement\"]",
+          "ok": true
+        }
+      }
+    ]
+  }
+}

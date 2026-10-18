@@ -212,7 +212,7 @@ void VulkanContext::CreateShadowResources()
         pipeline.pDynamicState = &dynamic;
         pipeline.layout = _csmLayout;
         pipeline.renderPass = _csmPass;
-        for (int variant = 0; variant < 4; ++variant)
+        for (int variant = 0; variant < int(_csmPipelines.size()); ++variant)
         {
             const int alpha = variant & 1;
             binding.stride = alpha ? 20 : 12;
@@ -222,7 +222,12 @@ void VulkanContext::CreateShadowResources()
                 raster.cullMode = VK_CULL_MODE_NONE;
             raster.depthBiasEnable = variant >= 2;
             raster.depthBiasConstantFactor = variant >= 2 ? 1.f : 0.f;
-            raster.depthBiasSlopeFactor = variant >= 2 ? 1.f : 0.f;
+            // Terrain is an open surface, so front-face culling cannot prevent
+            // self-shadowing. A 3x3 PCF tap can be 1.5 texels away in each axis:
+            // its depth error is at most 3 * max(abs(dz/dx), abs(dz/dy)). Use
+            // that raster slope, not a world-space height offset. Object and
+            // local-light bias remain unchanged.
+            raster.depthBiasSlopeFactor = variant == 4 ? 3.f : variant >= 2 ? 1.f : 0.f;
             Require(vkCreateGraphicsPipelines(_device, VK_NULL_HANDLE, 1, &pipeline, nullptr, &_csmPipelines[variant]),
                     "create depth pipeline");
         }
@@ -297,7 +302,7 @@ void VulkanContext::CreateShadowTarget(Frame::ShadowTarget& target, int resoluti
 
 void VulkanContext::RenderShadowDepth(const float* matrices, int count, int resolution, std::span<const float> solid,
                                       std::span<const float> alpha, std::span<const ShadowAlphaBatch> batches,
-                                      const std::shared_ptr<MeshBuffers>& terrain, uint32_t terrainVertices,
+                                      const std::shared_ptr<MeshBuffers>& terrain, uint32_t terrainIndices,
                                       const std::array<float, 3>& terrainOffset, int localSlot)
 {
     if (!_frameOpen)
@@ -305,8 +310,8 @@ void VulkanContext::RenderShadowDepth(const float* matrices, int count, int reso
     if (localSlot < -1 || localSlot > 1 || (localSlot >= 0 && count != 1) ||
         (localSlot < 0 ? _csmActive : (_localShadowMask & (1u << localSlot)) != 0) || _shadowPass || !matrices ||
         count < 1 || count > 4 || resolution < 128 || resolution > 4096 || solid.size() % 9 || alpha.size() % 15 ||
-        terrainVertices % 3 ||
-        (terrainVertices && (!terrain || size_t(terrainVertices) * 3 * sizeof(float) > terrain->vertices.size)))
+        terrainIndices % 3 ||
+        (terrainIndices && (!terrain || size_t(terrainIndices) * sizeof(uint32_t) > terrain->indices.size)))
         throw std::invalid_argument("Vulkan invalid or repeated CSM depth pass");
     FlushScreenBatch();
     CreateShadowResources();
@@ -389,19 +394,20 @@ void VulkanContext::RenderShadowDepth(const float* matrices, int count, int reso
                     vkCmdDraw(command, batch.count, 1, batch.first, 0);
                 }
         }
-        if (terrain && terrainVertices)
+        if (terrain && terrainIndices)
         {
             const auto translated = TranslateShadowMatrix(matrices + c * 16, terrainOffset);
             std::copy(translated.begin(), translated.end(), push.begin());
             push[16] = 0;
             const VkDeviceSize offset = 0;
-            vkCmdBindPipeline(command, VK_PIPELINE_BIND_POINT_GRAPHICS, _csmPipelines[0]);
+            vkCmdBindPipeline(command, VK_PIPELINE_BIND_POINT_GRAPHICS, _csmPipelines[4]);
             vkCmdBindVertexBuffers(command, 0, 1, &terrain->vertices.buffer, &offset);
+            vkCmdBindIndexBuffer(command, terrain->indices.buffer, 0, VK_INDEX_TYPE_UINT32);
             vkCmdBindDescriptorSets(command, VK_PIPELINE_BIND_POINT_GRAPHICS, _csmLayout, 0, 1,
                                     &_whiteTexture->descriptors[0], 0, nullptr);
             vkCmdPushConstants(command, _csmLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0,
                                sizeof(push), push.data());
-            vkCmdDraw(command, terrainVertices, 1, 0, 0);
+            vkCmdDrawIndexed(command, terrainIndices, 1, 0, 0, 0);
         }
         vkCmdEndRenderPass(command);
     }
@@ -413,7 +419,7 @@ void VulkanContext::RenderShadowDepth(const float* matrices, int count, int reso
     if (_profile.enabled && localSlot < 0)
     {
         ++_profile.csmPasses;
-        _profile.csmVertices += solid.size() / 3 + alpha.size() / 5 + terrainVertices;
+        _profile.csmVertices += solid.size() / 3 + alpha.size() / 5 + terrainIndices;
     }
     if (localSlot >= 0)
     {

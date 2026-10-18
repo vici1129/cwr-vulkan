@@ -1,0 +1,50 @@
+{
+  "road-before.png": {
+    "run": "volume-banding-baseline-repeat-1080",
+    "source": "road-on.png",
+    "sha256": "b07f5d35abab2faa0c12bc6bb45b7893b1c32a565315074ce08fcba0fa150924",
+    "executable_sha256": "442D285339F79252610B1F732F79A49D7FB373EE5D8770649093872754AEEA1F"
+  },
+  "road-after.png": {
+    "run": "volume-banding-indexed-1080",
+    "source": "road-on.png",
+    "sha256": "4a226316eabf90944fe332f9f44f11a5d22b46971ca80c06eba0e6df2de94cc8",
+    "executable_sha256": "431A152705C81084445F4F19C4941625C679F9F1EE06F4436AB0BA4D49B39A5E"
+  },
+  "road-fine-before.png": {
+    "run": "volume-banding-baseline-repeat-1080",
+    "source": "road-fine-on.png",
+    "sha256": "730c8c6203b729b61f37f499bd019d5f533db5be194ee4f0281f525b544382e1",
+    "executable_sha256": "442D285339F79252610B1F732F79A49D7FB373EE5D8770649093872754AEEA1F"
+  },
+  "road-fine-after.png": {
+    "run": "volume-banding-indexed-1080",
+    "source": "road-fine-on.png",
+    "sha256": "fa9916109391d2b0393f3aaca6a9fc6efb58a1afee7c842861412ef87a366a13",
+    "executable_sha256": "431A152705C81084445F4F19C4941625C679F9F1EE06F4436AB0BA4D49B39A5E"
+  },
+  "forest-before.png": {
+    "run": "volume-banding-baseline-repeat-1080",
+    "source": "forest-on.png",
+    "sha256": "87cd9b414a59bf2608ca3eab21cebcc0abe00db7ba05221f6516c01eb5496e13",
+    "executable_sha256": "442D285339F79252610B1F732F79A49D7FB373EE5D8770649093872754AEEA1F"
+  },
+  "forest-after.png": {
+    "run": "volume-banding-indexed-1080",
+    "source": "forest-on.png",
+    "sha256": "9b9051fde8cb0a6b8c1da4d34737221b2cea830a9e6594c3d459e1d220b24cbf",
+    "executable_sha256": "431A152705C81084445F4F19C4941625C679F9F1EE06F4436AB0BA4D49B39A5E"
+  },
+  "everon-before.png": {
+    "run": "volume-banding-baseline-everon",
+    "source": "everon-on.png",
+    "sha256": "8c540805aaaf75d7d18f971ba01f89dff6f1d48617b9f1be3131cf6e11e002e5",
+    "executable_sha256": "442D285339F79252610B1F732F79A49D7FB373EE5D8770649093872754AEEA1F"
+  },
+  "everon-after.png": {
+    "run": "volume-banding-fixed-everon",
+    "source": "everon-on.png",
+    "sha256": "e7187242b26667309aab115a151b0f8b014418c79ed9150722d60d5b75fff4f9",
+    "executable_sha256": "431A152705C81084445F4F19C4941625C679F9F1EE06F4436AB0BA4D49B39A5E"
+  }
+}

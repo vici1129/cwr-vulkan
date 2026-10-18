@@ -1,0 +1,922 @@
+{
+  "volume-banding-baseline-repeat-1080": {
+    "road-fine/on": {
+      "gpu": {
+        "median": 3.47075,
+        "min": 3.4134,
+        "max": 3.4729,
+        "count": 6
+      },
+      "cpu_frame": {
+        "median": 6.1745,
+        "min": 6.173,
+        "max": 6.176,
+        "count": 6
+      },
+      "cpu_command": {
+        "median": 3.337,
+        "min": 2.683,
+        "max": 3.383,
+        "count": 6
+      },
+      "volume": {
+        "median": 0.8653500000000001,
+        "min": 0.8646,
+        "max": 0.8658,
+        "count": 6
+      },
+      "csm": {
+        "median": 0.4268,
+        "min": 0.425,
+        "max": 0.427,
+        "count": 6
+      },
+      "vertices": {
+        "median": 193668.0,
+        "min": 193526.0,
+        "max": 193668.0,
+        "count": 6
+      },
+      "allocations": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "count": 6
+      }
+    },
+    "road/off": {
+      "gpu": {
+        "median": 1.76515,
+        "min": 1.5061,
+        "max": 1.9081,
+        "count": 6
+      },
+      "cpu_frame": {
+        "median": 6.174,
+        "min": 6.173,
+        "max": 6.176,
+        "count": 6
+      },
+      "cpu_command": {
+        "median": 2.7855,
+        "min": 2.773,
+        "max": 2.84,
+        "count": 6
+      },
+      "csm": {
+        "median": 0.1552,
+        "min": 0.132,
+        "max": 0.1682,
+        "count": 6
+      },
+      "vertices": {
+        "median": 9156.0,
+        "min": 9156.0,
+        "max": 9156.0,
+        "count": 6
+      },
+      "allocations": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "count": 6
+      }
+    },
+    "road/on": {
+      "gpu": {
+        "median": 2.2092,
+        "min": 2.0842,
+        "max": 2.2107,
+        "count": 7
+      },
+      "cpu_frame": {
+        "median": 6.173,
+        "min": 6.172,
+        "max": 6.174,
+        "count": 7
+      },
+      "cpu_command": {
+        "median": 2.784,
+        "min": 2.778,
+        "max": 2.794,
+        "count": 7
+      },
+      "volume": {
+        "median": 1.0263,
+        "min": 0.9594,
+        "max": 1.0291,
+        "count": 7
+      },
+      "csm": {
+        "median": 0.3285,
+        "min": 0.3132,
+        "max": 0.3291,
+        "count": 7
+      },
+      "vertices": {
+        "median": 85956.0,
+        "min": 85956.0,
+        "max": 85956.0,
+        "count": 7
+      },
+      "allocations": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "count": 7
+      }
+    },
+    "forest/off": {
+      "gpu": {
+        "median": 2.1060499999999998,
+        "min": 1.951,
+        "max": 2.1262,
+        "count": 6
+      },
+      "cpu_frame": {
+        "median": 6.172,
+        "min": 6.172,
+        "max": 6.172,
+        "count": 6
+      },
+      "cpu_command": {
+        "median": 1.2890000000000001,
+        "min": 1.276,
+        "max": 1.299,
+        "count": 6
+      },
+      "csm": {
+        "median": 0.49365000000000003,
+        "min": 0.4607,
+        "max": 0.498,
+        "count": 6
+      },
+      "vertices": {
+        "median": 53334.0,
+        "min": 53334.0,
+        "max": 53334.0,
+        "count": 6
+      },
+      "allocations": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "count": 6
+      }
+    },
+    "forest/on": {
+      "gpu": {
+        "median": 2.29475,
+        "min": 2.2928,
+        "max": 2.2967,
+        "count": 6
+      },
+      "cpu_frame": {
+        "median": 6.172,
+        "min": 6.172,
+        "max": 6.173,
+        "count": 6
+      },
+      "cpu_command": {
+        "median": 1.3085,
+        "min": 1.292,
+        "max": 1.322,
+        "count": 6
+      },
+      "volume": {
+        "median": 0.77315,
+        "min": 0.7728,
+        "max": 0.7733,
+        "count": 6
+      },
+      "csm": {
+        "median": 0.48614999999999997,
+        "min": 0.4859,
+        "max": 0.4865,
+        "count": 6
+      },
+      "vertices": {
+        "median": 130134.0,
+        "min": 130134.0,
+        "max": 130134.0,
+        "count": 6
+      },
+      "allocations": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "count": 6
+      }
+    }
+  },
+  "volume-banding-baseline-1440": {
+    "road/off": {
+      "gpu": {
+        "median": 2.05355,
+        "min": 1.6825,
+        "max": 2.082,
+        "count": 6
+      },
+      "cpu_frame": {
+        "median": 6.173,
+        "min": 6.172,
+        "max": 6.176,
+        "count": 6
+      },
+      "cpu_command": {
+        "median": 2.8045,
+        "min": 2.8,
+        "max": 2.809,
+        "count": 6
+      },
+      "csm": {
+        "median": 0.11205000000000001,
+        "min": 0.0957,
+        "max": 0.1138,
+        "count": 6
+      },
+      "vertices": {
+        "median": 9156.0,
+        "min": 9156.0,
+        "max": 9156.0,
+        "count": 6
+      },
+      "allocations": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "count": 6
+      }
+    },
+    "road/on": {
+      "gpu": {
+        "median": 3.0756,
+        "min": 3.0738,
+        "max": 3.0785,
+        "count": 6
+      },
+      "cpu_frame": {
+        "median": 6.1745,
+        "min": 6.172,
+        "max": 6.178,
+        "count": 6
+      },
+      "cpu_command": {
+        "median": 3.0220000000000002,
+        "min": 2.937,
+        "max": 3.049,
+        "count": 6
+      },
+      "volume": {
+        "median": 1.5586,
+        "min": 1.5559,
+        "max": 1.5614,
+        "count": 6
+      },
+      "csm": {
+        "median": 0.2906,
+        "min": 0.2904,
+        "max": 0.2908,
+        "count": 6
+      },
+      "vertices": {
+        "median": 85956.0,
+        "min": 85956.0,
+        "max": 85956.0,
+        "count": 6
+      },
+      "allocations": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "count": 6
+      }
+    },
+    "forest/off": {
+      "gpu": {
+        "median": 2.20055,
+        "min": 2.1732,
+        "max": 2.2069,
+        "count": 6
+      },
+      "cpu_frame": {
+        "median": 6.172,
+        "min": 6.172,
+        "max": 6.173,
+        "count": 6
+      },
+      "cpu_command": {
+        "median": 1.3045,
+        "min": 1.299,
+        "max": 1.311,
+        "count": 6
+      },
+      "csm": {
+        "median": 0.35375,
+        "min": 0.3501,
+        "max": 0.3545,
+        "count": 6
+      },
+      "vertices": {
+        "median": 53334.0,
+        "min": 53334.0,
+        "max": 53334.0,
+        "count": 6
+      },
+      "allocations": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "count": 6
+      }
+    },
+    "forest/on": {
+      "gpu": {
+        "median": 3.6319999999999997,
+        "min": 3.6309,
+        "max": 3.6336,
+        "count": 6
+      },
+      "cpu_frame": {
+        "median": 6.172,
+        "min": 6.172,
+        "max": 6.173,
+        "count": 6
+      },
+      "cpu_command": {
+        "median": 1.3225,
+        "min": 1.309,
+        "max": 1.336,
+        "count": 6
+      },
+      "volume": {
+        "median": 1.3875,
+        "min": 1.3869,
+        "max": 1.3882,
+        "count": 6
+      },
+      "csm": {
+        "median": 0.48524999999999996,
+        "min": 0.4849,
+        "max": 0.4857,
+        "count": 6
+      },
+      "vertices": {
+        "median": 130134.0,
+        "min": 130134.0,
+        "max": 130134.0,
+        "count": 6
+      },
+      "allocations": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "count": 6
+      }
+    }
+  },
+  "volume-banding-indexed-1080": {
+    "road-fine/on": {
+      "gpu": {
+        "median": 3.6403,
+        "min": 3.5842,
+        "max": 3.6422,
+        "count": 6
+      },
+      "cpu_frame": {
+        "median": 6.1745,
+        "min": 6.173,
+        "max": 6.175,
+        "count": 6
+      },
+      "cpu_command": {
+        "median": 3.314,
+        "min": 2.789,
+        "max": 3.381,
+        "count": 6
+      },
+      "volume": {
+        "median": 0.8637999999999999,
+        "min": 0.8621,
+        "max": 0.865,
+        "count": 6
+      },
+      "csm": {
+        "median": 0.5927,
+        "min": 0.5915,
+        "max": 0.5932,
+        "count": 6
+      },
+      "vertices": {
+        "median": 662556.0,
+        "min": 662434.0,
+        "max": 662556.0,
+        "count": 6
+      },
+      "allocations": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "count": 6
+      }
+    },
+    "road/off": {
+      "gpu": {
+        "median": 1.7326000000000001,
+        "min": 1.5062,
+        "max": 1.8752,
+        "count": 6
+      },
+      "cpu_frame": {
+        "median": 6.1745,
+        "min": 6.173,
+        "max": 6.176,
+        "count": 6
+      },
+      "cpu_command": {
+        "median": 2.7765,
+        "min": 2.758,
+        "max": 2.808,
+        "count": 6
+      },
+      "csm": {
+        "median": 0.15134999999999998,
+        "min": 0.1305,
+        "max": 0.164,
+        "count": 6
+      },
+      "vertices": {
+        "median": 9156.0,
+        "min": 9156.0,
+        "max": 9156.0,
+        "count": 6
+      },
+      "allocations": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "count": 6
+      }
+    },
+    "road/on": {
+      "gpu": {
+        "median": 2.18835,
+        "min": 2.074,
+        "max": 2.2134,
+        "count": 6
+      },
+      "cpu_frame": {
+        "median": 6.173500000000001,
+        "min": 6.173,
+        "max": 6.174,
+        "count": 6
+      },
+      "cpu_command": {
+        "median": 2.7755,
+        "min": 2.766,
+        "max": 2.785,
+        "count": 6
+      },
+      "volume": {
+        "median": 1.0525,
+        "min": 0.9883,
+        "max": 1.066,
+        "count": 6
+      },
+      "csm": {
+        "median": 0.274,
+        "min": 0.2588,
+        "max": 0.2771,
+        "count": 6
+      },
+      "vertices": {
+        "median": 51492.0,
+        "min": 51492.0,
+        "max": 51492.0,
+        "count": 6
+      },
+      "allocations": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "count": 6
+      }
+    },
+    "forest/off": {
+      "gpu": {
+        "median": 2.0858,
+        "min": 1.7759,
+        "max": 2.1412,
+        "count": 6
+      },
+      "cpu_frame": {
+        "median": 6.172,
+        "min": 6.172,
+        "max": 6.172,
+        "count": 6
+      },
+      "cpu_command": {
+        "median": 1.287,
+        "min": 1.267,
+        "max": 1.326,
+        "count": 6
+      },
+      "csm": {
+        "median": 0.4871,
+        "min": 0.422,
+        "max": 0.499,
+        "count": 6
+      },
+      "vertices": {
+        "median": 53334.0,
+        "min": 53334.0,
+        "max": 53334.0,
+        "count": 6
+      },
+      "allocations": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "count": 6
+      }
+    },
+    "forest/on": {
+      "gpu": {
+        "median": 2.2409499999999998,
+        "min": 2.2376,
+        "max": 2.2443,
+        "count": 6
+      },
+      "cpu_frame": {
+        "median": 6.172,
+        "min": 6.172,
+        "max": 6.173,
+        "count": 6
+      },
+      "cpu_command": {
+        "median": 1.2985,
+        "min": 1.281,
+        "max": 1.384,
+        "count": 6
+      },
+      "volume": {
+        "median": 0.78065,
+        "min": 0.7797,
+        "max": 0.781,
+        "count": 6
+      },
+      "csm": {
+        "median": 0.4204,
+        "min": 0.4201,
+        "max": 0.4211,
+        "count": 6
+      },
+      "vertices": {
+        "median": 95670.0,
+        "min": 95670.0,
+        "max": 95670.0,
+        "count": 6
+      },
+      "allocations": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "count": 6
+      }
+    }
+  },
+  "volume-banding-indexed-1440": {
+    "road/off": {
+      "gpu": {
+        "median": 2.0516,
+        "min": 1.7508,
+        "max": 2.086,
+        "count": 6
+      },
+      "cpu_frame": {
+        "median": 6.173500000000001,
+        "min": 6.172,
+        "max": 6.175,
+        "count": 6
+      },
+      "cpu_command": {
+        "median": 2.7874999999999996,
+        "min": 2.772,
+        "max": 2.801,
+        "count": 6
+      },
+      "csm": {
+        "median": 0.11115,
+        "min": 0.0983,
+        "max": 0.1134,
+        "count": 6
+      },
+      "vertices": {
+        "median": 9156.0,
+        "min": 9156.0,
+        "max": 9156.0,
+        "count": 6
+      },
+      "allocations": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "count": 6
+      }
+    },
+    "road/on": {
+      "gpu": {
+        "median": 2.98345,
+        "min": 2.9805,
+        "max": 2.9842,
+        "count": 6
+      },
+      "cpu_frame": {
+        "median": 6.199999999999999,
+        "min": 6.199,
+        "max": 6.21,
+        "count": 6
+      },
+      "cpu_command": {
+        "median": 2.8185000000000002,
+        "min": 2.807,
+        "max": 2.83,
+        "count": 6
+      },
+      "volume": {
+        "median": 1.55125,
+        "min": 1.5499,
+        "max": 1.5527,
+        "count": 6
+      },
+      "csm": {
+        "median": 0.2287,
+        "min": 0.2286,
+        "max": 0.2289,
+        "count": 6
+      },
+      "vertices": {
+        "median": 51492.0,
+        "min": 51492.0,
+        "max": 51492.0,
+        "count": 6
+      },
+      "allocations": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "count": 6
+      }
+    },
+    "forest/off": {
+      "gpu": {
+        "median": 2.1952,
+        "min": 2.1264,
+        "max": 2.2035,
+        "count": 7
+      },
+      "cpu_frame": {
+        "median": 6.172,
+        "min": 6.172,
+        "max": 6.186,
+        "count": 7
+      },
+      "cpu_command": {
+        "median": 1.294,
+        "min": 1.283,
+        "max": 1.302,
+        "count": 7
+      },
+      "csm": {
+        "median": 0.3514,
+        "min": 0.3409,
+        "max": 0.3525,
+        "count": 7
+      },
+      "vertices": {
+        "median": 53334.0,
+        "min": 53334.0,
+        "max": 53334.0,
+        "count": 7
+      },
+      "allocations": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "count": 7
+      }
+    },
+    "forest/on": {
+      "gpu": {
+        "median": 3.5656,
+        "min": 3.5572,
+        "max": 3.5672,
+        "count": 6
+      },
+      "cpu_frame": {
+        "median": 6.172,
+        "min": 6.172,
+        "max": 6.173,
+        "count": 6
+      },
+      "cpu_command": {
+        "median": 1.314,
+        "min": 1.306,
+        "max": 1.336,
+        "count": 6
+      },
+      "volume": {
+        "median": 1.38965,
+        "min": 1.3864,
+        "max": 1.3911,
+        "count": 6
+      },
+      "csm": {
+        "median": 0.41805000000000003,
+        "min": 0.4174,
+        "max": 0.4186,
+        "count": 6
+      },
+      "vertices": {
+        "median": 95670.0,
+        "min": 95670.0,
+        "max": 95670.0,
+        "count": 6
+      },
+      "allocations": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "count": 6
+      }
+    }
+  },
+  "volume-banding-baseline-everon": {
+    "everon/off": {
+      "gpu": {
+        "median": 1.9533,
+        "min": 1.4498,
+        "max": 2.0434,
+        "count": 6
+      },
+      "cpu_frame": {
+        "median": 6.173,
+        "min": 6.172,
+        "max": 6.173,
+        "count": 6
+      },
+      "cpu_command": {
+        "median": 1.6280000000000001,
+        "min": 1.31,
+        "max": 1.657,
+        "count": 6
+      },
+      "csm": {
+        "median": 0.30485,
+        "min": 0.2642,
+        "max": 0.336,
+        "count": 6
+      },
+      "vertices": {
+        "median": 64350.0,
+        "min": 47912.0,
+        "max": 64350.0,
+        "count": 6
+      },
+      "allocations": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "count": 6
+      }
+    },
+    "everon/on": {
+      "gpu": {
+        "median": 2.2109,
+        "min": 2.1877,
+        "max": 2.2132,
+        "count": 6
+      },
+      "cpu_frame": {
+        "median": 6.173,
+        "min": 6.172,
+        "max": 6.176,
+        "count": 6
+      },
+      "cpu_command": {
+        "median": 1.6135000000000002,
+        "min": 1.598,
+        "max": 1.63,
+        "count": 6
+      },
+      "volume": {
+        "median": 0.90175,
+        "min": 0.8901,
+        "max": 0.9035,
+        "count": 6
+      },
+      "csm": {
+        "median": 0.4693,
+        "min": 0.4659,
+        "max": 0.4696,
+        "count": 6
+      },
+      "vertices": {
+        "median": 141150.0,
+        "min": 141150.0,
+        "max": 141150.0,
+        "count": 6
+      },
+      "allocations": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "count": 6
+      }
+    }
+  },
+  "volume-banding-fixed-everon": {
+    "everon/off": {
+      "gpu": {
+        "median": 1.95885,
+        "min": 1.7081,
+        "max": 2.0362,
+        "count": 6
+      },
+      "cpu_frame": {
+        "median": 6.172499999999999,
+        "min": 6.172,
+        "max": 6.173,
+        "count": 6
+      },
+      "cpu_command": {
+        "median": 1.591,
+        "min": 1.318,
+        "max": 1.695,
+        "count": 6
+      },
+      "csm": {
+        "median": 0.31975,
+        "min": 0.2763,
+        "max": 0.3331,
+        "count": 6
+      },
+      "vertices": {
+        "median": 64350.0,
+        "min": 48016.0,
+        "max": 64350.0,
+        "count": 6
+      },
+      "allocations": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "count": 6
+      }
+    },
+    "everon/on": {
+      "gpu": {
+        "median": 2.1873,
+        "min": 2.1156,
+        "max": 2.2151,
+        "count": 6
+      },
+      "cpu_frame": {
+        "median": 6.174,
+        "min": 6.172,
+        "max": 6.175,
+        "count": 6
+      },
+      "cpu_command": {
+        "median": 1.6175000000000002,
+        "min": 1.597,
+        "max": 1.676,
+        "count": 6
+      },
+      "volume": {
+        "median": 0.9319500000000001,
+        "min": 0.8954,
+        "max": 0.9479,
+        "count": 6
+      },
+      "csm": {
+        "median": 0.4133,
+        "min": 0.4032,
+        "max": 0.4169,
+        "count": 6
+      },
+      "vertices": {
+        "median": 106686.0,
+        "min": 106686.0,
+        "max": 106686.0,
+        "count": 6
+      },
+      "allocations": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "count": 6
+      }
+    }
+  }
+}

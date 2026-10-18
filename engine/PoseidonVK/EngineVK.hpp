@@ -269,6 +269,7 @@ class EngineVK final : public Engine
     std::array<LightDescription, 2> _localShadowDescriptions{};
     int _localShadowCount = 0;
     std::vector<float> _volumeTerrain;
+    uint32_t _volumeTerrainIndices = 0;
     std::shared_ptr<vk::MeshBuffers> _volumeTerrainMesh;
     const void* _volumeLandscape = nullptr;
     std::array<float, 5> _volumeTerrainKey{};

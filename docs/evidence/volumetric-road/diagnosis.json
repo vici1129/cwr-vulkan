@@ -1,0 +1,555 @@
+{
+  "volume-banding-baseline-1080": {
+    "variant": "Original main: darkness/bias isolation; partial forest sweep excluded from final statistics",
+    "session": {
+      "arguments": [
+        "-C",
+        "<source-checkout>/game-local/Remastered",
+        "--nosound",
+        "--window",
+        "--width",
+        "1920",
+        "--height",
+        "1080",
+        "--timeout",
+        "3600",
+        "--lang",
+        "English",
+        "--no-splash",
+        "--render",
+        "vk",
+        "--test-mission",
+        "<source-checkout>/game-local/Remastered/Missions/01TakeTheCar.ABEL",
+        "--harness",
+        "19501"
+      ],
+      "run": "<source-checkout>\\build\\shadow-live\\volume-banding-baseline-1080",
+      "pid": 22328,
+      "exe": "<source-checkout>\\dist\\vulkan-local\\PoseidonGame.exe",
+      "sha256": "442D285339F79252610B1F732F79A49D7FB373EE5D8770649093872754AEEA1F"
+    },
+    "actions": [
+      {
+        "code": "player allowDammage false; setAccTime 0; setViewDistance 1400; hint ''; titleText ['','PLAIN']; triAA 'off'; triRenderScale 100; triSetVsync 0; setDate [1985,7,5,12,0]; triCheatWeather .45; 0 setRain 0; 0 setFog 0; triSetView [7116,78,6100,0,-.12,1]; triVolumetricFog 'on'; triEnableShadowMaps; [triVolumetricFog 'status',triShadowTuning]",
+        "result": {
+          "result": "[\"requested=on active=off scattering=off draws=0 csm=unavailable csmReach=0.000000 sunlight=0.003570 fog=225.812927,752.709717 half=0x0 steps=48 reach=400m history=world-AA shafts=exclusive\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\"]",
+          "ok": true
+        }
+      },
+      {
+        "code": "triAtmosphere 'on'; triWetSurfaces 'on'; triUnderwater 'on'; triPBR 'on'; triBloom 'off'; triSunShafts 'off'; triSoftShadows 'off'; triContactShadows 'off'; triLocalShadows 'off'; triVolumetricClouds 'off'; triCloudShadows 'off'; triRTShadows 'off'; triRTReflections 'off'; triRTAO 'off'; triRTGI 'off'; triSSAO [0,1.2,1.5,.03,80]; [triVolumetricFog 'status',triAA 'status',triShadowTuning]",
+        "result": {
+          "result": "[\"requested=on active=on scattering=on draws=1166 csm=ready csmReach=388.888916 sunlight=0.526876 fog=414.000031,1380.000000 half=960x540 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\"]",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'off'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'on'; triShadowSetDarkness 1",
+        "result": {
+          "result": "\"OK:1.000\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triShadowSetDarkness .35; triShadowSetBias .0002",
+        "result": {
+          "result": "\"OK:0.000200\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triShadowSetBias .00002",
+        "result": {
+          "result": "\"OK:0.000020\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "player allowDammage false; setAccTime 0; setViewDistance 1400; hint ''; titleText ['','PLAIN']; triAA 'off'; triRenderScale 100; triSetVsync 0",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triAtmosphere 'on'; triWetSurfaces 'on'; triUnderwater 'on'; triPBR 'on'; triBloom 'off'; triVolumetricFog 'off'; triSunShafts 'off'; triSoftShadows 'off'; triContactShadows 'off'; triLocalShadows 'off'; triVolumetricClouds 'off'; triCloudShadows 'off'; triWaterRefraction 'off'; triRainRipples 'off'; triShoreFoam 'off'; triRTShadows 'off'; triSoftRTShadows 'off'; triRTDynamic 'off'; triRTReflections 'off'; triSkyReflections 'off'; triRTAO 'off'; triRTGI 'off'; triSSAO [0,1.2,1.5,.03,80]; triEnableShadowMaps; triShadowSetDarkness .35; triShadowSetBias .00002",
+        "result": {
+          "result": "\"OK:0.000020\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "setAccTime 0; setDate [1985,7,5,12,0]; triCheatWeather 0.45; 0 setRain 0; 0 setFog 0; triSetView [7116, 78, 6100, 0, -0.12, 1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'off'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time]",
+        "result": {
+          "result": "[\"requested=off active=off scattering=off draws=12679 csm=ready csmReach=388.888916 sunlight=0.526876 fog=414.000031,1380.000000 half=0x0 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,8.615]",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'on'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time]",
+        "result": {
+          "result": "[\"requested=on active=on scattering=on draws=14167 csm=ready csmReach=388.888916 sunlight=0.526876 fog=414.000031,1380.000000 half=960x540 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,8.615]",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'on'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time]",
+        "result": {
+          "result": "[\"requested=on active=on scattering=on draws=15754 csm=ready csmReach=388.888916 sunlight=0.526876 fog=414.000031,1380.000000 half=960x540 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,8.615]",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'off'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time]",
+        "result": {
+          "result": "[\"requested=off active=off scattering=off draws=15763 csm=ready csmReach=388.888916 sunlight=0.526876 fog=414.000031,1380.000000 half=0x0 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,8.615]",
+          "ok": true
+        }
+      },
+      {
+        "code": "setAccTime 0; setDate [1985,7,5,6,0]; triCheatWeather 0; 0 setRain 0; 0 setFog 0.6; triSetView [6800, 79, 5500, 1, 0.05, 0]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'off'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time]",
+        "result": {
+          "result": "[\"requested=off active=off scattering=off draws=15763 csm=ready csmReach=388.888916 sunlight=0.918954 fog=116.100006,387.000000 half=0x0 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,8.615]",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'on'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time]",
+        "result": {
+          "result": "[\"requested=on active=on scattering=on draws=17249 csm=ready csmReach=388.888916 sunlight=0.918954 fog=116.100006,387.000000 half=960x540 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,8.615]",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'on'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      }
+    ],
+    "actual_grid_diagnostics": [],
+    "local_capture_sha256": {
+      "diagnostic-bias-tenfold.png": "cf47331759388099cbdfa6a1467a722ddd987e7bf802ffc94a2a90f3a98a8caf",
+      "diagnostic-darkness-one.png": "cf9902c2fc286d1b2cebbcb0ad061dce2aa97a9ccb7f646f2d5a9a86dd742f18",
+      "forest-off.png": "262ce8251c1e37f6073702f6139b2453a7454bde1197156e3f2df22e606c2b25",
+      "forest-on.png": "bb6bca821c01f2384276d1d38fbce546530962d3d158f2f2942d74046353ebee",
+      "road-off.png": "e3c870619a5c2714fee33f0acb6c3fadb1657dfcf7c4a27ac0d025940410bcb6",
+      "road-on.png": "1697e8eed4726e422da15eca732f64c528b52476f70ba5b0ba7cf43a292c4bce"
+    }
+  },
+  "volume-banding-diagnostic-slope": {
+    "variant": "Original grid, terrain draw uses existing no-cull/slope-1 pipeline; local shadows Off",
+    "session": {
+      "arguments": [
+        "-C",
+        "<source-checkout>/game-local/Remastered",
+        "--nosound",
+        "--window",
+        "--width",
+        "1920",
+        "--height",
+        "1080",
+        "--timeout",
+        "3600",
+        "--lang",
+        "English",
+        "--no-splash",
+        "--render",
+        "vk",
+        "--test-mission",
+        "<source-checkout>/game-local/Remastered/Missions/01TakeTheCar.ABEL",
+        "--harness",
+        "19501"
+      ],
+      "run": "<source-checkout>\\build\\shadow-live\\volume-banding-diagnostic-slope",
+      "pid": 10456,
+      "exe": "<source-checkout>\\dist\\vulkan-local\\PoseidonGame.exe",
+      "sha256": "A0A7F1E0C56A5220A90AB7ACF7656FD708BD1216362AB35BEA2DEB1093FD653C"
+    },
+    "actions": [
+      {
+        "code": "player allowDammage false; setAccTime 0; setViewDistance 1400; hint ''; titleText ['','PLAIN']; triAA 'off'; triRenderScale 100; triSetVsync 0",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triAtmosphere 'on'; triWetSurfaces 'on'; triUnderwater 'on'; triPBR 'on'; triBloom 'off'; triVolumetricFog 'off'; triSunShafts 'off'; triSoftShadows 'off'; triContactShadows 'off'; triLocalShadows 'off'; triVolumetricClouds 'off'; triCloudShadows 'off'; triWaterRefraction 'off'; triRainRipples 'off'; triShoreFoam 'off'; triRTShadows 'off'; triSoftRTShadows 'off'; triRTDynamic 'off'; triRTReflections 'off'; triSkyReflections 'off'; triRTAO 'off'; triRTGI 'off'; triSSAO [0,1.2,1.5,.03,80]; triEnableShadowMaps; triShadowSetDarkness .35; triShadowSetBias .00002",
+        "result": {
+          "result": "\"OK:0.000020\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "setAccTime 0; setDate [1985,7,5,12,0]; triCheatWeather 0.45; 0 setRain 0; 0 setFog 0; triSetView [7116, 78, 6100, 0, -0.12, 1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'on'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time]",
+        "result": {
+          "result": "[\"requested=on active=on scattering=on draws=563 csm=ready csmReach=388.888916 sunlight=0.526876 fog=414.000031,1380.000000 half=960x540 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,1.854]",
+          "ok": true
+        }
+      },
+      {
+        "code": "triShadowSetBias .002",
+        "result": {
+          "result": "\"OK:0.002000\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triShadowSetBias .00002; setTerrainGrid 6.25",
+        "result": {
+          "result": "<null>",
+          "ok": true
+        }
+      }
+    ],
+    "actual_grid_diagnostics": [],
+    "local_capture_sha256": {
+      "diagnostic-bias-hundredfold.png": "2802822051f6dc8bb58afc6170ed67fc3b2365ded31c33948e4ed6b2dd5de469",
+      "diagnostic-slope-grid625.png": "d7c8e500c8f624417b75f558edd7ab75c89081b8e3a6bb923b0fef3872205d39",
+      "road-on.png": "b860c8404ac146fc7d9f94309a638268199aed07cd7c5a117eb9c8c4388ec433"
+    }
+  },
+  "volume-banding-diagnostic-grid": {
+    "variant": "Native grid sampling only, original unbiased terrain pipeline",
+    "session": {
+      "arguments": [
+        "-C",
+        "<source-checkout>/game-local/Remastered",
+        "--nosound",
+        "--window",
+        "--width",
+        "1920",
+        "--height",
+        "1080",
+        "--timeout",
+        "3600",
+        "--lang",
+        "English",
+        "--no-splash",
+        "--render",
+        "vk",
+        "--test-mission",
+        "<source-checkout>/game-local/Remastered/Missions/01TakeTheCar.ABEL",
+        "--harness",
+        "19501"
+      ],
+      "run": "<source-checkout>\\build\\shadow-live\\volume-banding-diagnostic-grid",
+      "pid": 9060,
+      "exe": "<source-checkout>\\dist\\vulkan-local\\PoseidonGame.exe",
+      "sha256": "203327EBEA610A35F11738707D7C76AFAA8DF7AD5F56BFE9C7E0F9E40F9D0134"
+    },
+    "actions": [
+      {
+        "code": "player allowDammage false; setAccTime 0; setViewDistance 1400; hint ''; titleText ['','PLAIN']; triAA 'off'; triRenderScale 100; triSetVsync 0",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triAtmosphere 'on'; triWetSurfaces 'on'; triUnderwater 'on'; triPBR 'on'; triBloom 'off'; triVolumetricFog 'off'; triSunShafts 'off'; triSoftShadows 'off'; triContactShadows 'off'; triLocalShadows 'off'; triVolumetricClouds 'off'; triCloudShadows 'off'; triWaterRefraction 'off'; triRainRipples 'off'; triShoreFoam 'off'; triRTShadows 'off'; triSoftRTShadows 'off'; triRTDynamic 'off'; triRTReflections 'off'; triSkyReflections 'off'; triRTAO 'off'; triRTGI 'off'; triSSAO [0,1.2,1.5,.03,80]; triEnableShadowMaps; triShadowSetDarkness .35; triShadowSetBias .00002",
+        "result": {
+          "result": "\"OK:0.000020\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "setAccTime 0; setDate [1985,7,5,12,0]; triCheatWeather 0.45; 0 setRain 0; 0 setFog 0; triSetView [7116, 78, 6100, 0, -0.12, 1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'on'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time]",
+        "result": {
+          "result": "[\"requested=on active=on scattering=on draws=566 csm=ready csmReach=388.888916 sunlight=0.526876 fog=414.000031,1380.000000 half=960x540 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,1.911]",
+          "ok": true
+        }
+      },
+      {
+        "code": "setTerrainGrid 6.25",
+        "result": {
+          "result": "<null>",
+          "ok": true
+        }
+      },
+      {
+        "code": "triSoftShadows 'on'; setTerrainGrid 12.5",
+        "result": {
+          "result": "<null>",
+          "ok": true
+        }
+      }
+    ],
+    "actual_grid_diagnostics": [
+      "Terrain diagnostic: grid=12.500000 sampled=12.500000 camera=7116.000000,78.000000,6100.000000 surface=71.909996",
+      "Terrain diagnostic: grid=6.250000 sampled=6.250000 camera=7116.000000,78.000000,6100.000000 surface=71.909996",
+      "Terrain diagnostic: grid=12.500000 sampled=12.500000 camera=7116.000000,78.000000,6100.000000 surface=71.909996"
+    ],
+    "local_capture_sha256": {
+      "diagnostic-grid625.png": "10da8e0ee8694e083d5fe79c4b159c3705e90e5cbb89a4334bb54ebeb2acc302",
+      "diagnostic-soft125.png": "995e49964dc9bf006b23adc3377422ce398bdaeca228fa416310e15382664ee4",
+      "road-on.png": "083fae86218b379337a5f3311217337ac1e2d2071c88fe66106e74451023c0c2"
+    }
+  },
+  "volume-banding-diagnostic-slope2": {
+    "variant": "Native grid with terrain slope factor 2; local shadows Off",
+    "session": {
+      "arguments": [
+        "-C",
+        "<source-checkout>/game-local/Remastered",
+        "--nosound",
+        "--window",
+        "--width",
+        "1920",
+        "--height",
+        "1080",
+        "--timeout",
+        "3600",
+        "--lang",
+        "English",
+        "--no-splash",
+        "--render",
+        "vk",
+        "--test-mission",
+        "<source-checkout>/game-local/Remastered/Missions/01TakeTheCar.ABEL",
+        "--harness",
+        "19501"
+      ],
+      "run": "<source-checkout>\\build\\shadow-live\\volume-banding-diagnostic-slope2",
+      "pid": 19188,
+      "exe": "<source-checkout>\\dist\\vulkan-local\\PoseidonGame.exe",
+      "sha256": "D3A409FD58C62466585262FC8FB114B8D857E81EF200F9BE81EF572A5B2AF915"
+    },
+    "actions": [
+      {
+        "code": "player allowDammage false; setAccTime 0; setViewDistance 1400; hint ''; titleText ['','PLAIN']; triAA 'off'; triRenderScale 100; triSetVsync 0",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triAtmosphere 'on'; triWetSurfaces 'on'; triUnderwater 'on'; triPBR 'on'; triBloom 'off'; triVolumetricFog 'off'; triSunShafts 'off'; triSoftShadows 'off'; triContactShadows 'off'; triLocalShadows 'off'; triVolumetricClouds 'off'; triCloudShadows 'off'; triWaterRefraction 'off'; triRainRipples 'off'; triShoreFoam 'off'; triRTShadows 'off'; triSoftRTShadows 'off'; triRTDynamic 'off'; triRTReflections 'off'; triSkyReflections 'off'; triRTAO 'off'; triRTGI 'off'; triSSAO [0,1.2,1.5,.03,80]; triEnableShadowMaps; triShadowSetDarkness .35; triShadowSetBias .00002",
+        "result": {
+          "result": "\"OK:0.000020\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "setAccTime 0; setDate [1985,7,5,12,0]; triCheatWeather 0.45; 0 setRain 0; 0 setFog 0; triSetView [7116, 78, 6100, 0, -0.12, 1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'on'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time]",
+        "result": {
+          "result": "[\"requested=on active=on scattering=on draws=551 csm=ready csmReach=388.888916 sunlight=0.526876 fog=414.000031,1380.000000 half=960x540 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,1.895]",
+          "ok": true
+        }
+      },
+      {
+        "code": "setTerrainGrid 6.25",
+        "result": {
+          "result": "<null>",
+          "ok": true
+        }
+      },
+      {
+        "code": "setTerrainGrid 3.125",
+        "result": {
+          "result": "<null>",
+          "ok": true
+        }
+      }
+    ],
+    "actual_grid_diagnostics": [
+      "Terrain diagnostic: grid=12.500000 sampled=12.500000 camera=7116.000000,78.000000,6100.000000 surface=71.909996",
+      "Terrain diagnostic: grid=6.250000 sampled=6.250000 camera=7116.000000,78.000000,6100.000000 surface=71.909996",
+      "Terrain diagnostic: grid=3.125000 sampled=3.125000 camera=7116.000000,78.000000,6100.000000 surface=71.909996"
+    ],
+    "local_capture_sha256": {
+      "road-grid3125.png": "30a7b6892434f1a89585b6952a52914af692a0af7d4f1083ea94b2b6053e97aa",
+      "road-grid625.png": "b59ed26f16656af9338614f3f5a243f9a3a8c618aca8ccb75396720d5613f5c0",
+      "road-on.png": "dd832296818f63728081d1ea460eabbb985cf844dca4add4f7e8668b493fad03"
+    }
+  },
+  "volume-banding-diagnostic-coarse": {
+    "variant": "Old 8 m minimum grid with terrain slope factor 2; local shadows Off",
+    "session": {
+      "arguments": [
+        "-C",
+        "<source-checkout>/game-local/Remastered",
+        "--nosound",
+        "--window",
+        "--width",
+        "1920",
+        "--height",
+        "1080",
+        "--timeout",
+        "3600",
+        "--lang",
+        "English",
+        "--no-splash",
+        "--render",
+        "vk",
+        "--test-mission",
+        "<source-checkout>/game-local/Remastered/Missions/01TakeTheCar.ABEL",
+        "--harness",
+        "19501"
+      ],
+      "run": "<source-checkout>\\build\\shadow-live\\volume-banding-diagnostic-coarse",
+      "pid": 17452,
+      "exe": "<source-checkout>\\dist\\vulkan-local\\PoseidonGame.exe",
+      "sha256": "56989E4DDBE9236A0B770FA84E827799F22765D8DB7B8E2C6339640EB7337CDD"
+    },
+    "actions": [
+      {
+        "code": "player allowDammage false; setAccTime 0; setViewDistance 1400; hint ''; titleText ['','PLAIN']; triAA 'off'; triRenderScale 100; triSetVsync 0",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triAtmosphere 'on'; triWetSurfaces 'on'; triUnderwater 'on'; triPBR 'on'; triBloom 'off'; triVolumetricFog 'off'; triSunShafts 'off'; triSoftShadows 'off'; triContactShadows 'off'; triLocalShadows 'off'; triVolumetricClouds 'off'; triCloudShadows 'off'; triWaterRefraction 'off'; triRainRipples 'off'; triShoreFoam 'off'; triRTShadows 'off'; triSoftRTShadows 'off'; triRTDynamic 'off'; triRTReflections 'off'; triSkyReflections 'off'; triRTAO 'off'; triRTGI 'off'; triSSAO [0,1.2,1.5,.03,80]; triEnableShadowMaps; triShadowSetDarkness .35; triShadowSetBias .00002",
+        "result": {
+          "result": "\"OK:0.000020\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "setAccTime 0; setDate [1985,7,5,12,0]; triCheatWeather 0.45; 0 setRain 0; 0 setFog 0; triSetView [7116, 78, 6100, 0, -0.12, 1]",
+        "result": {
+          "result": "\"OK\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "triVolumetricFog 'on'",
+        "result": {
+          "result": "\"OK: volumetric fog requested for next frame\"",
+          "ok": true
+        }
+      },
+      {
+        "code": "[triVolumetricFog 'status',triAA 'status',triShadowTuning,triGetTerrainGrid,time]",
+        "result": {
+          "result": "[\"requested=on active=on scattering=on draws=559 csm=ready csmReach=388.888916 sunlight=0.526876 fog=414.000031,1380.000000 half=960x540 steps=48 reach=400m history=world-AA shafts=exclusive\",\"active=off requested=off scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=0 fsrResets=0\",\"enabled=true darkness=0.350 cascades=4 omni=2/0.080/0.200 dist=1.000 split=0.90 bias=0.000020 fade=40.0 res=2048\",12.5,1.903]",
+          "ok": true
+        }
+      },
+      {
+        "code": "setTerrainGrid 3.125",
+        "result": {
+          "result": "<null>",
+          "ok": true
+        }
+      }
+    ],
+    "actual_grid_diagnostics": [
+      "Terrain diagnostic: grid=12.500000 sampled=12.500000 camera=7116.000000,78.000000,6100.000000 surface=71.909996",
+      "Terrain diagnostic: grid=3.125000 sampled=8.000000 camera=7116.000000,78.000000,6100.000000 surface=71.909996"
+    ],
+    "local_capture_sha256": {
+      "coarse-grid3125.png": "873c3910fc34e659274afc850277c52d20d6958c5e3f7c52e56b4523eeb9c768",
+      "road-on.png": "684758d43306f1e57ce857584109f9ef238504d7c42cd791b8237fb96ab4f0e0"
+    }
+  }
+}

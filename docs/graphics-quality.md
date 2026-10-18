@@ -176,16 +176,16 @@ Sky reflections and dynamic RT geometry are dependencies owned by the relevant
 RT choice, not additional player switches. If either shadow or water RT needs
 the shared scene, turning off the other must not tear that scene down.
 
-**Do not expose volumetric lighting yet.** In the matched Malden road view,
-turning off volumetrics removes repeated dark bands. Soft CSM, contact shadows,
-AO and cloud-shadow isolation do not account for the problem. The Vulkan
-volumetric path adds an 8 m-or-coarser terrain patch to the shared CSM maps
-(`EngineVK_Shadow.cpp`); that is a plausible source-level explanation, not a
-claim of a completed general fix. Keep the developer command and the positive
-forest-shaft evidence, but leave it Off in both presets until this terrain/road
-interaction is fixed and requalified. A future ready version needs one On/Off
-control, not a sample-count ladder. Do not automatically enable screen-space
-shafts as a substitute.
+**Volumetric lighting remains developer-only and Off in both presets.** The
+original matched Malden road view exposed repeated dark bands from terrain
+added to the shared CSM maps. The focused
+[terrain-shadow correction](evidence/volumetric-road/README.md) diagnoses the
+surface self-shadowing and fine-detail resampling errors, corrects terrain
+geometry/bias, and records new road/forest/Everon checks and costs. It preserves
+the existing atmospheric tuning. This milestone adds no player control; eventual
+exposure still needs only On/Off, not a sample-count ladder. Do not automatically
+enable screen-space shafts as a substitute. The older measurements and rejected
+tuning trials below remain historical evidence from before that correction.
 
 **Leave bloom hidden and Off for this proposed first menu.** Existing source
 energy produces little or no visible difference in the reviewed views; previous

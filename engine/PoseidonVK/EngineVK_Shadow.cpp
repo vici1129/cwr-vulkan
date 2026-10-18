@@ -248,38 +248,44 @@ void EngineVK::RenderShadowDepthScene(const float* matrices, const float* splits
     if (_vk.VolumetricScatteringEligible() && GScene && GScene->GetLandscape())
     {
         // The object CSM collection has no landscape triangles. A bounded patch
-        // supplies valley/ridge occlusion using the existing terrain surface.
+        // supplies valley/ridge occlusion using the actual landscape vertices
+        // and SurfaceY's 01--10 diagonal. Resampling onto an unrelated 8 m grid
+        // can put the caster above the visible surface at finer terrain detail.
         // Kept in the Vulkan path and allocated only for this optional effect.
         auto* land = GScene->GetLandscape();
         const auto position = GScene->GetCamera()->Position();
         const float radius = std::min(600.f, splits[count - 1] + 100.f);
-        const float grid = std::max(8.f, land->GetTerrainGrid());
-        const int cx = int(std::floor(position.X() / grid)), cz = int(std::floor(position.Z() / grid));
-        const int cells = int(std::ceil(radius / grid));
+        const float grid = land->GetTerrainGrid();
+        // Reuse the immutable upload across small movements even at 3.125 m
+        // detail. The margin retains the full radius until the next anchor.
+        const int anchorCells = std::max(1, int(25.f / grid));
+        const int cx = int(std::floor(position.X() / (grid * anchorCells))) * anchorCells;
+        const int cz = int(std::floor(position.Z() / (grid * anchorCells))) * anchorCells;
+        const int cells = int(std::ceil(radius / grid)) + anchorCells;
         const auto key = vk::ShadowTerrainKey(cx, cz, grid, cells, land->GetTerrainGrid());
         if (_volumeLandscape != land || _volumeTerrainKey != key)
         {
             _volumeTerrain.clear();
-            auto vertex = [&](float x, float z) {
-                return std::array<float, 3>{x - cx * grid, land->SurfaceY(x, z), z - cz * grid};
-            };
-            auto triangle = [&](const auto& a, const auto& b, const auto& c)
-            {
-                // Both sides: the ordinary solid CSM pipeline culls front faces.
-                for (const auto* v : {&a, &b, &c, &c, &b, &a})
-                    _volumeTerrain.insert(_volumeTerrain.end(), v->begin(), v->end());
-            };
-            for (int z = cz - cells; z < cz + cells; ++z)
-                for (int x = cx - cells; x < cx + cells; ++x)
+            const uint32_t stride = 2 * cells + 1;
+            _volumeTerrain.reserve(size_t(stride) * stride * 3);
+            for (int z = cz - cells; z <= cz + cells; ++z)
+                for (int x = cx - cells; x <= cx + cells; ++x)
+                    _volumeTerrain.insert(_volumeTerrain.end(),
+                                          {(x - cx) * grid, land->ClippedData(z, x), (z - cz) * grid});
+            // Share the actual grid vertices rather than transforming six
+            // copies per cell in every cascade. The terrain pipeline is
+            // two-sided, so reverse faces are unnecessary too.
+            std::vector<uint32_t> indices;
+            indices.reserve(size_t(stride - 1) * (stride - 1) * 6);
+            for (uint32_t z = 0; z < stride - 1; ++z)
+                for (uint32_t x = 0; x < stride - 1; ++x)
                 {
-                    const auto a = vertex(x * grid, z * grid), b = vertex((x + 1) * grid, z * grid);
-                    const auto c = vertex(x * grid, (z + 1) * grid), d = vertex((x + 1) * grid, (z + 1) * grid);
-                    triangle(a, b, c);
-                    triangle(b, d, c);
+                    const auto a = z * stride + x;
+                    indices.insert(indices.end(), {a, a + 1, a + stride, a + 1, a + stride + 1, a + stride});
                 }
-            const uint32_t unusedIndex = 0;
             _volumeTerrainMesh = _vk.UploadMesh(_volumeTerrain.data(), _volumeTerrain.size() * sizeof(float),
-                                                &unusedIndex, sizeof(unusedIndex));
+                                                indices.data(), indices.size() * sizeof(uint32_t));
+            _volumeTerrainIndices = uint32_t(indices.size());
             _volumeLandscape = land;
             _volumeTerrainKey = key;
         }
@@ -288,6 +294,6 @@ void EngineVK::RenderShadowDepthScene(const float* matrices, const float* splits
     }
     _vk.RenderShadowDepth(matrices, count, resolution, solid,
                           {casters.alphaXYZUV, size_t(casters.alphaVertexCount) * 5}, batches,
-                          terrain, terrain ? uint32_t(_volumeTerrain.size() / 3) : 0, terrainOffset);
+                          terrain, terrain ? _volumeTerrainIndices : 0, terrainOffset);
 }
 } // namespace Poseidon
