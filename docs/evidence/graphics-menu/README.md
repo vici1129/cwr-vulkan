@@ -88,3 +88,37 @@ Remaining focused follow-ups: player-friendly RT device startup opt-in, Vulkan
 AA/upscaling/render-scale UI modernization, and localization of the new English
 labels. The existing RT-water transition and volumetric road-banding visual gates
 remain unresolved and neither feature is selected by either preset.
+
+## Shadow preference isolation regression (2026-10-18)
+
+Vulkan's CSM caster gates are now process-local. Quality Apply/OK leaves the
+legacy shadow tier untouched; the detail page, shared live-apply path and Scene profile
+save no longer copy Vulkan gates into GL33 preferences. No config schema or
+renderer algorithm changed. The nested Video return merge remains in place.
+
+- Vulkan and GL33 `RelWithDebInfo` builds passed. Each focused configuration/UI
+  run passed **569 assertions / 49 cases**; Vulkan driver-free policy/lifetime
+  guards passed **517 checks**. Existing Vulkan shape/AA and shadow math passed
+  **1,601 assertions / 71 cases**. New tests exercise the actual Scene load/save,
+  GraphicsApply, detail Mount/child-return/Unmount and quality Apply/OK/Cancel
+  paths, including mixed flags, absent old-profile entries and GL33 edits.
+- Direct isolated Malden gameplay checks started in GL33 with legacy tier Off
+  and both profile gates disabled. Vulkan Standard rendered CSM; Enhanced and
+  explicit Ray Traced Apply/OK/Cancel preserved all three legacy preferences.
+  Restart restored soft RT sunlight with executed queries, dynamic geometry and
+  four 2048-square CSM cascades (25,989 caster vertices in a completed window).
+  Returning to Enhanced stopped RT world dispatch and retained CSM. Developer
+  shadow-map disable/enable commands still changed the active runtime state.
+- In nested Video, accepted gamma 1.1 and temporary caster edits survived later
+  FPS-cap changes; Cancel discarded the gamma 1.2/caster preview. Legacy saved
+  shadow fields remained Off, and restart retained gamma 1.1 and FPS cap 30.
+- Returning to GL33 still showed Shadows Off. Changing its menu to Medium saved
+  legacy tier 2 and both profile flags On; another GL33 restart showed Medium.
+  These were copied test profiles, not changes to the player's original profile.
+- Both Vulkan sessions shut down normally with **zero validation errors and
+  warnings**. Local logs/captures are under `build/shadow-live/isolation-*`;
+  build/test output is under `build/shadow-isolation-*.log`.
+
+Tested runtime SHA-256: Vulkan
+`277841ABFED4559A6B1557E901EB42CD7D1F5D4456E8DB2A3AD953EA27CB0962`;
+GL33 `8D7363797D440A0CD5AAFAB254FBCD46BAC1E9BD856BBE10EE95039A22809EFD`.

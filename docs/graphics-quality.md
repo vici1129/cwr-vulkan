@@ -19,6 +19,12 @@ preferences are independent of these presets. Developer-created partial groups
 are displayed as Custom; select a supported group or preset before applying.
 All supported shadow choices enable the original object/vehicle caster gates
 needed by CSM, including profiles migrated from the old Shadows Off setting.
+These are runtime overrides: Vulkan saves its shadow choice only in
+`vulkanShadows`, without changing the legacy `shadowQuality` tier or the profile's
+`objectShadows`/`vehicleShadows` preferences. Display & detail and the original
+Video dialog preserve those saved GL33 preferences too; shadow-gate edits in a
+Vulkan session remain process-local. GL33 continues to load and save its own
+shadow preferences normally, including profiles without explicit shadow fields.
 Disabling these gates through legacy controls is observed as a Custom shadow
 group; the new Shadow Quality control owns their enabled state when applied.
 

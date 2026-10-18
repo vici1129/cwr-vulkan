@@ -80,9 +80,14 @@ void ApplyGraphicsConfigToEngine(const GraphicsConfig& cfg)
         // Shadow tier — Off → both off; Low+ → both on.  Low/Med/High
         // discrimination is UI-only until a shadow-distance bias hook
         // lands.
-        const bool shadowsOn = cfg.shadowQuality != GraphicsConfig::TierOff;
-        GScene->SetObjectShadows(shadowsOn);
-        GScene->SetVehicleShadows(shadowsOn);
+        // Vulkan's quality group owns temporary CSM caster gates. The shared
+        // legacy preference still belongs to GL33, including when editing FPS.
+        if (!GEngine || !GEngine->HasVulkanGraphics())
+        {
+            const bool shadowsOn = cfg.shadowQuality != GraphicsConfig::TierOff;
+            GScene->SetObjectShadows(shadowsOn);
+            GScene->SetVehicleShadows(shadowsOn);
+        }
         // Particles tier — Off → cloudlets off; Low/High → on.  Low vs
         // High is UI-only until the cloudlet system grows tiered density.
         GScene->SetCloudlets(cfg.particlesQuality != GraphicsConfig::TierOff);

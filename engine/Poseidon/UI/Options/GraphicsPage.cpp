@@ -271,7 +271,7 @@ int GraphicsPage::GraphicsProvider::RowValue(int row) const
     const GraphicsConfig& c = m_page->m_cfg;
     if (GEngine && GEngine->HasVulkanGraphics())
     {
-        if (row == kRowShadow) return c.shadowQuality != GraphicsConfig::TierOff;
+        if (row == kRowShadow) return GScene && GScene->GetObjectShadows() && GScene->GetVehicleShadows();
         if (row == kRowParticles) return c.particlesQuality != GraphicsConfig::TierOff;
     }
     switch (row)
@@ -447,9 +447,6 @@ void GraphicsPage::Mount(OptionsShell& shell)
     // instance falls back to class defaults — same as PresetUltra.
     if (!m_cfg.Load(GraphicsCfgPath()))
         m_cfg.LoadDefaults();
-    if (GEngine && GEngine->HasVulkanGraphics() && GScene)
-        m_cfg.shadowQuality = GScene->GetObjectShadows() && GScene->GetVehicleShadows()
-                                ? GraphicsConfig::TierHigh : GraphicsConfig::TierOff;
     // Ensure the displayed Preset is consistent with the tiers loaded
     // from disk; a hand-edited file might set preset=Ultra with mismatched
     // tiers, in which case we derive Custom.
@@ -497,7 +494,8 @@ void GraphicsPage::OnChildDestroyed(OptionsShell& shell, int idd, int /*exit*/)
                           GScene->GetPreferredTerrainGrid()) < .001f)
                 m_cfg.terrainDetail = static_cast<GraphicsConfig::Tier>(tier);
         const bool shadows = GScene->GetObjectShadows() && GScene->GetVehicleShadows();
-        if (shadows != (m_cfg.shadowQuality != GraphicsConfig::TierOff))
+        if ((!GEngine || !GEngine->HasVulkanGraphics()) &&
+            shadows != (m_cfg.shadowQuality != GraphicsConfig::TierOff))
             m_cfg.shadowQuality = shadows ? GraphicsConfig::TierHigh : GraphicsConfig::TierOff;
         if (GScene->GetCloudlets() != (m_cfg.particlesQuality != GraphicsConfig::TierOff))
             m_cfg.particlesQuality = GScene->GetCloudlets() ? GraphicsConfig::TierHigh : GraphicsConfig::TierOff;

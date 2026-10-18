@@ -697,8 +697,14 @@ void Scene::SaveConfig() const
         cfg.Parse(name);
         cfg.Add("frameRate", GetFrameRateSettings());
         cfg.Add("visualQuality", GetQualitySettings());
-        cfg.Add("objectShadows", GetObjectShadows());
-        cfg.Add("vehicleShadows", GetVehicleShadows());
+        // LoadConfig/EngineVK enable these gates for Vulkan's CSM. Preserve
+        // the original profile entries (including absent legacy defaults)
+        // rather than saving the process-local override as a GL33 preference.
+        if (!GEngine || !GEngine->HasVulkanGraphics())
+        {
+            cfg.Add("objectShadows", GetObjectShadows());
+            cfg.Add("vehicleShadows", GetVehicleShadows());
+        }
         cfg.Add("cloudlets", GetCloudlets());
         cfg.Add("viewDistance", GetSelectedPreferredViewDistance());
         cfg.Add("terrainGrid", GetPreferredTerrainGrid());

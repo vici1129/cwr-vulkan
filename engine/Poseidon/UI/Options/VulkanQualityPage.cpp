@@ -165,7 +165,6 @@ void VulkanQualityPage::OnSimulate(OptionsShell& shell)
             GraphicsConfig cfg;
             cfg.Load(QualityConfigPath());
             cfg.vulkan = active;
-            cfg.shadowQuality = GraphicsConfig::TierHigh; // enabled legacy CSM caster prerequisites
             if (!cfg.Save(QualityConfigPath())) m_status = "Graphics are active, but graphics.cfg could not be saved. Retry Apply.";
             else
             {
