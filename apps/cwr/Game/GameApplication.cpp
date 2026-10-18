@@ -412,6 +412,9 @@ void LoadAndApplyGraphicsConfig()
     ApplyGraphicsConfigToEngine(cfg);
     if (GEngine && GEngine->HasVulkanGraphics())
     {
+        auto imageError = GEngine->ApplyImageQuality(cfg.vulkanImage);
+        if (imageError.GetLength())
+            LOG_WARN(Graphics, "Saved Vulkan AA unavailable (preference retained): {}", static_cast<const char*>(imageError));
         auto quality = cfg.vulkan;
         // Device capability is fixed at startup. Keep the saved preference on
         // disk, but present the actual raster fallback in this process.

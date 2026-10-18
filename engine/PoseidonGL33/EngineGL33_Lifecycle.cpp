@@ -542,6 +542,13 @@ bool EngineGL33::ResetHard()
     return true;
 }
 
+void EngineGL33::GetVideoResolution(int& width, int& height) const
+{
+    width = _w;
+    height = _h;
+    if (_sdlWindow && _windowMode == WindowMode::Windowed) SDL_GetWindowSize(_sdlWindow, &width, &height);
+}
+
 bool EngineGL33::SwitchRes(int w, int h, int bpp)
 {
     if (_pendingExclusiveEnter && _sdlWindow)
@@ -623,7 +630,7 @@ bool EngineGL33::SwitchRes(int w, int h, int bpp)
 
 bool EngineGL33::SwitchRefreshRate(int refresh)
 {
-    if (refresh == 0)
+    if (refresh < 0)
         return false;
     if (_refreshRate == refresh)
         return true;

@@ -62,7 +62,7 @@ public:
 protected:
 	OptionsScrollList::Provider& ProviderRef() override { return m_provider; }
 
-private:
+protected:
 	static const char* CloseLabel();
 	static const char* CloseDescription();
 

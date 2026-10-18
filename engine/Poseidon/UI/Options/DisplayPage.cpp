@@ -559,12 +559,13 @@ void DisplayPage::RebuildLists()
         {
             GEngine->ListResolutions(res);
         }
-        if (res.Size() == 0 && m_pending.windowMode == DisplayConfig::Fullscreen)
+        if (m_pending.windowMode == DisplayConfig::Fullscreen)
         {
             SDL_DisplayID display = DisplayIdForMonitorIndex(m_pending.monitor);
             int count = 0;
             if (SDL_DisplayMode** modes = SDL_GetFullscreenDisplayModes(display, &count))
             {
+                res.Clear(); // Enumerate the selected monitor, not the window's old one.
                 for (int i = 0; i < count; ++i)
                 {
                     ResolutionInfo info;
@@ -607,8 +608,7 @@ void DisplayPage::RebuildLists()
         FindArray<int> rates;
         if (GEngine)
             GEngine->ListRefreshRates(rates);
-        if ((rates.Size() == 0 || (rates.Size() == 1 && rates[0] == 0)) &&
-            m_pending.windowMode == DisplayConfig::Fullscreen)
+        if (m_pending.windowMode == DisplayConfig::Fullscreen)
         {
             int targetW = m_pending.resolutionWidth;
             int targetH = m_pending.resolutionHeight;
@@ -622,6 +622,7 @@ void DisplayPage::RebuildLists()
             int count = 0;
             if (SDL_DisplayMode** modes = SDL_GetFullscreenDisplayModes(display, &count))
             {
+                rates.Clear();
                 for (int i = 0; i < count; ++i)
                 {
                     if (targetW > 0 && targetH > 0 && (modes[i]->w != targetW || modes[i]->h != targetH))
@@ -656,8 +657,8 @@ void DisplayPage::RebuildLists()
 
 void DisplayPage::RefreshLocalizedChoices()
 {
-    m_windowModeLabels[0] = LocalizeString("STR_DISP_MAIN_OPT_DISPLAY_FULLSCREEN");
-    m_windowModeLabels[1] = LocalizeString("STR_DISP_MAIN_OPT_DISPLAY_BORDERLESS");
+    m_windowModeLabels[0] = LocalizeStringWithFallback("STR_VIDEO_BORDERLESS", "Borderless");
+    m_windowModeLabels[1] = LocalizeStringWithFallback("STR_VIDEO_EXCLUSIVE", "Exclusive Fullscreen");
     m_windowModeLabels[2] = LocalizeString("STR_DISP_MAIN_OPT_DISPLAY_WINDOWED");
     for (size_t i = 0; i < m_windowModeLabels.size(); ++i)
         m_windowModeCStrs[i] = m_windowModeLabels[i].c_str();
@@ -682,7 +683,9 @@ void DisplayPage::ApplyToEngine(const DisplayConfig& cfg)
     // state.  Window mode next.  Resolution + refresh last.
     if (cfg.monitor != GEngine->GetCurrentMonitor())
         GEngine->SwitchMonitor(cfg.monitor);
-    if (cfg.windowMode == DisplayConfig::Fullscreen && cfg.refreshRate > 0)
+    // GL33 caches refresh before the mode change. Vulkan requires an active
+    // exclusive mode and the newly requested resolution before changing Hz.
+    if (cfg.windowMode == DisplayConfig::Fullscreen && !GEngine->HasVulkanGraphics())
         GEngine->SwitchRefreshRate(cfg.refreshRate);
     if (cfg.windowMode == DisplayConfig::Fullscreen)
     {
@@ -697,6 +700,8 @@ void DisplayPage::ApplyToEngine(const DisplayConfig& cfg)
         GEngine->SetWindowMode(WindowMode::Fullscreen);
         if (targetW > 0 && targetH > 0)
             GEngine->SwitchRes(targetW, targetH, /*bpp*/ 32);
+        if (GEngine->HasVulkanGraphics() && cfg.refreshRate > 0)
+            GEngine->SwitchRefreshRate(cfg.refreshRate);
     }
     else if (cfg.windowMode == DisplayConfig::Windowed)
     {

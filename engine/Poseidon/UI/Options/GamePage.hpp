@@ -33,12 +33,10 @@ class GamePage : public ScrollListPage
         {
             kRowTextLanguage = 0,
             kRowVoiceLanguage = 1,
-            kRowViewDistance = 2,
-            kRowRespectMissionViewDistance = 3,
-            kRowBlood = 4,
-            kRowSubtitles = 5,
-            kRowRadioSubtitles = 6,
-            kRowCount = 7,
+            kRowBlood = 2,
+            kRowSubtitles = 3,
+            kRowRadioSubtitles = 4,
+            kRowCount = 5,
         };
 
         int RowCount() const override { return kRowCount; }
@@ -48,11 +46,9 @@ class GamePage : public ScrollListPage
         int RowValue(int row) const override;
         void SetRowValue(int row, int value) override;
         OptionsScrollList::Kind RowKind(int row) const override;
-        const char* SliderValueText(int row) const override;
 
       private:
         void RefreshToggleTexts() const;
-        mutable std::string m_sliderValueText;
 
         mutable std::array<std::string, 2> m_toggleText;
         mutable std::array<const char*, 2> m_toggleOptions{};

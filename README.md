@@ -20,10 +20,12 @@ In short: the code is free software, the name is not, and the game data comes se
 
 ## CWRR Vulkan rendering roadmap
 
-Vulkan graphics can now be configured in **Options > Graphics** (or the legacy
-**Options > Video** flow): Standard/Enhanced presets, grouped shadows, clouds,
-water and ambient occlusion, with Apply/OK/Cancel and persistent settings.
-See [graphics settings and capability requirements](docs/graphics-quality.md).
+**Options > Video Settings** unifies display modes, image quality and graphics
+in one scrollable notebook page. Vulkan offers supported AA/FSR/render-scale
+choices and the validated Standard/Enhanced effect groups; GL33 retains its own
+meaningful controls and preferences. Both use Apply/OK/Cancel, display reversion
+and persistent settings. See the [video settings guide](docs/video-settings.md)
+and [graphics quality mappings](docs/graphics-quality.md).
 Ray Traced Shadows require the existing `CWR_VK_RTAO=1` startup opt-in and a
 supported, initialized Vulkan ray-query device; presets never enable RT.
 

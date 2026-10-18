@@ -38,7 +38,7 @@ class IndexPage : public FlatMenuPage
     // FlatMenuPage::WrapFocus; rows missing from the cycle are visible
     // but unreachable by keyboard, which is why this needs to stay
     // in sync with the resource bundle when rows are added.
-    static constexpr int kCycle[] = {1101, 1102, 1103, 1104, 1107, 1108, 1105, 1106};
+    static constexpr int kCycle[] = {1101, 1102, 1104, 1107, 1108, 1105, 1106};
     static constexpr int kCycleSize = sizeof(kCycle) / sizeof(kCycle[0]);
 };
 

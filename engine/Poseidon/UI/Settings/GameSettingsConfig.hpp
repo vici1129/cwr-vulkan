@@ -35,7 +35,7 @@ class GameSettingsConfig
 bool EnsureGameSettingsFile(GameSettingsConfig& cfg, const std::string& path,
                             const GameSettingsConfig::Environment& env, bool* created = nullptr);
 void LoadGameSettings();
-void SaveGameSettings();
+bool SaveGameSettings();
 std::string LoadActiveProfile();
 void SaveActiveProfile(const std::string& name);
 

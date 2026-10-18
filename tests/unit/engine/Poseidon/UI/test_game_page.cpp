@@ -1,7 +1,5 @@
-// GamePage Provider tests — exercise the Game options row layout, row
-// kinds, and value round-trip for the View Distance slider + Respect
-// Mission Visibility toggle.  Regression: removing kRowViewDistance from the enum trips
-// the RowCount and RowKind / SliderValueText assertions below.
+// Gameplay keeps language, blood and subtitles. Visibility controls now live
+// in the unified Video page; the existing conversion helpers are reused there.
 //
 // Snapshots ENGINE_CONFIG / USER_CONFIG / chat / view-distance state so
 // parallel ctest runs stay clean.
@@ -73,48 +71,47 @@ void LoadMainMenuStringtable()
 }
 } // namespace
 
-TEST_CASE("GamePage: provider exposes 7 rows + close", "[UI][GamePage]")
+TEST_CASE("GamePage: provider exposes 5 gameplay rows + close", "[UI][GamePage]")
 {
     TestableGamePage page;
     auto& p = page.Provider();
-    CHECK(p.RowCount() == 8);
+    CHECK(p.RowCount() == 6);
 }
 
-TEST_CASE("GamePage: row labels include view-distance controls", "[UI][GamePage]")
+TEST_CASE("GamePage: blood belongs to gameplay and visibility is no longer duplicated", "[UI][GamePage]")
 {
     LoadMainMenuStringtable();
 
     TestableGamePage page;
     auto& p = page.Provider();
     CHECK(std::string(page.TitleText()) == "Game");
-    CHECK(std::string(p.RowLabel(2)) == "Visibility distance");
-    CHECK(std::string(p.RowLabel(3)) == "Respect mission visibility");
+    CHECK(std::string(p.RowLabel(2)) == std::string(LocalizeString("STR_DISP_MAIN_OPT_GAME_BLOOD")));
+    for (int row = 0; row < 5; ++row) CHECK(p.RowKind(row) != OptionsScrollList::KindSlider);
 }
 
-TEST_CASE("GamePage: view-distance row is a slider with metre text", "[UI][GamePage]")
+TEST_CASE("GamePage: blood remains a meaningful gameplay toggle", "[UI][GamePage]")
 {
     GamePageStateSnapshot snap;
     LoadMainMenuStringtable();
 
-    SetSelectedPreferredViewDistance(900.0f);
+    ENGINE_CONFIG.blood = true;
 
     TestableGamePage page;
     auto& p = page.Provider();
-    CHECK(p.RowKind(2) == OptionsScrollList::KindSlider);
-    CHECK(p.RowValue(2) == 16);
-    CHECK(std::string(p.SliderValueText(2)) == "900 m");
+    CHECK(p.RowKind(2) == OptionsScrollList::KindBoolean);
+    CHECK(p.RowValue(2) == 1);
 
     p.SetRowValue(2, 0);
-    CHECK(GetSelectedPreferredViewDistance() == GameSettingsConfig::kMinViewDistance);
-    p.SetRowValue(2, 100);
-    CHECK(GetSelectedPreferredViewDistance() == GameSettingsConfig::kMaxViewDistance);
+    CHECK_FALSE(ENGINE_CONFIG.blood);
+    p.SetRowValue(2, 1);
+    CHECK(ENGINE_CONFIG.blood);
 }
 
-TEST_CASE("GamePage: respect-mission visibility row toggles runtime setting", "[UI][GamePage]")
+TEST_CASE("GamePage: subtitles still toggle after row consolidation", "[UI][GamePage]")
 {
     GamePageStateSnapshot snap;
 
-    SetRespectMissionViewDistance(true);
+    USER_CONFIG.showTitles = true;
 
     TestableGamePage page;
     auto& p = page.Provider();
@@ -122,9 +119,9 @@ TEST_CASE("GamePage: respect-mission visibility row toggles runtime setting", "[
     CHECK(p.RowValue(3) == 1);
 
     p.SetRowValue(3, 0);
-    CHECK(GetRespectMissionViewDistance() == false);
+    CHECK_FALSE(USER_CONFIG.showTitles);
     p.SetRowValue(3, 1);
-    CHECK(GetRespectMissionViewDistance() == true);
+    CHECK(USER_CONFIG.showTitles);
 }
 
 TEST_CASE("GamePage: view-distance helpers clamp and round to the supported range", "[UI][GamePage]")

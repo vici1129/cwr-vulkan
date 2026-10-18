@@ -27,6 +27,8 @@ using Poseidon::Foundation::Time;
 #include <Poseidon/World/Scene/Scene.hpp>
 #include <Poseidon/Foundation/Platform/AppConfig.hpp>
 #include <Poseidon/UI/Settings/GameSettingsConfig.hpp>
+#include <Poseidon/UI/Settings/GraphicsApply.hpp>
+#include <Poseidon/Foundation/Common/GamePaths.hpp>
 #include <Poseidon/Graphics/Core/Engine.hpp>
 #include <Poseidon/Graphics/Textures/TextureBank.hpp>
 #include <Poseidon/Graphics/Rendering/Lighting/Lights.hpp>
@@ -678,6 +680,11 @@ void Scene::LoadConfig()
     }
 
     SetPreferredViewDistance(GetSelectedPreferredViewDistance());
+    // The engine's boot request precedes Scene creation. Load explicit modern
+    // object-detail choices here as well, without changing old profiles' 1x default.
+    Poseidon::GraphicsConfig graphics;
+    if (graphics.Load(Poseidon::Foundation::GamePaths::Instance().UserDir() + "graphics.cfg") && graphics.objectLodConfigured)
+        SetObjectLODBias(Poseidon::ObjectLodBiasForTier(graphics.objectLod));
     // Scene/profile creation follows the engine's graphics.cfg boot request.
     // Every supported Vulkan shadow group needs these original caster gates.
     if (GEngine && GEngine->HasVulkanGraphics())
@@ -687,7 +694,7 @@ void Scene::LoadConfig()
     }
 }
 
-void Scene::SaveConfig() const
+bool Scene::SaveConfig() const
 {
     if (!IsOutOfMemory())
     {
@@ -709,8 +716,9 @@ void Scene::SaveConfig() const
         cfg.Add("viewDistance", GetSelectedPreferredViewDistance());
         cfg.Add("terrainGrid", GetPreferredTerrainGrid());
 
-        cfg.Save(name);
+        return cfg.Save(name) == LSOK;
     }
+    return false;
 }
 
 extern bool ObjViewer;

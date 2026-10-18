@@ -7,7 +7,7 @@
 // between "config value" and "running renderer".  Two callers:
 //
 //   - GameApplication::LoadAndApplyGraphicsConfig at boot.
-//   - GraphicsPage's row handlers on every live row change.
+//   - VideoPage's explicit Apply/OK transaction.
 //
 // Tier→engine-value mappings live in this TU so both callers see the
 // same translation table; changing a mapping touches one place.
@@ -22,6 +22,9 @@
 namespace Poseidon
 {
 float TerrainGridForTier(GraphicsConfig::Tier tier);
-void ApplyGraphicsConfigToEngine(const GraphicsConfig& cfg);
+float ObjectLodBiasForTier(GraphicsConfig::Tier tier);
+// Optional baseline limits a staged UI commit to fields that actually changed;
+// boot still applies the complete file. Unrelated developer/mod overrides stay live.
+void ApplyGraphicsConfigToEngine(const GraphicsConfig& cfg, const GraphicsConfig* baseline = nullptr);
 
 } // namespace Poseidon

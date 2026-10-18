@@ -7,8 +7,8 @@
 // runtime Environment, Load + Save against a path.  System-global —
 // one file per machine, not per game profile.
 //
-// Live-apply screen (no Apply button): values flow to the engine the
-// frame they change.  Persistence on Unmount mirrors AudioPage.
+// The unified Video screen stages changes and persists on Apply/OK.
+// Legacy tier fields remain readable for old configs and GL33 preferences.
 //
 // Field grouping:
 //
@@ -66,9 +66,13 @@ public:
 
 	// Persistable fields.
 	GraphicsQuality vulkan;
+    ImageQuality vulkanImage;
 	Preset    qualityPreset    = PresetUltra;
 	Tier      terrainDetail    = TierUltra;     // → grid 6.25 m
 	Tier      objectLod        = TierUltra;
+    // Old boot configs held an auto-detected tier that never reached the
+    // subsequently created Scene. Only explicit Video choices opt into loading it.
+    bool      objectLodConfigured = false;
 	Tier      shadowQuality    = TierHigh;      // High caps Shadow tier; "Ultra shadow" needs
 	                                             // shadow-distance bias hook that doesn't exist yet
 	Tier      particlesQuality = TierHigh;

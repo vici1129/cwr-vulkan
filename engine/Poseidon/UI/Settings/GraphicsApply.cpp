@@ -71,18 +71,25 @@ int VsyncToInterval(GraphicsConfig::VsyncMode v)
 }
 } // namespace
 
-void ApplyGraphicsConfigToEngine(const GraphicsConfig& cfg)
+float ObjectLodBiasForTier(GraphicsConfig::Tier tier)
+{
+    return ObjectLodTierToBias(tier);
+}
+
+void ApplyGraphicsConfigToEngine(const GraphicsConfig& cfg, const GraphicsConfig* baseline)
 {
     if (GScene)
     {
-        GScene->SetPreferredTerrainGrid(TerrainGridForTier(cfg.terrainDetail));
-        GScene->SetObjectLODBias(ObjectLodTierToBias(cfg.objectLod));
+        if (!baseline || cfg.terrainDetail != baseline->terrainDetail)
+            GScene->SetPreferredTerrainGrid(TerrainGridForTier(cfg.terrainDetail));
+        if (!baseline || cfg.objectLod != baseline->objectLod || cfg.objectLodConfigured != baseline->objectLodConfigured)
+            GScene->SetObjectLODBias(ObjectLodTierToBias(cfg.objectLod));
         // Shadow tier — Off → both off; Low+ → both on.  Low/Med/High
         // discrimination is UI-only until a shadow-distance bias hook
         // lands.
         // Vulkan's quality group owns temporary CSM caster gates. The shared
         // legacy preference still belongs to GL33, including when editing FPS.
-        if (!GEngine || !GEngine->HasVulkanGraphics())
+        if ((!GEngine || !GEngine->HasVulkanGraphics()) && (!baseline || cfg.shadowQuality != baseline->shadowQuality))
         {
             const bool shadowsOn = cfg.shadowQuality != GraphicsConfig::TierOff;
             GScene->SetObjectShadows(shadowsOn);
@@ -90,19 +97,24 @@ void ApplyGraphicsConfigToEngine(const GraphicsConfig& cfg)
         }
         // Particles tier — Off → cloudlets off; Low/High → on.  Low vs
         // High is UI-only until the cloudlet system grows tiered density.
-        GScene->SetCloudlets(cfg.particlesQuality != GraphicsConfig::TierOff);
+        if (!baseline || cfg.particlesQuality != baseline->particlesQuality)
+            GScene->SetCloudlets(cfg.particlesQuality != GraphicsConfig::TierOff);
     }
     if (GEngine)
     {
-        GEngine->SetSwapInterval(VsyncToInterval(cfg.vsync));
-        GEngine->SetBrightness(cfg.brightness);
-        GEngine->SetGamma(cfg.gamma);
-        GEngine->SetAlphaToCoverage(cfg.alphaToCoverage);
-        GEngine->SetRenderScale(cfg.renderScale);
-        GEngine->SetMsaaSamples(cfg.msaaSamples);
-        GEngine->SetMultitexturing(cfg.multitexturing);
+        if (!baseline || cfg.vsync != baseline->vsync)
+        {
+            const int interval = VsyncToInterval(cfg.vsync);
+            if (!GEngine->SetSwapInterval(interval) && interval < 0) GEngine->SetSwapInterval(1);
+        }
+        if (!baseline || cfg.brightness != baseline->brightness) GEngine->SetBrightness(cfg.brightness);
+        if (!baseline || cfg.gamma != baseline->gamma) GEngine->SetGamma(cfg.gamma);
+        if (!baseline || cfg.alphaToCoverage != baseline->alphaToCoverage) GEngine->SetAlphaToCoverage(cfg.alphaToCoverage);
+        if (!baseline || cfg.renderScale != baseline->renderScale) GEngine->SetRenderScale(cfg.renderScale);
+        if (!baseline || cfg.msaaSamples != baseline->msaaSamples) GEngine->SetMsaaSamples(cfg.msaaSamples);
+        if (!baseline || cfg.multitexturing != baseline->multitexturing) GEngine->SetMultitexturing(cfg.multitexturing);
     }
-    gUserFpsCap = cfg.fpsCap;
+    if (!baseline || cfg.fpsCap != baseline->fpsCap) gUserFpsCap = cfg.fpsCap;
 }
 
 } // namespace Poseidon

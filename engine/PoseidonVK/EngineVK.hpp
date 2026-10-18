@@ -57,6 +57,12 @@ class EngineVK final : public Engine
     bool UsesHDRLighting() const override { return true; }
     bool SetSSAO(bool enabled, float strength, float radius, float bias, float fade) override;
     bool HasVulkanGraphics() const override { return true; }
+    ImageQuality GetImageQuality() const override { return _vk.GetImageQuality(); }
+    RString ImageQualityUnavailable(const ImageQuality& q) const override
+    { return _failed ? "The Vulkan renderer has stopped." : _vk.ImageQualityUnavailable(q).c_str(); }
+    RString ApplyImageQuality(const ImageQuality& q) override
+    { return _failed ? "The Vulkan renderer has stopped." : _vk.ApplyImageQuality(q).c_str(); }
+    bool ImageQualityPending() const override { return !_failed && _vk.ImageQualityPending(); }
     GraphicsQuality GetGraphicsQuality() const override;
     RString GraphicsQualityRTUnavailable() const override { return _vk.GraphicsQualityRTUnavailable().c_str(); }
     bool ApplyGraphicsQuality(const GraphicsQuality& quality) override;
@@ -144,6 +150,7 @@ class EngineVK final : public Engine
     void StopTextInput() override;
     bool IsTextInputActive() const override;
     bool SwitchRes(int width, int height, int bpp) override;
+    void GetVideoResolution(int& width, int& height) const override;
     bool SwitchRefreshRate(int refresh) override;
     bool SetWindowMode(WindowMode mode) override;
     WindowMode GetCurrentWindowMode() const override { return _mode; }
@@ -153,6 +160,7 @@ class EngineVK final : public Engine
     void ListRefreshRates(FindArray<int>& ret) override;
     void ListMonitors(FindArray<MonitorInfo>& ret) override;
     int GetCurrentMonitor() const override;
+    bool SwitchMonitor(int index) override;
     bool GetDesktopDisplayMode(int& width, int& height, int& refresh) const override;
     bool GetCurrentDisplayMode(int& width, int& height, int& refresh) const override;
     bool GetRequestedFullscreenMode(int& width, int& height, int& refresh) const override;

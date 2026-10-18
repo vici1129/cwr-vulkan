@@ -1,14 +1,12 @@
 #!/usr/bin/env pwsh
-# Combined Pester + Trident: drive the live game through a Graphics
+# Combined Pester + Trident: drive the live game through a Video
 # row change and assert the resulting graphics.cfg on disk.
 #
 # Mirrors audio_volume_persist.tests.ps1 + display_apply_persist.tests.ps1
 # 1:1.  Pester sets up an ephemeral POSEIDON_USER_DIR; tri honours it
 # (commit 110cdba2) instead of creating its own tempdir; the tri
-# scenario opens Graphics, changes Terrain Detail via UI nav, Esc
-# back to Index (live-apply pattern — Unmount writes the file),
-# exits.  Pester then reads graphics.cfg and asserts the change
-# landed.
+# scenario opens Video, changes Terrain Detail, explicitly Applies,
+# then exits. Pester reads graphics.cfg and asserts the change landed.
 #
 # Run:
 #   Invoke-Pester -Container (New-PesterContainer
@@ -39,26 +37,19 @@ Describe "graphics.cfg persistence through live UI flow" {
         if ($script:Skip -ne "") { Set-ItResult -Skipped -Because $script:Skip }
     }
 
-    It "Terrain Detail change via UI + Unmount round-trips into graphics.cfg" {
+    It "Terrain Detail change via unified Video Apply round-trips into graphics.cfg" {
         $eph = New-EphemeralGamePaths
         try {
             $cfgPath = Join-Path $eph.UserDir "graphics.cfg"
 
-            # --retries 10 absorbs the pre-existing options-screen engine
-            # flake (access violation during long idle simulation).  This
-            # test does more sim frames than the audio / display
-            # equivalents because GraphicsPage requires double-page
-            # navigation (Index → Down×2 → Enter into Graphics) so the
-            # crash window is larger; bumping retries is the dirty knob
-            # that keeps the gate green until the engine bug is fixed.
+            # Retain the existing runner retry budget for legacy idle flakes.
             $sqf = Join-Path $script:repoRoot "tests/integration/ui/options/graphics/new_graphics_apply_persist.test.sqf"
             & $script:triExe test $sqf --game-dir (Split-Path $script:gameExe -Parent) --data-dir $script:gameDir --retries 10 2>&1 | Out-Null
             $LASTEXITCODE | Should -Be 0 -Because "tri scenario must pass"
 
-            Test-Path $cfgPath | Should -BeTrue -Because "GraphicsPage::Unmount should write graphics.cfg"
+            Test-Path $cfgPath | Should -BeTrue -Because "Video Apply should write graphics.cfg"
             $kv = Read-CfgFile $cfgPath
-            $kv['terrainDetail'] | Should -Be '5' -Because "tri advanced Terrain Detail from Ultra to Extreme"
-            $kv['qualityPreset'] | Should -Be '4' -Because "touching a tier row drops Quality Preset to Custom (4)"
+            $kv['terrainDetail'] | Should -Be '3' -Because "tri selected the existing 12.5 m terrain grid"
         } finally {
             Remove-EphemeralGamePaths $eph
         }

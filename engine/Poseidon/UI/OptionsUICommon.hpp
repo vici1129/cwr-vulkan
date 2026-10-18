@@ -263,6 +263,7 @@ class DisplayCredits : public Display
 };
 
 void OpenVideoOptions(ControlsContainer* parent, bool enableSimulation);
+bool UseLegacyVideoResource(const ParamEntry& video, bool shellAvailable);
 
 class DisplayOptionsVideo : public Display
 {

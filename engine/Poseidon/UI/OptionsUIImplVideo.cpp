@@ -45,7 +45,7 @@
 #include <Poseidon/Foundation/Strings/StrFormat.hpp>
 #include <Poseidon/UI/OptionsUICommon.hpp>
 #include <Poseidon/UI/Options/OptionsShell.hpp>
-#include <Poseidon/UI/Options/VulkanQualityPage.hpp>
+#include <Poseidon/UI/Options/VideoPage.hpp>
 
 // Defined at global scope in World/World.cpp.
 void ShowCinemaBorder(bool show);
@@ -55,13 +55,19 @@ extern void RestoreVBuffers();
 namespace Poseidon
 {
 
-// Keep mod-provided legacy Video layouts intact; the Vulkan panel owns its
-// notebook and returns to the original display for display/detail controls.
+// Addon-owned replacement layouts retain their original dialog, as do mods
+// explicitly opting out on RscDisplayOptionsVideo. Never rewrite their controls.
+bool UseLegacyVideoResource(const ParamEntry& video, bool shellAvailable)
+{
+    const auto* legacy = video.FindEntry("cwrLegacyVideo");
+    return !shellAvailable || video.GetOwner().GetLength() != 0 || (legacy && int(*legacy) != 0);
+}
 void OpenVideoOptions(ControlsContainer* parent, bool enableSimulation)
 {
-    if (GEngine && GEngine->HasVulkanGraphics())
-        parent->CreateChild(new OptionsShell(parent, enableSimulation, false, std::make_unique<VulkanQualityPage>()));
-    else parent->CreateChild(new DisplayOptionsVideo(parent, enableSimulation));
+    if (UseLegacyVideoResource(Res >> "RscDisplayOptionsVideo",
+                              Res.FindEntry("RscOptionsShell") && Res.FindEntry("RscOptionsPageScrollList")))
+        parent->CreateChild(new DisplayOptionsVideo(parent, enableSimulation));
+    else parent->CreateChild(new OptionsShell(parent, enableSimulation, false, std::make_unique<VideoPage>()));
 }
 
 void SetHWTL(bool val)

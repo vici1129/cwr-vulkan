@@ -397,6 +397,13 @@ class Engine : public IGraphicsEngine
     virtual bool SetWorldRenderScale(int) { return false; }
     virtual bool SetSSAO(bool, float, float, float, float) { return false; }
     virtual bool HasVulkanGraphics() const { return false; }
+    virtual ImageQuality GetImageQuality() const { return {}; }
+    virtual RString ImageQualityUnavailable(const ImageQuality&) const { return "Vulkan image quality is unavailable."; }
+    virtual RString ApplyImageQuality(const ImageQuality&) { return "Vulkan image quality is unavailable."; }
+    virtual bool ImageQualityPending() const { return false; }
+    // Display config uses logical window sizes, but fullscreen modes/drawables
+    // use pixels. Keep UI persistence and rollback in the window setter's units.
+    virtual void GetVideoResolution(int& width, int& height) const { width = Width(); height = Height(); }
     virtual GraphicsQuality GetGraphicsQuality() const { return {}; }
     virtual RString GraphicsQualityRTUnavailable() const { return "Ray Traced Shadows require Vulkan."; }
     virtual bool ApplyGraphicsQuality(const GraphicsQuality&) { return false; }
@@ -478,6 +485,7 @@ class Engine : public IGraphicsEngine
     // MSAA sample count on the frame render target (0/1 = no multisampling).
     virtual void SetMsaaSamples(int /*samples*/) {}
     virtual int GetMsaaSamples() const { return 0; }
+    virtual bool SupportsMsaaSamples(int samples) const { return samples == 0; }
 
     // Instanced-run mode: the scene batches a sorted run of
     // identical static shapes; backends that support it draw every TL section

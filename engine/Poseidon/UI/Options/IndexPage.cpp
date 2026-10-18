@@ -6,10 +6,8 @@
 #include <Poseidon/UI/Options/OptionsShell.hpp>
 #include <Poseidon/UI/Options/AudioPage.hpp>
 #include <Poseidon/UI/Options/ControlsPage.hpp>
-#include <Poseidon/UI/Options/DisplayPage.hpp>
 #include <Poseidon/UI/Options/DifficultyPage.hpp>
-#include <Poseidon/UI/Options/GraphicsPage.hpp>
-#include <Poseidon/UI/Options/VulkanQualityPage.hpp>
+#include <Poseidon/UI/Options/VideoPage.hpp>
 #include <Poseidon/UI/Options/GamePage.hpp>
 
 #include <Poseidon/UI/OptionsUICommon.hpp>
@@ -43,8 +41,8 @@ void RefreshIndexLayout(OptionsShell& shell)
         close->ShowCtrl(showCredits);
 
     setNavText(1101, LocalizeString("STR_DISP_MAIN_OPT_AUDIO"));
-    setNavText(1102, LocalizeString("STR_DISP_MAIN_OPT_DISPLAY"));
-    setNavText(1103, LocalizeString("STR_DISP_MAIN_OPT_GRAPHICS"));
+    setNavText(1102, LocalizeStringWithFallback("STR_VIDEO_TITLE", "Video Settings"));
+    if (auto* duplicate = shell.GetCtrl(1103)) { duplicate->ShowCtrl(false); duplicate->EnableCtrl(false); }
     setNavText(1104, LocalizeString("STR_DISP_MAIN_OPT_GAME"));
     setNavText(1107, LocalizeString("STR_DISP_OPT_CONTROLS"));
     setNavText(1108, LocalizeString("STR_DISP_OPTIONS_DIFFICULTY"));
@@ -79,12 +77,12 @@ bool IndexPage::OnNav(OptionsShell& shell, int idc)
         case 1101: // Audio
             shell.PushPage(std::make_unique<AudioPage>());
             return true;
-        case 1102: // Display
-            shell.PushPage(std::make_unique<DisplayPage>());
-            return true;
-        case 1103: // Graphics
-            if (GEngine && GEngine->HasVulkanGraphics()) shell.PushPage(std::make_unique<VulkanQualityPage>());
-            else shell.PushPage(std::make_unique<GraphicsPage>());
+        case 1102: // Unified Video (old Display route).
+        case 1103: // Keep old Graphics IDC working for mod resources/scripts.
+            if (UseLegacyVideoResource(Res >> "RscDisplayOptionsVideo",
+                                      Res.FindEntry("RscOptionsShell") && Res.FindEntry("RscOptionsPageScrollList")))
+                shell.CreateChild(new DisplayOptionsVideo(&shell, shell.SimulationEnabled()));
+            else shell.PushPage(std::make_unique<VideoPage>());
             return true;
         case 1104: // Game
             shell.PushPage(std::make_unique<GamePage>());

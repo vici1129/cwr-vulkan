@@ -240,6 +240,8 @@ bool GraphicsConfig::Load(const std::string& path)
         terrainDetail = static_cast<Tier>((int)*e);
     if (auto* e = cfg.FindEntry("objectLod"))
         objectLod = static_cast<Tier>((int)*e);
+    if (auto* e = cfg.FindEntry("objectLodConfigured"))
+        objectLodConfigured = (int)*e != 0;
     if (auto* e = cfg.FindEntry("shadowQuality"))
         shadowQuality = static_cast<Tier>((int)*e);
     if (auto* e = cfg.FindEntry("particlesQuality"))
@@ -265,6 +267,14 @@ bool GraphicsConfig::Load(const std::string& path)
     vulkan.clouds = cfg.ReadValue("vulkanClouds", 0);
     vulkan.water = cfg.ReadValue("vulkanWater", 0);
     vulkan.ao = cfg.ReadValue("vulkanAO", 0) != 0;
+    if (auto* e = cfg.FindEntry("vulkanAA")) vulkanImage.aa = static_cast<const char*>(RString(*e));
+    vulkanImage.scale = cfg.ReadValue("vulkanRenderScale", 100);
+    const std::string modes[] = {"off", "fxaa", "smaa", "taa", "msaa2", "msaa4", "msaa8",
+                                  "fsr-native", "fsr-quality", "fsr-balanced", "fsr-performance"};
+    if (std::find(std::begin(modes), std::end(modes), vulkanImage.aa) == std::end(modes)) vulkanImage.aa = "off";
+    if (vulkanImage.scale != 100 && vulkanImage.scale != 125 && vulkanImage.scale != 150 && vulkanImage.scale != 200)
+        vulkanImage.scale = 100;
+    if (vulkanImage.IsFSR()) vulkanImage.scale = 100;
     if (vulkan.shadows < 0 || vulkan.shadows > 2) vulkan.shadows = 0;
     if (vulkan.clouds < 0 || vulkan.clouds > 1) vulkan.clouds = 0;
     if (vulkan.water < 0 || vulkan.water > 1) vulkan.water = 0;
@@ -278,6 +288,7 @@ bool GraphicsConfig::Save(const std::string& path) const
     cfg.Add("qualityPreset", static_cast<int>(qualityPreset));
     cfg.Add("terrainDetail", static_cast<int>(terrainDetail));
     cfg.Add("objectLod", static_cast<int>(objectLod));
+    cfg.Add("objectLodConfigured", objectLodConfigured);
     cfg.Add("shadowQuality", static_cast<int>(shadowQuality));
     cfg.Add("particlesQuality", static_cast<int>(particlesQuality));
     cfg.Add("vsync", static_cast<int>(vsync));
@@ -293,6 +304,8 @@ bool GraphicsConfig::Save(const std::string& path) const
     cfg.Add("vulkanClouds", vulkan.clouds);
     cfg.Add("vulkanWater", vulkan.water);
     cfg.Add("vulkanAO", vulkan.ao ? 1 : 0);
+    cfg.Add("vulkanAA", vulkanImage.aa.c_str());
+    cfg.Add("vulkanRenderScale", vulkanImage.scale);
 
     return WriteSettingsFile(path, cfg);
 }

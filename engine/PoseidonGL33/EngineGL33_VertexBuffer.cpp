@@ -384,6 +384,13 @@ void EngineGL33::SetRenderScale(float scale)
     _pendingRenderScale = scale;
 }
 
+bool EngineGL33::SupportsMsaaSamples(int samples) const
+{
+    GLint maximum = 0;
+    glGetIntegerv(GL_MAX_SAMPLES, &maximum);
+    return samples == 0 || ((samples == 2 || samples == 4 || samples == 8) && samples <= maximum);
+}
+
 void EngineGL33::SetMsaaSamples(int samples)
 {
     // Round to the supported steps; 0/1 = single-sampled target (no AA).

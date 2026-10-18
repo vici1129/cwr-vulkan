@@ -393,6 +393,13 @@ bool EngineVK::SetWindowMode(WindowMode mode)
     return true;
 }
 
+void EngineVK::GetVideoResolution(int& width, int& height) const
+{
+    width = _width;
+    height = _height;
+    if (_window && _mode == WindowMode::Windowed) SDL_GetWindowSize(_window, &width, &height);
+}
+
 bool EngineVK::SwitchRes(int width, int height, int bpp)
 {
     if (!_window || width <= 0 || height <= 0 || (bpp != 16 && bpp != 32))
@@ -414,7 +421,10 @@ bool EngineVK::SwitchRefreshRate(int refresh)
     if (!_window || _mode != WindowMode::Fullscreen || refresh <= 0)
         return false;
     SDL_DisplayMode closest{};
-    if (!SDL_GetClosestFullscreenDisplayMode(SDL_GetDisplayForWindow(_window), _width, _height,
+    const auto* requested = SDL_GetWindowFullscreenMode(_window);
+    const int width = requested ? requested->w : _width;
+    const int height = requested ? requested->h : _height;
+    if (!SDL_GetClosestFullscreenDisplayMode(SDL_GetDisplayForWindow(_window), width, height,
                                              static_cast<float>(refresh), true, &closest) ||
         !SDL_SetWindowFullscreenMode(_window, &closest))
         return false;
@@ -470,6 +480,23 @@ void EngineVK::ListMonitors(FindArray<MonitorInfo>& ret)
         ret.Add(info);
     }
     SDL_free(displays);
+}
+
+bool EngineVK::SwitchMonitor(int index)
+{
+    if (!_window) return false;
+    int count = 0;
+    SDL_DisplayID* displays = SDL_GetDisplays(&count);
+    if (!displays || index < 0 || index >= count) { SDL_free(displays); return false; }
+    const auto target = displays[index];
+    SDL_free(displays);
+    SDL_Rect bounds{};
+    if (!SDL_GetDisplayBounds(target, &bounds)) return false;
+    int width = 0, height = 0;
+    SDL_GetWindowSize(_window, &width, &height);
+    if (!SDL_SetWindowPosition(_window, bounds.x + (bounds.w - width) / 2, bounds.y + (bounds.h - height) / 2)) return false;
+    _vk.RequestRecreation();
+    return true;
 }
 
 int EngineVK::GetCurrentMonitor() const

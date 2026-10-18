@@ -1,15 +1,13 @@
 # Graphics quality and visual tuning
 
-## Player menu (2026-10-18)
+## Player menu (updated 2026-10-19)
 
-The first Vulkan graphics menu implements the exact group mappings below. Open
-Options > Graphics in the current notebook, or Options > Video in the legacy
-flow. The nine-row Vulkan panel uses the existing notebook appearance, focus,
-keyboard/controller navigation and mouse controls. **Display & detail** retains
-the existing VSync, frame cap, brightness, gamma, terrain, object and particle
-controls; its **Video options** entry opens the original mod-provided Video
-layout, including resolution, refresh rate and view distance. GL33 keeps its
-original Graphics/Video pages and behavior. No original PBO or asset is edited.
+The unified [Video Settings page](video-settings.md) implements the exact Vulkan
+group mappings below in its GRAPHICS section. DISPLAY and IMAGE QUALITY contain
+display modes, VSync/frame cap, brightness/gamma, AA/upscaling/scale, view distance
+and scene detail on the same scrollable notebook page. GL33 shows its meaningful
+legacy controls instead of Vulkan-only groups. Original mod Video resources
+retain a compatibility fallback. No original PBO or asset is edited.
 
 Overall **Standard** selects Standard shadows/clouds/water and AO Off;
 **Enhanced** selects Enhanced shadows/clouds/water and AO On. A matching set of
@@ -21,7 +19,7 @@ All supported shadow choices enable the original object/vehicle caster gates
 needed by CSM, including profiles migrated from the old Shadows Off setting.
 These are runtime overrides: Vulkan saves its shadow choice only in
 `vulkanShadows`, without changing the legacy `shadowQuality` tier or the profile's
-`objectShadows`/`vehicleShadows` preferences. Display & detail and the original
+`objectShadows`/`vehicleShadows` preferences. Unified Video and the compatibility
 Video dialog preserve those saved GL33 preferences too; shadow-gate edits in a
 Vulkan session remain process-local. GL33 continues to load and save its own
 shadow preferences normally, including profiles without explicit shadow fields.
@@ -36,8 +34,8 @@ checks renderer acceptance/fallback, then saves the four `vulkanShadows`,
 unapplied selections. During activation, controls wait for completion. Rejected
 requests and resource failures show an error and actual renderer choices without
 saving the failed bundle. A file-write failure is reported and Apply can retry.
-These semantics cover this Vulkan panel; the retained display/detail pages keep
-their existing live-preview/confirmation behavior.
+The unified page also stages its independent display/image/detail selections;
+display changes retain the existing timed Keep/Revert confirmation.
 
 Saved Vulkan choices are requested during the existing graphics configuration
 boot path, after device creation and before ordinary world rendering. The four
@@ -56,10 +54,9 @@ saved RT preference falls back to Enhanced shadows for that process; the saved
 preference is preserved until the player explicitly applies another choice.
 Availability is based on device negotiation and independent MRT blending, never
 GPU brand. This menu does not change the device bootstrap. Player-friendly RT
-startup opt-in is a focused follow-up. Vulkan AA/upscaling and render-scale UI
-modernization are also deferred; the old GL33-only AA/scale rows are disabled
-with an explanation under Vulkan. FSR retains its existing build and
-`CWR_VK_FSR=1` startup requirements.
+startup opt-in is a focused follow-up. AA/upscaling and render scale are now
+available on the unified page with actual capability checks. FSR retains its
+existing build and `CWR_VK_FSR=1` startup requirements.
 
 The measurements and visual gates below remain the authoritative mappings and
 qualification record. The original report describes the pre-menu state.

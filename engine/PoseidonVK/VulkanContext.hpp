@@ -295,6 +295,10 @@ class VulkanContext
     void PrepareRTAOAlpha(const std::shared_ptr<TextureImage>& image, uint32_t width, uint32_t height, const void* rgba);
     std::string SetAntiAliasing(std::string_view mode);
     bool SetRenderScale(int percent);
+    ImageQuality GetImageQuality() const { return {AAName(_aaMode), _renderScale}; }
+    std::string ImageQualityUnavailable(const ImageQuality& quality) const;
+    std::string ApplyImageQuality(const ImageQuality& quality);
+    bool ImageQualityPending() const { return _recreate; }
     std::string SetHDR(std::string_view mode);
     std::string SetBloom(std::string_view mode);
     std::string SetAtmosphere(std::string_view mode);

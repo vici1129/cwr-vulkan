@@ -91,10 +91,6 @@ const char* GamePage::GameProvider::RowLabel(int row) const
             return LocalizeString("STR_DISP_MAIN_OPT_GAME_TEXT_LANGUAGE");
         case kRowVoiceLanguage:
             return LocalizeString("STR_DISP_MAIN_OPT_GAME_VOICE_LANGUAGE");
-        case kRowViewDistance:
-            return LocalizeString("STR_DISP_MAIN_OPT_GAME_VIEW_DISTANCE");
-        case kRowRespectMissionViewDistance:
-            return LocalizeString("STR_DISP_MAIN_OPT_GAME_RESPECT_MISSION_VIEW_DISTANCE");
         case kRowBlood:
             return LocalizeString("STR_DISP_MAIN_OPT_GAME_BLOOD");
         case kRowSubtitles:
@@ -114,10 +110,6 @@ const char* GamePage::GameProvider::RowDescription(int row) const
             return LocalizeString("STR_DISP_MAIN_OPT_GAME_TEXT_LANGUAGE_DESC");
         case kRowVoiceLanguage:
             return LocalizeString("STR_DISP_MAIN_OPT_GAME_VOICE_LANGUAGE_DESC");
-        case kRowViewDistance:
-            return LocalizeString("STR_DISP_MAIN_OPT_GAME_VIEW_DISTANCE_DESC");
-        case kRowRespectMissionViewDistance:
-            return LocalizeString("STR_DISP_MAIN_OPT_GAME_RESPECT_MISSION_VIEW_DISTANCE_DESC");
         case kRowBlood:
             return LocalizeString("STR_DISP_MAIN_OPT_GAME_BLOOD_DESC");
         case kRowSubtitles:
@@ -142,10 +134,6 @@ OptionsScrollList::RowDef GamePage::GameProvider::RowFor(int row) const
             // Only languages the game provides dubbing for (hasVoice), not the full text set.
             return {512, CfgLib::LanguageRegistry::Instance().VoiceDisplayNamePtrs(),
                     CfgLib::LanguageRegistry::Instance().VoiceCount()};
-        case kRowViewDistance:
-            return {522, nullptr, -1};
-        case kRowRespectMissionViewDistance:
-            return {532, m_toggleOptions.data(), 2};
         case kRowBlood:
             return {542, m_toggleOptions.data(), 2};
         case kRowSubtitles:
@@ -178,10 +166,6 @@ int GamePage::GameProvider::RowValue(int row) const
             const int v = CfgLib::LanguageRegistry::Instance().VoiceIndexOf(GetSelectedVoiceLanguage());
             return v < 0 ? 0 : v;
         }
-        case kRowViewDistance:
-            return GamePage::ViewDistanceToSlider(GetSelectedPreferredViewDistance());
-        case kRowRespectMissionViewDistance:
-            return GetRespectMissionViewDistance() ? 1 : 0;
         case kRowBlood:
             return ENGINE_CONFIG.blood ? 1 : 0;
         case kRowSubtitles:
@@ -195,14 +179,10 @@ int GamePage::GameProvider::RowValue(int row) const
 
 void GamePage::GameProvider::SetRowValue(int row, int value)
 {
-    if (row == kRowBlood || row == kRowSubtitles || row == kRowRadioSubtitles || row == kRowRespectMissionViewDistance)
+    if (row == kRowBlood || row == kRowSubtitles || row == kRowRadioSubtitles)
     {
         if (value < 0 || value >= 2)
             return;
-    }
-    else if (row == kRowViewDistance)
-    {
-        value = std::clamp(value, 0, 100);
     }
     else if (row == kRowVoiceLanguage)
     {
@@ -223,14 +203,6 @@ void GamePage::GameProvider::SetRowValue(int row, int value)
         case kRowVoiceLanguage:
             SetSelectedVoiceLanguage(CfgLib::LanguageRegistry::Instance().VoiceNameAt(value));
             return;
-        case kRowViewDistance:
-            SetSelectedPreferredViewDistance(GamePage::SliderToViewDistance(value));
-            ApplyCurrentMissionViewDistance();
-            return;
-        case kRowRespectMissionViewDistance:
-            SetRespectMissionViewDistance(value != 0);
-            ApplyCurrentMissionViewDistance();
-            return;
         case kRowBlood:
             ENGINE_CONFIG.blood = value != 0;
             return;
@@ -245,23 +217,9 @@ void GamePage::GameProvider::SetRowValue(int row, int value)
 
 OptionsScrollList::Kind GamePage::GameProvider::RowKind(int row) const
 {
-    if (row == kRowViewDistance)
-        return OptionsScrollList::KindSlider;
-    if (row == kRowBlood || row == kRowSubtitles || row == kRowRadioSubtitles || row == kRowRespectMissionViewDistance)
+    if (row == kRowBlood || row == kRowSubtitles || row == kRowRadioSubtitles)
         return OptionsScrollList::KindBoolean;
     return OptionsScrollList::Provider::RowKind(row);
-}
-
-const char* GamePage::GameProvider::SliderValueText(int row) const
-{
-    if (row != kRowViewDistance)
-        return nullptr;
-
-    char buffer[32];
-    snprintf(buffer, sizeof(buffer), LocalizeString("STR_DISP_MAIN_OPT_GAME_VIEW_DISTANCE_FORMAT"),
-             (int)std::lround(GetSelectedPreferredViewDistance()));
-    m_sliderValueText = buffer;
-    return m_sliderValueText.c_str();
 }
 
 } // namespace Poseidon

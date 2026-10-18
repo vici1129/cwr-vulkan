@@ -833,6 +833,8 @@ class EngineGL33 : public Engine
     void SetRenderScale(float scale) override;
     float GetRenderScale() const override { return _renderScale; }
     void SetMsaaSamples(int samples) override;
+    bool SupportsMsaaSamples(int samples) const override;
+    void GetVideoResolution(int& width, int& height) const override;
     int GetMsaaSamples() const override { return _msaaSamples; }
     bool HasWBuffer() const override { return false; }
 

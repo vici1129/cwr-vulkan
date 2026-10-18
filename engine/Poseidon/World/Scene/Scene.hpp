@@ -304,7 +304,7 @@ class Scene
     RString GetQualityText() const;
 
     void LoadConfig();
-    void SaveConfig() const;
+    bool SaveConfig() const;
 
     float GetFogMaxRange() const { return _fogMaxRange; }
     float GetFogMinRange() const { return _fogMinRange; }

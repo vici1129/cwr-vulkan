@@ -117,7 +117,7 @@ void ApplyToRuntime(const GameSettingsConfig& cfg)
         GScene->SetPreferredViewDistance(SelectedPreferredViewDistanceStorage());
 }
 
-void SaveLegacySinks(const GameSettingsConfig& cfg)
+bool SaveLegacySinks(const GameSettingsConfig& cfg)
 {
     // Mirror blood + viewDistance into UserParams so mission scripts
     // (which read that file directly) see the current values.
@@ -126,7 +126,11 @@ void SaveLegacySinks(const GameSettingsConfig& cfg)
     userCfg.Add("blood", cfg.blood);
     userCfg.Add("viewDistance", cfg.preferredViewDistance);
     if (userCfg.Save(Poseidon::GetUserParams()) != LSOK)
+    {
         LOG_WARN(Config, "GameSettings: failed to write '{}'", (const char*)Poseidon::GetUserParams());
+        return false;
+    }
+    return true;
 }
 } // namespace
 
@@ -273,7 +277,7 @@ void LoadGameSettings()
               cfg.respectMissionViewDistance);
 }
 
-void SaveGameSettings()
+bool SaveGameSettings()
 {
     const std::string path = GameSettingsPath();
     GameSettingsConfig cfg;
@@ -287,13 +291,14 @@ void SaveGameSettings()
     if (!cfg.Save(path))
     {
         LOG_WARN(Config, "GameSettings: failed to write '{}'", path);
-        return;
+        return false;
     }
 
-    SaveLegacySinks(cfg);
+    if (!SaveLegacySinks(cfg)) return false;
     LOG_DEBUG(Config, "GameSettings: saved text='{}' voice='{}' blood={} viewDistance={} respectMissionViewDistance={}",
               cfg.textLanguage, cfg.voiceLanguage, cfg.blood, cfg.preferredViewDistance,
               cfg.respectMissionViewDistance);
+    return true;
 }
 
 std::string LoadActiveProfile()

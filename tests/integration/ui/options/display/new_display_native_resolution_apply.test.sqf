@@ -1,63 +1,22 @@
-// Regression for issue #5: after applying a non-native exclusive mode, picking
-// "Native" and keeping the change must restore the desktop display mode rather
-// than leaving the previous low-resolution exclusive mode active.
-
 #include "../../../helpers/options_preamble.sqf"
 #include "../../../helpers/display_preamble.sqf"
 
-private _desktopMode = triGetDesktopDisplayMode;
-private _desktopSize = triGetWindowSize;
-private _nativeLabel = triControlText 521;
-
-// Other display tests may persist Window / Exclusive state, so rotate until
-// Resolution re-enables instead of assuming a specific starting label.
-for "_i" from 0 to 3 do {
-    if ((triAssert [(triGetControlEnabled 522)]) == "OK") exitWith {};
-    triClick 519;
-    triSimFrames 2
+private _desktop = triGetDesktopDisplayMode;
+for "_i" from 0 to 3 do { if ((triControlText 521) == "Exclusive Fullscreen") exitWith {}; triInvokeButton 529 };
+triAssertEq [(triControlText 521), "Exclusive Fullscreen"];
+private _picked = "";
+for "_i" from 0 to 79 do {
+    triInvokeButton 539;
+    private _candidate = triControlText 531;
+    if (_candidate != "Native" && _candidate != triGetWindowSize) exitWith { _picked = _candidate };
 };
-if ((triAssert [(triGetControlEnabled 522)]) != "OK") exitWith { "FAIL:resolution_not_enabled_in_exclusive" };
-
-// Pick the first available non-native mode instead of hardcoding 800x600 —
-// some CI runners only advertise a subset of fullscreen modes.
-private _pickedMode = "Native";
-private _pickedSteps = 0;
-for "_i" from 1 to 79 do {
-    triClick 529;
-    triSimFrames 1;
-    private _candidate = triControlText 521;
-    if (_candidate != _nativeLabel && _candidate != _desktopSize) exitWith {
-        _pickedMode = _candidate;
-        _pickedSteps = _i
-    }
-};
-if (_pickedSteps <= 0) exitWith {
-    format ["FAIL:no_non_native_mode_available actual=%1 desktop=%2", triControlText 521, _desktopSize]
-};
-
-triClick 563
+if (_picked == "") exitWith { "FAIL:no_non_native_mode" };
+#include "../../../helpers/video_apply.sqf"
 #include "../../../helpers/display_confirm_keep.sqf"
-private _lowResCurrentMode = triGetCurrentDisplayMode;
-private _lowResRequestedMode = triGetRequestedFullscreenMode;
-if (_lowResCurrentMode == _desktopMode && _lowResRequestedMode == _desktopMode) exitWith {
-    format ["FAIL:low_res_not_applied current=%1 requested=%2 picked=%3 desktop=%4",
-            _lowResCurrentMode, _lowResRequestedMode, _pickedMode, _desktopMode]
-};
-
-// Now walk back to Native and apply again.
-for "_i" from 1 to _pickedSteps do {
-    triClick 528;
-    triSimFrames 1
-};
-
-triClick 563
+#include "../../../helpers/video_top.sqf"
+for "_i" from 0 to 79 do { if ((triControlText 531) == "Native") exitWith {}; triInvokeButton 538 };
+triAssertEq [(triControlText 531), "Native"];
+#include "../../../helpers/video_apply.sqf"
 #include "../../../helpers/display_confirm_keep.sqf"
-
-private _currentMode = triGetCurrentDisplayMode;
-private _requestedMode = triGetRequestedFullscreenMode;
-if (_currentMode != _desktopMode && _requestedMode != _desktopMode) exitWith {
-    format ["FAIL:native_not_applied current=%1 requested=%2 desktop=%3", _currentMode, _requestedMode, _desktopMode]
-};
-"OK"
-
-triEndTest
+triAssertEq [triGetCurrentDisplayMode, _desktop];
+triEndTest;

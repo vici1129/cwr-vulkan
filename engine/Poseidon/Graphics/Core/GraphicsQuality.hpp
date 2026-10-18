@@ -1,7 +1,17 @@
 #pragma once
+#include <string>
 
 namespace Poseidon
 {
+// Renderer state/capability exchange, not a separate configuration store.
+struct ImageQuality
+{
+    std::string aa = "off";
+    int scale = 100;
+    bool operator==(const ImageQuality& b) const { return aa == b.aa && scale == b.scale; }
+    bool operator!=(const ImageQuality& b) const { return !(*this == b); }
+    bool IsFSR() const { return aa.compare(0, 4, "fsr-") == 0; }
+};
 // The four player choices. -1 is a read-only observation of a developer's
 // partial group; it is never a selectable or persisted quality tier.
 struct GraphicsQuality

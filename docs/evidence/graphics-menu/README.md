@@ -84,9 +84,9 @@ gamma 1.1, brightness 1.7 and a 30 FPS cap. Local logs: `video-return-fix` and
 - [Explicit Ray Traced component on Everon](ray-traced.png)
 - [No RT capability and restart hint](no-rt.png)
 
-Remaining focused follow-ups: player-friendly RT device startup opt-in, Vulkan
-AA/upscaling/render-scale UI modernization, and localization of the new English
-labels. The existing RT-water transition and volumetric road-banding visual gates
+Remaining focused follow-ups: player-friendly RT/FSR device startup opt-in and
+additional translations for the new English-fallback labels. AA/upscaling/scale
+UI modernization is complete below. The RT-water transition and road-banding gates
 remain unresolved and neither feature is selected by either preset.
 
 ## Shadow preference isolation regression (2026-10-18)
@@ -122,3 +122,102 @@ renderer algorithm changed. The nested Video return merge remains in place.
 Tested runtime SHA-256: Vulkan
 `277841ABFED4559A6B1557E901EB42CD7D1F5D4456E8DB2A3AD953EA27CB0962`;
 GL33 `8D7363797D440A0CD5AAFAB254FBCD46BAC1E9BD856BBE10EE95039A22809EFD`.
+
+## Unified Video modernization (2026-10-19)
+
+The [Video guide and consolidation audit](../../video-settings.md) describe the
+single DISPLAY / IMAGE QUALITY / GRAPHICS page, renderer-specific controls,
+capability hints and community-resource fallback. The redundant Graphics and
+Vulkan Quality page implementations and ordinary nested Video navigation are
+removed. Existing display enumeration/switching and configuration writers are
+reused; no rendering algorithms, artistic parameters, game assets or private
+DLSS/NGX sources changed.
+
+### Automated checks
+
+- Public Vulkan and GL33 `RelWithDebInfo` builds passed with
+  `build/local-build.ps1`. The pre-existing `FileServerMT.hpp` constructor-order
+  warning is unchanged.
+- Each build passed **742 assertions / 108 cases** across Video, shadow
+  isolation, GraphicsConfig, DisplayConfig/Page, Game settings and notebook UI.
+  Tests cover staging, exact presets/Custom, grouped changes, capability-filtered
+  AA/RT/FSR, scale ownership, actual-state acceptance, deferred completion,
+  Apply/OK/Cancel, failed display requests, persistence, independent renderer
+  fields, old profiles and mod resource ownership/explicit fallback.
+- Failed-writer tests include a blocked display path and a read-only later
+  writer: graphics/profile files are restored using temporary in-memory byte
+  snapshots, Cancel restores the previous runtime values, and Retry succeeds.
+  No backup settings store or new configuration format is introduced.
+- Logical-window versus drawable-pixel tests prevent DPI-scaled sizes from
+  inflating persistence/rollback. Physical OS DPI settings were not changed.
+  An additional regression preserves mod/developer scene detail when only a
+  Vulkan effect preset changes.
+- Real Scene-construction tests cover explicit object-detail persistence in both
+  renderers and preserve the 1x default of old auto-detected configs. The selector
+  uses the existing 0.5x/0.75x/1x/2x engine mapping.
+- Vulkan shape/AA/shadow math: **1,601 assertions / 71 cases**. Driver-free
+  policy/lifetime guards: **517 checks**. Their intentional synthetic failures
+  are not live validation errors.
+- Existing SQF display/graphics fixtures now target the unified layout. Their
+  shared top-level Apply helper was replayed through the existing live harness;
+  no new test framework was added. The full CLI/Pester jobs were not run here.
+
+### Direct gameplay and persistence
+
+Stock GOG data, isolated copied profiles, `--nosound`, exact-window input and the
+existing harness; these are diagnostic mission checks, not Steam-route acceptance
+or mission completion. Malden `01TakeTheCar.ABEL` and Everon `05HeavyMetal.Eden`
+both rendered gameplay with the new menu and normal keyboard movement.
+
+- Live AA selections covered Off, FXAA, SMAA, TAA, MSAA 2x/4x/8x and FSR 3.1.4
+  Native AA/Quality/Balanced/Performance. Each saved selection matched active AA.
+  Native scales 100/125/150/200% worked; selecting FSR restored 100% independent
+  scale and disabled that row. FSR dispatches executed during gameplay.
+- Standard/Enhanced/Custom, each shadow/cloud/water/AO group, particles, terrain,
+  object bias, visibility/mission limits, brightness/gamma and VSync/frame cap
+  were exercised. Mouse chevrons, keyboard scrolling, controller left/right and
+  controller Back worked. Staging/Cancel did not commit the preview.
+- Windowed 1024x768 and restoration to 1280x720 passed on Vulkan and GL33.
+  Vulkan exclusive **1280x720 at 120 Hz** matched both requested and active
+  display modes. Explicit Revert and the 15-second timeout restored the previous
+  mode. Aspect handling/HUD width choices retained their existing behavior.
+  Vulkan refresh is now requested after entering exclusive mode at the selected
+  size; monitor mode lists use the selected output. The machine had one monitor,
+  so no physical multi-monitor move was qualified.
+- A saved FSR Quality / Ray Traced configuration restarted on Everon with FSR
+  dispatches, soft sunlight queries and dynamic casters active. Without startup
+  opt-ins, the page instead showed AA Off / Enhanced raster, excluded unavailable
+  choices and rejected developer FSR/RT requests honestly. Applying unrelated FPS
+  retained the saved unavailable RT/FSR preferences.
+- Vulkan -> GL33 -> Vulkan -> GL33 preserved separate choices. GL33 first retained
+  its original shadows Off, then saved **MSAA 4x, scale 175%, objects On and
+  vehicles Off**. Vulkan restored FSR independently, retained nonempty CSM,
+  applied Ray Traced and returned to raster without overwriting those GL33
+  fields. The next GL33 restart restored all four preferences. GL33 detail-texture
+  toggles also worked. Developer shadow-map disable/enable remained functional.
+- Final exact-binary runs applied and saved successfully, retained the mixed
+  GL33 caster preferences, and closed cleanly. Final Vulkan shutdown reported
+  **zero validation errors and warnings**. Experimental features were not enabled
+  by presets; the existing RTAO status remained Off alongside sunlight RT.
+- The final object-detail follow-up saved 2x in Vulkan, restored it after a
+  restart and into GL33, then saved 0.75x in GL33 and restored that exact runtime
+  bias after GL33 and Vulkan restarts. These last checks used live harness/UI
+  state; a new capture attempt was refused on foreground-focus loss, so no
+  additional visual/input result is claimed for that attempt.
+
+Local build/test output: `build/video-modernization-*.log`. Local mission logs,
+status assertions and captures: `build/shadow-live/video-modernization-*`.
+Early raw-script driver attempts (comment parsing / nested SDL-event pumping)
+were corrected and excluded from acceptance; one stalled isolated test process
+was stopped without an active settings write. Original player profiles, PBOs,
+gameplay assets, private repositories/SDKs and persistent power settings were
+not modified.
+
+Final Vulkan runtime SHA-256:
+`83E3C2F813A7256881134D5D9A28891282ACB602F500D3375EE99D57759BD2FD`.
+Final GL33 runtime SHA-256:
+`C84A24AFF2AC56A45992C13B208E1BE53201F149AC2E56A0AC690E439D349DAC`.
+Final clean run labels: `video-modernization-object-vk`,
+`video-modernization-object-vk-restart`, `video-modernization-object-gl33`,
+`video-modernization-object-gl33-restart` and
+`video-modernization-object-return-vk`.

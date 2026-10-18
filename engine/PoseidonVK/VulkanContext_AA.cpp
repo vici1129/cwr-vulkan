@@ -25,6 +25,44 @@ void Require(VkResult result, const char* operation)
 }
 } // namespace
 
+std::string VulkanContext::ImageQualityUnavailable(const ImageQuality& quality) const
+{
+    AAMode mode;
+    if (!ParseAA(quality.aa, mode) || !ValidRenderScale(quality.scale)) return "Invalid AA or render scale.";
+    if (IsFSR(mode))
+    {
+        if (!_fsrAvailable) return "FSR 3.1.4 requires a supported build and CWR_VK_FSR=1 at startup: " + _fsrReason;
+        if (_aaColorFormat != SceneFormat) return "FSR requires linear FP16 scene color.";
+        if (quality.scale != 100) return "FSR owns internal resolution; independent render scale must be 100%.";
+    }
+    if (!(_aaSampleSupport & AASamples(mode))) return "The device does not support this color/depth sample count.";
+    if (!_physical) return "Vulkan device has not been initialized.";
+    VkPhysicalDeviceFeatures features{};
+    vkGetPhysicalDeviceFeatures(_physical, &features);
+    if (IsTemporal(mode) && !features.independentBlend) return "Temporal AA requires independent attachment blending.";
+    VkPhysicalDeviceProperties properties{};
+    vkGetPhysicalDeviceProperties(_physical, &properties);
+    const auto size = ScaledExtent(_extent, quality.scale);
+    if (size.width > properties.limits.maxFramebufferWidth || size.height > properties.limits.maxFramebufferHeight)
+        return "Render scale exceeds the device framebuffer limit.";
+    return {};
+}
+
+std::string VulkanContext::ApplyImageQuality(const ImageQuality& quality)
+{
+    auto error = ImageQualityUnavailable(quality);
+    if (!error.empty()) return error; // Validate the complete bundle before either request changes.
+    AAMode mode;
+    ParseAA(quality.aa, mode);
+    if (_requestedAA != mode || _requestedScale != quality.scale)
+    {
+        _requestedAA = mode;
+        _requestedScale = quality.scale;
+        _recreate = true; // Same deferred boundary used by the developer commands.
+    }
+    return {};
+}
+
 std::string VulkanContext::SetAntiAliasing(std::string_view name)
 {
     if (name == "motion" || name == "motion-off")
