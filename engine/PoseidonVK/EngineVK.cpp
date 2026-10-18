@@ -156,9 +156,9 @@ void EngineVK::InitDraw(bool clear, PackedColor color)
                 _qualityError = _vk.GraphicsQualityFailure();
                 if (_qualityError.empty()) _qualityError = "The renderer could not activate the complete selection.";
             }
-            LOG_INFO(Graphics, "Vulkan graphics apply: shadows={} clouds={} water={} AO={} result={}",
+            LOG_INFO(Graphics, "Vulkan graphics apply: shadows={} clouds={} water={} AO={} volumetricLighting={} result={}",
                      _qualityRequested.shadows, _qualityRequested.clouds, _qualityRequested.water,
-                     _qualityRequested.ao, _qualityError.empty() ? "OK" : _qualityError);
+                     _qualityRequested.ao, _qualityRequested.volumetricLighting, _qualityError.empty() ? "OK" : _qualityError);
         }
         if (!_vk.BeginFrame(static_cast<uint32_t>(std::max(width, 0)), static_cast<uint32_t>(std::max(height, 0))))
             return;

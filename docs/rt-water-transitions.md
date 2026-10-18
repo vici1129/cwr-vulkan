@@ -1,8 +1,9 @@
 # RT-water reflection transitions
 
 Follow-up to the [graphics-quality visual gate](graphics-quality.md), starting
-from public main `aadbc5e`. RT water remains a process-local developer feature;
-the unified Video Settings menu and its Water choices are unchanged.
+from public main `aadbc5e`, corrected in `d03ed0c`. The subsequent
+[Video Settings integration](video-settings.md#vulkan-water-and-lighting) exposes
+that same implementation as Water Quality: Ray Traced without renderer changes.
 
 ## Diagnosis
 
@@ -136,4 +137,7 @@ add detail materials, local-light transport or hidden unsupported geometry.
 Excluded blended/proxy/dynamic-texture geometry can reveal a supported hit or
 sky behind it. Reactive water still limits long temporal trails at the expense
 of some fine reflected-edge shimmer. No new denoiser or temporal framework is
-introduced. Keep RT water developer-only pending broader GPU/mod qualification.
+introduced. This report originally retained developer-only exposure; the
+subsequent [controls qualification](evidence/graphics-controls/README.md) exposes
+the same implementation as an explicit, capability-gated Water Quality choice.
+Broader GPU/mod qualification remains a limitation, not a new overall preset.

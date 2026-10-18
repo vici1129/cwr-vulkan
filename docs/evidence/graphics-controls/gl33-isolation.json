@@ -1,0 +1,32 @@
+{
+  "result": "PASS",
+  "labels": [
+    "",
+    "AA / Upscaling",
+    "Aspect Handling",
+    "Brightness",
+    "Detail Textures",
+    "FPS Cap",
+    "Gamma",
+    "HUD Width Limit",
+    "Monitor",
+    "Object Detail",
+    "Object Shadows",
+    "Particles / Smoke",
+    "Refresh Rate",
+    "Render Scale",
+    "Resolution",
+    "Respect mission visibility",
+    "Terrain Detail",
+    "VSync",
+    "Vehicle Shadows",
+    "Visibility distance",
+    "Window Mode"
+  ],
+  "VulkanPreferences": [
+    "2",
+    "2",
+    "1",
+    "fsr-quality"
+  ]
+}

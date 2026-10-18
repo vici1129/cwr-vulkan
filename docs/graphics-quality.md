@@ -3,7 +3,8 @@
 The [RT-water transition follow-up](rt-water-transitions.md) diagnoses and
 corrects the shoreline rejection seam on top of `aadbc5e`. Its current visual
 and performance evidence is separate from the historical measurements below.
-RT water remains developer-only; the unified Video Settings mapping is unchanged.
+RT water is now an explicit Water Quality choice in unified Video Settings;
+corrected volumetric sunlight is an independent Off/On preference.
 
 ## Player menu (updated 2026-10-19)
 
@@ -33,8 +34,8 @@ group; the new Shadow Quality control owns their enabled state when applied.
 
 Selections are staged: browsing does no resource recreation. **Apply** sends one
 complete bundle, coalesces deferred resources into the next frame's rebuild,
-checks renderer acceptance/fallback, then saves the four `vulkanShadows`,
-`vulkanClouds`, `vulkanWater`, `vulkanAO` fields in the existing per-user
+checks renderer acceptance/fallback, then saves `vulkanShadows`,
+`vulkanClouds`, `vulkanWater`, `vulkanAO` and independent `vulkanVolumetricLighting` in the existing per-user
 `graphics.cfg`. **OK** does the same and returns; **Cancel/Escape** discards
 unapplied selections. During activation, controls wait for completion. Rejected
 requests and resource failures show an error and actual renderer choices without
@@ -48,15 +49,20 @@ automatic Vulkan effects (atmosphere, classified wet surfaces, underwater optics
 allowlisted PBR) start enabled with their existing parameters and gates. They do
 not affect GL33. `tri` effect commands remain available and process-local; the
 menu observes their actual group state when it opens and after external changes.
-Player presets do not change bloom, volumetric sunlight, sun shafts, RT water,
+Player presets do not change bloom, volumetric sunlight, sun shafts,
 RTGI, RTAO, AA/upscaling, render scale, or internal artistic tuning. Existing
-shared RT scene consumers retain dynamic geometry when sunlight RT is disabled.
+shared RT scene consumers retain dynamic geometry while any consumer needs it.
+Water offers Standard, Enhanced and Ray Traced: the last adds the corrected
+hardware/sky/cloud reflections and supported dynamic geometry to Enhanced and
+derives Custom. Volumetric Lighting defaults Off; its independent On/Off choice
+does not change preset recognition and is preserved when selecting a preset.
 
-**Ray Traced Shadows require initialized ray-query capability.** Without it the
-shadow selector offers only Standard/Enhanced and its hint explains the
+**Ray Traced Shadows and Water require initialized ray-query capability.** Without it the
+selectors offer only Standard/Enhanced and their hints explain the
 `CWR_VK_RTAO=1` startup/restart requirement or hardware limitation. A previously
-saved RT preference falls back to Enhanced shadows for that process; the saved
-preference is preserved until the player explicitly applies another choice.
+saved RT component falls back to Enhanced for that process; the saved
+preference is preserved until the player explicitly applies another choice for
+that component (or a raster preset). Changing independent lighting does not erase it.
 Availability is based on device negotiation and independent MRT blending, never
 GPU brand. This menu does not change the device bootstrap. Player-friendly RT
 startup opt-in is a focused follow-up. AA/upscaling and render scale are now

@@ -1,0 +1,52 @@
+﻿{
+    "sourceBase":  "d03ed0c",
+    "diagnosticLaunches":  true,
+    "runs":  [
+                 {
+                     "label":  "graphics-finalize-final-malden",
+                     "renderer":  "Vulkan",
+                     "runtimeSHA256":  "9FAFE5EFA8A8917FBDE59A794167AC65B52C48075D7337BD05414217EB13ECCD",
+                     "normalShutdown":  true,
+                     "frames":  16302,
+                     "presented":  16302,
+                     "validationErrors":  0,
+                     "validationWarnings":  0
+                 },
+                 {
+                     "label":  "graphics-finalize-final-everon",
+                     "renderer":  "Vulkan",
+                     "runtimeSHA256":  "9FAFE5EFA8A8917FBDE59A794167AC65B52C48075D7337BD05414217EB13ECCD",
+                     "normalShutdown":  true,
+                     "frames":  9936,
+                     "presented":  9936,
+                     "validationErrors":  0,
+                     "validationWarnings":  0
+                 },
+                 {
+                     "label":  "graphics-finalize-final-no-rt",
+                     "renderer":  "Vulkan",
+                     "runtimeSHA256":  "9FAFE5EFA8A8917FBDE59A794167AC65B52C48075D7337BD05414217EB13ECCD",
+                     "normalShutdown":  true,
+                     "frames":  4223,
+                     "presented":  4223,
+                     "validationErrors":  0,
+                     "validationWarnings":  0
+                 },
+                 {
+                     "label":  "graphics-finalize-final-gl33",
+                     "renderer":  "GL33",
+                     "runtimeSHA256":  "73027E349954BD2726870C5408986828E407FF2DDBA178F2DC012B7BA78D4ABB",
+                     "normalShutdown":  true
+                 },
+                 {
+                     "label":  "graphics-finalize-return-vulkan",
+                     "renderer":  "Vulkan",
+                     "runtimeSHA256":  "9FAFE5EFA8A8917FBDE59A794167AC65B52C48075D7337BD05414217EB13ECCD",
+                     "normalShutdown":  true,
+                     "frames":  3462,
+                     "presented":  3462,
+                     "validationErrors":  0,
+                     "validationWarnings":  0
+                 }
+             ]
+}

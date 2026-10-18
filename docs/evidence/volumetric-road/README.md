@@ -3,7 +3,9 @@
 Public main baseline: `7dfc1f9`. The original
 [Malden reproduction](../graphics-quality/README.md#reproduction-recipe) is used
 with stock `01TakeTheCar.ABEL`; Everon uses `05HeavyMetal.Eden`. Volumetrics
-remain developer-only, default Off. No Video Settings changes are included.
+default to Off. That correction made no Video Settings changes; the subsequent
+[final controls integration](../graphics-controls/README.md) exposes this same
+implementation through an independent Volumetric Lighting Off/On preference.
 
 ## Diagnosis
 

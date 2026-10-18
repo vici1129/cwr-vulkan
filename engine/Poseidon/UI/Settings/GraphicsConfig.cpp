@@ -267,6 +267,7 @@ bool GraphicsConfig::Load(const std::string& path)
     vulkan.clouds = cfg.ReadValue("vulkanClouds", 0);
     vulkan.water = cfg.ReadValue("vulkanWater", 0);
     vulkan.ao = cfg.ReadValue("vulkanAO", 0) != 0;
+    vulkan.volumetricLighting = cfg.ReadValue("vulkanVolumetricLighting", 0) != 0;
     if (auto* e = cfg.FindEntry("vulkanAA")) vulkanImage.aa = static_cast<const char*>(RString(*e));
     vulkanImage.scale = cfg.ReadValue("vulkanRenderScale", 100);
     const std::string modes[] = {"off", "fxaa", "smaa", "taa", "msaa2", "msaa4", "msaa8",
@@ -277,7 +278,7 @@ bool GraphicsConfig::Load(const std::string& path)
     if (vulkanImage.IsFSR()) vulkanImage.scale = 100;
     if (vulkan.shadows < 0 || vulkan.shadows > 2) vulkan.shadows = 0;
     if (vulkan.clouds < 0 || vulkan.clouds > 1) vulkan.clouds = 0;
-    if (vulkan.water < 0 || vulkan.water > 1) vulkan.water = 0;
+    if (vulkan.water < 0 || vulkan.water > 2) vulkan.water = 0;
 
     return true;
 }
@@ -304,6 +305,7 @@ bool GraphicsConfig::Save(const std::string& path) const
     cfg.Add("vulkanClouds", vulkan.clouds);
     cfg.Add("vulkanWater", vulkan.water);
     cfg.Add("vulkanAO", vulkan.ao ? 1 : 0);
+    cfg.Add("vulkanVolumetricLighting", vulkan.volumetricLighting ? 1 : 0);
     cfg.Add("vulkanAA", vulkanImage.aa.c_str());
     cfg.Add("vulkanRenderScale", vulkanImage.scale);
 

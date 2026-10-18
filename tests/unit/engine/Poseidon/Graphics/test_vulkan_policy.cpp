@@ -476,6 +476,9 @@ int main()
             const auto enhanced = quality.GetGraphicsQuality();
             Check(!quality.SetGraphicsQuality({2, 0, 0, false}).empty(), "uninitialized RT rejected");
             Check(quality.GetGraphicsQuality() == enhanced, "unsupported bundle changes nothing");
+            Check(!quality.SetGraphicsQuality({0, 1, 2, true}).empty(), "uninitialized RT water rejected");
+            Check(quality.GetGraphicsQuality() == enhanced, "unsupported water bundle changes nothing");
+            Check(!quality.SetGraphicsQuality({0, 0, 3, false}).empty(), "invalid water rejected");
             Check(!quality.SetGraphicsQuality({3, 0, 0, false}).empty(), "invalid group rejected");
             Check(quality.GetGraphicsQuality() == enhanced, "invalid bundle changes nothing");
             Check(quality.SetGraphicsQuality({0, 1, 0, true}).empty(), "independent raster groups accepted");

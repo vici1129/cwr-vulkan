@@ -94,7 +94,7 @@ void VideoPage::BuildRows()
               Brightness,    Gamma,       Style,   HudWidth,   ImageHeader,   AA,    Scale,
               ViewDistance,  MissionView, Terrain, Objects,    GraphicsHeader};
     if (m_vulkan)
-        m_rows.insert(m_rows.end(), {Overall, Shadows, Clouds, Water, AO});
+        m_rows.insert(m_rows.end(), {Overall, Shadows, Clouds, Water, AO, VolumetricLighting});
     else
         m_rows.insert(m_rows.end(), {ObjectShadows, VehicleShadows, Multitexturing});
     m_rows.insert(m_rows.end(), {Particles, Apply, OK, Cancel});
@@ -247,6 +247,7 @@ const char* VideoPage::VideoProvider::RowLabel(int i) const
                                  "STR_VIDEO_CLOUDS",
                                  "STR_VIDEO_WATER",
                                  "STR_VIDEO_AO",
+                                 "STR_VIDEO_VOLUMETRIC_LIGHTING",
                                  "STR_VIDEO_OBJECT_SHADOWS",
                                  "STR_VIDEO_VEHICLE_SHADOWS",
                                  "STR_VIDEO_PARTICLES",
@@ -278,6 +279,7 @@ const char* VideoPage::VideoProvider::RowLabel(int i) const
                                    "Cloud Quality",
                                    "Water Quality",
                                    "Ambient Occlusion",
+                                   "Volumetric Lighting",
                                    "Object Shadows",
                                    "Vehicle Shadows",
                                    "Particles / Smoke",
@@ -307,7 +309,7 @@ const char* VideoPage::VideoProvider::RowDescription(int i) const
                         "Supersampling: 100%, 125%, 150% or 200%. FSR owns its scale and disables this control.");
         case Overall:
             return Text("STR_VIDEO_OVERALL_HELP", "Standard or Enhanced sets shadows, clouds, water and AO only. "
-                                                  "Display, AA and scene detail stay independent.");
+                                                  "Display, AA, volumetric lighting and scene detail stay independent.");
         case Shadows:
             if (!page->m_rtReason.empty())
                 return page->m_rtReason.c_str();
@@ -317,10 +319,16 @@ const char* VideoPage::VideoProvider::RowDescription(int i) const
             return Text("STR_VIDEO_CLOUD_HELP",
                         "Standard: stock clouds. Enhanced: volumetric clouds with synchronized cloud shadows.");
         case Water:
+            if (!page->m_rtReason.empty())
+                return page->m_rtReason.c_str();
             return Text("STR_VIDEO_WATER_HELP",
-                        "Standard: stock water. Enhanced: refraction, shoreline foam and rain ripples.");
+                        "Standard: stock water. Enhanced: refraction, shoreline foam and rain ripples. Ray Traced "
+                        "adds hardware reflections, weather sky/clouds and supported dynamic geometry.");
         case AO:
             return Text("STR_VIDEO_AO_HELP", "Existing SSAO at validated parameters; not ray-traced AO.");
+        case VolumetricLighting:
+            return Text("STR_VIDEO_VOLUMETRIC_LIGHTING_HELP", "Volumetric sunlight in eligible weather and fog. "
+                        "Independent of graphics presets; Off by default.");
         case Terrain:
             return Text(
                 "STR_VIDEO_TERRAIN_HELP",
@@ -394,7 +402,7 @@ OptionsScrollList::RowDef VideoPage::VideoProvider::RowFor(int i) const
         case Water:
             add("STR_VIDEO_STANDARD", "Standard");
             add("STR_VIDEO_ENHANCED", "Enhanced");
-            if (row == Shadows && page->m_rtReason.empty())
+            if ((row == Shadows || row == Water) && page->m_rtReason.empty())
                 add("STR_VIDEO_RT", "Ray Traced");
             if ((row == Shadows && page->m_quality.shadows < 0) || (row == Clouds && page->m_quality.clouds < 0) ||
                 (row == Water && page->m_quality.water < 0))
@@ -445,6 +453,7 @@ OptionsScrollList::Kind VideoPage::VideoProvider::RowKind(int i) const
         case ViewDistance:
             return OptionsScrollList::KindSlider;
         case AO:
+        case VolumetricLighting:
         case ObjectShadows:
         case VehicleShadows:
         case Particles:
@@ -501,9 +510,11 @@ int VideoPage::VideoProvider::RowValue(int i) const
         case Clouds:
             return q.clouds < 0 ? 2 : q.clouds;
         case Water:
-            return q.water < 0 ? 2 : q.water;
+            return q.water < 0 ? (page->m_rtReason.empty() ? 3 : 2) : q.water;
         case AO:
             return q.ao;
+        case VolumetricLighting:
+            return q.volumetricLighting;
         case ObjectShadows:
             return page->m_objectShadows;
         case VehicleShadows:
@@ -585,24 +596,31 @@ void VideoPage::VideoProvider::SetRowValue(int i, int v)
             break;
         }
         case Overall:
+        {
+            const bool volume = q.volumetricLighting;
             if (v == 2 && q.Preset() != 2)
                 v = 1 - q.Preset();
             if (v == 0)
             {
                 q = {};
                 page->m_qualityTouched = true;
+                page->m_shadowsTouched = page->m_waterTouched = true;
             }
             else if (v == 1)
             {
                 q = GraphicsQuality::Enhanced();
                 page->m_qualityTouched = true;
+                page->m_shadowsTouched = page->m_waterTouched = true;
             }
+            q.volumetricLighting = volume;
             break;
+        }
         case Shadows:
             if (v >= 0 && v <= (page->m_rtReason.empty() ? 2 : 1))
             {
                 q.shadows = v;
                 page->m_qualityTouched = true;
+                page->m_shadowsTouched = true;
             }
             break;
         case Clouds:
@@ -613,15 +631,19 @@ void VideoPage::VideoProvider::SetRowValue(int i, int v)
             }
             break;
         case Water:
-            if (v == 0 || v == 1)
+            if (v >= 0 && v <= (page->m_rtReason.empty() ? 2 : 1))
             {
                 q.water = v;
                 page->m_qualityTouched = true;
+                page->m_waterTouched = true;
             }
             break;
         case AO:
             q.ao = v != 0;
             page->m_qualityTouched = true;
+            break;
+        case VolumetricLighting:
+            q.volumetricLighting = v != 0;
             break;
         case ObjectShadows:
             page->m_objectShadows = v != 0;
@@ -701,7 +723,9 @@ bool VideoPage::VideoProvider::IsPending(int i) const
         case Objects:
             return a.objectLod != b.objectLod || a.objectLodConfigured != b.objectLodConfigured;
         case Overall:
-            return page->m_quality != page->m_oldQuality;
+            return page->m_quality.shadows != page->m_oldQuality.shadows ||
+                   page->m_quality.clouds != page->m_oldQuality.clouds ||
+                   page->m_quality.water != page->m_oldQuality.water || page->m_quality.ao != page->m_oldQuality.ao;
         case Shadows:
             return page->m_quality.shadows != page->m_oldQuality.shadows;
         case Clouds:
@@ -710,6 +734,8 @@ bool VideoPage::VideoProvider::IsPending(int i) const
             return page->m_quality.water != page->m_oldQuality.water;
         case AO:
             return page->m_quality.ao != page->m_oldQuality.ao;
+        case VolumetricLighting:
+            return page->m_quality.volumetricLighting != page->m_oldQuality.volumetricLighting;
         case ObjectShadows:
             return page->m_objectShadows != page->m_oldObjects;
         case VehicleShadows:
@@ -761,7 +787,8 @@ void VideoPage::Commit(OptionsShell& shell, bool close)
         m_status = static_cast<const char*>(GEngine->ImageQualityUnavailable(m_image));
         if (!m_status.empty())
             return;
-        if (m_quality != m_oldQuality && (!m_quality.Valid() || (m_quality.shadows == 2 && !m_rtReason.empty())))
+        if (m_quality != m_oldQuality && (!m_quality.Valid() ||
+            ((m_quality.shadows == 2 || m_quality.water == 2) && !m_rtReason.empty())))
         {
             m_status = Text("STR_VIDEO_GROUP_ERROR", "Select supported graphics groups before applying.");
             return;
@@ -859,6 +886,7 @@ void VideoPage::Restore()
     m_applying = false;
     m_close = false;
     m_qualityTouched = m_imageTouched = false;
+    m_shadowsTouched = m_waterTouched = false;
     m_pending = m_applied;
     m_graphics = m_saved;
     m_image = m_oldImage;
@@ -933,7 +961,21 @@ bool VideoPage::Save()
         if (m_imageTouched || m_image != m_oldImage)
             cfg.vulkanImage = m_image;
         if ((m_qualityTouched || m_quality != m_oldQuality) && m_quality.Valid())
-            cfg.vulkan = m_quality;
+        {
+            // Each RT preference can fall back independently. Choosing water,
+            // AO or lighting must not erase an unavailable saved shadow choice
+            // (or vice versa); an explicit preset accepts both raster choices.
+            if (m_shadowsTouched || m_quality.shadows != m_oldQuality.shadows)
+                cfg.vulkan.shadows = m_quality.shadows;
+            if (m_waterTouched || m_quality.water != m_oldQuality.water)
+                cfg.vulkan.water = m_quality.water;
+            if (m_qualityTouched || m_quality.clouds != m_oldQuality.clouds)
+                cfg.vulkan.clouds = m_quality.clouds;
+            if (m_qualityTouched || m_quality.ao != m_oldQuality.ao)
+                cfg.vulkan.ao = m_quality.ao;
+            if (m_quality.volumetricLighting != m_oldQuality.volumetricLighting)
+                cfg.vulkan.volumetricLighting = m_quality.volumetricLighting;
+        }
     }
     else
     {
@@ -1001,6 +1043,7 @@ bool VideoPage::Finish(OptionsShell& shell)
     }
     m_retrySave = false;
     m_qualityTouched = m_imageTouched = false;
+    m_shadowsTouched = m_waterTouched = false;
     m_applied = m_pending;
     m_saved = m_graphics;
     m_oldImage = m_image;

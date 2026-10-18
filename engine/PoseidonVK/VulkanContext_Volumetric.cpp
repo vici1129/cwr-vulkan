@@ -75,6 +75,9 @@ void VulkanContext::CreateVolumetricResources()
         write.pImageInfo = &image;
         vkUpdateDescriptorSets(_device, 1, &write, 0, nullptr);
     }
+    // A saved On preference can build this pipeline before the first mesh draw.
+    // Reuse the mesh lighting layout, rather than depending on lazy draw order.
+    CreateLightingLayout();
     CreateWeatherLayout();
     const VkDescriptorSetLayout sets[]{_textureLayout, _textureLayout, _lightingLayout, _weatherLayout};
     const VkPushConstantRange push{VK_SHADER_STAGE_FRAGMENT_BIT, 0, 32};

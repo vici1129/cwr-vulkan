@@ -1,0 +1,1 @@
+Vulkan driver-free policy/lifetime guards: 520 checks passed

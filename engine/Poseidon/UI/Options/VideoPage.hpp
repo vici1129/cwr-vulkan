@@ -44,6 +44,7 @@ class VideoPage : public DisplayPage
         Clouds,
         Water,
         AO,
+        VolumetricLighting,
         ObjectShadows,
         VehicleShadows,
         Particles,
@@ -88,6 +89,7 @@ class VideoPage : public DisplayPage
     bool m_objectShadows = false, m_vehicleShadows = false, m_oldObjects = false, m_oldVehicles = false;
     bool m_vulkan = false, m_applying = false, m_close = false, m_retrySave = false;
     bool m_qualityTouched = false, m_imageTouched = false;
+    bool m_shadowsTouched = false, m_waterTouched = false;
     int m_waitFrames = 0;
     std::string m_status, m_rtReason, m_fsrReason;
     void Capture();

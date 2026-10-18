@@ -1,5 +1,9 @@
 # Vulkan graphics menu verification (2026-10-18)
 
+The later [final graphics-controls verification](../graphics-controls/README.md)
+adds qualified RT water and corrected volumetric lighting to this same page.
+The dated results below describe their respective implementation snapshots.
+
 Implemented from public main `e6fc59c`, using the mappings in
 [graphics-quality.md](../../graphics-quality.md). No shader/algorithm changes,
 original PBO edits, private SDK changes or performance campaign.
@@ -86,8 +90,9 @@ gamma 1.1, brightness 1.7 and a 30 FPS cap. Local logs: `video-return-fix` and
 
 Remaining focused follow-ups: player-friendly RT/FSR device startup opt-in and
 additional translations for the new English-fallback labels. AA/upscaling/scale
-UI modernization is complete below. The RT-water transition and road-banding gates
-remain unresolved and neither feature is selected by either preset.
+UI modernization is complete below. The subsequent RT-water transition and
+volumetric road-banding corrections are now qualified through the linked final
+integration; neither feature is automatically enabled by either preset.
 
 ## Shadow preference isolation regression (2026-10-18)
 

@@ -284,9 +284,80 @@ TEST_CASE("Video filters device capabilities and explains startup requirements",
     CHECK(p.Choice(VideoPage::AA, "FSR 3.1.4 Quality") == -1);
     CHECK(std::string(p.Rows().RowDescription(p.At(VideoPage::AA))).find("CWR_VK_FSR") != std::string::npos);
     CHECK(p.Rows().RowFor(p.At(VideoPage::Shadows)).count == 2);
+    CHECK(p.Rows().RowFor(p.At(VideoPage::Water)).count == 2);
+    p.Set(VideoPage::Water, 2);
+    CHECK(p.Value(VideoPage::Water) == 0);
+    CHECK(std::string(p.Rows().RowDescription(p.At(VideoPage::Water))).find("CWR_VK_RTAO") != std::string::npos);
     p.Set(VideoPage::Shadows, 2);
     CHECK(p.Value(VideoPage::Shadows) == 0);
     CHECK(std::string(p.Rows().RowDescription(p.At(VideoPage::Shadows))).find("CWR_VK_RTAO") != std::string::npos);
+}
+TEST_CASE("Video RT water and shadows apply independently and volume does not redefine presets", "[UI][VideoPage]")
+{
+    Fixture f;
+    f.engine.rt = true;
+    f.Open();
+    auto& p = *f.page;
+    REQUIRE(p.Choice(VideoPage::Water, "Ray Traced") == 2);
+    CHECK(p.Value(VideoPage::VolumetricLighting) == 0);
+    p.Set(VideoPage::VolumetricLighting, 1);
+    CHECK(p.Value(VideoPage::Overall) == 0);
+    CHECK_FALSE(p.Rows().IsPending(p.At(VideoPage::Overall)));
+    p.Set(VideoPage::Overall, 1);
+    CHECK(p.Value(VideoPage::VolumetricLighting) == 1);
+    CHECK(p.Value(VideoPage::Overall) == 1);
+    for (int shadows : {0, 2, 1})
+        for (int water : {2, 1, 0})
+        {
+            const auto before = f.engine.quality;
+            p.Set(VideoPage::Shadows, shadows);
+            p.Set(VideoPage::Water, water);
+            CHECK(f.engine.quality == before);
+            CHECK(p.Value(VideoPage::Overall) == (shadows == 1 && water == 1 ? 1 : 2));
+            p.Action(VideoPage::Apply, *f.shell);
+            p.Tick(*f.shell);
+            CHECK(f.engine.quality.shadows == shadows);
+            CHECK(f.engine.quality.water == water);
+            CHECK(f.engine.quality.volumetricLighting);
+            CHECK(f.Saved().vulkan == f.engine.quality);
+        }
+    p.Set(VideoPage::Overall, 0);
+    p.Action(VideoPage::Apply, *f.shell);
+    p.Tick(*f.shell);
+    CHECK(f.Saved().vulkan.Preset() == 0);
+    CHECK(f.Saved().vulkan.volumetricLighting);
+    p.Set(VideoPage::VolumetricLighting, 0);
+    p.Action(VideoPage::Apply, *f.shell);
+    p.Tick(*f.shell);
+    CHECK(f.Saved().vulkan == GraphicsQuality{});
+}
+TEST_CASE("Video new controls stage Cancel, commit OK, and reject incomplete activation", "[UI][VideoPage]")
+{
+    Fixture f;
+    f.engine.rt = true;
+    f.Open();
+    f.page->Set(VideoPage::Water, 2);
+    f.page->Set(VideoPage::VolumetricLighting, 1);
+    f.shell->OnButtonClicked(IDC_CANCEL);
+    CHECK(f.engine.qualityCalls == 0);
+    CHECK(f.Saved().vulkan == GraphicsQuality{});
+    f.Open();
+    f.page->Set(VideoPage::Water, 2);
+    f.page->Set(VideoPage::VolumetricLighting, 1);
+    f.shell->OnButtonClicked(IDC_OK);
+    for (int n = 0; n < 4; ++n) f.shell->OnSimulate(nullptr);
+    CHECK(f.Saved().vulkan.water == 2);
+    CHECK(f.Saved().vulkan.volumetricLighting);
+    f.Open();
+    f.page->Set(VideoPage::Water, 1);
+    f.page->Set(VideoPage::VolumetricLighting, 0);
+    f.page->Action(VideoPage::Apply, *f.shell);
+    // Simulate a deferred activation fallback rather than a synchronous rejection.
+    f.engine.quality.volumetricLighting = true;
+    f.page->Tick(*f.shell);
+    CHECK(f.Saved().vulkan.water == 2);
+    CHECK(f.Saved().vulkan.volumetricLighting);
+    CHECK(f.engine.quality.water == 2);
 }
 TEST_CASE("Video switches FSR and independent scale as one coherent bundle", "[UI][VideoPage]")
 {
@@ -410,13 +481,14 @@ TEST_CASE("Video GL33 exposes only meaningful controls and preserves Vulkan pref
     Fixture f;
     f.engine.vulkan = false;
     auto cfg = f.Saved();
-    cfg.vulkan = {2, 1, 1, true};
+    cfg.vulkan = {2, 1, 2, true, true};
     cfg.vulkanImage = {"fsr-quality", 100};
     cfg.Save(f.graphics.path);
     f.Open();
     auto& p = *f.page;
     CHECK(p.At(VideoPage::Overall) == -1);
     CHECK(p.At(VideoPage::Shadows) == -1);
+    CHECK(p.At(VideoPage::VolumetricLighting) == -1);
     CHECK(p.At(VideoPage::ObjectShadows) >= 0);
     CHECK(p.At(VideoPage::Multitexturing) >= 0);
     CHECK(p.Choice(VideoPage::AA, "FXAA") == -1);
@@ -445,6 +517,12 @@ TEST_CASE("Video image config round-trips and old files default safely", "[Setti
     old.Add("shadowQuality", 0);
     old.Save(f.graphics.path.c_str());
     CHECK(f.Saved().vulkanImage == ImageQuality{});
+    CHECK_FALSE(f.Saved().vulkan.volumetricLighting);
+    old.Add("vulkanWater", 2);
+    old.Add("vulkanVolumetricLighting", 1);
+    old.Save(f.graphics.path.c_str());
+    CHECK(f.Saved().vulkan.water == 2);
+    CHECK(f.Saved().vulkan.volumetricLighting);
     old.Add("vulkanAA", "invalid");
     old.Add("vulkanRenderScale", 175);
     old.Save(f.graphics.path.c_str());
@@ -548,7 +626,7 @@ TEST_CASE("Video gamma Apply preserves unavailable saved RT and FSR preferences"
 {
     Fixture f;
     auto cfg = f.Saved();
-    cfg.vulkan = {2, 1, 1, true};
+    cfg.vulkan = {2, 1, 2, true};
     cfg.vulkanImage = {"fsr-quality", 100};
     cfg.Save(f.graphics.path);
     f.engine.quality = GraphicsQuality::Enhanced(); // Startup RT fallback; no FSR startup opt-in.
@@ -560,13 +638,24 @@ TEST_CASE("Video gamma Apply preserves unavailable saved RT and FSR preferences"
     CHECK(f.Saved().gamma == 1.4f);
     CHECK(f.Saved().vulkan == cfg.vulkan);
     CHECK(f.Saved().vulkanImage == cfg.vulkanImage);
+    p.Set(VideoPage::VolumetricLighting, 1);
+    p.Action(VideoPage::Apply, *f.shell);
+    p.Tick(*f.shell);
+    CHECK(f.Saved().vulkan.shadows == 2);
+    CHECK(f.Saved().vulkan.water == 2);
+    CHECK(f.Saved().vulkan.volumetricLighting);
     // Explicitly accepting a raster/Off choice replaces the remembered preference.
     p.Set(VideoPage::Shadows, 1);
     p.Set(VideoPage::AA, p.Choice(VideoPage::AA, "Off"));
     p.Action(VideoPage::Apply, *f.shell);
     p.Tick(*f.shell);
     CHECK(f.Saved().vulkan.shadows == 1);
+    CHECK(f.Saved().vulkan.water == 2);
     CHECK(f.Saved().vulkanImage.aa == "off");
+    p.Set(VideoPage::Water, 1);
+    p.Action(VideoPage::Apply, *f.shell);
+    p.Tick(*f.shell);
+    CHECK(f.Saved().vulkan.water == 1);
 }
 
 TEST_CASE("Video reports write failure and allows retry without claiming a successful save", "[UI][VideoPage]")

@@ -1,5 +1,18 @@
 # Vulkan backend development
 
+## Final player graphics controls (2026-10-19)
+
+The unified [Video Settings](video-settings.md#vulkan-water-and-lighting) now adds
+Water Quality: Ray Traced (the corrected `d03ed0c` implementation) and independent
+Volumetric Lighting Off/On (the corrected `aadbc5e` implementation). Standard and
+Enhanced retain their four-component mappings; neither automatically enables RT
+or volumetric lighting. Initialized ray-query capability still requires the
+existing `CWR_VK_RTAO=1` startup opt-in. Unsupported saved RT components fall back
+individually without erasing preferences. Water/sunlight share their existing
+bounded scene and dynamic resources until the last consumer is disabled.
+No shaders, ray counts, sample counts, new rendering systems or private SDKs are
+changed. See the [integration verification](evidence/graphics-controls/README.md).
+
 ## RT-water reflection transitions (2026-10-19)
 
 The [focused transition report](rt-water-transitions.md) traces the conspicuous
@@ -8,8 +21,9 @@ followed by a hard nonzero-Fresnel back-face rejection. The correction uses the
 actual water geometry normal and existing rain slopes, continuous grazing/range
 fallback, and coverage-correct filtering. Receiver/ray/scene bounds stay unchanged.
 Matched stock Malden/Everon views, current RTX 4060 Ti measurements and live
-validation receipts are linked there. RT water remains developer-only; no menu,
-GL33, asset, private SDK, additional ray system or temporal framework changes.
+validation receipts are linked there. That correction made no menu, GL33, asset,
+private SDK, additional ray system or temporal framework changes; subsequent
+player-control exposure is documented above.
 
 ## Graphics quality and visual tuning pass (2026-10-14)
 

@@ -150,6 +150,20 @@ void VulkanContext::FlushScreenBatch()
              mesh.indexOffset, state.depthWrite, nullptr, false, state.additive, state.waterOverlay);
 }
 
+void VulkanContext::CreateLightingLayout()
+{
+    if (_lightingLayout) return;
+    VkPhysicalDeviceProperties properties{};
+    vkGetPhysicalDeviceProperties(_physical, &properties);
+    _uniformAlignment = uint32_t(std::max<VkDeviceSize>(16, properties.limits.minUniformBufferOffsetAlignment));
+    const VkDescriptorSetLayoutBinding binding{0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1,
+                                               VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, nullptr};
+    VkDescriptorSetLayoutCreateInfo uniforms{VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO};
+    uniforms.bindingCount = 1;
+    uniforms.pBindings = &binding;
+    Require(vkCreateDescriptorSetLayout(_device, &uniforms, nullptr, &_lightingLayout), "create lighting layout");
+}
+
 void VulkanContext::CreateShapePipeline(bool translucent, bool screen, bool depthTest, bool depthWrite, bool shadow,
                                         bool additive, bool waterOverlay)
 {
@@ -158,15 +172,7 @@ void VulkanContext::CreateShapePipeline(bool translucent, bool screen, bool dept
         const VkPushConstantRange push{VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, 112};
         VkPipelineLayoutCreateInfo layout{VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO};
         CreateTextureLayout();
-        VkPhysicalDeviceProperties properties{};
-        vkGetPhysicalDeviceProperties(_physical, &properties);
-        _uniformAlignment = uint32_t(std::max<VkDeviceSize>(16, properties.limits.minUniformBufferOffsetAlignment));
-        const VkDescriptorSetLayoutBinding binding{0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1,
-                                                   VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, nullptr};
-        VkDescriptorSetLayoutCreateInfo uniforms{VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO};
-        uniforms.bindingCount = 1;
-        uniforms.pBindings = &binding;
-        Require(vkCreateDescriptorSetLayout(_device, &uniforms, nullptr, &_lightingLayout), "create lighting layout");
+        CreateLightingLayout();
         CreateWeatherLayout();
         const VkDescriptorSetLayout sets[] = {_textureLayout, _textureLayout, _lightingLayout, _weatherLayout};
         layout.setLayoutCount = 4;

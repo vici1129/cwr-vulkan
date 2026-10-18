@@ -54,11 +54,34 @@ included. AA/scale changes share the existing deferred renderer rebuild boundary
 GL33 keeps its existing supported MSAA and 100/125/150/175/200% supersampling
 implementation. Unsupported Vulkan-only modes are not presented.
 
+## Vulkan water and lighting
+
+Water Quality offers **Standard** (original water), **Enhanced** (existing
+refraction, shoreline foam and rain ripples), and **Ray Traced** (Enhanced plus
+the corrected hardware reflections, weather-synchronized sky/cloud reflection
+fallback and supported dynamic geometry). Ray Traced is an explicit component
+choice and makes Overall Quality **Custom**. Water and sunlight RT are independent:
+either may retain the shared bounded scene/dynamic resources while the other is
+disabled. Returning to Enhanced or Standard disables RT water; Standard restores
+the original water path. No ray budget, shader, denoiser or reflection algorithm
+is changed by this menu integration.
+
+**Volumetric Lighting: Off / On** uses the corrected existing volumetric sunlight
+implementation. It defaults **Off**, retains weather/sun/fog/night-vision
+eligibility, and is independent of Overall Quality, like AA/upscaling. Switching
+Standard/Enhanced preserves this preference; neither preset automatically turns
+it on. No sample-count, intensity or extra quality controls are exposed.
+
+Standard still means Standard shadows/clouds/water and AO Off; Enhanced still
+means Enhanced shadows/clouds/water and AO On. Neither selects hardware RT.
+
 ## Persistence and capabilities
 
 The existing `graphics.cfg`, `display.cfg`, `game.cfg` and profile handling remain
 the only stores. Optional `vulkanAA` and `vulkanRenderScale` fields extend the
-existing Vulkan fields; old files default to Off/100%. GL33's `msaaSamples`,
+existing Vulkan fields; old files default to Off/100%. `vulkanWater=2` remembers
+Ray Traced water; `vulkanVolumetricLighting` stores the independent lighting
+preference (0 by default). GL33 preserves both without applying them. GL33's `msaaSamples`,
 `renderScale`, `shadowQuality` and per-profile caster flags remain independent.
 Vulkan AA is requested during the normal graphics boot path before ordinary
 world rendering. The UI observes the active renderer after deferred activation,
@@ -69,16 +92,19 @@ An explicit choice is loaded when each Scene is created. Old configs without
 `objectLodConfigured` retain their original 1x scene default; applying unrelated
 settings does not opt them into an old auto-detected tier.
 
-Ray Traced Shadows still require initialized Vulkan ray-query capability and
+Ray Traced Shadows and Water require initialized Vulkan ray-query capability and
 `CWR_VK_RTAO=1` at startup; the menu cannot initialize it after device creation.
 Saved but unavailable RT/FSR choices remain remembered while the page shows the
 actual fallback. Applying an unrelated gamma/FPS/detail change does not erase
-them. Explicitly selecting and applying an available alternative replaces the
-remembered choice. Browsing and Cancel do not change rendering resources.
+them. This preservation is component-specific: changing lighting, AO or water
+does not overwrite an unavailable saved RT-shadow preference, or vice versa.
+Explicitly selecting and applying an available alternative replaces that
+remembered choice; applying a preset explicitly accepts both raster components.
+Browsing and Cancel do not change rendering resources.
 
 Atmosphere, supported-material PBR, classified wet surfaces and underwater optics
-remain automatic in Vulkan. Bloom, RT water, RTGI, RTAO, volumetric sunlight and
-screen-space shafts remain hidden and are not enabled by presets. Developer
+remain automatic in Vulkan. Bloom, RTGI, RTAO and screen-space shafts remain
+hidden and are not enabled by presets. Developer
 commands remain available; clean pages observe external AA/quality/gamma changes
 and ordinary window resizing without overwriting staged edits.
 

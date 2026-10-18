@@ -1,0 +1,3 @@
+Filters: [VideoPage],[ShadowIsolation],[GraphicsConfig],[DisplayConfig],[DisplayPage],[GameSettings],[OptionsUI],[vulkan-shape],[PAADecoder],[factory],[WindowMetrics],[WindowPlacement]
+RNG seed: 1740663337
+All tests passed (2895 assertions in 189 test cases)

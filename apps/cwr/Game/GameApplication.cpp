@@ -418,8 +418,11 @@ void LoadAndApplyGraphicsConfig()
         auto quality = cfg.vulkan;
         // Device capability is fixed at startup. Keep the saved preference on
         // disk, but present the actual raster fallback in this process.
-        if (quality.shadows == 2 && GEngine->GraphicsQualityRTUnavailable().GetLength())
-            quality.shadows = 1;
+        if (GEngine->GraphicsQualityRTUnavailable().GetLength())
+        {
+            if (quality.shadows == 2) quality.shadows = 1;
+            if (quality.water == 2) quality.water = 1;
+        }
         if (!GEngine->ApplyGraphicsQuality(quality))
             LOG_WARN(Graphics, "Saved Vulkan graphics rejected: {}", static_cast<const char*>(GEngine->GraphicsQualityError()));
     }

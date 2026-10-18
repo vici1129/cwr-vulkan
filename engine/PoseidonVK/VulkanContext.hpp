@@ -525,6 +525,7 @@ class VulkanContext
     std::shared_ptr<TextureImage> _whiteTexture;
     VkDescriptorSetLayout _textureLayout = VK_NULL_HANDLE;
     VkDescriptorSetLayout _lightingLayout = VK_NULL_HANDLE;
+    void CreateLightingLayout();
     VkRenderPass _csmPass = VK_NULL_HANDLE;
     VkPipelineLayout _csmLayout = VK_NULL_HANDLE;
     std::array<VkPipeline, 5> _csmPipelines{}; // sunlight solid/cutout, local solid/cutout, terrain
