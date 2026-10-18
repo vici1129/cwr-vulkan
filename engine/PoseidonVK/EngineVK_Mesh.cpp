@@ -129,7 +129,7 @@ void EngineVK::PrepareTriangleTL(const MipInfo& mip, const render::LegacySpec& s
                     _sectionDetail = texture->Image(_vk);
             // Same slow wave translation used by legacy TGWater; original color sampling stays unchanged.
             const float move = std::fmod(Glob.time.toFloat() * .3f + std::sin(Glob.time.toFloat() * .5f) * .5f, 2.f);
-            _lighting.rtWater = {_sectionDetail ? 1.f : 0.f, move * .5f, move, 0};
+            _lighting.rtWater = {_sectionDetail ? (_vk.RTReflectionsEnabled() ? 2.f : 1.f) : 0.f, move * .5f, move, 0};
         }
         catch (const std::exception& error)
         {

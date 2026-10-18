@@ -68,11 +68,17 @@ vec3 nightResponse(vec3 color) {
 void main() {
     vec3 waterNormal=vec3(0,1,0), originalWaterNormal=waterNormal;
     if(lighting.rtWater.x>.5) {
-        // Same animated bump and geometry for native sea and software coast water.
-        vec3 bump=WORLD_TEXTURE(detailTexture,texCoord+lighting.rtWater.yz).xyz*2-1;
         vec3 geometric=normalize(cross(dFdx(shadowWorld),dFdy(shadowWorld)));
         if(geometric.y<0) geometric=-geometric;
-        originalWaterNormal=normalize(geometric+vec3(bump.y,0,bump.x)*.06);
+        if(lighting.rtWater.x>1.5) {
+            // Stock specular_dx is scalar intensity/alpha detail, not XYZ normals.
+            // Reflect about the actual animated water geometry. Its detail alpha
+            // still modulates raster color below; existing rain slopes follow.
+            originalWaterNormal=geometric;
+        } else {
+            vec3 bump=WORLD_TEXTURE(detailTexture,texCoord+lighting.rtWater.yz).xyz*2-1;
+            originalWaterNormal=normalize(geometric+vec3(bump.y,0,bump.x)*.06);
+        }
         waterNormal=originalWaterNormal;
         if(lighting.rainRipples.x>0) {
             vec2 slope=rainSlope(shadowWorld);

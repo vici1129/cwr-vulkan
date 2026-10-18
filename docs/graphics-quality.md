@@ -1,5 +1,10 @@
 # Graphics quality and visual tuning
 
+The [RT-water transition follow-up](rt-water-transitions.md) diagnoses and
+corrects the shoreline rejection seam on top of `aadbc5e`. Its current visual
+and performance evidence is separate from the historical measurements below.
+RT water remains developer-only; the unified Video Settings mapping is unchanged.
+
 ## Player menu (updated 2026-10-19)
 
 The unified [Video Settings page](video-settings.md) implements the exact Vulkan

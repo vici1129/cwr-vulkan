@@ -13,9 +13,12 @@ void main() {
         ivec2 q=clamp(p+ivec2(x,y),ivec2(0),depthSize()-1);vec4 other=waterAt(q);
         if(other.w<=0) continue;
         float v=exp(-abs(w.w-other.w)/max(.05,w.w*.002))*exp(-float(x*x+y*y));
-        sum+=texelFetch(rawAO,q,0)*v;weight+=v;
+        vec4 reflected=texelFetch(rawAO,q,0);
+        // Filter radiance with its coverage. Zero-weight misses/faded receivers
+        // must not introduce black RGB and darken a partially covered reflection.
+        sum+=vec4(reflected.rgb*reflected.a,reflected.a)*v;weight+=v;
     }
-    outColor=sum/max(weight,.0001);
+    outColor=vec4(sum.rgb/max(sum.a,.0001),sum.a/max(weight,.0001));
 #elif defined(SUN_SHADOW)
     // Full-resolution deterministic visibility needs no stochastic denoiser.
     outColor=vec4(texelFetch(rawAO,ivec2(gl_FragCoord.xy),0).rgb,0);

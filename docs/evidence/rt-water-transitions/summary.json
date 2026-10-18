@@ -1,0 +1,1074 @@
+{
+  "rt-water-baseline-everon-1080": {
+    "coast/clouds-on": {
+      "gpu": {
+        "median": 3.51185,
+        "min": 3.4422,
+        "max": 3.514,
+        "count": 6
+      },
+      "trace": {
+        "median": 1.3491,
+        "min": 1.3425,
+        "max": 1.365,
+        "count": 16
+      },
+      "filter": {
+        "median": 0.07694999999999999,
+        "min": 0.0764,
+        "max": 0.0774,
+        "count": 16
+      },
+      "cpu_frame": {
+        "median": 6.173,
+        "min": 6.172,
+        "max": 6.175,
+        "count": 6
+      },
+      "cpu_command": {
+        "median": 3.096,
+        "min": 2.24,
+        "max": 3.153,
+        "count": 6
+      },
+      "cpu_rt_collection": {
+        "median": 0.0059,
+        "min": 0.0054,
+        "max": 0.008,
+        "count": 16
+      },
+      "cpu_rt_build": {
+        "median": 0.0236,
+        "min": 0.0225,
+        "max": 0.0267,
+        "count": 16
+      },
+      "blas": {
+        "median": 0.0001,
+        "min": 0.0,
+        "max": 0.0001,
+        "count": 32
+      },
+      "tlas": {
+        "median": 0.0001,
+        "min": 0.0001,
+        "max": 0.0001,
+        "count": 32
+      },
+      "allocations": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "count": 6
+      },
+      "gpu_states": [
+        "NVIDIA GeForce RTX 4060 Ti, 617.14, 2850 MHz, 9201 MHz, 106.98 W, 60, 60 %",
+        "NVIDIA GeForce RTX 4060 Ti, 617.14, 2850 MHz, 9201 MHz, 107.01 W, 61, 60 %"
+      ]
+    },
+    "coast/clouds-off": {
+      "gpu": {
+        "median": 2.22705,
+        "min": 2.1808,
+        "max": 2.2333,
+        "count": 6
+      },
+      "trace": {
+        "median": 0.471,
+        "min": 0.47,
+        "max": 0.4915,
+        "count": 17
+      },
+      "filter": {
+        "median": 0.0847,
+        "min": 0.0824,
+        "max": 0.0867,
+        "count": 17
+      },
+      "cpu_frame": {
+        "median": 6.1745,
+        "min": 6.173,
+        "max": 6.177,
+        "count": 6
+      },
+      "cpu_command": {
+        "median": 2.9345,
+        "min": 2.927,
+        "max": 2.962,
+        "count": 6
+      },
+      "cpu_rt_collection": {
+        "median": 0.0056,
+        "min": 0.0051,
+        "max": 0.0106,
+        "count": 17
+      },
+      "cpu_rt_build": {
+        "median": 0.0236,
+        "min": 0.023,
+        "max": 0.0277,
+        "count": 17
+      },
+      "blas": {
+        "median": 0.0001,
+        "min": 0.0001,
+        "max": 0.0002,
+        "count": 34
+      },
+      "tlas": {
+        "median": 0.0001,
+        "min": 0.0001,
+        "max": 0.0001,
+        "count": 34
+      },
+      "allocations": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "count": 6
+      },
+      "gpu_states": [
+        "NVIDIA GeForce RTX 4060 Ti, 617.14, 2580 MHz, 9201 MHz, 56.74 W, 51, 40 %",
+        "NVIDIA GeForce RTX 4060 Ti, 617.14, 2610 MHz, 9201 MHz, 55.62 W, 50, 40 %"
+      ]
+    }
+  },
+  "rt-water-baseline-everon-1440": {
+    "coast/clouds-on": {
+      "gpu": {
+        "median": 6.38185,
+        "min": 6.3703,
+        "max": 6.3958,
+        "count": 6
+      },
+      "trace": {
+        "median": 2.3455000000000004,
+        "min": 2.3388,
+        "max": 2.3562,
+        "count": 16
+      },
+      "filter": {
+        "median": 0.19805,
+        "min": 0.1964,
+        "max": 0.1997,
+        "count": 16
+      },
+      "cpu_frame": {
+        "median": 6.3955,
+        "min": 6.379,
+        "max": 6.41,
+        "count": 6
+      },
+      "cpu_command": {
+        "median": 3.1185,
+        "min": 2.456,
+        "max": 3.146,
+        "count": 6
+      },
+      "cpu_rt_collection": {
+        "median": 0.0052,
+        "min": 0.0046,
+        "max": 0.0078,
+        "count": 17
+      },
+      "cpu_rt_build": {
+        "median": 0.0237,
+        "min": 0.0231,
+        "max": 0.0329,
+        "count": 17
+      },
+      "blas": {
+        "median": 0.0001,
+        "min": 0.0,
+        "max": 0.0001,
+        "count": 33
+      },
+      "tlas": {
+        "median": 0.0001,
+        "min": 0.0,
+        "max": 0.0001,
+        "count": 33
+      },
+      "allocations": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "count": 6
+      },
+      "gpu_states": [
+        "NVIDIA GeForce RTX 4060 Ti, 617.14, 2835 MHz, 9201 MHz, 161.01 W, 68, 100 %",
+        "NVIDIA GeForce RTX 4060 Ti, 617.14, 2835 MHz, 9201 MHz, 160.35 W, 68, 100 %"
+      ]
+    },
+    "coast/clouds-off": {
+      "gpu": {
+        "median": 3.58005,
+        "min": 3.58,
+        "max": 3.5811,
+        "count": 6
+      },
+      "trace": {
+        "median": 0.8253,
+        "min": 0.8243,
+        "max": 0.8253,
+        "count": 17
+      },
+      "filter": {
+        "median": 0.1968,
+        "min": 0.1961,
+        "max": 0.2088,
+        "count": 17
+      },
+      "cpu_frame": {
+        "median": 6.173,
+        "min": 6.172,
+        "max": 6.174,
+        "count": 6
+      },
+      "cpu_command": {
+        "median": 3.1710000000000003,
+        "min": 3.081,
+        "max": 3.189,
+        "count": 6
+      },
+      "cpu_rt_collection": {
+        "median": 0.0049,
+        "min": 0.0047,
+        "max": 0.0059,
+        "count": 17
+      },
+      "cpu_rt_build": {
+        "median": 0.0237,
+        "min": 0.0225,
+        "max": 0.0364,
+        "count": 17
+      },
+      "blas": {
+        "median": 0.0001,
+        "min": 0.0,
+        "max": 0.0001,
+        "count": 34
+      },
+      "tlas": {
+        "median": 0.0001,
+        "min": 0.0,
+        "max": 0.0001,
+        "count": 34
+      },
+      "allocations": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "count": 6
+      },
+      "gpu_states": [
+        "NVIDIA GeForce RTX 4060 Ti, 617.14, 2850 MHz, 9201 MHz, 103.77 W, 57, 60 %",
+        "NVIDIA GeForce RTX 4060 Ti, 617.14, 2850 MHz, 9201 MHz, 103.46 W, 58, 62 %"
+      ]
+    }
+  },
+  "rt-water-baseline-repeat-malden-1080": {
+    "coast/clouds-on": {
+      "gpu": {
+        "median": 3.20765,
+        "min": 3.0705,
+        "max": 3.2098,
+        "count": 6
+      },
+      "trace": {
+        "median": 1.1474,
+        "min": 1.1407,
+        "max": 1.1602,
+        "count": 16
+      },
+      "filter": {
+        "median": 0.0776,
+        "min": 0.0773,
+        "max": 0.0787,
+        "count": 16
+      },
+      "cpu_frame": {
+        "median": 6.4625,
+        "min": 6.245,
+        "max": 6.55,
+        "count": 6
+      },
+      "cpu_command": {
+        "median": 4.833,
+        "min": 2.958,
+        "max": 4.942,
+        "count": 6
+      },
+      "cpu_rt_collection": {
+        "median": 0.0016,
+        "min": 0.0015,
+        "max": 0.0019,
+        "count": 16
+      },
+      "cpu_rt_build": {
+        "median": 0.04575,
+        "min": 0.0451,
+        "max": 0.0802,
+        "count": 16
+      },
+      "blas": {
+        "median": 0.0001,
+        "min": 0.0,
+        "max": 0.0001,
+        "count": 32
+      },
+      "tlas": {
+        "median": 0.0001,
+        "min": 0.0001,
+        "max": 0.0001,
+        "count": 32
+      },
+      "allocations": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "count": 6
+      },
+      "gpu_states": [
+        "NVIDIA GeForce RTX 4060 Ti, 617.14, 2850 MHz, 9201 MHz, 95.39 W, 58, 51 %",
+        "NVIDIA GeForce RTX 4060 Ti, 617.14, 2850 MHz, 9201 MHz, 95.65 W, 59, 54 %"
+      ]
+    },
+    "coast/clouds-off": {
+      "gpu": {
+        "median": 2.3155,
+        "min": 2.2566,
+        "max": 2.3729,
+        "count": 6
+      },
+      "trace": {
+        "median": 0.4792,
+        "min": 0.4782,
+        "max": 0.4792,
+        "count": 15
+      },
+      "filter": {
+        "median": 0.0895,
+        "min": 0.0848,
+        "max": 0.094,
+        "count": 15
+      },
+      "cpu_frame": {
+        "median": 6.508,
+        "min": 6.424,
+        "max": 6.59,
+        "count": 6
+      },
+      "cpu_command": {
+        "median": 4.8495,
+        "min": 4.796,
+        "max": 4.936,
+        "count": 6
+      },
+      "cpu_rt_collection": {
+        "median": 0.0017,
+        "min": 0.0015,
+        "max": 0.0018,
+        "count": 15
+      },
+      "cpu_rt_build": {
+        "median": 0.0458,
+        "min": 0.0449,
+        "max": 0.048,
+        "count": 15
+      },
+      "blas": {
+        "median": 0.0001,
+        "min": 0.0001,
+        "max": 0.0001,
+        "count": 30
+      },
+      "tlas": {
+        "median": 0.0001,
+        "min": 0.0001,
+        "max": 0.0001,
+        "count": 30
+      },
+      "allocations": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "count": 6
+      },
+      "gpu_states": [
+        "NVIDIA GeForce RTX 4060 Ti, 617.14, 2460 MHz, 9201 MHz, 50.03 W, 51, 39 %",
+        "NVIDIA GeForce RTX 4060 Ti, 617.14, 2475 MHz, 9201 MHz, 50.09 W, 49, 39 %"
+      ]
+    }
+  },
+  "rt-water-baseline-malden-1440": {
+    "coast/clouds-on": {
+      "gpu": {
+        "median": 5.44,
+        "min": 5.427,
+        "max": 5.4461,
+        "count": 6
+      },
+      "trace": {
+        "median": 1.9999,
+        "min": 1.9937,
+        "max": 2.007,
+        "count": 16
+      },
+      "filter": {
+        "median": 0.1998,
+        "min": 0.1979,
+        "max": 0.2017,
+        "count": 16
+      },
+      "cpu_frame": {
+        "median": 6.5705,
+        "min": 6.427,
+        "max": 6.728,
+        "count": 6
+      },
+      "cpu_command": {
+        "median": 4.9075,
+        "min": 4.738,
+        "max": 4.985,
+        "count": 6
+      },
+      "cpu_rt_collection": {
+        "median": 0.0015500000000000002,
+        "min": 0.0014,
+        "max": 0.0018,
+        "count": 16
+      },
+      "cpu_rt_build": {
+        "median": 0.04655,
+        "min": 0.0444,
+        "max": 0.0676,
+        "count": 16
+      },
+      "blas": {
+        "median": 0.0001,
+        "min": 0.0,
+        "max": 0.0001,
+        "count": 32
+      },
+      "tlas": {
+        "median": 0.0001,
+        "min": 0.0,
+        "max": 0.0001,
+        "count": 32
+      },
+      "allocations": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "count": 6
+      },
+      "gpu_states": [
+        "NVIDIA GeForce RTX 4060 Ti, 617.14, 2835 MHz, 9201 MHz, 141.09 W, 65, 85 %",
+        "NVIDIA GeForce RTX 4060 Ti, 617.14, 2835 MHz, 9201 MHz, 139.48 W, 63, 78 %"
+      ]
+    },
+    "coast/clouds-off": {
+      "gpu": {
+        "median": 3.6050500000000003,
+        "min": 3.6043,
+        "max": 3.6056,
+        "count": 6
+      },
+      "trace": {
+        "median": 0.8417,
+        "min": 0.8397,
+        "max": 0.8479,
+        "count": 15
+      },
+      "filter": {
+        "median": 0.1972,
+        "min": 0.1951,
+        "max": 0.1986,
+        "count": 15
+      },
+      "cpu_frame": {
+        "median": 6.5120000000000005,
+        "min": 6.435,
+        "max": 6.608,
+        "count": 6
+      },
+      "cpu_command": {
+        "median": 4.853,
+        "min": 4.782,
+        "max": 4.936,
+        "count": 6
+      },
+      "cpu_rt_collection": {
+        "median": 0.0016,
+        "min": 0.0014,
+        "max": 0.0018,
+        "count": 15
+      },
+      "cpu_rt_build": {
+        "median": 0.0459,
+        "min": 0.0451,
+        "max": 0.0475,
+        "count": 15
+      },
+      "blas": {
+        "median": 0.0001,
+        "min": 0.0,
+        "max": 0.0001,
+        "count": 30
+      },
+      "tlas": {
+        "median": 0.0001,
+        "min": 0.0,
+        "max": 0.0001,
+        "count": 30
+      },
+      "allocations": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "count": 6
+      },
+      "gpu_states": [
+        "NVIDIA GeForce RTX 4060 Ti, 617.14, 2850 MHz, 9201 MHz, 97.55 W, 57, 58 %",
+        "NVIDIA GeForce RTX 4060 Ti, 617.14, 2850 MHz, 9201 MHz, 95.76 W, 57, 56 %"
+      ]
+    }
+  },
+  "rt-water-final-malden-1080": {
+    "coast/clouds-on": {
+      "gpu": {
+        "median": 3.5704,
+        "min": 3.4717,
+        "max": 3.5733,
+        "count": 6
+      },
+      "trace": {
+        "median": 1.5145,
+        "min": 1.5073,
+        "max": 1.5237,
+        "count": 15
+      },
+      "filter": {
+        "median": 0.0777,
+        "min": 0.0772,
+        "max": 0.0783,
+        "count": 15
+      },
+      "cpu_frame": {
+        "median": 6.659,
+        "min": 6.343,
+        "max": 6.721,
+        "count": 6
+      },
+      "cpu_command": {
+        "median": 4.955,
+        "min": 3.472,
+        "max": 5.108,
+        "count": 6
+      },
+      "cpu_rt_collection": {
+        "median": 0.0017,
+        "min": 0.0014,
+        "max": 0.0021,
+        "count": 15
+      },
+      "cpu_rt_build": {
+        "median": 0.0453,
+        "min": 0.0442,
+        "max": 0.0739,
+        "count": 15
+      },
+      "blas": {
+        "median": 0.0001,
+        "min": 0.0,
+        "max": 0.0001,
+        "count": 30
+      },
+      "tlas": {
+        "median": 0.0001,
+        "min": 0.0001,
+        "max": 0.0001,
+        "count": 30
+      },
+      "allocations": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "count": 6
+      },
+      "gpu_states": [
+        "NVIDIA GeForce RTX 4060 Ti, 617.14, 2850 MHz, 9201 MHz, 104.98 W, 59, 57 %",
+        "NVIDIA GeForce RTX 4060 Ti, 617.14, 2850 MHz, 9201 MHz, 103.36 W, 58, 57 %"
+      ]
+    },
+    "coast/clouds-off": {
+      "gpu": {
+        "median": 2.36735,
+        "min": 2.2561,
+        "max": 2.3745,
+        "count": 6
+      },
+      "trace": {
+        "median": 0.4762,
+        "min": 0.4751,
+        "max": 0.4772,
+        "count": 16
+      },
+      "filter": {
+        "median": 0.09209999999999999,
+        "min": 0.0854,
+        "max": 0.094,
+        "count": 16
+      },
+      "cpu_frame": {
+        "median": 6.6065000000000005,
+        "min": 6.528,
+        "max": 6.703,
+        "count": 6
+      },
+      "cpu_command": {
+        "median": 4.887,
+        "min": 4.829,
+        "max": 4.96,
+        "count": 6
+      },
+      "cpu_rt_collection": {
+        "median": 0.0016,
+        "min": 0.0015,
+        "max": 0.0023,
+        "count": 16
+      },
+      "cpu_rt_build": {
+        "median": 0.0451,
+        "min": 0.0446,
+        "max": 0.0459,
+        "count": 16
+      },
+      "blas": {
+        "median": 0.0001,
+        "min": 0.0001,
+        "max": 0.0001,
+        "count": 32
+      },
+      "tlas": {
+        "median": 0.0001,
+        "min": 0.0001,
+        "max": 0.0001,
+        "count": 32
+      },
+      "allocations": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "count": 6
+      },
+      "gpu_states": [
+        "NVIDIA GeForce RTX 4060 Ti, 617.14, 2460 MHz, 9201 MHz, 50.08 W, 50, 41 %",
+        "NVIDIA GeForce RTX 4060 Ti, 617.14, 2445 MHz, 9201 MHz, 49.62 W, 50, 39 %"
+      ]
+    }
+  },
+  "rt-water-final-malden-1440": {
+    "coast/clouds-on": {
+      "gpu": {
+        "median": 6.4222,
+        "min": 6.3589,
+        "max": 6.5601,
+        "count": 6
+      },
+      "trace": {
+        "median": 2.6419,
+        "min": 2.6378,
+        "max": 2.6532,
+        "count": 15
+      },
+      "filter": {
+        "median": 0.2103,
+        "min": 0.2058,
+        "max": 0.2123,
+        "count": 15
+      },
+      "cpu_frame": {
+        "median": 6.627000000000001,
+        "min": 6.607,
+        "max": 6.646,
+        "count": 6
+      },
+      "cpu_command": {
+        "median": 4.898,
+        "min": 4.847,
+        "max": 5.073,
+        "count": 6
+      },
+      "cpu_rt_collection": {
+        "median": 0.0016,
+        "min": 0.0014,
+        "max": 0.0026,
+        "count": 15
+      },
+      "cpu_rt_build": {
+        "median": 0.047,
+        "min": 0.0459,
+        "max": 0.0526,
+        "count": 15
+      },
+      "blas": {
+        "median": 0.0001,
+        "min": 0.0,
+        "max": 0.0001,
+        "count": 30
+      },
+      "tlas": {
+        "median": 0.0001,
+        "min": 0.0,
+        "max": 0.0001,
+        "count": 30
+      },
+      "allocations": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "count": 6
+      },
+      "gpu_states": [
+        "NVIDIA GeForce RTX 4060 Ti, 617.14, 2835 MHz, 9201 MHz, 156.90 W, 68, 92 %",
+        "NVIDIA GeForce RTX 4060 Ti, 617.14, 2835 MHz, 9201 MHz, 159.27 W, 67, 100 %"
+      ]
+    },
+    "coast/clouds-off": {
+      "gpu": {
+        "median": 3.6115,
+        "min": 3.6106,
+        "max": 3.612,
+        "count": 6
+      },
+      "trace": {
+        "median": 0.8366,
+        "min": 0.8366,
+        "max": 0.8458,
+        "count": 15
+      },
+      "filter": {
+        "median": 0.2098,
+        "min": 0.2072,
+        "max": 0.2107,
+        "count": 15
+      },
+      "cpu_frame": {
+        "median": 6.773,
+        "min": 6.69,
+        "max": 6.835,
+        "count": 6
+      },
+      "cpu_command": {
+        "median": 5.0195,
+        "min": 4.968,
+        "max": 5.041,
+        "count": 6
+      },
+      "cpu_rt_collection": {
+        "median": 0.0016,
+        "min": 0.0015,
+        "max": 0.0027,
+        "count": 15
+      },
+      "cpu_rt_build": {
+        "median": 0.0456,
+        "min": 0.0447,
+        "max": 0.0511,
+        "count": 15
+      },
+      "blas": {
+        "median": 0.0001,
+        "min": 0.0,
+        "max": 0.0001,
+        "count": 30
+      },
+      "tlas": {
+        "median": 0.0001,
+        "min": 0.0001,
+        "max": 0.0001,
+        "count": 30
+      },
+      "allocations": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "count": 6
+      },
+      "gpu_states": [
+        "NVIDIA GeForce RTX 4060 Ti, 617.14, 2850 MHz, 9201 MHz, 97.04 W, 55, 54 %",
+        "NVIDIA GeForce RTX 4060 Ti, 617.14, 2850 MHz, 9201 MHz, 98.03 W, 55, 58 %"
+      ]
+    }
+  },
+  "rt-water-final-everon-1080": {
+    "coast/clouds-on": {
+      "gpu": {
+        "median": 3.8565,
+        "min": 3.7495,
+        "max": 3.8639,
+        "count": 6
+      },
+      "trace": {
+        "median": 1.7009,
+        "min": 1.6947,
+        "max": 1.7101,
+        "count": 16
+      },
+      "filter": {
+        "median": 0.07694999999999999,
+        "min": 0.0764,
+        "max": 0.0775,
+        "count": 16
+      },
+      "cpu_frame": {
+        "median": 6.173500000000001,
+        "min": 6.172,
+        "max": 6.175,
+        "count": 6
+      },
+      "cpu_command": {
+        "median": 3.093,
+        "min": 1.656,
+        "max": 3.109,
+        "count": 6
+      },
+      "cpu_rt_collection": {
+        "median": 0.0055,
+        "min": 0.0049,
+        "max": 0.0065,
+        "count": 16
+      },
+      "cpu_rt_build": {
+        "median": 0.0235,
+        "min": 0.0223,
+        "max": 0.0257,
+        "count": 16
+      },
+      "blas": {
+        "median": 0.0001,
+        "min": 0.0,
+        "max": 0.0001,
+        "count": 32
+      },
+      "tlas": {
+        "median": 0.0001,
+        "min": 0.0001,
+        "max": 0.0001,
+        "count": 32
+      },
+      "allocations": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "count": 6
+      },
+      "gpu_states": [
+        "NVIDIA GeForce RTX 4060 Ti, 617.14, 2835 MHz, 9201 MHz, 118.17 W, 64, 66 %",
+        "NVIDIA GeForce RTX 4060 Ti, 617.14, 2850 MHz, 9201 MHz, 117.77 W, 62, 66 %"
+      ]
+    },
+    "coast/clouds-off": {
+      "gpu": {
+        "median": 2.2257499999999997,
+        "min": 2.2081,
+        "max": 2.2314,
+        "count": 6
+      },
+      "trace": {
+        "median": 0.4731,
+        "min": 0.4721,
+        "max": 0.4884,
+        "count": 16
+      },
+      "filter": {
+        "median": 0.08515,
+        "min": 0.084,
+        "max": 0.0873,
+        "count": 16
+      },
+      "cpu_frame": {
+        "median": 6.173,
+        "min": 6.172,
+        "max": 6.174,
+        "count": 6
+      },
+      "cpu_command": {
+        "median": 2.9165,
+        "min": 2.902,
+        "max": 2.941,
+        "count": 6
+      },
+      "cpu_rt_collection": {
+        "median": 0.0052,
+        "min": 0.0049,
+        "max": 0.0064,
+        "count": 16
+      },
+      "cpu_rt_build": {
+        "median": 0.0236,
+        "min": 0.0231,
+        "max": 0.0254,
+        "count": 16
+      },
+      "blas": {
+        "median": 0.0001,
+        "min": 0.0001,
+        "max": 0.0001,
+        "count": 32
+      },
+      "tlas": {
+        "median": 0.0001,
+        "min": 0.0001,
+        "max": 0.0001,
+        "count": 32
+      },
+      "allocations": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "count": 6
+      },
+      "gpu_states": [
+        "NVIDIA GeForce RTX 4060 Ti, 617.14, 2580 MHz, 9201 MHz, 57.24 W, 51, 39 %",
+        "NVIDIA GeForce RTX 4060 Ti, 617.14, 2565 MHz, 9201 MHz, 56.24 W, 49, 40 %"
+      ]
+    }
+  },
+  "rt-water-final-everon-1440": {
+    "coast/clouds-on": {
+      "gpu": {
+        "median": 6.872,
+        "min": 6.8683,
+        "max": 6.9826,
+        "count": 6
+      },
+      "trace": {
+        "median": 2.9409,
+        "min": 2.9368,
+        "max": 3.0679,
+        "count": 15
+      },
+      "filter": {
+        "median": 0.2131,
+        "min": 0.2107,
+        "max": 0.2482,
+        "count": 15
+      },
+      "cpu_frame": {
+        "median": 6.888999999999999,
+        "min": 6.879,
+        "max": 7.0,
+        "count": 6
+      },
+      "cpu_command": {
+        "median": 3.224,
+        "min": 2.404,
+        "max": 3.255,
+        "count": 6
+      },
+      "cpu_rt_collection": {
+        "median": 0.0051,
+        "min": 0.0048,
+        "max": 0.0067,
+        "count": 15
+      },
+      "cpu_rt_build": {
+        "median": 0.0237,
+        "min": 0.023,
+        "max": 0.0246,
+        "count": 15
+      },
+      "blas": {
+        "median": 0.0001,
+        "min": 0.0,
+        "max": 0.0001,
+        "count": 30
+      },
+      "tlas": {
+        "median": 0.0001,
+        "min": 0.0,
+        "max": 0.0001,
+        "count": 30
+      },
+      "allocations": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "count": 6
+      },
+      "gpu_states": [
+        "NVIDIA GeForce RTX 4060 Ti, 617.14, 2835 MHz, 9201 MHz, 166.41 W, 69, 100 %",
+        "NVIDIA GeForce RTX 4060 Ti, 617.14, 2835 MHz, 9201 MHz, 166.39 W, 69, 100 %"
+      ]
+    },
+    "coast/clouds-off": {
+      "gpu": {
+        "median": 3.596,
+        "min": 3.5957,
+        "max": 3.5962,
+        "count": 6
+      },
+      "trace": {
+        "median": 0.8279000000000001,
+        "min": 0.8264,
+        "max": 0.8284,
+        "count": 16
+      },
+      "filter": {
+        "median": 0.21234999999999998,
+        "min": 0.2113,
+        "max": 0.2136,
+        "count": 16
+      },
+      "cpu_frame": {
+        "median": 6.175000000000001,
+        "min": 6.173,
+        "max": 6.177,
+        "count": 6
+      },
+      "cpu_command": {
+        "median": 3.1515,
+        "min": 3.087,
+        "max": 3.155,
+        "count": 6
+      },
+      "cpu_rt_collection": {
+        "median": 0.0056,
+        "min": 0.005,
+        "max": 0.0063,
+        "count": 16
+      },
+      "cpu_rt_build": {
+        "median": 0.0235,
+        "min": 0.022,
+        "max": 0.0241,
+        "count": 16
+      },
+      "blas": {
+        "median": 0.0001,
+        "min": 0.0,
+        "max": 0.0001,
+        "count": 32
+      },
+      "tlas": {
+        "median": 0.0001,
+        "min": 0.0,
+        "max": 0.0001,
+        "count": 32
+      },
+      "allocations": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "count": 6
+      },
+      "gpu_states": [
+        "NVIDIA GeForce RTX 4060 Ti, 617.14, 2850 MHz, 9201 MHz, 103.80 W, 57, 62 %",
+        "NVIDIA GeForce RTX 4060 Ti, 617.14, 2850 MHz, 9201 MHz, 103.17 W, 56, 62 %"
+      ]
+    }
+  }
+}

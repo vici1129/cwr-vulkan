@@ -30,7 +30,7 @@ struct alignas(16) ShapeLighting
     std::array<float, 4> outputColor{};
     std::array<float, 4> atmosphereSun{}, atmosphereColor{};
     std::array<float, 4> rtSun{}; // x: 1 sunlight separation, 2 contact capture preserving legacy CSM; yzw: forced sun
-    std::array<float, 4> rtWater{}; // water draw, animated bump UV offset; w: opaque GI receiver
+    std::array<float, 4> rtWater{}; // water draw (2: RT geometric normal), animated bump UV offset; w: opaque GI receiver
     std::array<float, 4> rainRipples{}; // intensity, simulation seconds, camera world X/Z
     std::array<float, 4> wetSurface{}; // darkening, restrained sun sheen, exponent, relative water height
     std::array<float, 32> localShadowMatrices{};

@@ -1,0 +1,98 @@
+[
+  {
+    "file": "malden-before.png",
+    "source": "rt-water-baseline-repeat-malden-1080/coast-day-on.png",
+    "sha256": "75a681a48424bf7f3448ded47e738827ef892b11bc12a74638d1a9e9be524d23",
+    "exe_sha256": "431A152705C81084445F4F19C4941625C679F9F1EE06F4436AB0BA4D49B39A5E",
+    "retouched": false,
+    "diagnostic_shader": false
+  },
+  {
+    "file": "malden-after.png",
+    "source": "rt-water-final-malden-1080/coast-day-on.png",
+    "sha256": "6af85e43aaabb45fe74bc425d831a0b5c5eee0704c5cfb5b6572dcb7c3ecd512",
+    "exe_sha256": "61524864683FC5B57FE8A8F5CC0AFB6E6445A8FAC47EEED6EACFCD8FA2C4EDBF",
+    "retouched": false,
+    "diagnostic_shader": false
+  },
+  {
+    "file": "malden-rt-off.png",
+    "source": "rt-water-final-malden-1080/coast-day-off.png",
+    "sha256": "4773703d63706c19571ce88a66bd29c305dbb44e2f25bfe0e3f35fe2a714a753",
+    "exe_sha256": "61524864683FC5B57FE8A8F5CC0AFB6E6445A8FAC47EEED6EACFCD8FA2C4EDBF",
+    "retouched": false,
+    "diagnostic_shader": false
+  },
+  {
+    "file": "everon-before.png",
+    "source": "rt-water-baseline-everon-1080/coast-day-on.png",
+    "sha256": "b63d632d653aed3fe421621988644f00620b527462e77810f8d853d8ad1e47f5",
+    "exe_sha256": "431A152705C81084445F4F19C4941625C679F9F1EE06F4436AB0BA4D49B39A5E",
+    "retouched": false,
+    "diagnostic_shader": false
+  },
+  {
+    "file": "everon-after.png",
+    "source": "rt-water-final-everon-1080/coast-day-on.png",
+    "sha256": "76381de2860bcab8496b6b6a4e802deb41528865ba7797f703dc79814a9e7349",
+    "exe_sha256": "61524864683FC5B57FE8A8F5CC0AFB6E6445A8FAC47EEED6EACFCD8FA2C4EDBF",
+    "retouched": false,
+    "diagnostic_shader": false
+  },
+  {
+    "file": "everon-rt-off.png",
+    "source": "rt-water-final-everon-1080/coast-day-off.png",
+    "sha256": "765b64da4af1e15b92ef1233dcbb681c124af495a361aac1e767bedf1781c8f8",
+    "exe_sha256": "61524864683FC5B57FE8A8F5CC0AFB6E6445A8FAC47EEED6EACFCD8FA2C4EDBF",
+    "retouched": false,
+    "diagnostic_shader": false
+  },
+  {
+    "file": "malden-sunset.png",
+    "source": "rt-water-final-malden-1080/coast-sunset-on.png",
+    "sha256": "e938dbd6332dd86843c2c86c41378cb1b8d72aa7a6469df2920f23f65f520028",
+    "exe_sha256": "61524864683FC5B57FE8A8F5CC0AFB6E6445A8FAC47EEED6EACFCD8FA2C4EDBF",
+    "retouched": false,
+    "diagnostic_shader": false
+  },
+  {
+    "file": "everon-overcast.png",
+    "source": "rt-water-final-everon-1080/coast-overcast-on.png",
+    "sha256": "9311b08a8dd857df9f9197c960ba309f981f1dcb3e2b2bb9723ea7872d615281",
+    "exe_sha256": "61524864683FC5B57FE8A8F5CC0AFB6E6445A8FAC47EEED6EACFCD8FA2C4EDBF",
+    "retouched": false,
+    "diagnostic_shader": false
+  },
+  {
+    "file": "malden-low-before.png",
+    "source": "rt-water-low-baseline-malden/above-low-off-on.png",
+    "sha256": "1a02613777f05bee67efeb1f53658b38441b8a2612a2d884a01034b5973c7138",
+    "exe_sha256": "431A152705C81084445F4F19C4941625C679F9F1EE06F4436AB0BA4D49B39A5E",
+    "retouched": false,
+    "diagnostic_shader": false
+  },
+  {
+    "file": "malden-low-after.png",
+    "source": "rt-water-low-final-malden/above-low-off-on.png",
+    "sha256": "819218ec584205bdbb97e758b2113501c787b6c5a61b1c91342f17e2ca663cca",
+    "exe_sha256": "61524864683FC5B57FE8A8F5CC0AFB6E6445A8FAC47EEED6EACFCD8FA2C4EDBF",
+    "retouched": false,
+    "diagnostic_shader": false
+  },
+  {
+    "file": "diagnostic-rejection.png",
+    "source": "rt-water-probe-coverage/probe-off.png",
+    "sha256": "10abe78174366106506d28fdf4ef9b0846c76bffbfe1cd0975cba75822298b66",
+    "exe_sha256": "27A3579CBBB0ECA98C80A724A66D50472002C2B1C084DDA3A4524EA7A5D35CB5",
+    "retouched": false,
+    "diagnostic_shader": true
+  },
+  {
+    "file": "diagnostic-normal.png",
+    "source": "rt-water-probe-malden/probe-on.png",
+    "sha256": "91b972a5af638e845ed2518f35cf14ec15c5b8b24f5cd09970565b99c093882c",
+    "exe_sha256": "8A06C05A632AD6E8FADFD8D851059B6165EB5CF07837CDCFA80F0898CABC6125",
+    "retouched": false,
+    "diagnostic_shader": true
+  }
+]

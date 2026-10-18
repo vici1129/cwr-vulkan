@@ -1,5 +1,16 @@
 # Vulkan backend development
 
+## RT-water reflection transitions (2026-10-19)
+
+The [focused transition report](rt-water-transitions.md) traces the conspicuous
+coastal strip to scalar stock detail incorrectly decoded as an RGB normal,
+followed by a hard nonzero-Fresnel back-face rejection. The correction uses the
+actual water geometry normal and existing rain slopes, continuous grazing/range
+fallback, and coverage-correct filtering. Receiver/ray/scene bounds stay unchanged.
+Matched stock Malden/Everon views, current RTX 4060 Ti measurements and live
+validation receipts are linked there. RT water remains developer-only; no menu,
+GL33, asset, private SDK, additional ray system or temporal framework changes.
+
 ## Graphics quality and visual tuning pass (2026-10-14)
 
 [Graphics-quality design and evidence](graphics-quality.md) audits the existing

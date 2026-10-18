@@ -1,0 +1,182 @@
+[
+  {
+    "island": "malden",
+    "view": "coast-day",
+    "off_full_window_mean_abs_RGB": [
+      0.03260710890184834,
+      0.024904270132281272,
+      0.035550591784636806
+    ],
+    "off_water_region_mean_abs_RGB": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "off_water_region_identical": true
+  },
+  {
+    "island": "malden",
+    "view": "coast-sunset",
+    "off_full_window_mean_abs_RGB": [
+      0.07273504817373988,
+      0.04977719177415612,
+      0.03697764993000397
+    ],
+    "off_water_region_mean_abs_RGB": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "off_water_region_identical": true
+  },
+  {
+    "island": "malden",
+    "view": "coast-overcast",
+    "off_full_window_mean_abs_RGB": [
+      0.04508053286819036,
+      0.04609351020744279,
+      0.04681546126262361
+    ],
+    "off_water_region_mean_abs_RGB": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "off_water_region_identical": true
+  },
+  {
+    "island": "malden",
+    "view": "high-day",
+    "off_full_window_mean_abs_RGB": [
+      0.00032658576572664865,
+      0.00031863167114591363,
+      0.0002975767149027916
+    ],
+    "off_water_region_mean_abs_RGB": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "off_water_region_identical": true
+  },
+  {
+    "island": "malden",
+    "view": "low-day",
+    "off_full_window_mean_abs_RGB": [
+      0.02409997080379401,
+      0.026437538834697072,
+      0.04277524910352675
+    ],
+    "off_water_region_mean_abs_RGB": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "off_water_region_identical": true
+  },
+  {
+    "island": "malden",
+    "view": "deep-day",
+    "off_full_window_mean_abs_RGB": [
+      0.03547339027841202,
+      0.024179979637517873,
+      0.020657251514085297
+    ],
+    "off_water_region_mean_abs_RGB": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "off_water_region_identical": true
+  },
+  {
+    "island": "everon",
+    "view": "coast-day",
+    "off_full_window_mean_abs_RGB": [
+      0.13714169143353372,
+      0.09929189842714797,
+      0.11042575928851092
+    ],
+    "off_water_region_mean_abs_RGB": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "off_water_region_identical": true
+  },
+  {
+    "island": "everon",
+    "view": "coast-sunset",
+    "off_full_window_mean_abs_RGB": [
+      0.2215070295480577,
+      0.15886666317310355,
+      0.11823106551179452
+    ],
+    "off_water_region_mean_abs_RGB": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "off_water_region_identical": true
+  },
+  {
+    "island": "everon",
+    "view": "coast-overcast",
+    "off_full_window_mean_abs_RGB": [
+      0.18065479978140275,
+      0.18567009035851445,
+      0.19129550677876014
+    ],
+    "off_water_region_mean_abs_RGB": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "off_water_region_identical": true
+  },
+  {
+    "island": "everon",
+    "view": "high-day",
+    "off_full_window_mean_abs_RGB": [
+      0.0036841494546298445,
+      0.003205968003952717,
+      0.002110642391393857
+    ],
+    "off_water_region_mean_abs_RGB": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "off_water_region_identical": true
+  },
+  {
+    "island": "everon",
+    "view": "low-day",
+    "off_full_window_mean_abs_RGB": [
+      0.10742472619199125,
+      0.10162057658763728,
+      0.13134175282042837
+    ],
+    "off_water_region_mean_abs_RGB": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "off_water_region_identical": true
+  },
+  {
+    "island": "everon",
+    "view": "deep-day",
+    "off_full_window_mean_abs_RGB": [
+      0.06536768504031322,
+      0.038207259374602294,
+      0.042243260542450534
+    ],
+    "off_water_region_mean_abs_RGB": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "off_water_region_identical": true
+  }
+]

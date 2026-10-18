@@ -311,6 +311,23 @@ TEST_CASE("PAADecoder: stock bank mip chains agree with the existing top decoder
         const auto top = DecodePAABuffer(source.act(), source.rest(), paa);
         REQUIRE(chain[0].rgba == top.rgba);
         const std::string textureName(name);
+        if (textureName == "data\\specular_dx.paa")
+        {
+            // This stock water detail is AI88, not a tangent-space RGB normal.
+            // Reading RGB as XYZ produces the same diagonal slope everywhere.
+            bool whiteIntensity = true;
+            uint8_t minAlpha = 255, maxAlpha = 0;
+            for (size_t p = 0; p < top.rgba.size(); p += 4)
+            {
+                whiteIntensity &= top.rgba[p] == 255 && top.rgba[p + 1] == 255 && top.rgba[p + 2] == 255;
+                minAlpha = std::min(minAlpha, top.rgba[p + 3]);
+                maxAlpha = std::max(maxAlpha, top.rgba[p + 3]);
+            }
+            REQUIRE(uint8_t(source.act()[0]) == 0x80);
+            REQUIRE(uint8_t(source.act()[1]) == 0x80);
+            REQUIRE(whiteIntensity);
+            REQUIRE(minAlpha < maxAlpha);
+        }
         const bool cloud = textureName.find("mrak_war_") != std::string::npos;
         const bool foliage = textureName.find("jablon") != std::string::npos ||
                              textureName == "data\\n_strom_13.pac" || textureName == "data\\krovi6.pac";

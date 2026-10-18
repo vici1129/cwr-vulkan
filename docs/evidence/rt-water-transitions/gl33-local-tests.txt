@@ -1,0 +1,4 @@
+Filters: [vulkan-shape],[PAADecoder],[factory],[WindowMetrics],[WindowPlacement]
+Randomness seeded to: 1978538752
+===============================================================================
+All tests passed (1823 assertions in 80 test cases)

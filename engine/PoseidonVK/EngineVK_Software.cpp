@@ -136,7 +136,7 @@ void EngineVK::SubmitSoftware(const std::vector<uint32_t>& indices)
             auto texture = _textures.Load(Remaster >> "CfgDetailTextures" >> "specular");
             if (auto* bump = dynamic_cast<TextureVK*>(texture.GetRef()))
                 waterBump = bump->Image(_vk);
-            receiver.rtWater = {waterBump ? 1.f : 0.f, 0, 0, 0}; // shoreline UVs already animate in Landscape::DrawMesh
+            receiver.rtWater = {waterBump ? (_vk.RTReflectionsEnabled() ? 2.f : 1.f) : 0.f, 0, 0, 0}; // shoreline UVs already animate in Landscape::DrawMesh
             receiver.temporal[3] = 2;                            // reactive water, never stationary terrain history
         }
         catch (const std::exception& error)
