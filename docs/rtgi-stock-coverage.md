@@ -1,5 +1,9 @@
 # Stock RTGI reflector coverage
 
+This records the `a16aced` material-coverage milestone. For the subsequent
+directional sky boundary and visibility-tested reflected skylight, see
+[diffuse skylight](rtgi-diffuse-skylight.md).
+
 Public base: `86a5f09`, verified against origin/main before work. This extends
 the existing one-bounce, ambient-replacing developer RTGI path. No artwork,
 original assets, PBOs, private DLSS/NGX, presets or default feature states change.

@@ -288,6 +288,7 @@ void EngineVK::UpdateWeather()
                 cache.sourceSky = source;
             }
             lighting.options[0] = 1;
+            lighting.options[1] = 1; // stock sky ready, independent of water reflection controls
         }
         _vk.SetWeatherFrame(lighting, cache.images);
     }

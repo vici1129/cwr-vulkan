@@ -248,7 +248,7 @@ class VulkanContext
     std::string SetSkyReflections(std::string_view mode);
     bool CloudShadowsEnabled() const { return _cloudShadows; }
     bool CloudShadowsActive() const { return _cloudShadows && _weatherLighting.sun[3] > 0; }
-    bool WeatherNeeded() const { return _cloudsRequested || _cloudShadows || (_skyReflections && RTReflectionsEnabled()); }
+    bool WeatherNeeded() const { return _cloudsRequested || _cloudShadows || RTGIEnabled() || (_skyReflections && RTReflectionsEnabled()); }
     void SetWeatherFrame(const WeatherLighting& lighting, const std::array<std::shared_ptr<TextureImage>, 4>& images);
     void FailWeather(std::string_view reason);
     std::string SetRTReflections(std::string_view mode);
@@ -386,7 +386,7 @@ class VulkanContext
     uint32_t _rtTerrain = 0, _rtFoliage = 0;
     bool _rtaoRequested = false, _rtaoAvailable = false, _rtaoEnabled = false;
     bool _rtGIEnabled = false;
-    bool _rtGISkyOnly = false; // diagnostic: keep visibility, suppress surface bounce
+    unsigned _rtGIComponents = 3; // binary diagnostics: bit 0 sun bounce, bit 1 secondary sky
     std::string _rtGIFailure;
     bool _rtDynamicEnabled = false;
     std::string _rtaoReason = "Vulkan ray-query device has not been initialized";

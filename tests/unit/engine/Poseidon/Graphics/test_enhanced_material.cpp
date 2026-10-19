@@ -94,6 +94,7 @@ struct vec3
 {
     float x, y, z;
     vec3 operator*(float k) const { return {x * k, y * k, z * k}; }
+    vec3 operator*(vec3 b) const { return {x * b.x, y * b.y, z * b.z}; }
     vec3 operator/(float k) const { return {x / k, y / k, z / k}; }
     vec3 operator+(vec3 b) const { return {x + b.x, y + b.y, z + b.z}; }
     vec3 operator-(vec3 b) const { return {x - b.x, y - b.y, z - b.z}; }
@@ -115,13 +116,55 @@ vec3 normalize(vec3 a)
 using std::abs;
 using std::max;
 using std::min;
+using std::sqrt;
+using std::cos;
+using std::sin;
+using std::clamp;
 vec3 clamp(vec3 c, float lo, float hi)
 {
     return {std::clamp(c.x, lo, hi), std::clamp(c.y, lo, hi), std::clamp(c.z, lo, hi)};
 }
 #include <PoseidonVK/Shaders/material_normal.glsl>
 #include <PoseidonVK/Shaders/material_diffuse.glsl>
+#include <PoseidonVK/Shaders/diffuse_sky_math.glsl>
 } // namespace MaterialNormalMath
+
+TEST_CASE("Diffuse sky cosine sampling conserves Lambert energy and respects the horizon",
+          "[Graphics][enhanced-material]")
+{
+    using namespace MaterialNormalMath;
+    for (const vec3 n : {vec3{0,1,0},vec3{1,0,0},vec3{0,-1,0}})
+    {
+        float sky=0;
+        for(int i=0;i<32;++i) for(int j=0;j<64;++j)
+        {
+            const auto d=giCosineDirection(n,(i+.5f)/32,(j+.5f)*6.2831853f/64);
+            REQUIRE(dot(d,d)==Catch::Approx(1).margin(1e-5));
+            REQUIRE(dot(d,n)>0);
+            sky+=giSkyHemisphere(d,n)?1.f:0.f;
+        }
+        sky/=2048;
+        REQUIRE(sky==Catch::Approx(n.y>0?1.f:n.y<0?0.f:.5f).margin(.001));
+        const vec3 reflectance{.2f,.3f,.4f},sun{.4f,.2f,.1f};
+        const auto out=giLambertOutgoing(reflectance,sun,{sky,sky,sky});
+        REQUIRE(out.x==Catch::Approx(.2f*(.4f+sky)));
+        REQUIRE(out.z==Catch::Approx(.4f*(.1f+sky)));
+        // Blocking every sky ray removes sky, not sunlight, and adds no ambient.
+        REQUIRE(giLambertOutgoing(reflectance,sun,{0,0,0}).x==Catch::Approx(.08f));
+        REQUIRE(giLambertOutgoing(reflectance,{0,0,0},{0,0,0}).x==0);
+    }
+    REQUIRE_FALSE(giSkyHemisphere({0,-1,0},{0,-1,0}));
+    REQUIRE_FALSE(giSkyHemisphere({0,1,0},{0,-1,0}));
+    const auto horizon=giSkyGradient({.1f,.2f,.4f},{.3f,.3f,.3f},0);
+    const auto zenith=giSkyGradient({.1f,.2f,.4f},{.3f,.3f,.3f},1);
+    REQUIRE(horizon.x==.3f);
+    REQUIRE(zenith.z==.4f);
+    for(int i=0;i<4;++i)
+    {
+        REQUIRE(giSunComponent(float(i))==bool(i&1));
+        REQUIRE(giSkyComponent(float(i))==bool(i&2));
+    }
+}
 
 TEST_CASE("Shared stock diffuse proxy bounds energy without inventing color or removing baked shading",
           "[Graphics][enhanced-material]")

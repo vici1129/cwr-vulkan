@@ -153,7 +153,8 @@ struct VulkanContext::RTAOState
     unsigned giHistoryIndex = 0, giPreviousSlot = FramesInFlight, giPhase = 0, giLastFrame = 0;
     bool giHistoryInitialized = false, giHistoryValid = false;
     uint64_t giHistoryBytes = 0, giHistoryAllocations = 0, giHistoryResets = 0;
-    std::array<float, 12> giLighting{};
+    std::array<float, 25> giLighting{};
+    const TextureImage* giSkyImage = nullptr;
     struct Slot
     {
         struct DynamicMesh
@@ -214,6 +215,7 @@ struct VulkanContext::RTAOState
     double waterRayMs = 0, waterFilterMs = 0;
     std::array<uint32_t, 8> giCounts{};
     std::array<uint32_t, 8> giSources{};
+    std::array<uint32_t, 8> giSkyCounts{};
     std::array<uint32_t, 4> giHistoryCounts{};
     uint64_t giFrames = 0;
     bool giDispatched = false, giCompleted = false, giTemporal = false;
@@ -244,7 +246,9 @@ std::string VulkanContext::SetRTGI(std::string_view mode)
     {
         std::ostringstream out;
         out << "RTGI=" << (RTGIEnabled() ? "on" : "off") << " capability=" << _rtaoReason
-            << " transport=" << (_rtGISkyOnly?"sky-only-diagnostic":"one-bounce");
+            << " transport=one-bounce components=" << (_rtGIComponents==0?"primary-sky":
+                _rtGIComponents==1?"primary-sky+sun-bounce":_rtGIComponents==2?"primary+secondary-sky":"sun+sky")
+            << " skySource=" << (_weatherLighting.options[1]>.5f?"stock-dome+clouds":"stock-gradient");
         if (!_rtGIFailure.empty()) out << " fallback=" << _rtGIFailure;
         if (_rtao)
         {
@@ -264,6 +268,9 @@ std::string VulkanContext::SetRTGI(std::string_view mode)
                 << " stockPBR(eligible/sunlit)=" << s[2] << '/' << s[3]
                 << " catalog(eligible/sunlit)=" << s[4] << '/' << s[5]
                 << " backfacing=" << s[6] << " missingColor=" << s[7];
+            const auto sky=RTGIEnabled() && rt.giDispatched && rt.giCompleted ? rt.giSkyCounts : std::array<uint32_t,8>{};
+            out << " secondarySky(rays/blocked/visible/rejectedHemisphere)=" << sky[0] << '/' << sky[1] << '/' << sky[2] << '/' << sky[3]
+                << " primarySky(rays/blocked/visible/belowHorizon)=" << sky[4] << '/' << sky[5] << '/' << sky[6] << '/' << sky[7];
             if (RTGIEnabled() && rt.giCompleted && rt.timingSamples)
                 out << " GPUms(trace/filter/temporal/BLAS/TLAS)=" << rt.giRayMs << '/' << rt.giFilterMs << '/'
                     << rt.giTemporalMs << '/'
@@ -277,12 +284,13 @@ std::string VulkanContext::SetRTGI(std::string_view mode)
         }
         else out << " lastWorldDispatch=no completedDispatches=0 bounceRays=0 hits=0 eligibleHits=0"
                     " rejectedMaterials=0 sunRays=0 sunBlocked=0 eligibleReceivers=0 dynamicHits=0 GPUtimings=unavailable";
-        out << "; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain";
+        out << "; last completed frame; one bounce, half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain";
         return out.str();
     }
-    if (mode != "on" && mode != "off" && mode != "sky-only") return "INVALID: triRTGI on, off, sky-only, status";
-    const bool skyOnly=mode=="sky-only";
-    if(skyOnly) mode="on";
+    if (mode != "on" && mode != "off" && mode != "sky-only" && mode != "sun-only" && mode != "no-sun")
+        return "INVALID: triRTGI on, off, sky-only, sun-only, no-sun, status";
+    const unsigned components=mode=="sky-only"?0:mode=="sun-only"?1:mode=="no-sun"?2:3;
+    if(mode!="off") mode="on";
     if (mode == "on" && !_rtaoAvailable) return "UNSUPPORTED: " + _rtaoReason;
     if (mode == "on" && !_rtGIFailure.empty()) return "UNSUPPORTED: " + _rtGIFailure;
     if (mode == "on")
@@ -306,8 +314,8 @@ std::string VulkanContext::SetRTGI(std::string_view mode)
             if (!RaySceneEnabled()) _rtao->scene.clear();
         }
     }
-    if(_rtGISkyOnly!=skyOnly) ResetTemporalHistory();
-    _rtGISkyOnly=skyOnly;
+    if(_rtGIComponents!=components) ResetTemporalHistory();
+    _rtGIComponents=components;
     return _rtGIEnabled ? "OK: one-bounce diffuse RTGI enabled (next frame)" : "OK: RTGI off";
 }
 
@@ -801,6 +809,7 @@ void VulkanContext::RetireRTAO()
         rt.surfaceMeasured = slot.surfaceMeasured;
         std::copy_n(counts + 20, 8, rt.giCounts.begin());
         std::copy_n(counts + 32, 8, rt.giSources.begin());
+        std::copy_n(counts + 40, 8, rt.giSkyCounts.begin());
         rt.giCompleted = slot.giDispatched;
         rt.giTemporal = slot.giTemporal;
         std::copy_n(counts + 28, 4, rt.giHistoryCounts.begin());
@@ -1122,15 +1131,18 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection, bool& ssaoH
             ++rt.giHistoryAllocations;
         }
     }
-    std::array<float, 12> giLighting{};
+    std::array<float, 25> giLighting{};
     for (int i = 0; i < 6; ++i) giLighting[i] = _reflectionLighting[i / 3][i % 3];
     std::copy(_rtSun.begin(), _rtSun.end(), giLighting.begin() + 6);
     giLighting[10] = _weatherLighting.cloudColor[3];
     giLighting[11] = _weatherLighting.sun[3];
-    bool lightingChanged = false;
-    for (int i = 0; i < 12; ++i)
+    for(int i=0;i<9;++i) giLighting[12+i]=_reflectionLighting[2+i/3][i%3];
+    std::copy_n(_weatherLighting.cloudColor.begin(),3,giLighting.begin()+21);
+    giLighting[24]=_weatherLighting.options[1];
+    bool lightingChanged = rt.giSkyImage != _weatherImages[3].get();
+    for (int i = 0; i < 25; ++i)
     {
-        const float threshold = i < 6 ? std::max(.002f, std::abs(rt.giLighting[i]) * .05f) : i < 10 ? .01f : .05f;
+        const float threshold = i < 6 || (i>=12 && i<24) ? std::max(.002f, std::abs(rt.giLighting[i]) * .05f) : i < 10 ? .01f : .05f;
         lightingChanged |= std::abs(giLighting[i] - rt.giLighting[i]) > threshold;
     }
     // Camera cuts/FOV changes already invalidate TAA/FSR. Also reject a missed
@@ -1141,6 +1153,7 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection, bool& ssaoH
     if (giTemporal && !rt.giHistoryValid) ++rt.giHistoryResets;
     if (!giTemporal) rt.giHistoryValid = false;
     rt.giLighting = giLighting;
+    rt.giSkyImage = _weatherImages[3].get();
     auto buffer = [&](VkDeviceSize size, VkBufferUsageFlags usage, bool host = false)
     {
         auto result = std::make_shared<RTBuffer>();
@@ -1148,13 +1161,13 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection, bool& ssaoH
         return result;
     };
     if (!slot.counters)
-        slot.counters = buffer(160, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, true);
+        slot.counters = buffer(192, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, true);
     if (!slot.materials)
         slot.materials = buffer(1024 * sizeof(uint64_t), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, true);
     if (!slot.reflectionLight)
         slot.reflectionLight = buffer(sizeof(_reflectionLighting), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, true);
     UploadMappedBuffer(slot.reflectionLight->buffer, _reflectionLighting.data(), sizeof(_reflectionLighting));
-    std::memset(slot.counters->buffer.mapped, 0, 160);
+    std::memset(slot.counters->buffer.mapped, 0, 192);
     if (!slot.queries && _timestampBits && _profile.enabled)
     {
         VkQueryPoolCreateInfo info{VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO};
@@ -1533,7 +1546,7 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection, bool& ssaoH
             push.settings[3] = 50.f;
         if (effect == 3)
         {
-            push.settings = {25.f, .02f, _rtGISkyOnly?0.f:1.f, 45.f};
+            push.settings = {25.f, .02f, float(_rtGIComponents), 45.f};
             rt.giPhase = _taaFrame % 32;
             push.jitter[2] = giTemporal ? float(1 + rt.giPhase) : 0.f;
             push.jitter[3] = giTemporal && rt.giHistoryValid ? 1.f : 0.f;

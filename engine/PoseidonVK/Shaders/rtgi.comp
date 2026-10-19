@@ -12,11 +12,24 @@
 #include "ray_lighting.glsl"
 #define WEATHER_SET 1
 #include "weather.glsl"
+#include "diffuse_sky_math.glsl"
+#include "ray_sky.glsl"
 layout(local_size_x=8,local_size_y=8) in;
 layout(set=0,binding=1) uniform accelerationStructureEXT scene;
 layout(set=0,binding=2,rgba32f) uniform writeonly image2D resultGI;
-layout(set=0,binding=3,std430) buffer Counters { uint count[40]; } counters;
-shared uint counts[16];
+layout(set=0,binding=3,std430) buffer Counters { uint count[48]; } counters;
+shared uint counts[24];
+bool skyBlocked(vec3 origin,vec3 direction,float minimum,inout float sampleData) {
+    rayQueryEXT sky;
+    rayQueryInitializeEXT(sky,scene,gl_RayFlagsTerminateOnFirstHitEXT,255,origin,minimum,direction,80.0);
+    while(rayQueryProceedEXT(sky)) {
+        if(rayQueryGetIntersectionTypeEXT(sky,false)==gl_RayQueryCandidateIntersectionTriangleEXT && opaqueHit(sky))
+            rayQueryConfirmIntersectionEXT(sky);
+    }
+    bool blocked=rayQueryGetIntersectionTypeEXT(sky,true)==gl_RayQueryCommittedIntersectionTriangleEXT;
+    if(blocked && (rayQueryGetIntersectionInstanceCustomIndexEXT(sky,true)>>20)==3u) sampleData=-abs(sampleData);
+    return blocked;
+}
 vec4 traceGI(ivec2 pixel) {
     ivec2 full=min(pixel*2+1,depthSize()-1);
     vec4 receiver=giReceiver(full);
@@ -57,12 +70,17 @@ vec4 traceGI(ivec2 pixel) {
     }
     atomicAdd(counts[0],1);
     if(rayQueryGetIntersectionTypeEXT(query,true)!=gl_RayQueryCommittedIntersectionTriangleEXT) {
-        // Uniform upper-hemisphere environment, calibrated to the engine's
-        // ambient irradiance. This replaces global ambient; it is not extra sky
-        // brightness. A later measured sky can replace this boundary condition.
-        // A finite-range miss below the horizon is unrepresented transport,
-        // not proof of black space. Retain the existing ambient boundary there.
-        result.rgb=rayAmbientLinear();
+        // A short transport miss is not necessarily visible sky: test the rest
+        // of the bounded visibility interval, without adding a surface bounce.
+        if(direction.y>0) {
+            atomicAdd(counts[20],1);
+            if(skyBlocked(world+worldNormal*ao.settings.y,direction,ao.settings.x,result.a))
+                atomicAdd(counts[21],1);
+            else {
+                atomicAdd(counts[22],1);
+                result.rgb=raySkyLinear(world,direction);
+            }
+        } else atomicAdd(counts[23],1); // below-horizon empty space is not a sky emitter
         return result;
     }
     atomicAdd(counts[1],1);
@@ -106,21 +124,45 @@ vec4 traceGI(ivec2 pixel) {
         visibility=blocked?0:cloudSunlight(hit.position);
         if(visibility>0) atomicAdd(counts[sourceCounter+1],1);
     }
-    vec3 incident=raySunlightLinear()*cosine*visibility;
-    vec3 reflected=hit.albedo*incident;
+    vec3 sky=vec3(0);
+    if(giSkyComponent(ao.settings.z)) {
+        // Independent dimensions for the hit's one cosine-weighted sky probe.
+        // Reuse the existing 32-phase temporal reconstruction, not more primary rays.
+        uint skyHash=hash^0x68bc21ebu;
+        skyHash^=skyHash>>16;skyHash*=2246822519u;skyHash^=skyHash>>13;
+        float su=(float(skyHash>>16)+.5)/65536;
+        float sp=6.2831853*(float(skyHash&65535u)+.5)/65536;
+        if(ao.jitter.z>0) {
+            float phase=ao.jitter.z-1;
+            su=fract(su+giSampleShift(phase)*.754877666);
+            sp+=giSampleRotation(phase)*1.324717957;
+        }
+        vec3 skyDirection=giCosineDirection(hit.normal,su,sp);
+        if(giSkyHemisphere(skyDirection,hit.geometricNormal)) {
+            atomicAdd(counts[16],1);
+            if(skyBlocked(hit.position+hit.geometricNormal*.02,skyDirection,.005,result.a))
+                atomicAdd(counts[17],1);
+            else {
+                atomicAdd(counts[18],1);
+                sky=raySkyLinear(hit.position,skyDirection);
+            }
+        } else atomicAdd(counts[19],1);
+    }
+    vec3 incident=giSunComponent(ao.settings.z)?raySunlightLinear()*cosine*visibility:vec3(0);
+    vec3 reflected=giLambertOutgoing(hit.albedo,incident,sky);
     // Cosine/PDF and Lambertian pi cancel for this single cosine-weighted
     // sample. Incident sunlight has the same Lambert-reference calibration as
     // enhanced raster lighting. No arbitrary GI gain or hit-distance falloff.
-    result.rgb=reflected*ao.settings.z; // binary surface-bounce isolation diagnostic, never an artistic gain
+    result.rgb=reflected; // component masks above are binary diagnostics, never an artistic gain
     return result;
 }
 void main() {
-    if(gl_LocalInvocationIndex<16) counts[gl_LocalInvocationIndex]=0;
+    if(gl_LocalInvocationIndex<24) counts[gl_LocalInvocationIndex]=0;
     barrier();
     ivec2 p=ivec2(gl_GlobalInvocationID.xy);
     if(all(lessThan(p,imageSize(resultGI)))) imageStore(resultGI,p,traceGI(p));
     barrier();
-    if(gl_LocalInvocationIndex<16) {
+    if(gl_LocalInvocationIndex<24) {
         uint i=gl_LocalInvocationIndex;
         atomicAdd(counters.count[i<8?20+i:24+i],counts[i]);
     }
