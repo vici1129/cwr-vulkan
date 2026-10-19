@@ -52,7 +52,7 @@ independent attachment blending. Native render-scale choices are **100%, 125%,
 150% and 200%**, filtered against framebuffer limits.
 
 AMD **FSR 3.1.4 Native AA, Quality, Balanced and Performance** appear only when
-the public FSR build, `CWR_VK_FSR=1` startup opt-in and renderer requirements are
+the public FSR build and renderer requirements are
 available. Otherwise the AA hint explains the unavailable capability. Selecting
 FSR sets independent scale to 100% and disables that control: FSR owns its
 internal input resolution, not the HUD/output resolution. Leaving FSR re-enables
@@ -100,8 +100,15 @@ An explicit choice is loaded when each Scene is created. Old configs without
 `objectLodConfigured` retain their original 1x scene default; applying unrelated
 settings does not opt them into an old auto-detected tier.
 
-Ray Traced Shadows and Water require initialized Vulkan ray-query capability and
-`CWR_VK_RTAO=1` at startup; the menu cannot initialize it after device creation.
+Vulkan automatically detects and initializes supported ray-query and FSR device
+capabilities at startup. No environment variables are needed. This makes Ray
+Traced Shadows/Water and supported FSR modes selectable; it does not enable any
+effect or reconstruction until selected or restored from saved preferences.
+RT pipelines, acceleration structures and targets remain allocated on demand
+only while an RT consumer needs them; disabling one consumer preserves the scene
+needed by another. FSR contexts likewise follow the selected AA mode.
+Unsupported loaders/devices, builds without FSR and optional initialization
+failures retain ordinary rendering and explain the unavailable capability.
 Saved but unavailable RT/FSR choices remain remembered while the page shows the
 actual fallback. Applying an unrelated gamma/FPS/detail change does not erase
 them. This preservation is component-specific: changing lighting, AO or water
@@ -131,5 +138,12 @@ policy, not a player-facing second menu. Existing original-dialog code and mod
 control IDs remain intact.
 
 See the [verification record](evidence/graphics-menu/README.md) for build,
-regression and direct gameplay checks. A player-friendly RT/FSR startup opt-in
-remains a focused bootstrap follow-up, not a hidden menu promise.
+regression and direct gameplay checks, and the
+[automatic startup checks](evidence/automatic-capabilities/README.md) for RT/FSR
+detection, saved preferences and unsupported-feature fallback.
+
+Developer commands remain unchanged. For diagnostics, `CWR_VK_RTAO=0` disables
+shared ray-query initialization and `CWR_VK_FSR=0` disables FSR initialization
+for that process. The legacy value `1` still requests normal detection. Removing
+a disabling override requires a restart: the menu cannot hot-enable device
+features omitted at startup. Neither override edits remembered preferences.

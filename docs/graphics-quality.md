@@ -59,15 +59,15 @@ does not change preset recognition and is preserved when selecting a preset.
 
 **Ray Traced Shadows and Water require initialized ray-query capability.** Without it the
 selectors offer only Standard/Enhanced and their hints explain the
-`CWR_VK_RTAO=1` startup/restart requirement or hardware limitation. A previously
+hardware/build limitation or explicit diagnostic override. A previously
 saved RT component falls back to Enhanced for that process; the saved
 preference is preserved until the player explicitly applies another choice for
 that component (or a raster preset). Changing independent lighting does not erase it.
 Availability is based on device negotiation and independent MRT blending, never
-GPU brand. This menu does not change the device bootstrap. Player-friendly RT
-startup opt-in is a focused follow-up. AA/upscaling and render scale are now
-available on the unified page with actual capability checks. FSR retains its
-existing build and `CWR_VK_FSR=1` startup requirements.
+GPU brand. Vulkan detects and initializes supported capabilities automatically
+at startup without enabling effects. AA/upscaling and render scale are available
+on the unified page with actual capability checks. FSR requires the public FSR
+build and supported device features, without a startup opt-in.
 
 The measurements and visual gates below remain the authoritative mappings and
 qualification record. The original report describes the pre-menu state.
@@ -225,15 +225,15 @@ repair that coverage boundary.
 
 RT means Vulkan 1.2 with `rayQuery`, `accelerationStructure`,
 `bufferDeviceAddress`, `shaderInt64`, the required acceleration-structure formats,
-and a compute-capable graphics queue. The current bootstrap requests that device
-path through `CWR_VK_RTAO=1`; despite its historical name, this is the shared
-capability opt-in for sunlight, water and GI. A supported GPU with the opt-in
-absent cannot enable RT in an already-created device. Restart is required to
-change that bootstrap decision. Once capability is initialized, effect toggles
+and a compute-capable graphics queue. The bootstrap automatically requests that
+supported device path for sunlight, water, AO and GI, while leaving effects off.
+`CWR_VK_RTAO=0` can disable detection for diagnostics; removing that override
+requires a restart to initialize device features. Once initialized, effect toggles
 are live; resource recreation can stall and temporal history resets.
 
-FSR 3.1.4 similarly requires the public optional build and `CWR_VK_FSR=1`
-at startup. Runtime status, not the NVIDIA brand or a menu label, determines
+FSR 3.1.4 similarly detects support at startup in the public optional build;
+`CWR_VK_FSR=0` can disable it for diagnostics until restart. Runtime status,
+not the GPU brand or a menu label, determines
 availability. Changing to FSR requires world render scale 100%; FSR's own mode
 sets its internal resolution. Existing independent render scale is supersampling
 at 100/125/150/200%, not a general 50-200% slider or dynamic resolution system.

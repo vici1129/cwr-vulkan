@@ -1,4 +1,4 @@
-// Deliberately standalone: no SDL initialization, instance, surface or physical device.
+// Deliberately standalone: fake Vulkan handles, no SDL initialization or driver.
 #include <PoseidonVK/VulkanContext.hpp>
 #include <PoseidonVK/TriangleVK.hpp>
 #include <cstdio>
@@ -6,6 +6,8 @@
 #include <stdexcept>
 #include <type_traits>
 #include <limits>
+#include <cstdlib>
+#include <optional>
 
 namespace
 {
@@ -20,6 +22,35 @@ VkInstanceCreateFlags requestedInstanceFlags = 0;
 PFN_vkDebugUtilsMessengerCallbackEXT instanceCallback = nullptr;
 void* instanceCallbackUser = nullptr;
 bool injectTeardownError = false;
+uint32_t loaderVersion = VK_API_VERSION_1_0;
+bool startupRT = true, startupFSR = true;
+unsigned rejectedDeviceFeatures = 0;
+std::vector<unsigned> deviceAttempts;
+struct EnvironmentOverride
+{
+    const char* name;
+    std::optional<std::string> previous;
+    EnvironmentOverride(const char* key, const char* value) : name(key)
+    {
+        if (const char* old = std::getenv(key)) previous = old;
+        Set(value);
+    }
+    void Set(const char* value)
+    {
+#ifdef _WIN32
+        _putenv_s(name, value ? value : "");
+#else
+        if (value) setenv(name, value, 1); else unsetenv(name);
+#endif
+    }
+    ~EnvironmentOverride() { Set(previous ? previous->c_str() : nullptr); }
+};
+
+VKAPI_ATTR VkResult VKAPI_CALL EnumerateVersion(uint32_t* version)
+{
+    *version = loaderVersion;
+    return VK_SUCCESS;
+}
 
 template <class Handle>
 Handle DebugMessengerHandle()
@@ -119,12 +150,128 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateInstance(const VkInstanceCreateInfo* info
 
 VKAPI_ATTR PFN_vkVoidFunction VKAPI_CALL vkGetInstanceProcAddr(VkInstance, const char* name)
 {
+    if (std::strcmp(name, "vkEnumerateInstanceVersion") == 0)
+        return reinterpret_cast<PFN_vkVoidFunction>(&EnumerateVersion);
+    if (std::strcmp(name, "vkGetPhysicalDeviceFeatures2") == 0)
+        return reinterpret_cast<PFN_vkVoidFunction>(&vkGetPhysicalDeviceFeatures2);
     if (std::strcmp(name, "vkCreateDebugUtilsMessengerEXT") == 0)
         return reinterpret_cast<PFN_vkVoidFunction>(&CreateDebugMessenger);
     if (std::strcmp(name, "vkDestroyDebugUtilsMessengerEXT") == 0)
         return reinterpret_cast<PFN_vkVoidFunction>(&DestroyDebugMessenger);
     return nullptr;
 }
+// A fake presentation device exercises the real startup negotiation. Stop at
+// the first frame-resource allocation so these tests never call a real driver.
+VKAPI_ATTR VkResult VKAPI_CALL vkEnumeratePhysicalDevices(VkInstance, uint32_t* count, VkPhysicalDevice* out)
+{
+    if (out) *out = reinterpret_cast<VkPhysicalDevice>(uintptr_t{1});
+    *count = 1;
+    return VK_SUCCESS;
+}
+VKAPI_ATTR VkResult VKAPI_CALL vkEnumerateDeviceExtensionProperties(VkPhysicalDevice, const char*, uint32_t* count, VkExtensionProperties* out)
+{
+    std::vector<const char*> names{VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+    if (startupRT)
+        for (auto name : {VK_KHR_RAY_QUERY_EXTENSION_NAME, VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME,
+                          VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME}) names.push_back(name);
+    if (out)
+        for (size_t i = 0; i < names.size(); ++i)
+        {
+            out[i] = {};
+            std::strcpy(out[i].extensionName, names[i]);
+        }
+    *count = uint32_t(names.size());
+    return VK_SUCCESS;
+}
+VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceQueueFamilyProperties(VkPhysicalDevice, uint32_t* count, VkQueueFamilyProperties* out)
+{
+    if (out) { *out = {}; out->queueCount = 1; out->queueFlags = VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_COMPUTE_BIT; }
+    *count = 1;
+}
+VKAPI_ATTR VkResult VKAPI_CALL vkGetPhysicalDeviceSurfaceSupportKHR(VkPhysicalDevice, uint32_t, VkSurfaceKHR, VkBool32* out)
+{ *out = VK_TRUE; return VK_SUCCESS; }
+VKAPI_ATTR VkResult VKAPI_CALL vkGetPhysicalDeviceSurfaceCapabilitiesKHR(VkPhysicalDevice, VkSurfaceKHR, VkSurfaceCapabilitiesKHR* out)
+{ *out = {}; out->supportedUsageFlags = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT; return VK_SUCCESS; }
+VKAPI_ATTR VkResult VKAPI_CALL vkGetPhysicalDeviceSurfaceFormatsKHR(VkPhysicalDevice, VkSurfaceKHR, uint32_t* count, VkSurfaceFormatKHR* out)
+{ if (out) *out = {VK_FORMAT_B8G8R8A8_UNORM, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR}; *count = 1; return VK_SUCCESS; }
+VKAPI_ATTR VkResult VKAPI_CALL vkGetPhysicalDeviceSurfacePresentModesKHR(VkPhysicalDevice, VkSurfaceKHR, uint32_t* count, VkPresentModeKHR* out)
+{ if (out) *out = VK_PRESENT_MODE_FIFO_KHR; *count = 1; return VK_SUCCESS; }
+VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceProperties(VkPhysicalDevice, VkPhysicalDeviceProperties* out)
+{
+    *out = {};
+    out->apiVersion = loaderVersion;
+    out->limits.maxColorAttachments = 4;
+    std::strcpy(out->deviceName, "Startup test device");
+}
+VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceFeatures(VkPhysicalDevice, VkPhysicalDeviceFeatures* out)
+{
+    *out = {};
+    out->independentBlend = VK_TRUE;
+    out->shaderInt64 = startupRT;
+    out->shaderStorageImageExtendedFormats = out->shaderStorageImageWriteWithoutFormat = startupFSR;
+}
+VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceFeatures2(VkPhysicalDevice physical, VkPhysicalDeviceFeatures2* out)
+{
+    vkGetPhysicalDeviceFeatures(physical, &out->features);
+    for (auto* next = static_cast<VkBaseOutStructure*>(out->pNext); next; next = next->pNext)
+    {
+        switch (next->sType)
+        {
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_QUERY_FEATURES_KHR:
+            reinterpret_cast<VkPhysicalDeviceRayQueryFeaturesKHR*>(next)->rayQuery = startupRT; break;
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR:
+            reinterpret_cast<VkPhysicalDeviceAccelerationStructureFeaturesKHR*>(next)->accelerationStructure = startupRT; break;
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES:
+            reinterpret_cast<VkPhysicalDeviceBufferDeviceAddressFeatures*>(next)->bufferDeviceAddress = startupRT; break;
+        default: break;
+        }
+    }
+}
+VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceProperties2(VkPhysicalDevice physical, VkPhysicalDeviceProperties2* out)
+{
+    vkGetPhysicalDeviceProperties(physical, &out->properties);
+    if (out->pNext)
+    {
+        auto* subgroup = static_cast<VkPhysicalDeviceSubgroupProperties*>(out->pNext);
+        subgroup->supportedStages = VK_SHADER_STAGE_COMPUTE_BIT;
+        subgroup->supportedOperations = VK_SUBGROUP_FEATURE_BASIC_BIT | VK_SUBGROUP_FEATURE_ARITHMETIC_BIT | VK_SUBGROUP_FEATURE_QUAD_BIT;
+    }
+}
+VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceFormatProperties(VkPhysicalDevice, VkFormat, VkFormatProperties* out)
+{
+    *out = {};
+    out->bufferFeatures = VK_FORMAT_FEATURE_ACCELERATION_STRUCTURE_VERTEX_BUFFER_BIT_KHR;
+    out->optimalTilingFeatures = VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT | VK_FORMAT_FEATURE_STORAGE_IMAGE_BIT;
+}
+VKAPI_ATTR VkResult VKAPI_CALL vkCreateDevice(VkPhysicalDevice, const VkDeviceCreateInfo* info, const VkAllocationCallbacks*, VkDevice* out)
+{
+    unsigned mask = info->pEnabledFeatures->shaderStorageImageExtendedFormats ? 2 : 0;
+    bool address = false, address12 = false, hasVulkan12 = false;
+    for (auto* next = static_cast<const VkBaseInStructure*>(info->pNext); next; next = next->pNext)
+    {
+        if (next->sType == VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_QUERY_FEATURES_KHR) mask |= 1;
+        if (next->sType == VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES) address = true;
+        if (next->sType == VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES)
+        {
+            hasVulkan12 = true;
+            address12 = reinterpret_cast<const VkPhysicalDeviceVulkan12Features*>(next)->bufferDeviceAddress;
+        }
+    }
+    Check(!(address && hasVulkan12), "combined RT/FSR device must not duplicate buffer-device-address feature structures");
+    Check((mask & 1) == 0 || (address || address12), "RT retry retains device address support");
+    Check(bool(info->pEnabledFeatures->shaderInt64) == bool(mask & 1), "raster retries remove RT features");
+    deviceAttempts.push_back(mask);
+    *out = VK_NULL_HANDLE;
+    if (mask & rejectedDeviceFeatures) return VK_ERROR_FEATURE_NOT_PRESENT;
+    *out = reinterpret_cast<VkDevice>(uintptr_t{1});
+    return VK_SUCCESS;
+}
+VKAPI_ATTR void VKAPI_CALL vkGetDeviceQueue(VkDevice, uint32_t, uint32_t, VkQueue* out) { *out = VK_NULL_HANDLE; }
+VKAPI_ATTR VkResult VKAPI_CALL vkCreateCommandPool(VkDevice, const VkCommandPoolCreateInfo*, const VkAllocationCallbacks*, VkCommandPool*)
+{ return VK_ERROR_OUT_OF_HOST_MEMORY; }
+VKAPI_ATTR VkResult VKAPI_CALL vkDeviceWaitIdle(VkDevice) { return VK_SUCCESS; }
+VKAPI_ATTR void VKAPI_CALL vkDestroyDevice(VkDevice, const VkAllocationCallbacks*) {}
+VKAPI_ATTR void VKAPI_CALL vkDestroySurfaceKHR(VkInstance, VkSurfaceKHR, const VkAllocationCallbacks*) {}
 VKAPI_ATTR void VKAPI_CALL vkDestroyInstance(VkInstance, const VkAllocationCallbacks*)
 {
     // The instance pNext callback remains valid during vkDestroyInstance, after
@@ -146,6 +293,7 @@ int main()
     using namespace Poseidon::vk;
     try
     {
+        EnvironmentOverride rtEnvironment("CWR_VK_RTAO", nullptr), fsrEnvironment("CWR_VK_FSR", nullptr);
         Check(Poseidon::vk::TextureAnisotropy(false, 16) == 1, "unsupported anisotropy falls back");
         Check(Poseidon::vk::TextureAnisotropy(true, 8) == 8, "anisotropy respects device limit");
         Check(Poseidon::vk::TextureAnisotropy(true, 32) == 16, "anisotropy matches GL33 cap");
@@ -398,6 +546,52 @@ int main()
               "native instance must retain the Vulkan 1.0 baseline and flags");
         instanceContext.Shutdown();
 
+        loaderVersion = VK_API_VERSION_1_2;
+        auto startup = [&](std::vector<unsigned> expected)
+        {
+            VulkanContext context;
+            context.CreateInstance(surfaceExtensions, 1);
+            deviceAttempts.clear();
+            bool reachedFrames = false;
+            try { context.CreateDevice(reinterpret_cast<VkSurfaceKHR>(uintptr_t{1})); }
+            catch (const std::runtime_error& error)
+            { reachedFrames = std::string(error.what()).find("create command pool failed") != std::string::npos; }
+            Check(reachedFrames, "optional negotiation must reach ordinary frame initialization");
+            Check(deviceAttempts == expected, "startup must select supported capabilities and retry rejected optional devices");
+            Check(!context.RTAOEnabled() && !context.RTGIEnabled() && !context.RTShadowsEnabled() && !context.RTReflectionsEnabled(),
+                  "capability detection must not enable RT effects");
+            Check(context.GetImageQuality().aa == "off", "capability detection must not select FSR reconstruction");
+        };
+#ifdef CWR_FSR3
+        startup({3}); // Both startup variables absent on supported hardware.
+        Check(requestedApiVersion == VK_API_VERSION_1_2, "normal startup automatically negotiates Vulkan 1.2");
+        rejectedDeviceFeatures = 1; startup({3, 2}); // RT failure preserves FSR.
+        rejectedDeviceFeatures = 2; startup({3, 2, 1}); // FSR failure preserves RT.
+        rejectedDeviceFeatures = 3; startup({3, 2, 1, 0});
+#else
+        startup({1});
+        rejectedDeviceFeatures = 1; startup({1, 0});
+#endif
+        rejectedDeviceFeatures = 0;
+        startupRT = startupFSR = false; startup({0});
+#ifdef CWR_FSR3
+        startupFSR = true; startup({2}); // FSR remains usable on non-RT hardware.
+        startupRT = true; startupFSR = false; startup({1});
+#endif
+        startupRT = startupFSR = true;
+        rtEnvironment.Set("0"); fsrEnvironment.Set("0"); startup({0});
+        Check(requestedApiVersion == VK_API_VERSION_1_0, "diagnostic overrides retain the original API baseline");
+        rtEnvironment.Set("1"); fsrEnvironment.Set("1");
+#ifdef CWR_FSR3
+        startup({3});
+        rtEnvironment.Set("0"); startup({2});
+        rtEnvironment.Set("1"); fsrEnvironment.Set("0"); startup({1});
+#else
+        startup({1});
+#endif
+        rtEnvironment.Set(nullptr); fsrEnvironment.Set(nullptr);
+        loaderVersion = VK_API_VERSION_1_0; startup({0});
+
         const unsigned createdBeforeRequest = instanceCreationCalls;
         bool rejectedMissingLayer = false;
         try
@@ -493,7 +687,7 @@ int main()
         Check(context.SetSSAO(true, 0.7f, 1.2f, 0.03f, 80), "valid SSAO controls are accepted");
         Check(!context.RTAOEnabled(), "RTAO defaults off");
         Check(!context.RTGIEnabled(), "RTGI defaults off");
-        Check(context.SetRTGI("on").starts_with("UNSUPPORTED:"), "GI requires opted-in ray-query capabilities");
+        Check(context.SetRTGI("on").starts_with("UNSUPPORTED:"), "GI requires initialized ray-query capabilities");
         Check(context.SetRTGI("invalid").starts_with("INVALID:"), "GI rejects invalid controls");
         Check(context.SetRTGI("status").find("lastWorldDispatch=no") != std::string::npos,
               "GI never claims execution from initialization");

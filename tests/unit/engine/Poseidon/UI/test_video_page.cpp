@@ -60,14 +60,14 @@ struct VideoEngine : EngineDummy
     bool HasVulkanGraphics() const override { return vulkan; }
     GraphicsQuality GetGraphicsQuality() const override { return quality; }
     ImageQuality GetImageQuality() const override { return image; }
-    RString GraphicsQualityRTUnavailable() const override { return rt ? "" : "Restart with CWR_VK_RTAO=1"; }
+    RString GraphicsQualityRTUnavailable() const override { return rt ? "" : "Ray-query hardware unavailable"; }
     RString GraphicsQualityError() const override { return reject ? "Request rejected" : ""; }
     RString ImageQualityUnavailable(const ImageQuality& q) const override
     {
         if (q.aa == "msaa8")
             return "Unsupported sample count";
         if (q.IsFSR() && !fsr)
-            return "FSR needs CWR_VK_FSR=1 at startup";
+            return "FSR compute features unavailable";
         if (q.IsFSR() && q.scale != 100)
             return "FSR owns scale";
         return "";
@@ -297,7 +297,7 @@ TEST_CASE("Video presets change exactly the validated groups and derive Custom",
     p.Set(VideoPage::Overall, 2);
     CHECK(p.Value(VideoPage::Overall) == 0);
 }
-TEST_CASE("Video filters device capabilities and explains startup requirements", "[UI][VideoPage]")
+TEST_CASE("Video filters device capabilities and explains unavailable features", "[UI][VideoPage]")
 {
     Fixture f;
     f.Open();
@@ -305,15 +305,15 @@ TEST_CASE("Video filters device capabilities and explains startup requirements",
     CHECK(p.Choice(VideoPage::AA, "MSAA 8x") == -1);
     CHECK(p.Choice(VideoPage::AA, "MSAA 4x") >= 0);
     CHECK(p.Choice(VideoPage::AA, "FSR 3.1.4 Quality") == -1);
-    CHECK(std::string(p.Rows().RowDescription(p.At(VideoPage::AA))).find("CWR_VK_FSR") != std::string::npos);
+    CHECK(std::string(p.Rows().RowDescription(p.At(VideoPage::AA))).find("FSR compute features unavailable") != std::string::npos);
     CHECK(p.Rows().RowFor(p.At(VideoPage::Shadows)).count == 2);
     CHECK(p.Rows().RowFor(p.At(VideoPage::Water)).count == 2);
     p.Set(VideoPage::Water, 2);
     CHECK(p.Value(VideoPage::Water) == 0);
-    CHECK(std::string(p.Rows().RowDescription(p.At(VideoPage::Water))).find("CWR_VK_RTAO") != std::string::npos);
+    CHECK(std::string(p.Rows().RowDescription(p.At(VideoPage::Water))).find("Ray-query hardware unavailable") != std::string::npos);
     p.Set(VideoPage::Shadows, 2);
     CHECK(p.Value(VideoPage::Shadows) == 0);
-    CHECK(std::string(p.Rows().RowDescription(p.At(VideoPage::Shadows))).find("CWR_VK_RTAO") != std::string::npos);
+    CHECK(std::string(p.Rows().RowDescription(p.At(VideoPage::Shadows))).find("Ray-query hardware unavailable") != std::string::npos);
 }
 TEST_CASE("Video RT water and shadows apply independently and volume does not redefine presets", "[UI][VideoPage]")
 {
@@ -890,7 +890,7 @@ TEST_CASE("Video gamma Apply preserves unavailable saved RT and FSR preferences"
     cfg.vulkan = {2, 1, 2, true};
     cfg.vulkanImage = {"fsr-quality", 100};
     cfg.Save(f.graphics.path);
-    f.engine.quality = GraphicsQuality::Enhanced(); // Startup RT fallback; no FSR startup opt-in.
+    f.engine.quality = GraphicsQuality::Enhanced(); // Startup fallback on an unavailable RT/FSR device.
     f.Open();
     auto& p = *f.page;
     p.Set(VideoPage::Gamma, 50);

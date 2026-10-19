@@ -1,5 +1,9 @@
 # Final Vulkan graphics controls (2026-10-19)
 
+The later [automatic startup verification](../automatic-capabilities/README.md)
+supersedes this snapshot's RT/FSR environment prerequisites. Normal Vulkan
+launches now detect supported capabilities automatically.
+
 Implementation starts from public main `d03ed0c`. The [Video Settings guide](../../video-settings.md)
 describes the compact player controls. This integration reuses the corrected
 [RT-water renderer](../../rt-water-transitions.md) and

@@ -64,8 +64,9 @@ and `ray` also enable bloom/volumetrics and are not the final mappings.
 ## Reproduction recipe
 
 Use an isolated profile and stock game data, current developer harness, Vulkan
-with public FSR built, `CWR_VK_PROFILE=1`, `CWR_VK_FSR=1`; add `CWR_VK_RTAO=1`
-only for a device initialized with RT capability. Timing startup excludes
+with public FSR built and `CWR_VK_PROFILE=1`. Current builds detect supported
+RT/FSR capabilities automatically; the original run used the former startup
+opt-ins. Timing startup excludes
 `--vk-validation`; separate validation startup includes it. Use a verified
 1920x1080 or 2560x1440 drawable, SDR, AA Off, scale 100%, VSync Off, view distance
 1400. Keep the existing cap/pacing and automatic GPU clocks unchanged.

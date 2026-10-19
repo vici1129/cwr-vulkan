@@ -1,0 +1,4 @@
+Filters: [VideoPage],[vulkan-shape],[ShadowIsolation],[GraphicsConfig],[vulkan-aa],[WindowMetrics],[WindowPlacement]
+Randomness seeded to: 645894797
+===============================================================================
+All tests passed (1678 assertions in 104 test cases)

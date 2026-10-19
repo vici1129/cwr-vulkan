@@ -130,30 +130,29 @@ void VulkanContext::CreateInstance(const char* const* extensions, uint32_t count
     app.pApplicationName = "CWR Remastered";
     app.pEngineName = "PoseidonVK (diagnostic indexed rendering)";
     app.apiVersion = VK_API_VERSION_1_0;
-    if (const char* opt = std::getenv("CWR_VK_RTAO"); opt && std::strcmp(opt, "1") == 0)
+    // Detect optional capabilities on ordinary launches. Explicit zero remains
+    // a process-local diagnostic override; it never changes saved preferences.
+    const char* rt = std::getenv("CWR_VK_RTAO");
+    _rtaoRequested = !rt || std::strcmp(rt, "0") != 0;
+    _rtaoReason = _rtaoRequested ? "requires a Vulkan 1.2 loader" : "disabled by CWR_VK_RTAO=0; restart without the override";
+#ifdef CWR_FSR3
+    const char* fsr = std::getenv("CWR_VK_FSR");
+    _fsrRequested = !fsr || std::strcmp(fsr, "0") != 0;
+    _fsrReason = _fsrRequested ? "requires a Vulkan 1.2 loader" : "disabled by CWR_VK_FSR=0; restart without the override";
+#endif
+    if (_rtaoRequested || _fsrRequested)
     {
         uint32_t version = VK_API_VERSION_1_0;
         auto enumerate = reinterpret_cast<PFN_vkEnumerateInstanceVersion>(vkGetInstanceProcAddr(nullptr, "vkEnumerateInstanceVersion"));
         if (enumerate && enumerate(&version) == VK_SUCCESS && version >= VK_API_VERSION_1_2)
         {
             app.apiVersion = VK_API_VERSION_1_2;
-            _rtaoRequested = true;
         }
-        else _rtaoReason = "requires a Vulkan 1.2 loader";
-    }
-#ifdef CWR_FSR3
-    if (const char* opt = std::getenv("CWR_VK_FSR"); opt && std::strcmp(opt, "1") == 0)
-    {
-        uint32_t version = VK_API_VERSION_1_0;
-        auto enumerateVersion = reinterpret_cast<PFN_vkEnumerateInstanceVersion>(vkGetInstanceProcAddr(nullptr, "vkEnumerateInstanceVersion"));
-        if (enumerateVersion && enumerateVersion(&version) == VK_SUCCESS && version >= VK_API_VERSION_1_2)
+        else
         {
-            app.apiVersion = VK_API_VERSION_1_2;
-            _fsrRequested = true;
+            _rtaoRequested = _fsrRequested = false;
         }
-        else _fsrReason = "requires a Vulkan 1.2 loader";
     }
-#endif
     VkInstanceCreateInfo info{VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO};
     info.flags = flags;
     info.pApplicationInfo = &app;
@@ -323,6 +322,8 @@ void VulkanContext::CreateDevice(VkSurfaceKHR surface)
     info.pEnabledFeatures = &features;
     VkPhysicalDeviceProperties properties{};
     vkGetPhysicalDeviceProperties(_physical, &properties);
+    const auto rasterExtensions = enabled;
+    const auto rasterFeatures = features;
 #ifdef CWR_FSR3
     VkPhysicalDeviceVulkan11Features f11{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES};
     VkPhysicalDeviceVulkan12Features f12{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES};
@@ -392,6 +393,9 @@ void VulkanContext::CreateDevice(VkSurfaceKHR surface)
     }
     else if (_fsrRequested) _fsrReason = "requires a Vulkan 1.2 device";
 #endif
+    const auto fsrExtensions = enabled;
+    const auto fsrFeatures = features;
+    const void* fsrChain = info.pNext;
     VkPhysicalDeviceRayQueryFeaturesKHR ray{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_QUERY_FEATURES_KHR};
     VkPhysicalDeviceAccelerationStructureFeaturesKHR accel{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR};
     VkPhysicalDeviceBufferDeviceAddressFeatures address{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES};
@@ -423,23 +427,57 @@ void VulkanContext::CreateDevice(VkSurfaceKHR surface)
             ray = {VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_QUERY_FEATURES_KHR}; ray.rayQuery = VK_TRUE;
             accel = {VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR}; accel.accelerationStructure = VK_TRUE;
             address = {VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES}; address.bufferDeviceAddress = VK_TRUE;
+            _rtaoAvailable = true;
+            _rtaoReason = "available";
+        }
+    }
+    // Try supported optional combinations before the original raster device.
+    // No resources exist yet, so a rejected optional device needs no teardown.
+    const bool rtSupported = _rtaoAvailable, fsrSupported = _fsrAvailable;
+    auto create = [&](bool rtEnabled, bool fsrEnabled)
+    {
+        enabled = fsrEnabled ? fsrExtensions : rasterExtensions;
+        features = fsrEnabled ? fsrFeatures : rasterFeatures;
+        info.pNext = fsrEnabled ? fsrChain : nullptr;
+#ifdef CWR_FSR3
+        f12.bufferDeviceAddress = rtEnabled && fsrEnabled;
+#endif
+        if (rtEnabled)
+        {
+            features.shaderInt64 = VK_TRUE;
             ray.pNext = &accel;
             address.pNext = const_cast<void*>(info.pNext);
             accel.pNext = &address;
 #ifdef CWR_FSR3
-            if (_fsrAvailable) { f12.bufferDeviceAddress = VK_TRUE; accel.pNext = const_cast<void*>(info.pNext); }
+            if (fsrEnabled) accel.pNext = const_cast<void*>(info.pNext);
 #endif
             info.pNext = &ray;
             for (const char* ext : {VK_KHR_RAY_QUERY_EXTENSION_NAME, VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME,
                                    VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME}) enabled.push_back(ext);
-            info.enabledExtensionCount = uint32_t(enabled.size()); info.ppEnabledExtensionNames = enabled.data();
-            _rtaoAvailable = true;
-            features.shaderInt64 = VK_TRUE;
-            _rtaoReason = "available";
         }
-    }
+        info.enabledExtensionCount = uint32_t(enabled.size());
+        info.ppEnabledExtensionNames = enabled.data();
+        VkDevice device = VK_NULL_HANDLE;
+        const VkResult result = vkCreateDevice(_physical, &info, nullptr, &device);
+        if (result == VK_SUCCESS)
+        {
+            _device = device;
+            _rtaoAvailable = rtEnabled;
+            _fsrAvailable = fsrEnabled;
+        }
+        else
+            std::fprintf(stderr, "Vulkan: device request RT=%u FSR=%u failed (%d); trying remaining startup capabilities\n",
+                         rtEnabled, fsrEnabled, int(result));
+        return result;
+    };
+    VkResult result = create(rtSupported, fsrSupported);
+    if (result != VK_SUCCESS && rtSupported && fsrSupported) result = create(false, true);
+    if (result != VK_SUCCESS && rtSupported && fsrSupported) result = create(true, false);
+    if (result != VK_SUCCESS && (rtSupported || fsrSupported)) result = create(false, false);
+    Check(result, "create logical device");
+    if (rtSupported && !_rtaoAvailable) _rtaoReason = "optional ray-query device initialization failed; using raster rendering";
+    if (fsrSupported && !_fsrAvailable) _fsrReason = "optional FSR device initialization failed; using ordinary AA";
     _textureAnisotropy = TextureAnisotropy(features.samplerAnisotropy, properties.limits.maxSamplerAnisotropy);
-    Check(vkCreateDevice(_physical, &info, nullptr, &_device), "create logical device");
     if (_hdrMetadataEnabled)
         _setHdrMetadata = reinterpret_cast<PFN_vkSetHdrMetadataEXT>(vkGetDeviceProcAddr(_device, "vkSetHdrMetadataEXT"));
     vkGetDeviceQueue(_device, _families.graphics, 0, &_graphics);
@@ -452,7 +490,18 @@ void VulkanContext::CreateDevice(VkSurfaceKHR surface)
     if (_present != _graphics)
         Name(VK_OBJECT_TYPE_QUEUE, ObjectHandle(_present), "PoseidonVK present queue");
     CreateFrameResources();
-    if (_rtaoAvailable) InitRTAO();
+    if (_rtaoAvailable)
+    {
+        try { InitRTAO(); } // Loads entry points/limits only; GPU resources stay lazy.
+        catch (const std::exception& error)
+        {
+            DestroyRTAO();
+            _rtaoAvailable = false;
+            _rtaoReason = std::string("ray-query initialization failed: ") + error.what();
+        }
+    }
+    std::fprintf(stderr, "Vulkan: optional capabilities: RT=%s; FSR=%s (effects remain player-selected)\n",
+                 _rtaoReason.c_str(), _fsrReason.c_str());
     std::fprintf(stderr, "Vulkan: logical device ready: %s, two frame slots\n", _deviceName.c_str());
     std::fprintf(stderr, "Vulkan: linear texture anisotropy %.1fx (supported=%u); point samplers unchanged\n",
                  _textureAnisotropy, features.samplerAnisotropy);
@@ -1340,7 +1389,9 @@ unsigned VulkanContext::Shutdown() noexcept
     _instance = VK_NULL_HANDLE;
     _physical = VK_NULL_HANDLE;
     _fsrAvailable = _fsrRequested = false;
-    _fsrReason = "not built or runtime opt-in CWR_VK_FSR=1 absent";
+    _fsrReason = "FSR 3.1.4 is not included in this build";
+    _rtaoAvailable = _rtaoRequested = false;
+    _rtaoReason = "Vulkan ray-query device has not been initialized";
     _graphics = _present = VK_NULL_HANDLE;
     _setName = nullptr;
     _debugNamesEnabled = false;

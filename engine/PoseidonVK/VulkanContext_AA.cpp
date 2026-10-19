@@ -31,7 +31,7 @@ std::string VulkanContext::ImageQualityUnavailable(const ImageQuality& quality) 
     if (!ParseAA(quality.aa, mode) || !ValidRenderScale(quality.scale)) return "Invalid AA or render scale.";
     if (IsFSR(mode))
     {
-        if (!_fsrAvailable) return "FSR 3.1.4 requires a supported build and CWR_VK_FSR=1 at startup: " + _fsrReason;
+        if (!_fsrAvailable) return "FSR 3.1.4 unavailable: " + _fsrReason;
         if (_aaColorFormat != SceneFormat) return "FSR requires linear FP16 scene color.";
         if (quality.scale != 100) return "FSR owns internal resolution; independent render scale must be 100%.";
     }

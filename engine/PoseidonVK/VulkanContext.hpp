@@ -385,7 +385,7 @@ class VulkanContext
     bool _rtGIEnabled = false;
     std::string _rtGIFailure;
     bool _rtDynamicEnabled = false;
-    std::string _rtaoReason = "restart with CWR_VK_RTAO=1 to opt into Vulkan ray-query capabilities";
+    std::string _rtaoReason = "Vulkan ray-query device has not been initialized";
     void InitRTAO();
     void RetireRTAO();
     void DrawRTAO(const std::array<float, 4>& projection, bool& ssaoHandled);
@@ -676,7 +676,7 @@ class VulkanContext
     struct FSRState;
     std::shared_ptr<FSRState> _fsr;
     bool _fsrRequested = false, _fsrAvailable = false;
-    std::string _fsrReason = "not built or runtime opt-in CWR_VK_FSR=1 absent";
+    std::string _fsrReason = "FSR 3.1.4 is not included in this build";
     VkFormat _aaColorFormat = VK_FORMAT_UNDEFINED;
     uint64_t _fsrDispatches = 0, _fsrResets = 0;
     VkRenderPass _fsrMaskPass = VK_NULL_HANDLE;

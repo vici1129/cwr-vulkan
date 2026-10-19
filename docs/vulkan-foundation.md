@@ -6,8 +6,11 @@ The unified [Video Settings](video-settings.md#vulkan-water-and-lighting) now ad
 Water Quality: Ray Traced (the corrected `d03ed0c` implementation) and independent
 Volumetric Lighting Off/On (the corrected `aadbc5e` implementation). Standard and
 Enhanced retain their four-component mappings; neither automatically enables RT
-or volumetric lighting. Initialized ray-query capability still requires the
-existing `CWR_VK_RTAO=1` startup opt-in. Unsupported saved RT components fall back
+or volumetric lighting. Supported ray-query and FSR device capabilities are now
+detected automatically on normal launches (see [Video Settings](video-settings.md)).
+The startup opt-ins described in historical implementation/validation entries
+below are superseded; explicit `=0` overrides remain useful for diagnostics and
+require restart when removed. Unsupported saved RT components fall back
 individually without erasing preferences. Water/sunlight share their existing
 bounded scene and dynamic resources until the last consumer is disabled.
 No shaders, ray counts, sample counts, new rendering systems or private SDKs are
@@ -448,8 +451,8 @@ original checkout; this is a targeted regression check, not a new full matrix.
 
 Built from public main `9d8886b` in an isolated worktree, preserving the original
 checkout's private DLSS/NGX changes. `triRTGI "on"`, `"off"`, `"status"` controls
-this default-Off, Vulkan-only experiment. Launch with `CWR_VK_RTAO=1` to opt into
-ray-query device capabilities; missing capabilities or independent MRT blending
+this default-Off, Vulkan-only experiment. Ray-query device capabilities are now
+detected automatically at startup; missing capabilities or independent MRT blending
 are reported as unsupported. Enabling GI does not select AO, RT sunlight,
 dynamic geometry, water effects, PBR or any AA mode. Resource failures disable
 GI and expose the reason. There is no persistent option or graphics-menu change.
@@ -1904,8 +1907,8 @@ sessions are not qualified by this run. Keep the feature opt-in.
 ## Optional soft RT sunlight (2026-10-12)
 
 `triSoftRTShadows "on"`, `"off"`, `"status"` controls sun-disc sampling in
-the existing hardware sunlight pass. Default **Off**, Vulkan only. Start with
-`CWR_VK_RTAO=1` on ray-query-capable hardware and explicitly enable
+the existing hardware sunlight pass. Default **Off**, Vulkan only. On
+ray-query-capable hardware, explicitly enable
 `triRTShadows "on"` first. An unsupported/missing prerequisite is reported,
 never enabled implicitly. `triSoftShadows` still independently controls CSM
 PCSS; neither soft-shadow command changes the other.
@@ -2059,8 +2062,8 @@ this is the final 1440p and missing-opt-in validation build. GL33:
 
 `triRTDynamic "on"`, `"off"`, `"status"` extends the **existing shared RT
 scene** used by `triRTAO`, `triRTShadows` and `triRTReflections`. Default **Off**;
-Vulkan, capable hardware and the existing startup opt-in `CWR_VK_RTAO=1` are
-required. Selecting dynamic geometry does not enable any of those effects.
+Vulkan and capable hardware are required; startup detects support automatically.
+Selecting dynamic geometry does not enable any of those effects.
 With all three effects disabled it performs no collection or uploads. Off
 restores the original static-only selection, instance budget and TLAS policy.
 GL33 has only the base engine's unsupported command/no-op capture hook.
@@ -2666,8 +2669,8 @@ triCloudShadows "on"       // also "off" and "status"; no RT prerequisite
 triSkyReflections "on"     // also "off" and "status"
 ```
 
-Sky reflections require the existing `triRTReflections "on"` path and its
-`CWR_VK_RTAO=1` hardware ray-query opt-in. Enabling the new control does not enable
+Sky reflections require the existing `triRTReflections "on"` path and
+automatically detected hardware ray-query support. Enabling the new control does not enable
 RT reflections implicitly; its reply/status explains an unavailable prerequisite.
 Status reports requested/active state, shared cloud position and resource fallback.
 Updates take effect on the next rendered world frame. GL33 returns `UNSUPPORTED`.
@@ -3599,8 +3602,8 @@ local-light volumes, multiple scattering, GI, RT requirement or new AA mode.
 
 ## First hardware water reflections (2026-10-12)
 
-Built on public **eebe9bcb**, default **Off**. Startup still uses
-`CWR_VK_RTAO=1`; reflections do not require RTAO or RT sunlight to be enabled.
+Built on public **eebe9bcb**, default **Off**. Startup now detects ray-query
+support automatically; reflections do not require RTAO or RT sunlight to be enabled.
 
 ```sqf
 triRTReflections "on"
@@ -3611,7 +3614,7 @@ triRTReflections "status"
 This is a Vulkan `rayQueryEXT` closest-hit implementation, not SSR. It uses the
 existing capability checks, spatial collection, mesh buffers, alpha data, BLAS
 cache and two frame-slot TLAS structures. All three effects share that scene.
-Independent MRT blending is required. Missing capabilities/startup opt-in return
+Independent MRT blending is required. Missing capabilities return
 the reason without changing ordinary rendering. Optional resource failures
 disable reflections, retain ordinary water and report the failure; retry requires
 a restart. GL33 returns the Vulkan-required reply. No private NGX code is included.
@@ -3763,7 +3766,7 @@ filter, MSAA variants and water MRT SPIR-V pass SDK validation.
 
 Built on public RTAO commit **c87d79b**, retaining the subsequent CPU-only
 transform-header fix **555f6d6**. Default **Off**, independently of RTAO/SSAO.
-Reuse the existing startup capability opt-in `CWR_VK_RTAO=1`, then:
+On automatically detected ray-query hardware, use:
 
 ```sqf
 triRTShadows "on"
@@ -3773,10 +3776,10 @@ triRTShadows "status"
 
 No new menu, persisted setting, SDK, NGX code or ray-tracing pipeline. The same
 Vulkan 1.2 ray-query/AS capability checks and initialization serve both effects;
-sunlight additionally requires independent attachment blending. Missing opt-in
-or capabilities returns `UNSUPPORTED` with the reason without changing AO/CSM.
-GL33 returns `UNSUPPORTED: RT shadows require Vulkan`. Ordinary non-opt-in Vulkan
-keeps its existing device path. Public changes contain no private NVIDIA files.
+sunlight additionally requires independent attachment blending. Missing
+capabilities returns `UNSUPPORTED` with the reason without changing AO/CSM.
+GL33 returns `UNSUPPORTED: RT shadows require Vulkan`. Unsupported Vulkan
+devices keep ordinary rendering. Public changes contain no private NVIDIA files.
 
 ### One scene, actual casters, bounded coverage
 
@@ -3982,8 +3985,8 @@ tests do not constitute hardware qualification on non-RTX devices.
 The following records the original AO milestone. Its AO geometry mask remains
 unchanged; the sunlight section above describes the later shared-scene extension.
 
-Based on public `main` **2bd25ff**. RTAO defaults **Off**. Opt into the Vulkan
-device capabilities at process startup with `CWR_VK_RTAO=1`, then use:
+Based on public `main` **2bd25ff**. RTAO defaults **Off**. With Vulkan
+device capabilities now detected automatically at process startup, use:
 
 ```sqf
 triRTAO "on"
@@ -3991,9 +3994,9 @@ triRTAO "off"
 triRTAO "status"
 ```
 
-There is no new menu or persistent setting. The environment variable enables
-capabilities, not AO. Without it the ordinary Vulkan 1.0 device path remains.
-GL33 returns `UNSUPPORTED: RTAO requires Vulkan`. A missing opt-in, extension,
+There is no new AO menu or persistent setting. Automatic capability detection
+does not enable AO. Unsupported loaders retain the Vulkan 1.0 device path.
+GL33 returns `UNSUPPORTED: RTAO requires Vulkan`. A missing extension,
 feature, queue capability, AS limit or entry point returns a reason; failed
 enablement leaves SSAO and ordinary rendering intact. RTAO can be built and run
 without FSR. With FSR enabled, its Vulkan 1.2 feature chain is merged without
@@ -4686,8 +4689,8 @@ are external build tools, not distributed runtime dependencies. Missing tools
 produce a configure warning and leave ordinary Vulkan available. FSR defaults
 OFF at build time. GL33 does not find or link the SDK.
 
-At runtime, start with `CWR_VK_FSR=1` to request the Vulkan 1.2 device path.
-Without it, the original API 1.0 device path is retained. Device checks include
+At runtime, supported FSR builds automatically request the Vulkan 1.2 device path.
+Unsupported loaders retain the original API 1.0 path. Device checks include
 compute queue support, independent blending, storage image formats/features,
 and FP16/Int16 when the SDK selects half precision. Unsupported requests return
 `UNSUPPORTED` and preserve the selected AA mode. Off/100% remains the default

@@ -26,8 +26,8 @@ choices and the validated Standard/Enhanced effect groups; GL33 retains its own
 meaningful controls and preferences. Both use Apply/OK/Cancel, display reversion
 and persistent settings. See the [video settings guide](docs/video-settings.md)
 and [graphics quality mappings](docs/graphics-quality.md).
-Ray Traced Shadows require the existing `CWR_VK_RTAO=1` startup opt-in and a
-supported, initialized Vulkan ray-query device; presets never enable RT.
+Supported Vulkan ray-query and FSR capabilities are detected at startup. Select
+Ray Traced Shadows/Water or FSR in Video Settings; presets never enable RT or FSR.
 
 This independent community fork's proposed graphics milestones are in [ROADMAP.md](ROADMAP.md). Technical notes and real-gameplay results are in [docs/vulkan-foundation.md](docs/vulkan-foundation.md). This is not an official Bohemia Interactive roadmap.
 

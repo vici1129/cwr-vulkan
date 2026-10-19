@@ -33,7 +33,7 @@ std::string VulkanContext::SetSkyReflections(std::string_view mode)
         return std::string("requested=") + (_skyReflections ? "on" : "off") +
                " active=" + (_weatherLighting.options[0] > 0 && RTReflectionsEnabled() ? "on" : "off") +
                " prerequisite=" +
-               (RTReflectionsEnabled() ? "available" : "requires triRTReflections on and ray-query hardware opt-in") +
+               (RTReflectionsEnabled() ? "available" : "requires triRTReflections on and initialized ray-query support") +
                " position=" + std::to_string(_weatherLighting.options[2]) + " fallback=" + _weatherFailure;
     if (mode != "on" && mode != "off")
         return "INVALID: triSkyReflections on, off, status";
@@ -44,7 +44,7 @@ std::string VulkanContext::SetSkyReflections(std::string_view mode)
     }
     return "OK: sky reflections " + std::string(mode) +
            (_skyReflections && !RTReflectionsEnabled()
-                ? "; inactive: requires triRTReflections on and ray-query hardware opt-in"
+                ? "; inactive: requires triRTReflections on and initialized ray-query support"
                 : "");
 }
 void VulkanContext::FailWeather(std::string_view reason)

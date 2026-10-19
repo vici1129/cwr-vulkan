@@ -3,6 +3,8 @@
 The later [final graphics-controls verification](../graphics-controls/README.md)
 adds qualified RT water and corrected volumetric lighting to this same page.
 The dated results below describe their respective implementation snapshots.
+The [automatic startup verification](../automatic-capabilities/README.md)
+supersedes the historical startup environment requirements below.
 
 Implemented from public main `e6fc59c`, using the mappings in
 [graphics-quality.md](../../graphics-quality.md). No shader/algorithm changes,
