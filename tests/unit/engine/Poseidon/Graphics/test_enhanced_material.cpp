@@ -166,6 +166,32 @@ TEST_CASE("Diffuse sky cosine sampling conserves Lambert energy and respects the
     }
 }
 
+TEST_CASE("Sky irradiance calibration preserves chroma and geometric energy loss",
+          "[Graphics][enhanced-material]")
+{
+    using namespace MaterialNormalMath;
+    const vec3 dome{.27f,.46f,.86f}, reference{.75f,.91f,1.28f};
+    const float scale=giSkyCalibration(reference,dome);
+    const auto calibrated=dome*scale;
+    REQUIRE(giSkyLuminance(calibrated)==Catch::Approx(giSkyLuminance(reference)));
+    REQUIRE(calibrated.x/calibrated.z==Catch::Approx(dome.x/dome.z));
+    REQUIRE(scale>1);
+    REQUIRE(giSkyCalibration(dome,dome)==Catch::Approx(1));
+    REQUIRE(giSkyCalibration(dome,reference)<1);
+    REQUIRE(giSkyCalibration({0,0,0},dome)==0);
+    REQUIRE(giSkyCalibration(reference,{0,0,0})==1);
+    // Visibility is applied after calibration, never normalized away.
+    REQUIRE(giSkyLuminance(calibrated*.25f)==Catch::Approx(giSkyLuminance(reference)*.25f));
+    REQUIRE(giSkyLuminance(calibrated*0)==0);
+    // A vertical surface sees half a uniform sky, not the full ambient reference.
+    REQUIRE(giSkyLuminance(calibrated*.5f)==Catch::Approx(giSkyLuminance(reference)*.5f));
+    const vec3 rho{.2f,.3f,.4f}, sun{.4f,.2f,.1f};
+    const auto outgoing=giLambertOutgoing(rho,sun,calibrated);
+    const auto withoutSun=giLambertOutgoing(rho,{0,0,0},calibrated);
+    REQUIRE((outgoing-withoutSun).x==Catch::Approx(rho.x*sun.x));
+    REQUIRE((outgoing-withoutSun).z==Catch::Approx(rho.z*sun.z));
+}
+
 TEST_CASE("Shared stock diffuse proxy bounds energy without inventing color or removing baked shading",
           "[Graphics][enhanced-material]")
 {

@@ -1,0 +1,4990 @@
+{
+  "publicBase": "ef9c3d9f694a74b9afbef69025ac2f723c7582b3",
+  "adapter": "NVIDIA GeForce RTX 4060 Ti",
+  "route": "Existing muted direct mission harness; original missions/assets, copied profiles, 1400m visibility, ordinary brightness, TAA. Running mission render-camera tests, not mission completion or player-input responsiveness.",
+  "initialWorktree": "clean",
+  "calibration": "k=Y(engine ambient E/pi)/Y(unoccluded dome-only E/pi); 1024 deterministic lookup samples, no added transport rays. Clouds/occlusion/materials/receiver orientation are not normalized. Same scalar on primary and reflected sky, not sunlight or fallback.",
+  "scenes": {
+    "malden": {
+      "mission": "01TakeTheCar.ABEL",
+      "camera": [
+        3128,
+        228.1,
+        6338,
+        -1,
+        -0.15,
+        -1
+      ],
+      "dates": {
+        "morning": [
+          1985,
+          7,
+          5,
+          9,
+          0
+        ],
+        "noon": [
+          1985,
+          7,
+          5,
+          12,
+          0
+        ],
+        "overcast": [
+          1985,
+          7,
+          5,
+          12,
+          0
+        ],
+        "dusk": [
+          1985,
+          7,
+          5,
+          17,
+          30
+        ]
+      },
+      "weatherCommands": "triCheatWeather 0, except overcast 1; fog/rain zero; legacy cloud rendering, cloud shadows on",
+      "rawRuns": {
+        "baseline": "calibration-before-malden-1080",
+        "1080": "calibration-after-malden-1080",
+        "1440": "calibration-after-malden-1440"
+      },
+      "executableSHA256": "345AD3268023B348C4D4A41FA6D8F18FFA2DDE87CCDC85DCEA58334B64E93976",
+      "baselineExecutableSHA256": "97B1DD2A48CF9739C05307F1AA81E1EBABB2C0C100C54AFBD760A2AA9D077831",
+      "validation": {
+        "1080": {
+          "presented": 16967,
+          "errors": 0,
+          "warnings": 0
+        },
+        "1440": {
+          "presented": 5862,
+          "errors": 0,
+          "warnings": 0
+        }
+      },
+      "baselineValidation": {
+        "presented": 3338,
+        "errors": 0,
+        "warnings": 0
+      },
+      "weather": {
+        "morning": {
+          "before": {
+            "counters": {
+              "bounceRays": 214709,
+              "hits": 155562,
+              "eligibleHits": 108458,
+              "rejectedMaterials": 47104,
+              "sunRays": 106616,
+              "sunBlocked": 42478,
+              "eligibleReceivers": 214849,
+              "sunVisible": 64138,
+              "backfacing": 1842,
+              "missingColor": 47054,
+              "secondarySky": {
+                "rays": 86524,
+                "blocked": 51936,
+                "visible": 34588,
+                "rejectedHemisphere": 21934
+              },
+              "primarySky": {
+                "rays": 58520,
+                "blocked": 1336,
+                "visible": 57184,
+                "belowHorizon": 627
+              }
+            },
+            "energy": null,
+            "raw": "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=15 reflectorInstances=39 completedDispatches=212 bounceRays=214709 hits=155562 eligibleHits=108458 rejectedMaterials=47104 sunRays=106616 sunBlocked=42478 eligibleReceivers=214849 dynamicHits=0 sunVisible=64138 terrain(eligible/sunlit)=65609/30583 stockPBR(eligible/sunlit)=601/471 catalog(eligible/sunlit)=42248/33084 backfacing=1842 missingColor=47054 secondarySky(rays/blocked/visible/rejectedHemisphere)=86524/51936/34588/21934 primarySky(rays/blocked/visible/belowHorizon)=58520/1336/57184/627 GPUms(trace/filter/temporal/BLAS/TLAS)=0.439296/0.109184/0.109056/6.4e-05/6.4e-05 CPUrecordMs=0.1142 temporal=on history(accepted/rejected/clamped/dynamic)=208136/6713/701/0 historyResets=1 phase=22 historyBytes=9830400 historyAllocations=2; last completed frame; one bounce, half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain"
+          },
+          "after": {
+            "counters": {
+              "bounceRays": 214917,
+              "hits": 155674,
+              "eligibleHits": 108586,
+              "rejectedMaterials": 47088,
+              "sunRays": 106801,
+              "sunBlocked": 42478,
+              "eligibleReceivers": 215051,
+              "sunVisible": 64323,
+              "backfacing": 1785,
+              "missingColor": 47050,
+              "secondarySky": {
+                "rays": 86579,
+                "blocked": 51804,
+                "visible": 34775,
+                "rejectedHemisphere": 22007
+              },
+              "primarySky": {
+                "rays": 58619,
+                "blocked": 1349,
+                "visible": 57270,
+                "belowHorizon": 624
+              }
+            },
+            "energy": {
+              "rawEpiRGB": {
+                "dome": [
+                  0.268212,
+                  0.461311,
+                  0.858996
+                ],
+                "weather": [
+                  0.50538,
+                  0.673631,
+                  1.0111
+                ],
+                "vertical": [
+                  0.292299,
+                  0.380109,
+                  0.535585
+                ],
+                "reference": [
+                  0.748414,
+                  0.911408,
+                  1.28
+                ]
+              },
+              "calibration": 2.01209,
+              "calibratedEpiRGB": {
+                "dome": [
+                  0.5396666830800001,
+                  0.9281992499900001,
+                  1.7283772616400002
+                ],
+                "weather": [
+                  1.0168700442000003,
+                  1.3554061987900001,
+                  2.0344241990000005
+                ],
+                "vertical": [
+                  0.58813189491,
+                  0.76481351781,
+                  1.07764522265
+                ]
+              },
+              "rawEpiY": {
+                "dome": 0.4489710096,
+                "weather": 0.6622260992,
+                "vertical": 0.37266596119999995,
+                "reference": 0.903367818
+              },
+              "calibratedEpiY": {
+                "dome": 0.9033700787060641,
+                "weather": 1.3324585119393282,
+                "vertical": 0.7498374538709079
+              },
+              "preCompositionSparseFrameMeans": {
+                "incoming": [
+                  0.523946,
+                  0.666704,
+                  0.936113
+                ],
+                "replacement": [
+                  0.0489324,
+                  0.0559029,
+                  0.0788371
+                ],
+                "capturedAmbient": [
+                  0.0715192,
+                  0.078697,
+                  0.111207
+                ],
+                "reflectanceFog": [
+                  0.0954948,
+                  0.086384,
+                  0.0867943
+                ],
+                "samples": 430
+              }
+            },
+            "raw": "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=15 reflectorInstances=39 completedDispatches=218 bounceRays=214917 hits=155674 eligibleHits=108586 rejectedMaterials=47088 sunRays=106801 sunBlocked=42478 eligibleReceivers=215051 dynamicHits=0 sunVisible=64323 terrain(eligible/sunlit)=65673/30754 stockPBR(eligible/sunlit)=610/470 catalog(eligible/sunlit)=42303/33099 backfacing=1785 missingColor=47050 secondarySky(rays/blocked/visible/rejectedHemisphere)=86579/51804/34775/22007 primarySky(rays/blocked/visible/belowHorizon)=58619/1349/57270/624 skyEpi(dome/weather/vertical/reference)=[0.268212,0.461311,0.858996][0.50538,0.673631,1.0111][0.292299,0.380109,0.535585][0.748414,0.911408,1.28] skyCalibration=2.01209 transportMean(incoming/replacement/capturedAmbient/reflectanceFog)=[0.523946,0.666704,0.936113][0.0489324,0.0559029,0.0788371][0.0715192,0.078697,0.111207][0.0954948,0.086384,0.0867943] transportSamples=430 GPUms(trace/filter/temporal/BLAS/TLAS)=0.574464/0.108768/0.10944/6.4e-05/6.4e-05 CPUrecordMs=0.1171 temporal=on history(accepted/rejected/clamped/dynamic)=207037/8014/663/0 historyResets=1 phase=28 historyBytes=9830400 historyAllocations=2; last completed frame; one bounce, half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain"
+          }
+        },
+        "noon": {
+          "before": {
+            "counters": {
+              "bounceRays": 214917,
+              "hits": 155674,
+              "eligibleHits": 108586,
+              "rejectedMaterials": 47088,
+              "sunRays": 84955,
+              "sunBlocked": 20921,
+              "eligibleReceivers": 215051,
+              "sunVisible": 64034,
+              "backfacing": 23631,
+              "missingColor": 47050,
+              "secondarySky": {
+                "rays": 86579,
+                "blocked": 51804,
+                "visible": 34775,
+                "rejectedHemisphere": 22007
+              },
+              "primarySky": {
+                "rays": 58619,
+                "blocked": 1349,
+                "visible": 57270,
+                "belowHorizon": 624
+              }
+            },
+            "energy": null,
+            "raw": "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=15 reflectorInstances=39 completedDispatches=560 bounceRays=214917 hits=155674 eligibleHits=108586 rejectedMaterials=47088 sunRays=84955 sunBlocked=20921 eligibleReceivers=215051 dynamicHits=0 sunVisible=64034 terrain(eligible/sunlit)=65673/48378 stockPBR(eligible/sunlit)=610/389 catalog(eligible/sunlit)=42303/15267 backfacing=23631 missingColor=47050 secondarySky(rays/blocked/visible/rejectedHemisphere)=86579/51804/34775/22007 primarySky(rays/blocked/visible/belowHorizon)=58619/1349/57270/624 GPUms(trace/filter/temporal/BLAS/TLAS)=0.429056/0.11104/0.109088/6.4e-05/6.4e-05 CPUrecordMs=0.1067 temporal=on history(accepted/rejected/clamped/dynamic)=207037/8014/659/0 historyResets=3 phase=28 historyBytes=9830400 historyAllocations=4; last completed frame; one bounce, half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain"
+          },
+          "after": {
+            "counters": {
+              "bounceRays": 214713,
+              "hits": 155532,
+              "eligibleHits": 108138,
+              "rejectedMaterials": 47394,
+              "sunRays": 84628,
+              "sunBlocked": 20882,
+              "eligibleReceivers": 214849,
+              "sunVisible": 63746,
+              "backfacing": 23510,
+              "missingColor": 47360,
+              "secondarySky": {
+                "rays": 86020,
+                "blocked": 51468,
+                "visible": 34552,
+                "rejectedHemisphere": 22118
+              },
+              "primarySky": {
+                "rays": 58501,
+                "blocked": 1325,
+                "visible": 57176,
+                "belowHorizon": 680
+              }
+            },
+            "energy": {
+              "rawEpiRGB": {
+                "dome": [
+                  0.262227,
+                  0.460884,
+                  0.864235
+                ],
+                "weather": [
+                  0.499281,
+                  0.672191,
+                  1.01476
+                ],
+                "vertical": [
+                  0.270666,
+                  0.350134,
+                  0.507314
+                ],
+                "reference": [
+                  0.748414,
+                  0.911408,
+                  1.28
+                ]
+              },
+              "calibration": 2.01748,
+              "calibratedEpiRGB": {
+                "dome": [
+                  0.5290377279599999,
+                  0.92982425232,
+                  1.7435768278
+                ],
+                "weather": [
+                  1.0072894318799999,
+                  1.35613189868,
+                  2.0472580048
+                ],
+                "vertical": [
+                  0.54606324168,
+                  0.70638834232,
+                  1.02349584872
+                ]
+              },
+              "rawEpiY": {
+                "dome": 0.44777146399999995,
+                "weather": 0.6601638157999999,
+                "vertical": 0.3445874992,
+                "reference": 0.903367818
+              },
+              "calibratedEpiY": {
+                "dome": 0.90336997319072,
+                "weather": 1.331867295100184,
+                "vertical": 0.695198387886016
+              },
+              "preCompositionSparseFrameMeans": {
+                "incoming": [
+                  0.512781,
+                  0.640878,
+                  0.887055
+                ],
+                "replacement": [
+                  0.051468,
+                  0.0582363,
+                  0.0815041
+                ],
+                "capturedAmbient": [
+                  0.0716577,
+                  0.0788779,
+                  0.111513
+                ],
+                "reflectanceFog": [
+                  0.095734,
+                  0.0864674,
+                  0.0871286
+                ],
+                "samples": 427
+              }
+            },
+            "raw": "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=15 reflectorInstances=39 completedDispatches=1258 bounceRays=214713 hits=155532 eligibleHits=108138 rejectedMaterials=47394 sunRays=84628 sunBlocked=20882 eligibleReceivers=214849 dynamicHits=0 sunVisible=63746 terrain(eligible/sunlit)=65303/48078 stockPBR(eligible/sunlit)=578/372 catalog(eligible/sunlit)=42257/15296 backfacing=23510 missingColor=47360 secondarySky(rays/blocked/visible/rejectedHemisphere)=86020/51468/34552/22118 primarySky(rays/blocked/visible/belowHorizon)=58501/1325/57176/680 skyEpi(dome/weather/vertical/reference)=[0.262227,0.460884,0.864235][0.499281,0.672191,1.01476][0.270666,0.350134,0.507314][0.748414,0.911408,1.28] skyCalibration=2.01748 transportMean(incoming/replacement/capturedAmbient/reflectanceFog)=[0.512781,0.640878,0.887055][0.051468,0.0582363,0.0815041][0.0716577,0.0788779,0.111513][0.095734,0.0864674,0.0871286] transportSamples=427 GPUms(trace/filter/temporal/BLAS/TLAS)=0.707584/0.109568/0.108928/6.4e-05/6.4e-05 CPUrecordMs=0.1216 temporal=on history(accepted/rejected/clamped/dynamic)=208136/6713/714/0 historyResets=6 phase=30 historyBytes=9830400 historyAllocations=4; last completed frame; one bounce, half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain"
+          }
+        },
+        "overcast": {
+          "before": {
+            "counters": {
+              "bounceRays": 214894,
+              "hits": 155479,
+              "eligibleHits": 108089,
+              "rejectedMaterials": 47390,
+              "sunRays": 84832,
+              "sunBlocked": 20913,
+              "eligibleReceivers": 215010,
+              "sunVisible": 63919,
+              "backfacing": 23257,
+              "missingColor": 47354,
+              "secondarySky": {
+                "rays": 86260,
+                "blocked": 51379,
+                "visible": 34881,
+                "rejectedHemisphere": 21829
+              },
+              "primarySky": {
+                "rays": 58739,
+                "blocked": 1328,
+                "visible": 57411,
+                "belowHorizon": 676
+              }
+            },
+            "energy": null,
+            "raw": "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=15 reflectorInstances=39 completedDispatches=900 bounceRays=214894 hits=155479 eligibleHits=108089 rejectedMaterials=47390 sunRays=84832 sunBlocked=20913 eligibleReceivers=215010 dynamicHits=0 sunVisible=63919 terrain(eligible/sunlit)=65407/48180 stockPBR(eligible/sunlit)=570/377 catalog(eligible/sunlit)=42112/15362 backfacing=23257 missingColor=47354 secondarySky(rays/blocked/visible/rejectedHemisphere)=86260/51379/34881/21829 primarySky(rays/blocked/visible/belowHorizon)=58739/1328/57411/676 GPUms(trace/filter/temporal/BLAS/TLAS)=0.600064/0.111168/0.109504/6.4e-05/6.4e-05 CPUrecordMs=0.1534 temporal=on history(accepted/rejected/clamped/dynamic)=207233/7777/743/0 historyResets=5 phase=23 historyBytes=9830400 historyAllocations=6; last completed frame; one bounce, half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain"
+          },
+          "after": {
+            "counters": {
+              "bounceRays": 214917,
+              "hits": 155951,
+              "eligibleHits": 108533,
+              "rejectedMaterials": 47418,
+              "sunRays": 84908,
+              "sunBlocked": 20938,
+              "eligibleReceivers": 215051,
+              "sunVisible": 63970,
+              "backfacing": 23625,
+              "missingColor": 47379,
+              "secondarySky": {
+                "rays": 86461,
+                "blocked": 51531,
+                "visible": 34930,
+                "rejectedHemisphere": 22072
+              },
+              "primarySky": {
+                "rays": 58278,
+                "blocked": 1347,
+                "visible": 56931,
+                "belowHorizon": 688
+              }
+            },
+            "energy": {
+              "rawEpiRGB": {
+                "dome": [
+                  0.429139,
+                  0.420054,
+                  0.340269
+                ],
+                "weather": [
+                  0.677772,
+                  0.734585,
+                  0.876338
+                ],
+                "vertical": [
+                  0.316991,
+                  0.339054,
+                  0.388414
+                ],
+                "reference": [
+                  0.748414,
+                  0.911408,
+                  1.28
+                ]
+              },
+              "calibration": 2.17038,
+              "calibratedEpiRGB": {
+                "dome": [
+                  0.93139470282,
+                  0.91167680052,
+                  0.7385130322200001
+                ],
+                "weather": [
+                  1.4710227933600002,
+                  1.5943285923000003,
+                  1.90198646844
+                ],
+                "vertical": [
+                  0.6879909265800002,
+                  0.7358760205200001,
+                  0.84300597732
+                ]
+              },
+              "rawEpiY": {
+                "dome": 0.41622499399999996,
+                "weather": 0.7327411228,
+                "vertical": 0.3379271982,
+                "reference": 0.903367818
+              },
+              "calibratedEpiY": {
+                "dome": 0.9033664024777199,
+                "weather": 1.5903266781026644,
+                "vertical": 0.7334304324293162
+              },
+              "preCompositionSparseFrameMeans": {
+                "incoming": [
+                  0.569952,
+                  0.631375,
+                  0.771644
+                ],
+                "replacement": [
+                  0.0549086,
+                  0.0551059,
+                  0.0670816
+                ],
+                "capturedAmbient": [
+                  0.0715192,
+                  0.078697,
+                  0.111207
+                ],
+                "reflectanceFog": [
+                  0.0954948,
+                  0.086384,
+                  0.0867943
+                ],
+                "samples": 430
+              }
+            },
+            "raw": "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=15 reflectorInstances=39 completedDispatches=2306 bounceRays=214917 hits=155951 eligibleHits=108533 rejectedMaterials=47418 sunRays=84908 sunBlocked=20938 eligibleReceivers=215051 dynamicHits=0 sunVisible=63970 terrain(eligible/sunlit)=65380/48075 stockPBR(eligible/sunlit)=597/385 catalog(eligible/sunlit)=42556/15510 backfacing=23625 missingColor=47379 secondarySky(rays/blocked/visible/rejectedHemisphere)=86461/51531/34930/22072 primarySky(rays/blocked/visible/belowHorizon)=58278/1347/56931/688 skyEpi(dome/weather/vertical/reference)=[0.429139,0.420054,0.340269][0.677772,0.734585,0.876338][0.316991,0.339054,0.388414][0.748414,0.911408,1.28] skyCalibration=2.17038 transportMean(incoming/replacement/capturedAmbient/reflectanceFog)=[0.569952,0.631375,0.771644][0.0549086,0.0551059,0.0670816][0.0715192,0.078697,0.111207][0.0954948,0.086384,0.0867943] transportSamples=430 GPUms(trace/filter/temporal/BLAS/TLAS)=0.487424/0.108896/0.111136/6.4e-05/6.4e-05 CPUrecordMs=0.1403 temporal=on history(accepted/rejected/clamped/dynamic)=207038/8013/877/0 historyResets=11 phase=4 historyBytes=9830400 historyAllocations=6; last completed frame; one bounce, half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain"
+          }
+        },
+        "dusk": {
+          "before": {
+            "counters": {
+              "bounceRays": 214779,
+              "hits": 155362,
+              "eligibleHits": 108131,
+              "rejectedMaterials": 47231,
+              "sunRays": 87294,
+              "sunBlocked": 80278,
+              "eligibleReceivers": 214901,
+              "sunVisible": 7016,
+              "backfacing": 20837,
+              "missingColor": 47194,
+              "secondarySky": {
+                "rays": 86009,
+                "blocked": 51466,
+                "visible": 34543,
+                "rejectedHemisphere": 22122
+              },
+              "primarySky": {
+                "rays": 58763,
+                "blocked": 1373,
+                "visible": 57390,
+                "belowHorizon": 654
+              }
+            },
+            "energy": null,
+            "raw": "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=15 reflectorInstances=39 completedDispatches=1230 bounceRays=214779 hits=155362 eligibleHits=108131 rejectedMaterials=47231 sunRays=87294 sunBlocked=80278 eligibleReceivers=214901 dynamicHits=0 sunVisible=7016 terrain(eligible/sunlit)=65177/2246 stockPBR(eligible/sunlit)=558/20 catalog(eligible/sunlit)=42396/4750 backfacing=20837 missingColor=47194 secondarySky(rays/blocked/visible/rejectedHemisphere)=86009/51466/34543/22122 primarySky(rays/blocked/visible/belowHorizon)=58763/1373/57390/654 GPUms(trace/filter/temporal/BLAS/TLAS)=0.406528/0.108544/0.11008/6.4e-05/6.4e-05 CPUrecordMs=0.1171 temporal=on history(accepted/rejected/clamped/dynamic)=206892/8009/811/0 historyResets=7 phase=26 historyBytes=9830400 historyAllocations=8; last completed frame; one bounce, half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain"
+          },
+          "after": {
+            "counters": {
+              "bounceRays": 214733,
+              "hits": 155142,
+              "eligibleHits": 108043,
+              "rejectedMaterials": 47099,
+              "sunRays": 87211,
+              "sunBlocked": 80172,
+              "eligibleReceivers": 214867,
+              "sunVisible": 7039,
+              "backfacing": 20832,
+              "missingColor": 47053,
+              "secondarySky": {
+                "rays": 86072,
+                "blocked": 51249,
+                "visible": 34823,
+                "rejectedHemisphere": 21971
+              },
+              "primarySky": {
+                "rays": 58936,
+                "blocked": 1348,
+                "visible": 57588,
+                "belowHorizon": 655
+              }
+            },
+            "energy": {
+              "rawEpiRGB": {
+                "dome": [
+                  0.221114,
+                  0.342987,
+                  0.619988
+                ],
+                "weather": [
+                  0.410545,
+                  0.495704,
+                  0.713903
+                ],
+                "vertical": [
+                  0.220152,
+                  0.263632,
+                  0.365805
+                ],
+                "reference": [
+                  0.176345,
+                  0.212659,
+                  0.399316
+                ]
+              },
+              "calibration": 0.64797,
+              "calibratedEpiRGB": {
+                "dome": [
+                  0.14327523858000002,
+                  0.22224528639000002,
+                  0.40173362436000004
+                ],
+                "weather": [
+                  0.26602084365,
+                  0.32120132088000003,
+                  0.46258772691
+                ],
+                "vertical": [
+                  0.14265189144,
+                  0.17082562704,
+                  0.23703066585000002
+                ]
+              },
+              "rawEpiY": {
+                "dome": 0.3370762724,
+                "weather": 0.49335316439999993,
+                "vertical": 0.26176504259999994,
+                "reference": 0.21841527899999996
+              },
+              "calibratedEpiY": {
+                "dome": 0.21841531222702804,
+                "weather": 0.31967804993626797,
+                "vertical": 0.169615894653522
+              },
+              "preCompositionSparseFrameMeans": {
+                "incoming": [
+                  0.120652,
+                  0.146369,
+                  0.229935
+                ],
+                "replacement": [
+                  0.0120882,
+                  0.0133579,
+                  0.0213574
+                ],
+                "capturedAmbient": [
+                  0.0169364,
+                  0.0184625,
+                  0.0348902
+                ],
+                "reflectanceFog": [
+                  0.096014,
+                  0.0868913,
+                  0.0873884
+                ],
+                "samples": 426
+              }
+            },
+            "raw": "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=15 reflectorInstances=39 completedDispatches=3360 bounceRays=214733 hits=155142 eligibleHits=108043 rejectedMaterials=47099 sunRays=87211 sunBlocked=80172 eligibleReceivers=214867 dynamicHits=0 sunVisible=7039 terrain(eligible/sunlit)=65065/2156 stockPBR(eligible/sunlit)=595/17 catalog(eligible/sunlit)=42383/4866 backfacing=20832 missingColor=47053 secondarySky(rays/blocked/visible/rejectedHemisphere)=86072/51249/34823/21971 primarySky(rays/blocked/visible/belowHorizon)=58936/1348/57588/655 skyEpi(dome/weather/vertical/reference)=[0.221114,0.342987,0.619988][0.410545,0.495704,0.713903][0.220152,0.263632,0.365805][0.176345,0.212659,0.399316] skyCalibration=0.64797 transportMean(incoming/replacement/capturedAmbient/reflectanceFog)=[0.120652,0.146369,0.229935][0.0120882,0.0133579,0.0213574][0.0169364,0.0184625,0.0348902][0.096014,0.0868913,0.0873884] transportSamples=426 GPUms(trace/filter/temporal/BLAS/TLAS)=0.492544/0.107712/0.110304/6.4e-05/9.6e-05 CPUrecordMs=0.1 temporal=on history(accepted/rejected/clamped/dynamic)=208436/6431/846/0 historyResets=16 phase=27 historyBytes=9830400 historyAllocations=8; last completed frame; one bounce, half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain"
+          }
+        }
+      },
+      "performance": {
+        "1080": {
+          "world": "1920x1080",
+          "AA": "TAA",
+          "order": "off/sun-only/on/on/sun-only/off",
+          "settleSeconds": 3,
+          "sampleSecondsPerInterval": 4,
+          "intervalMedianMeansMs": {
+            "off": {
+              "frame": 5.099775
+            },
+            "sun-only": {
+              "frame": 5.72245,
+              "trace": 0.665075,
+              "filter": 0.196875,
+              "temporal": 0.19637500000000002
+            },
+            "on": {
+              "frame": 5.706275,
+              "trace": 0.882925,
+              "filter": 0.1913,
+              "temporal": 0.1862
+            }
+          },
+          "totalGIFrameCostMs": 0.6064999999999996,
+          "secondarySkyTraceCostMs": 0.21785,
+          "note": "Includes calibration on all GI modes. Trace includes lookup integration, not the tiny post-trace diagnostic reduction; whole-frame cost includes both. Short differences include clock/cache variation. No heavy build concurrent with timing."
+        },
+        "1440": {
+          "world": "2560x1440",
+          "AA": "TAA",
+          "order": "off/sun-only/on/on/sun-only/off",
+          "settleSeconds": 3,
+          "sampleSecondsPerInterval": 4,
+          "intervalMedianMeansMs": {
+            "off": {
+              "frame": 4.913824999999999
+            },
+            "sun-only": {
+              "frame": 5.698925,
+              "trace": 0.6627749999999999,
+              "filter": 0.229425,
+              "temporal": 0.19677499999999998
+            },
+            "on": {
+              "frame": 5.6249,
+              "trace": 0.872975,
+              "filter": 0.2264,
+              "temporal": 0.18435
+            }
+          },
+          "totalGIFrameCostMs": 0.711075000000001,
+          "secondarySkyTraceCostMs": 0.21020000000000005,
+          "note": "Includes calibration on all GI modes. Trace includes lookup integration, not the tiny post-trace diagnostic reduction; whole-frame cost includes both. Short differences include clock/cache variation. No heavy build concurrent with timing."
+        }
+      },
+      "pixelMeasurements": {
+        "regions": [
+          {
+            "region": "shade",
+            "box": [
+              330,
+              635,
+              960,
+              735
+            ],
+            "modes": {
+              "sky-only": {
+                "RGB": [
+                  0.06735719053395016,
+                  0.07550065510816592,
+                  0.10556232821288788
+                ],
+                "Y": 0.07593980733784857,
+                "minY": 0.07586220500500682,
+                "maxY": 0.0759959105520752,
+                "samples": 6
+              },
+              "sun-only": {
+                "RGB": [
+                  0.07113179467377514,
+                  0.0782507488474614,
+                  0.10613512699926776
+                ],
+                "Y": 0.07875051129269611,
+                "minY": 0.07862128749690774,
+                "maxY": 0.07883464541852132,
+                "samples": 6
+              },
+              "no-sun": {
+                "RGB": [
+                  0.07009580983098049,
+                  0.07844371169484421,
+                  0.10834309109482725
+                ],
+                "Y": 0.07882768295126555,
+                "minY": 0.07869843499002101,
+                "maxY": 0.07890336485508916,
+                "samples": 6
+              },
+              "on": {
+                "RGB": [
+                  0.07388219667067485,
+                  0.08118843496127764,
+                  0.10890498456286002
+                ],
+                "Y": 0.08163626358192974,
+                "minY": 0.08150630558553582,
+                "maxY": 0.0817086671647472,
+                "samples": 6
+              }
+            },
+            "directSunBounceRGB": [
+              0.0037863868396943584,
+              0.0027447232664334353,
+              0.0005618934680327731
+            ],
+            "secondarySkyRGB": [
+              0.0027504019968997012,
+              0.002937686113816243,
+              0.0027698575635922568
+            ],
+            "directSunBounceY": 0.0028085806306641795,
+            "secondarySkyY": 0.0028857522892336146,
+            "sunBouncePercentVsNoSun": 3.5629369347321265,
+            "secondarySkyPercentVsSunOnly": 3.664423559750602
+          },
+          {
+            "region": "upper",
+            "box": [
+              600,
+              585,
+              900,
+              625
+            ],
+            "modes": {
+              "sky-only": {
+                "RGB": [
+                  0.04536297384768477,
+                  0.051813517062079595,
+                  0.07569278973750473
+                ],
+                "Y": 0.052166215061864946,
+                "minY": 0.0519177451636774,
+                "maxY": 0.05264686514774711,
+                "samples": 6
+              },
+              "sun-only": {
+                "RGB": [
+                  0.04801936882514315,
+                  0.05380789253099692,
+                  0.07627475345976556
+                ],
+                "Y": 0.0541993597501895,
+                "minY": 0.05404389742090595,
+                "maxY": 0.054514382429508304,
+                "samples": 6
+              },
+              "no-sun": {
+                "RGB": [
+                  0.0472606270434862,
+                  0.05389064764566538,
+                  0.07784950734517178
+                ],
+                "Y": 0.05421093493594645,
+                "minY": 0.054014061190106835,
+                "maxY": 0.05463478204858833,
+                "samples": 6
+              },
+              "on": {
+                "RGB": [
+                  0.049914148471283996,
+                  0.05587540696151966,
+                  0.0784174136163539
+                ],
+                "Y": 0.056235576286974585,
+                "minY": 0.05591698466121022,
+                "maxY": 0.056583090367588226,
+                "samples": 6
+              }
+            },
+            "directSunBounceRGB": [
+              0.002653521427797796,
+              0.001984759315854276,
+              0.0005679062711821253
+            ],
+            "secondarySkyRGB": [
+              0.0018947796461408484,
+              0.002067514430522735,
+              0.002142660156588344
+            ],
+            "directSunBounceY": 0.002024641351028139,
+            "secondarySkyY": 0.002036216536785083,
+            "sunBouncePercentVsNoSun": 3.7347471564922783,
+            "secondarySkyPercentVsSunOnly": 3.756901458191051
+          },
+          {
+            "region": "lower",
+            "box": [
+              600,
+              680,
+              900,
+              720
+            ],
+            "modes": {
+              "sky-only": {
+                "RGB": [
+                  0.05582327896810358,
+                  0.06083156648079462,
+                  0.08533863237036556
+                ],
+                "Y": 0.06153621471282353,
+                "minY": 0.06132821171701618,
+                "maxY": 0.06172700166304503,
+                "samples": 6
+              },
+              "sun-only": {
+                "RGB": [
+                  0.059298259417393195,
+                  0.0633169158902135,
+                  0.08582048702365745
+                ],
+                "Y": 0.06408730735992656,
+                "minY": 0.0638900847354918,
+                "maxY": 0.06424339633707035,
+                "samples": 6
+              },
+              "no-sun": {
+                "RGB": [
+                  0.058149954962722204,
+                  0.06329878017963819,
+                  0.08775553981226823
+                ],
+                "Y": 0.06396991798399775,
+                "minY": 0.06366999735192927,
+                "maxY": 0.06410297902901056,
+                "samples": 6
+              },
+              "on": {
+                "RGB": [
+                  0.061632670741959945,
+                  0.06577887965201533,
+                  0.08822022683558506
+                ],
+                "Y": 0.06651766090439129,
+                "minY": 0.06623542578850741,
+                "maxY": 0.0667691091352658,
+                "samples": 6
+              }
+            },
+            "directSunBounceRGB": [
+              0.003482715779237741,
+              0.002480099472377137,
+              0.000464687023316826
+            ],
+            "secondarySkyRGB": [
+              0.00233441132456675,
+              0.0024619637618018275,
+              0.0023997398119276064
+            ],
+            "directSunBounceY": 0.002547742920393547,
+            "secondarySkyY": 0.0024303535444647312,
+            "sunBouncePercentVsNoSun": 3.9827203171197936,
+            "secondarySkyPercentVsSunOnly": 3.792254105505481
+          },
+          {
+            "region": "sun",
+            "box": [
+              1250,
+              770,
+              1770,
+              870
+            ],
+            "modes": {
+              "sky-only": {
+                "RGB": [
+                  0.12904783723168423,
+                  0.1207571831522857,
+                  0.09371820086113267
+                ],
+                "Y": 0.12056756168814457,
+                "minY": 0.12040612811512483,
+                "maxY": 0.12067334719895502,
+                "samples": 6
+              },
+              "sun-only": {
+                "RGB": [
+                  0.13042079842160786,
+                  0.12179787477771949,
+                  0.09386206939206394
+                ],
+                "Y": 0.12161414319556582,
+                "minY": 0.12146206306655297,
+                "maxY": 0.12171770559933341,
+                "samples": 6
+              },
+              "no-sun": {
+                "RGB": [
+                  0.1309970932775854,
+                  0.12283496858027054,
+                  0.09568408307128898
+                ],
+                "Y": 0.12260994235717121,
+                "minY": 0.12240914914989984,
+                "maxY": 0.1226873001906384,
+                "samples": 6
+              },
+              "on": {
+                "RGB": [
+                  0.13237171843829942,
+                  0.12387553111493867,
+                  0.09582628095681947
+                ],
+                "Y": 0.12365666467846895,
+                "minY": 0.12352163830249134,
+                "maxY": 0.12377801998348047,
+                "samples": 6
+              }
+            },
+            "directSunBounceRGB": [
+              0.0013746251607140159,
+              0.001040562534668124,
+              0.00014219788553049284
+            ],
+            "secondarySkyRGB": [
+              0.0019509200166915597,
+              0.0020776563372191803,
+              0.0019642115647555275
+            ],
+            "directSunBounceY": 0.0010467223212977435,
+            "secondarySkyY": 0.0020425214829031322,
+            "sunBouncePercentVsNoSun": 0.8537010141058295,
+            "secondarySkyPercentVsSunOnly": 1.679509824460618
+          },
+          {
+            "region": "control",
+            "box": [
+              800,
+              465,
+              1010,
+              510
+            ],
+            "modes": {
+              "sky-only": {
+                "RGB": [
+                  0.13203323666709546,
+                  0.13980094513717017,
+                  0.15277678138506373
+                ],
+                "Y": 0.13908638569353018,
+                "minY": 0.13759201259150233,
+                "maxY": 0.141893647522651,
+                "samples": 6
+              },
+              "sun-only": {
+                "RGB": [
+                  0.13233084915128826,
+                  0.14012085833503488,
+                  0.15324259240542898
+                ],
+                "Y": 0.1394120915824528,
+                "minY": 0.1387333450813561,
+                "maxY": 0.14063158792616598,
+                "samples": 6
+              },
+              "no-sun": {
+                "RGB": [
+                  0.13235089810123776,
+                  0.1401309267423078,
+                  0.15321391932148282
+                ],
+                "Y": 0.13942148471743274,
+                "minY": 0.13873416108640454,
+                "maxY": 0.14189369053208062,
+                "samples": 6
+              },
+              "on": {
+                "RGB": [
+                  0.1329224522178778,
+                  0.14073444192669754,
+                  0.15384330492088583
+                ],
+                "Y": 0.14002007282278284,
+                "minY": 0.13873462955804022,
+                "maxY": 0.14189399427932184,
+                "samples": 6
+              }
+            },
+            "directSunBounceRGB": [
+              0.0005715541166400329,
+              0.0006035151843897524,
+              0.0006293855994030095
+            ],
+            "secondarySkyRGB": [
+              0.0005916030665895355,
+              0.0006135835916626642,
+              0.0006007125154568471
+            ],
+            "directSunBounceY": 0.0005985881053501192,
+            "secondarySkyY": 0.000607981240330057,
+            "sunBouncePercentVsNoSun": 0.42933706133117516,
+            "secondarySkyPercentVsSunOnly": 0.43610366463118255
+          }
+        ],
+        "weather": {
+          "morning": {
+            "shade": {
+              "off": {
+                "RGB": [
+                  0.10071941398689754,
+                  0.1092970052556785,
+                  0.1508472919178867
+                ],
+                "Y": 0.1104733400489471
+              },
+              "old": {
+                "RGB": [
+                  0.04845151579250839,
+                  0.05243119891106264,
+                  0.06899896755789363
+                ],
+                "Y": 0.0527813111763592
+              },
+              "new": {
+                "RGB": [
+                  0.07389593949149523,
+                  0.08120546765996679,
+                  0.10892871678956335
+                ],
+                "Y": 0.08165308055850662
+              },
+              "sun-only": {
+                "RGB": [
+                  0.07116891718963095,
+                  0.07829961103146123,
+                  0.10621251508767808
+                ],
+                "Y": 0.07879893719354697
+              },
+              "no-sun": {
+                "RGB": [
+                  0.07000765259389741,
+                  0.07833612461915061,
+                  0.10819304175857178
+                ],
+                "Y": 0.07872116088404799
+              },
+              "sky-only": {
+                "RGB": [
+                  0.06728940239117236,
+                  0.075406993111128,
+                  0.10543530783552887
+                ],
+                "Y": 0.07584923764716717
+              },
+              "newVsOldPercent": 54.700743006701025,
+              "newVsOffPercent": -26.087976952331825,
+              "directSunBounceRGB": [
+                0.00388828689759782,
+                0.00286934304081618,
+                0.0007356750309915755
+              ],
+              "secondarySkyRGB": [
+                0.002727022301864279,
+                0.0029058566285055654,
+                0.0027162017018852735
+              ],
+              "directSunBounceY": 0.0029319196744586203,
+              "secondarySkyY": 0.0028541433649596428
+            },
+            "upper": {
+              "off": {
+                "RGB": [
+                  0.06958374665236951,
+                  0.07685323142331296,
+                  0.11112575146516959
+                ],
+                "Y": 0.07778221490803243
+              },
+              "old": {
+                "RGB": [
+                  0.03325690099748162,
+                  0.03656141381533982,
+                  0.05000323639425909
+                ],
+                "Y": 0.036829373980461134
+              },
+              "new": {
+                "RGB": [
+                  0.04981639802159571,
+                  0.055779768513888085,
+                  0.07827492632830421
+                ],
+                "Y": 0.05613610634142757
+              },
+              "sun-only": {
+                "RGB": [
+                  0.04789504421349025,
+                  0.05366853236340808,
+                  0.07607715851704329
+                ],
+                "Y": 0.05405899159102801
+              },
+              "no-sun": {
+                "RGB": [
+                  0.04758620037471424,
+                  0.05424977874247737,
+                  0.07831349649892942
+                ],
+                "Y": 0.05457050240350676
+              },
+              "sky-only": {
+                "RGB": [
+                  0.0457392817700306,
+                  0.05220272530133641,
+                  0.07621187471337251
+                ],
+                "Y": 0.0525620577941298
+              },
+              "newVsOldPercent": 52.42210299639935,
+              "newVsOffPercent": -27.8291233956228,
+              "directSunBounceRGB": [
+                0.0022301976468814683,
+                0.0015299897714107155,
+                -3.8570170625210065e-05
+              ],
+              "secondarySkyRGB": [
+                0.0019213538081054582,
+                0.002111236150480006,
+                0.002197767811260923
+              ],
+              "directSunBounceY": 0.0015656039379208036,
+              "secondarySkyY": 0.002077114750399559
+            },
+            "lower": {
+              "off": {
+                "RGB": [
+                  0.08659866634890866,
+                  0.09170945032076165,
+                  0.12732594899095173
+                ],
+                "Y": 0.09319440885233342
+              },
+              "old": {
+                "RGB": [
+                  0.040595849096207295,
+                  0.042518776575118794,
+                  0.055366888532409425
+                ],
+                "Y": 0.04303759587641859
+              },
+              "new": {
+                "RGB": [
+                  0.0616471801309049,
+                  0.0657929060226861,
+                  0.08823763887624107
+                ],
+                "Y": 0.06653203441012008
+              },
+              "sun-only": {
+                "RGB": [
+                  0.059311278206961436,
+                  0.06332049412017696,
+                  0.08584873344934825
+                ],
+                "Y": 0.06409467369659351
+              },
+              "no-sun": {
+                "RGB": [
+                  0.05790594992144421,
+                  0.06300747462436125,
+                  0.08728952775842504
+                ],
+                "Y": 0.06367605470880049
+              },
+              "sky-only": {
+                "RGB": [
+                  0.05564158646038157,
+                  0.06061381558646617,
+                  0.0849908484151657
+                ],
+                "Y": 0.06131674144449269
+              },
+              "newVsOldPercent": 54.59049943487828,
+              "newVsOffPercent": -28.60941420258364,
+              "directSunBounceRGB": [
+                0.00374123020946069,
+                0.00278543139832485,
+                0.0009481111178160362
+              ],
+              "secondarySkyRGB": [
+                0.0023359019239434647,
+                0.0024724119025091446,
+                0.0023889054268928234
+              ],
+              "directSunBounceY": 0.0028559797013195934,
+              "secondarySkyY": 0.0024373607135265824
+            },
+            "sun": {
+              "off": {
+                "RGB": [
+                  0.15634792932119776,
+                  0.14677964262859544,
+                  0.12684885366281218
+                ],
+                "Y": 0.14737485741611314
+              },
+              "old": {
+                "RGB": [
+                  0.11821674042407697,
+                  0.10667789192959398,
+                  0.0714987183952466
+                ],
+                "Y": 0.10659111479034117
+              },
+              "new": {
+                "RGB": [
+                  0.13242052196648615,
+                  0.1239052023008374,
+                  0.09584410046620163
+                ],
+                "Y": 0.12368954770929362
+              },
+              "sun-only": {
+                "RGB": [
+                  0.1304671276522115,
+                  0.12183835543797321,
+                  0.09389594790971677
+                ],
+                "Y": 0.12165539058718015
+              },
+              "no-sun": {
+                "RGB": [
+                  0.13084256355803572,
+                  0.12270663030696073,
+                  0.09559032214204896
+                ],
+                "Y": 0.12247853226663265
+              },
+              "sky-only": {
+                "RGB": [
+                  0.12886216967195696,
+                  0.12062054602352934,
+                  0.09363692717863366
+                ],
+                "Y": 0.12042449793058357
+              },
+              "newVsOldPercent": 16.0411427843532,
+              "newVsOffPercent": -16.07147251714993,
+              "directSunBounceRGB": [
+                0.0015779584084504306,
+                0.001198571993876671,
+                0.0002537783241526731
+              ],
+              "secondarySkyRGB": [
+                0.001953394314274659,
+                0.002066846862864194,
+                0.0019481525564848667
+              ],
+              "directSunBounceY": 0.0012110154426609795,
+              "secondarySkyY": 0.0020341571221134712
+            },
+            "control": {
+              "off": {
+                "RGB": [
+                  0.1320269121177184,
+                  0.13972506413279467,
+                  0.1524742838242543
+                ],
+                "Y": 0.13900893067611284
+              },
+              "old": {
+                "RGB": [
+                  0.13470666045805807,
+                  0.14261335280026538,
+                  0.15592776448681014
+                ],
+                "Y": 0.14189369053208062
+              },
+              "new": {
+                "RGB": [
+                  0.13338830366860757,
+                  0.14115011214979287,
+                  0.15399458412373182
+                ],
+                "Y": 0.14042732254321125
+              },
+              "sun-only": {
+                "RGB": [
+                  0.13169761490315085,
+                  0.13943852073714152,
+                  0.15248722804353673
+                ],
+                "Y": 0.13873492082435684
+              },
+              "no-sun": {
+                "RGB": [
+                  0.13343119668088516,
+                  0.14134568136869624,
+                  0.1547598473327329
+                ],
+                "Y": 0.14063156470667104
+              },
+              "sky-only": {
+                "RGB": [
+                  0.13343119668088516,
+                  0.14134568136869624,
+                  0.1547598473327329
+                ],
+                "Y": 0.14063156470667104
+              },
+              "newVsOldPercent": -1.0334271970590891,
+              "newVsOffPercent": 1.020360246064489,
+              "directSunBounceRGB": [
+                -4.289301227758391e-05,
+                -0.0001955692189033742,
+                -0.0007652632090010825
+              ],
+              "secondarySkyRGB": [
+                0.0016906887654567215,
+                0.001711591412651342,
+                0.001507356080195088
+              ],
+              "directSunBounceY": -0.0002042421634597857,
+              "secondarySkyY": 0.001692401718854424
+            }
+          },
+          "noon": {
+            "shade": {
+              "off": {
+                "RGB": [
+                  0.09989565622373268,
+                  0.10859727940882415,
+                  0.1504833251482726
+                ],
+                "Y": 0.10977148682206186
+              },
+              "old": {
+                "RGB": [
+                  0.04908720747712242,
+                  0.052519055202159104,
+                  0.06850071528241694
+                ],
+                "Y": 0.05294332023361092
+              },
+              "new": {
+                "RGB": [
+                  0.07398267854509989,
+                  0.08065970624890277,
+                  0.10786451665098588
+                ],
+                "Y": 0.08120435747010468
+              },
+              "sun-only": {
+                "RGB": [
+                  0.07134476010961853,
+                  0.0778157465961152,
+                  0.10523920497862435
+                ],
+                "Y": 0.07841998856430317
+              },
+              "no-sun": {
+                "RGB": [
+                  0.06876512057526024,
+                  0.07706120973611902,
+                  0.10743392227426697
+                ],
+                "Y": 0.07749037102577472
+              },
+              "sky-only": {
+                "RGB": [
+                  0.06591474164912822,
+                  0.07393084742550171,
+                  0.1043952088284377
+                ],
+                "Y": 0.07442615023073669
+              },
+              "newVsOldPercent": 53.379797700243834,
+              "newVsOffPercent": -26.024180029796007,
+              "directSunBounceRGB": [
+                0.005217557969839651,
+                0.0035984965127837526,
+                0.00043059437671891243
+              ],
+              "secondarySkyRGB": [
+                0.0026379184354813623,
+                0.002843959652787567,
+                0.0026253116723615327
+              ],
+              "directSunBounceY": 0.0037139864443299546,
+              "secondarySkyY": 0.002784368905801508
+            },
+            "upper": {
+              "off": {
+                "RGB": [
+                  0.06876901798396527,
+                  0.07621050377052993,
+                  0.11135076999047268
+                ],
+                "Y": 0.07716557111338615
+              },
+              "old": {
+                "RGB": [
+                  0.03218843074450159,
+                  0.03524695075765494,
+                  0.04866552250593296
+                ],
+                "Y": 0.03556553028308421
+              },
+              "new": {
+                "RGB": [
+                  0.04921399203848578,
+                  0.05489938547930178,
+                  0.07762496120188174
+                ],
+                "Y": 0.05533145740095457
+              },
+              "sun-only": {
+                "RGB": [
+                  0.04704753791300866,
+                  0.05255715655359226,
+                  0.07521766721770165
+                ],
+                "Y": 0.05302190050055288
+              },
+              "no-sun": {
+                "RGB": [
+                  0.04531317486131792,
+                  0.05196077652180275,
+                  0.07660963567484469
+                ],
+                "Y": 0.052327144039633296
+              },
+              "sky-only": {
+                "RGB": [
+                  0.04413586448084408,
+                  0.05062565856586073,
+                  0.07536290820597649
+                ],
+                "Y": 0.05103195776740255
+              },
+              "newVsOldPercent": 55.576078749686175,
+              "newVsOffPercent": -28.295149504367433,
+              "directSunBounceRGB": [
+                0.0039008171771678646,
+                0.0029386089574990337,
+                0.0010153255270370504
+              ],
+              "secondarySkyRGB": [
+                0.00216645412547712,
+                0.0023422289257095177,
+                0.0024072939841800894
+              ],
+              "directSunBounceY": 0.0030043133613212717,
+              "secondarySkyY": 0.002309556900401685
+            },
+            "lower": {
+              "off": {
+                "RGB": [
+                  0.08462295527149792,
+                  0.09005381701578273,
+                  0.1264181947424928
+                ],
+                "Y": 0.09152472388081626
+              },
+              "old": {
+                "RGB": [
+                  0.03990708584483993,
+                  0.04164665042497479,
+                  0.054843171522776006
+                ],
+                "Y": 0.04222960781849937
+              },
+              "new": {
+                "RGB": [
+                  0.0602072727734509,
+                  0.06408172261999691,
+                  0.0867818568567803
+                ],
+                "Y": 0.06489696427451698
+              },
+              "sun-only": {
+                "RGB": [
+                  0.05812283332598102,
+                  0.06185766693814163,
+                  0.08474064404537593
+                ],
+                "Y": 0.0627157922593386
+              },
+              "no-sun": {
+                "RGB": [
+                  0.05595227378878609,
+                  0.061268764233955796,
+                  0.08676023758482787
+                ],
+                "Y": 0.061978962741245675
+              },
+              "sky-only": {
+                "RGB": [
+                  0.05335342326270705,
+                  0.05845064786258778,
+                  0.08376976760547772
+                ],
+                "Y": 0.05919501835808979
+              },
+              "newVsOldPercent": 53.67645504414986,
+              "newVsOffPercent": -29.093515366376867,
+              "directSunBounceRGB": [
+                0.004254998984664811,
+                0.002812958386041113,
+                2.1619271952433294e-05
+              ],
+              "secondarySkyRGB": [
+                0.002084439447469881,
+                0.002224055681855276,
+                0.002041212811404375
+              ],
+              "directSunBounceY": 0.0029180015332713086,
+              "secondarySkyY": 0.002181172015178386
+            },
+            "sun": {
+              "off": {
+                "RGB": [
+                  0.07512158786601009,
+                  0.08072457036269223,
+                  0.10713204925941137
+                ],
+                "Y": 0.08143999626024073
+              },
+              "old": {
+                "RGB": [
+                  0.04056246459839761,
+                  0.04257159415924917,
+                  0.05113673771397122
+                ],
+                "Y": 0.042762856579263056
+              },
+              "new": {
+                "RGB": [
+                  0.05084931706783853,
+                  0.055943773046251595,
+                  0.0730089664540111
+                ],
+                "Y": 0.05609279866928121
+              },
+              "sun-only": {
+                "RGB": [
+                  0.048919678550286096,
+                  0.05385576221577215,
+                  0.07106975939004516
+                ],
+                "Y": 0.05404920142447232
+              },
+              "no-sun": {
+                "RGB": [
+                  0.047284731640722985,
+                  0.05346929818604432,
+                  0.07273137377821899
+                ],
+                "Y": 0.05354518119626401
+              },
+              "sky-only": {
+                "RGB": [
+                  0.04514755217882971,
+                  0.05120327909577924,
+                  0.07052352000574612
+                ],
+                "Y": 0.05131075294693538
+              },
+              "newVsOldPercent": 31.17177652833003,
+              "newVsOffPercent": -31.12377057332222,
+              "directSunBounceRGB": [
+                0.0035645854271155464,
+                0.0024744748602072777,
+                0.0002775926757921099
+              ],
+              "secondarySkyRGB": [
+                0.0019296385175524358,
+                0.0020880108304794434,
+                0.001939207063965942
+              ],
+              "directSunBounceY": 0.0025476174730172003,
+              "secondarySkyY": 0.002043597244808887
+            },
+            "control": {
+              "off": {
+                "RGB": [
+                  0.04480594385233027,
+                  0.05257402621093141,
+                  0.06615945454962543
+                ],
+                "Y": 0.05190339982754651
+              },
+              "old": {
+                "RGB": [
+                  0.044247411221967514,
+                  0.051904150759589596,
+                  0.06525604080574446
+                ],
+                "Y": 0.05124033439522352
+              },
+              "new": {
+                "RGB": [
+                  0.04538525592296011,
+                  0.05320866211275294,
+                  0.06685705566579044
+                ],
+                "Y": 0.05253081997133229
+              },
+              "sun-only": {
+                "RGB": [
+                  0.045026203176628594,
+                  0.05275591652666844,
+                  0.06619851697058961
+                ],
+                "Y": 0.05208313522050108
+              },
+              "no-sun": {
+                "RGB": [
+                  0.0442478007199956,
+                  0.05190399426414502,
+                  0.0652557183008076
+                ],
+                "Y": 0.051240281992105896
+              },
+              "sky-only": {
+                "RGB": [
+                  0.045369418383906734,
+                  0.053223219323228814,
+                  0.06691058636050655
+                ],
+                "Y": 0.05254172914362039
+              },
+              "newVsOldPercent": 2.51849561744677,
+              "newVsOffPercent": 1.2088228244593546,
+              "directSunBounceRGB": [
+                0.0011374552029645088,
+                0.0013046678486079225,
+                0.00160133736498283
+              ],
+              "secondarySkyRGB": [
+                0.000359052746331516,
+                0.00045274558608450477,
+                0.0006585386952008276
+              ],
+              "directSunBounceY": 0.001290537979226401,
+              "secondarySkyY": 0.0004476847508312179
+            }
+          },
+          "overcast": {
+            "shade": {
+              "off": {
+                "RGB": [
+                  0.09998440722756473,
+                  0.10868999508571216,
+                  0.15060239255572838
+                ],
+                "Y": 0.10986526220440518
+              },
+              "old": {
+                "RGB": [
+                  0.050912347045566374,
+                  0.051405890666893536,
+                  0.06418108995213861
+                ],
+                "Y": 0.05222333268139408
+              },
+              "new": {
+                "RGB": [
+                  0.08869419683113987,
+                  0.08792354219763696,
+                  0.10710055571451256
+                ],
+                "Y": 0.0894719637486381
+              },
+              "sun-only": {
+                "RGB": [
+                  0.0843356132364615,
+                  0.08416073529595523,
+                  0.10434901565833489
+                ],
+                "Y": 0.08565550818827068
+              },
+              "no-sun": {
+                "RGB": [
+                  0.08828790746426751,
+                  0.08761039277644828,
+                  0.10689220933261002
+                ],
+                "Y": 0.08914657955443352
+              },
+              "sky-only": {
+                "RGB": [
+                  0.08409533090259183,
+                  0.08403002230284974,
+                  0.10435322747128283
+                ],
+                "Y": 0.08551124232431577
+              },
+              "newVsOldPercent": 71.32564919686718,
+              "newVsOffPercent": -18.56209874402811,
+              "directSunBounceRGB": [
+                0.00040628936687235606,
+                0.00031314942118867983,
+                0.00020834638190253552
+              ],
+              "secondarySkyRGB": [
+                0.004358583594678361,
+                0.003762806901681723,
+                0.0027515400561776704
+              ],
+              "directSunBounceY": 0.00032538419420456976,
+              "secondarySkyY": 0.0038164555603674155
+            },
+            "upper": {
+              "off": {
+                "RGB": [
+                  0.06862425188946632,
+                  0.0760735184177803,
+                  0.11121060556499548
+                ],
+                "Y": 0.07702670204588968
+              },
+              "old": {
+                "RGB": [
+                  0.03373625159449221,
+                  0.03475260075259276,
+                  0.04561775142199226
+                ],
+                "Y": 0.035320988799911225
+              },
+              "new": {
+                "RGB": [
+                  0.05792936304715963,
+                  0.05865299256575476,
+                  0.07523988459437206
+                ],
+                "Y": 0.0596967225345676
+              },
+              "sun-only": {
+                "RGB": [
+                  0.054886045764580935,
+                  0.05594715799590834,
+                  0.07301189016373566
+                ],
+                "Y": 0.05695363919804527
+              },
+              "no-sun": {
+                "RGB": [
+                  0.05808763934767331,
+                  0.05881107706309626,
+                  0.07548477833038568
+                ],
+                "Y": 0.05986111543629563
+              },
+              "sky-only": {
+                "RGB": [
+                  0.054765468248930534,
+                  0.05588127041079075,
+                  0.07303332938246043
+                ],
+                "Y": 0.05688242952893382
+              },
+              "newVsOldPercent": 69.01203664694017,
+              "newVsOffPercent": -22.498664814959255,
+              "directSunBounceRGB": [
+                -0.00015827630051368224,
+                -0.0001580844973415041,
+                -0.0002448937360136211
+              ],
+              "secondarySkyRGB": [
+                0.0030433172825786933,
+                0.0027058345698464173,
+                0.0022279944306363986
+              ],
+              "directSunBounceY": -0.000164392901728036,
+              "secondarySkyY": 0.002743083336522336
+            },
+            "lower": {
+              "off": {
+                "RGB": [
+                  0.08483113792668935,
+                  0.09026179637433819,
+                  0.12672424324015538
+                ],
+                "Y": 0.09173982705208003
+              },
+              "old": {
+                "RGB": [
+                  0.04157786203188132,
+                  0.04101617072572522,
+                  0.05184896651494376
+                ],
+                "Y": 0.04191771415339558
+              },
+              "new": {
+                "RGB": [
+                  0.07344482689271555,
+                  0.07122401863882423,
+                  0.08802312440637028
+                ],
+                "Y": 0.07290905791001835
+              },
+              "sun-only": {
+                "RGB": [
+                  0.06989582496746374,
+                  0.06825565671761631,
+                  0.08589617606217949
+                ],
+                "Y": 0.06987800198421133
+              },
+              "no-sun": {
+                "RGB": [
+                  0.07289436041204767,
+                  0.07075792950075505,
+                  0.0875938693468378
+                ],
+                "Y": 0.07242768956938303
+              },
+              "sky-only": {
+                "RGB": [
+                  0.06957836787501878,
+                  0.06802754792902686,
+                  0.0857391634538381
+                ],
+                "Y": 0.06963603089043612
+              },
+              "newVsOldPercent": 73.93376376204972,
+              "newVsOffPercent": -20.526274952940117,
+              "directSunBounceRGB": [
+                0.00055046648066788,
+                0.00046608913806918395,
+                0.00042925505953247955
+              ],
+              "secondarySkyRGB": [
+                0.003549001925251802,
+                0.002968361921207918,
+                0.0021269483441907905
+              ],
+              "directSunBounceY": 0.00048136834063531664,
+              "secondarySkyY": 0.003031055925807011
+            },
+            "sun": {
+              "off": {
+                "RGB": [
+                  0.0672618344125485,
+                  0.07427515531650278,
+                  0.10528667149903119
+                ],
+                "Y": 0.07502315476070065
+              },
+              "old": {
+                "RGB": [
+                  0.03296334099173483,
+                  0.03411145880068651,
+                  0.04381794873402513
+                ],
+                "Y": 0.034568177527690425
+              },
+              "new": {
+                "RGB": [
+                  0.04931335014751718,
+                  0.04976626570465099,
+                  0.06122890711528273
+                ],
+                "Y": 0.05049757856705195
+              },
+              "sun-only": {
+                "RGB": [
+                  0.04615944149504232,
+                  0.04697900805208268,
+                  0.05909815620486522
+                ],
+                "Y": 0.0476797706986868
+              },
+              "no-sun": {
+                "RGB": [
+                  0.04900681995779,
+                  0.049538640892186236,
+                  0.06108815594414589
+                ],
+                "Y": 0.050259450748285084
+              },
+              "sky-only": {
+                "RGB": [
+                  0.045998333773484126,
+                  0.04688662916327573,
+                  0.05908193411564743
+                ],
+                "Y": 0.04757827858096727
+              },
+              "newVsOldPercent": 46.08111326262851,
+              "newVsOffPercent": -32.69067566123722,
+              "directSunBounceRGB": [
+                0.0003065301897271777,
+                0.00022762481246475091,
+                0.00014075117113683533
+              ],
+              "secondarySkyRGB": [
+                0.003153908652474856,
+                0.0027872576525683063,
+                0.002130750910417506
+              ],
+              "directSunBounceY": 0.00023812781876686733,
+              "secondarySkyY": 0.002817807868365151
+            },
+            "control": {
+              "off": {
+                "RGB": [
+                  0.04184838645523217,
+                  0.051375038891974784,
+                  0.06622312202249292
+                ],
+                "Y": 0.05042170418594671
+              },
+              "old": {
+                "RGB": [
+                  0.04220469776345486,
+                  0.05183121134885449,
+                  0.06687400455090568
+                ],
+                "Y": 0.05087070422978662
+              },
+              "new": {
+                "RGB": [
+                  0.04136103665725118,
+                  0.05077901844973534,
+                  0.06546417066630329
+                ],
+                "Y": 0.049837023510689415
+              },
+              "sun-only": {
+                "RGB": [
+                  0.04073922208716855,
+                  0.05001520445467184,
+                  0.06455746575324163
+                ],
+                "Y": 0.049093081869097374
+              },
+              "no-sun": {
+                "RGB": [
+                  0.04125472782695864,
+                  0.050657885250679054,
+                  0.06544584836660254
+                ],
+                "Y": 0.04972646491936577
+              },
+              "sky-only": {
+                "RGB": [
+                  0.04073935277925721,
+                  0.05001415091869285,
+                  0.06455746575324163
+                ],
+                "Y": 0.049092356165303254
+              },
+              "newVsOldPercent": -2.0319764287673237,
+              "newVsOffPercent": -1.1595813443771918,
+              "directSunBounceRGB": [
+                0.00010630883029254246,
+                0.00012113319905628778,
+                1.83222997007515e-05
+              ],
+              "secondarySkyRGB": [
+                0.0006218145700826322,
+                0.000763813995063499,
+                0.0009067049130616622
+              ],
+              "directSunBounceY": 0.0001105585913236458,
+              "secondarySkyY": 0.0007439416415920341
+            }
+          },
+          "dusk": {
+            "shade": {
+              "off": {
+                "RGB": [
+                  0.023798492732762164,
+                  0.025525742903087238,
+                  0.04702756404113982
+                ],
+                "Y": 0.026710961003043522
+              },
+              "old": {
+                "RGB": [
+                  0.025045002357026797,
+                  0.026171858740492892,
+                  0.037098545775202434
+                ],
+                "Y": 0.02672119587727403
+              },
+              "new": {
+                "RGB": [
+                  0.018133286412153744,
+                  0.018910024912415408,
+                  0.027438591083007752
+                ],
+                "Y": 0.019360652784776545
+              },
+              "sun-only": {
+                "RGB": [
+                  0.017459479125166433,
+                  0.018260695665799513,
+                  0.02685380956259079
+                ],
+                "Y": 0.01871077985260925
+              },
+              "no-sun": {
+                "RGB": [
+                  0.018025234809766463,
+                  0.018830856865265644,
+                  0.027394710951245932
+                ],
+                "Y": 0.019277891881274295
+              },
+              "sky-only": {
+                "RGB": [
+                  0.017389072026055084,
+                  0.018222241127116668,
+                  0.026859121020225328
+                ],
+                "Y": 0.01866869210451342
+              },
+              "newVsOldPercent": -27.545709878791445,
+              "newVsOffPercent": -27.51794747268532,
+              "directSunBounceRGB": [
+                0.00010805160238728032,
+                7.916804714976425e-05,
+                4.388013176181982e-05
+              ],
+              "secondarySkyRGB": [
+                0.0006738072869873109,
+                0.0006493292466158949,
+                0.0005847815204169625
+              ],
+              "directSunBounceY": 8.276090350225058e-05,
+              "secondarySkyY": 0.000649872932167295
+            },
+            "upper": {
+              "off": {
+                "RGB": [
+                  0.016737298979564372,
+                  0.01815050850491191,
+                  0.03462036340972556
+                ],
+                "Y": 0.019039183683950568
+              },
+              "old": {
+                "RGB": [
+                  0.017387382055030345,
+                  0.018432254216491018,
+                  0.027046519468897676
+                ],
+                "Y": 0.01883206434618824
+              },
+              "new": {
+                "RGB": [
+                  0.012577687320420698,
+                  0.013291963263075201,
+                  0.01982988159510721
+                ],
+                "Y": 0.013612145901239565
+              },
+              "sun-only": {
+                "RGB": [
+                  0.012112762131183468,
+                  0.012824559470943261,
+                  0.01935546321551427
+                ],
+                "Y": 0.013144762606868355
+              },
+              "no-sun": {
+                "RGB": [
+                  0.012607281456354775,
+                  0.013340518764533254,
+                  0.019940168433300553
+                ],
+                "Y": 0.013661127218899506
+              },
+              "sky-only": {
+                "RGB": [
+                  0.0120680858809593,
+                  0.012797170667587253,
+                  0.01935285817439442
+                ],
+                "Y": 0.013115487879941627
+              },
+              "newVsOldPercent": -27.71824877502199,
+              "newVsOffPercent": -28.504571796772073,
+              "directSunBounceRGB": [
+                -2.9594135934077337e-05,
+                -4.855550145805264e-05,
+                -0.00011028683819334223
+              ],
+              "secondarySkyRGB": [
+                0.00046492518923722977,
+                0.0004674037921319398,
+                0.00047441837959294117
+              ],
+              "directSunBounceY": -4.89813176599434e-05,
+              "secondarySkyY": 0.0004673832943712087
+            },
+            "lower": {
+              "off": {
+                "RGB": [
+                  0.020494112263355884,
+                  0.021410936667741774,
+                  0.03967815661886494
+                ],
+                "Y": 0.022534913079840426
+              },
+              "old": {
+                "RGB": [
+                  0.02056587719692822,
+                  0.020894661814298807,
+                  0.0297642361553483
+                ],
+                "Y": 0.021465145472069593
+              },
+              "new": {
+                "RGB": [
+                  0.014915210514635869,
+                  0.015101537262201859,
+                  0.02197920161379877
+                ],
+                "Y": 0.015558491561854626
+              },
+              "sun-only": {
+                "RGB": [
+                  0.014338751638935597,
+                  0.01455292379807954,
+                  0.021461327708009164
+                ],
+                "Y": 0.015006177559342455
+              },
+              "no-sun": {
+                "RGB": [
+                  0.014785228854369196,
+                  0.014993703501439993,
+                  0.021870147000479248
+                ],
+                "Y": 0.015445861012103376
+              },
+              "sky-only": {
+                "RGB": [
+                  0.014286559414391472,
+                  0.014535081226768956,
+                  0.021487082759527553
+                ],
+                "Y": 0.014984180000122672
+              },
+              "newVsOldPercent": -27.51741849548932,
+              "newVsOffPercent": -30.95828012856574,
+              "directSunBounceRGB": [
+                0.00012998166026667243,
+                0.00010783376076186658,
+                0.00010905461331952096
+              ],
+              "secondarySkyRGB": [
+                0.0005764588757002712,
+                0.0005486134641223186,
+                0.0005178739057896051
+              ],
+              "directSunBounceY": 0.00011263054975125095,
+              "secondarySkyY": 0.0005523140025121693
+            },
+            "sun": {
+              "off": {
+                "RGB": [
+                  0.015750608986497237,
+                  0.017259863085034747,
+                  0.03281310078457076
+                ],
+                "Y": 0.01806193942559217
+              },
+              "old": {
+                "RGB": [
+                  0.013186736480349282,
+                  0.014723293477632836,
+                  0.023622406155579426
+                ],
+                "Y": 0.015039137395358095
+              },
+              "new": {
+                "RGB": [
+                  0.009473378820393178,
+                  0.010687480827666499,
+                  0.017982814181218783
+                ],
+                "Y": 0.010956085809046666
+              },
+              "sun-only": {
+                "RGB": [
+                  0.008963077912851595,
+                  0.010213406495571158,
+                  0.01754278574399815
+                ],
+                "Y": 0.010476767820621407
+              },
+              "no-sun": {
+                "RGB": [
+                  0.009380845980797194,
+                  0.0106257788220513,
+                  0.017949848092494395
+                ],
+                "Y": 0.010889903901326667
+              },
+              "sky-only": {
+                "RGB": [
+                  0.008889480121629514,
+                  0.010167813837442133,
+                  0.01754194932858727
+                ],
+                "Y": 0.010428452671921048
+              },
+              "newVsOldPercent": -27.149506510736998,
+              "newVsOffPercent": -39.341587019592914,
+              "directSunBounceRGB": [
+                9.253283959598409e-05,
+                6.170200561519956e-05,
+                3.2966088724387804e-05
+              ],
+              "secondarySkyRGB": [
+                0.0005103009075415835,
+                0.0004740743320953405,
+                0.00044002843722063326
+              ],
+              "directSunBounceY": 6.618190771999774e-05,
+              "secondarySkyY": 0.00047931798842525787
+            },
+            "control": {
+              "off": {
+                "RGB": [
+                  0.008013401225477444,
+                  0.0097785322351935,
+                  0.01732614639130932
+                ],
+                "Y": 0.009948203124599427
+              },
+              "old": {
+                "RGB": [
+                  0.008157265106580698,
+                  0.009961319935448186,
+                  0.01766205299588707
+                ],
+                "Y": 0.010133770805794645
+              },
+              "new": {
+                "RGB": [
+                  0.008124953503585726,
+                  0.009918058851027084,
+                  0.017560098125475977
+                ],
+                "Y": 0.010088599889776262
+              },
+              "sun-only": {
+                "RGB": [
+                  0.00806576791560422,
+                  0.00984752591392253,
+                  0.017441781619161312
+                ],
+                "Y": 0.010017029425398297
+              },
+              "no-sun": {
+                "RGB": [
+                  0.00815738053308588,
+                  0.009961368957434403,
+                  0.01766205299588707
+                ],
+                "Y": 0.010133830405994188
+              },
+              "sky-only": {
+                "RGB": [
+                  0.00806576791560422,
+                  0.00984752591392253,
+                  0.017441781619161312
+                ],
+                "Y": 0.010017029425398297
+              },
+              "newVsOldPercent": -0.4457463750073609,
+              "newVsOffPercent": 1.411277628918417,
+              "directSunBounceRGB": [
+                -3.242702950015386e-05,
+                -4.331010640731825e-05,
+                -0.00010195487041109522
+              ],
+              "secondarySkyRGB": [
+                5.918558798150529e-05,
+                7.053293710455356e-05,
+                0.00011831650631466406
+              ],
+              "directSunBounceY": -4.523051621792779e-05,
+              "secondarySkyY": 7.157046437796347e-05
+            }
+          }
+        },
+        "note": "Linearized SDR screenshot means after AA/output; not raw radiometric measurements. Six captures per component mode. Diagnostic differences isolate terms without amplified images."
+      },
+      "screenshots": {
+        "morning": {
+          "off": {
+            "file": "malden-morning-off.png",
+            "sha256": "76a0f47bc47ccfd645908644975b6e137e8ee9db6767b1c57cbb20ec0a6d3933"
+          },
+          "old": {
+            "file": "malden-morning-old.png",
+            "sha256": "b7d0779deaa1976c081692dd048216117226e110f358a751c0b85bdc4d836421"
+          },
+          "calibrated": {
+            "file": "malden-morning-calibrated.png",
+            "sha256": "c74bf14205239ff0423bc1c3a239bc9d93c65f2215e412dc7dbc9ebb3b703d4f"
+          }
+        },
+        "noon": {
+          "off": {
+            "file": "malden-noon-off.png",
+            "sha256": "39792ebb7c6ae6cc9df9dafa89f15b4ebe24337e8f78ccbdd6397cd60a537a7f"
+          },
+          "old": {
+            "file": "malden-noon-old.png",
+            "sha256": "b529b9d25387a600bb93c647b457dc9bed49ff2832798f221489cbe5afd27ceb"
+          },
+          "calibrated": {
+            "file": "malden-noon-calibrated.png",
+            "sha256": "e1175fedaa40a6b390c82a44e92e3c7f02659cdc79304e60105fc4cd0f67badb"
+          }
+        },
+        "overcast": {
+          "off": {
+            "file": "malden-overcast-off.png",
+            "sha256": "774647ed63d3acee792e352f094ed27b67ef841cfe2927ff74a3aa9f7464dbc0"
+          },
+          "old": {
+            "file": "malden-overcast-old.png",
+            "sha256": "55255b8bd648e2061d6016cbfc61e7af058ebc66acde7262d087bb2bf55ec404"
+          },
+          "calibrated": {
+            "file": "malden-overcast-calibrated.png",
+            "sha256": "f2553ccaba8b42f93f7f430266129474c81747906c6149991d4b8d82f8ed9cff"
+          }
+        },
+        "dusk": {
+          "off": {
+            "file": "malden-dusk-off.png",
+            "sha256": "268ee8ee13cc19828978bd4500d68771904c54b661d82fffec2282b9f09f6b10"
+          },
+          "old": {
+            "file": "malden-dusk-old.png",
+            "sha256": "3771b894c1978737b891c347f80b22dbac27a6f76d89225979ab8d3455f486ba"
+          },
+          "calibrated": {
+            "file": "malden-dusk-calibrated.png",
+            "sha256": "1f36d29551d8b48cb4fb145eb4cdde250edea775d8db01ad7ed55f5b3ff0fac1"
+          }
+        }
+      },
+      "motion": [
+        {
+          "aa": "taa",
+          "missionTimeBefore": 3.914,
+          "missionTimeAfter": 9.52,
+          "BLASbuildsBefore": 202,
+          "BLASbuildsAfter": 202,
+          "image": {
+            "file": "malden-motion-taa.png",
+            "sha256": "a6a083bf2c0e22445f526c7c7349e930b413941e81a48bcbe33c0a23dc5b3a33"
+          }
+        },
+        {
+          "aa": "fsr-quality",
+          "missionTimeBefore": 11.654,
+          "missionTimeAfter": 17.202,
+          "BLASbuildsBefore": 202,
+          "BLASbuildsAfter": 202,
+          "image": {
+            "file": "malden-motion-fsr-quality.png",
+            "sha256": "e763dbcafdff13e79e1c46e0ef108b1ddec1ab9d92545b0d641632293d4e78e0"
+          }
+        }
+      ]
+    },
+    "everon": {
+      "mission": "05HeavyMetal.Eden",
+      "camera": [
+        5091,
+        33.6,
+        10494,
+        1,
+        -0.08,
+        0.5
+      ],
+      "dates": {
+        "morning": [
+          1985,
+          7,
+          5,
+          9,
+          0
+        ],
+        "noon": [
+          1985,
+          7,
+          5,
+          12,
+          0
+        ],
+        "overcast": [
+          1985,
+          7,
+          5,
+          12,
+          0
+        ],
+        "dusk": [
+          1985,
+          7,
+          5,
+          17,
+          30
+        ]
+      },
+      "weatherCommands": "triCheatWeather 0, except overcast 1; fog/rain zero; legacy cloud rendering, cloud shadows on",
+      "rawRuns": {
+        "baseline": "calibration-before-everon-1080",
+        "1080": "calibration-after-everon-1080",
+        "1440": "calibration-after-everon-1440"
+      },
+      "executableSHA256": "345AD3268023B348C4D4A41FA6D8F18FFA2DDE87CCDC85DCEA58334B64E93976",
+      "baselineExecutableSHA256": "97B1DD2A48CF9739C05307F1AA81E1EBABB2C0C100C54AFBD760A2AA9D077831",
+      "validation": {
+        "1080": {
+          "presented": 26637,
+          "errors": 0,
+          "warnings": 0
+        },
+        "1440": {
+          "presented": 7783,
+          "errors": 0,
+          "warnings": 0
+        }
+      },
+      "baselineValidation": {
+        "presented": 7501,
+        "errors": 0,
+        "warnings": 0
+      },
+      "weather": {
+        "morning": {
+          "before": {
+            "counters": {
+              "bounceRays": 113224,
+              "hits": 52940,
+              "eligibleHits": 52908,
+              "rejectedMaterials": 32,
+              "sunRays": 50712,
+              "sunBlocked": 21240,
+              "eligibleReceivers": 113408,
+              "sunVisible": 29472,
+              "backfacing": 2196,
+              "missingColor": 22,
+              "secondarySky": {
+                "rays": 51624,
+                "blocked": 11561,
+                "visible": 40063,
+                "rejectedHemisphere": 1284
+              },
+              "primarySky": {
+                "rays": 55753,
+                "blocked": 2386,
+                "visible": 53367,
+                "belowHorizon": 4531
+              }
+            },
+            "energy": null,
+            "raw": "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=33 reflectorInstances=49 completedDispatches=295 bounceRays=113224 hits=52940 eligibleHits=52908 rejectedMaterials=32 sunRays=50712 sunBlocked=21240 eligibleReceivers=113408 dynamicHits=0 sunVisible=29472 terrain(eligible/sunlit)=50386/29434 stockPBR(eligible/sunlit)=0/0 catalog(eligible/sunlit)=2522/38 backfacing=2196 missingColor=22 secondarySky(rays/blocked/visible/rejectedHemisphere)=51624/11561/40063/1284 primarySky(rays/blocked/visible/belowHorizon)=55753/2386/53367/4531 GPUms(trace/filter/temporal/BLAS/TLAS)=0.159744/0.065376/0.063168/9.6e-05/6.4e-05 CPUrecordMs=0.0969999 temporal=on history(accepted/rejected/clamped/dynamic)=111630/1778/357/0 historyResets=1 phase=9 historyBytes=9830400 historyAllocations=2; last completed frame; one bounce, half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain"
+          },
+          "after": {
+            "counters": {
+              "bounceRays": 113224,
+              "hits": 52940,
+              "eligibleHits": 52908,
+              "rejectedMaterials": 32,
+              "sunRays": 50712,
+              "sunBlocked": 21240,
+              "eligibleReceivers": 113408,
+              "sunVisible": 29472,
+              "backfacing": 2196,
+              "missingColor": 22,
+              "secondarySky": {
+                "rays": 51624,
+                "blocked": 11561,
+                "visible": 40063,
+                "rejectedHemisphere": 1284
+              },
+              "primarySky": {
+                "rays": 55753,
+                "blocked": 2386,
+                "visible": 53367,
+                "belowHorizon": 4531
+              }
+            },
+            "energy": {
+              "rawEpiRGB": {
+                "dome": [
+                  0.268212,
+                  0.461311,
+                  0.858996
+                ],
+                "weather": [
+                  0.433574,
+                  0.607726,
+                  0.958818
+                ],
+                "vertical": [
+                  0.268896,
+                  0.347719,
+                  0.503948
+                ],
+                "reference": [
+                  0.748414,
+                  0.911408,
+                  1.28
+                ]
+              },
+              "calibration": 2.01209,
+              "calibratedEpiRGB": {
+                "dome": [
+                  0.5396666830800001,
+                  0.9281992499900001,
+                  1.7283772616400002
+                ],
+                "weather": [
+                  0.8723899096600001,
+                  1.2227994073400001,
+                  1.9292281096200001
+                ],
+                "vertical": [
+                  0.5410429526400001,
+                  0.69964192271,
+                  1.01398873132
+                ]
+              },
+              "rawEpiY": {
+                "dome": 0.4489710096,
+                "weather": 0.5960501272,
+                "vertical": 0.342240964,
+                "reference": 0.903367818
+              },
+              "calibratedEpiY": {
+                "dome": 0.9033700787060641,
+                "weather": 1.199306500437848,
+                "vertical": 0.68861962125476
+              },
+              "preCompositionSparseFrameMeans": {
+                "incoming": [
+                  0.535311,
+                  0.70791,
+                  1.00603
+                ],
+                "replacement": [
+                  0.0394846,
+                  0.0379077,
+                  0.0311572
+                ],
+                "capturedAmbient": [
+                  0.0561594,
+                  0.0490775,
+                  0.0417086
+                ],
+                "reflectanceFog": [
+                  0.0750779,
+                  0.0539307,
+                  0.0324537
+                ],
+                "samples": 214
+              }
+            },
+            "raw": "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=33 reflectorInstances=49 completedDispatches=3681 bounceRays=113224 hits=52940 eligibleHits=52908 rejectedMaterials=32 sunRays=50712 sunBlocked=21240 eligibleReceivers=113408 dynamicHits=0 sunVisible=29472 terrain(eligible/sunlit)=50386/29434 stockPBR(eligible/sunlit)=0/0 catalog(eligible/sunlit)=2522/38 backfacing=2196 missingColor=22 secondarySky(rays/blocked/visible/rejectedHemisphere)=51624/11561/40063/1284 primarySky(rays/blocked/visible/belowHorizon)=55753/2386/53367/4531 skyEpi(dome/weather/vertical/reference)=[0.268212,0.461311,0.858996][0.433574,0.607726,0.958818][0.268896,0.347719,0.503948][0.748414,0.911408,1.28] skyCalibration=2.01209 transportMean(incoming/replacement/capturedAmbient/reflectanceFog)=[0.535311,0.70791,1.00603][0.0394846,0.0379077,0.0311572][0.0561594,0.0490775,0.0417086][0.0750779,0.0539307,0.0324537] transportSamples=214 GPUms(trace/filter/temporal/BLAS/TLAS)=0.221184/0.065952/0.062912/6.4e-05/6.4e-05 CPUrecordMs=0.1065 temporal=on history(accepted/rejected/clamped/dynamic)=111630/1778/357/0 historyResets=9 phase=9 historyBytes=9830400 historyAllocations=4; last completed frame; one bounce, half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain"
+          }
+        },
+        "noon": {
+          "before": {
+            "counters": {
+              "bounceRays": 113249,
+              "hits": 53155,
+              "eligibleHits": 53126,
+              "rejectedMaterials": 29,
+              "sunRays": 51976,
+              "sunBlocked": 473,
+              "eligibleReceivers": 113416,
+              "sunVisible": 51503,
+              "backfacing": 1150,
+              "missingColor": 22,
+              "secondarySky": {
+                "rays": 51887,
+                "blocked": 11702,
+                "visible": 40185,
+                "rejectedHemisphere": 1239
+              },
+              "primarySky": {
+                "rays": 55494,
+                "blocked": 2297,
+                "visible": 53197,
+                "belowHorizon": 4600
+              }
+            },
+            "energy": null,
+            "raw": "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=33 reflectorInstances=49 completedDispatches=776 bounceRays=113249 hits=53155 eligibleHits=53126 rejectedMaterials=29 sunRays=51976 sunBlocked=473 eligibleReceivers=113416 dynamicHits=0 sunVisible=51503 terrain(eligible/sunlit)=50659/50524 stockPBR(eligible/sunlit)=0/0 catalog(eligible/sunlit)=2467/979 backfacing=1150 missingColor=22 secondarySky(rays/blocked/visible/rejectedHemisphere)=51887/11702/40185/1239 primarySky(rays/blocked/visible/belowHorizon)=55494/2297/53197/4600 GPUms(trace/filter/temporal/BLAS/TLAS)=0.155648/0.064512/0.063104/6.4e-05/6.4e-05 CPUrecordMs=0.0984 temporal=on history(accepted/rejected/clamped/dynamic)=111355/2061/288/0 historyResets=3 phase=15 historyBytes=9830400 historyAllocations=4; last completed frame; one bounce, half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain"
+          },
+          "after": {
+            "counters": {
+              "bounceRays": 113251,
+              "hits": 53310,
+              "eligibleHits": 53266,
+              "rejectedMaterials": 44,
+              "sunRays": 52016,
+              "sunBlocked": 433,
+              "eligibleReceivers": 113427,
+              "sunVisible": 51583,
+              "backfacing": 1250,
+              "missingColor": 31,
+              "secondarySky": {
+                "rays": 52020,
+                "blocked": 11575,
+                "visible": 40445,
+                "rejectedHemisphere": 1246
+              },
+              "primarySky": {
+                "rays": 55402,
+                "blocked": 2363,
+                "visible": 53039,
+                "belowHorizon": 4539
+              }
+            },
+            "energy": {
+              "rawEpiRGB": {
+                "dome": [
+                  0.262227,
+                  0.460884,
+                  0.864235
+                ],
+                "weather": [
+                  0.42749,
+                  0.606573,
+                  0.962914
+                ],
+                "vertical": [
+                  0.276381,
+                  0.360623,
+                  0.518537
+                ],
+                "reference": [
+                  0.748414,
+                  0.911408,
+                  1.28
+                ]
+              },
+              "calibration": 2.01748,
+              "calibratedEpiRGB": {
+                "dome": [
+                  0.5290377279599999,
+                  0.92982425232,
+                  1.7435768278
+                ],
+                "weather": [
+                  0.8624525251999999,
+                  1.22374889604,
+                  1.94265973672
+                ],
+                "vertical": [
+                  0.5575931398799999,
+                  0.72754969004,
+                  1.04613802676
+                ]
+              },
+              "rawEpiY": {
+                "dome": 0.44777146399999995,
+                "weather": 0.5942277744,
+                "vertical": 0.3541145416,
+                "reference": 0.903367818
+              },
+              "calibratedEpiY": {
+                "dome": 0.90336997319072,
+                "weather": 1.198842650296512,
+                "vertical": 0.714419005387168
+              },
+              "preCompositionSparseFrameMeans": {
+                "incoming": [
+                  0.583371,
+                  0.762364,
+                  1.0359
+                ],
+                "replacement": [
+                  0.0460393,
+                  0.0438742,
+                  0.037126
+                ],
+                "capturedAmbient": [
+                  0.0565195,
+                  0.0494475,
+                  0.0419646
+                ],
+                "reflectanceFog": [
+                  0.0753711,
+                  0.0542239,
+                  0.0327653
+                ],
+                "samples": 214
+              }
+            },
+            "raw": "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=33 reflectorInstances=49 completedDispatches=5082 bounceRays=113251 hits=53310 eligibleHits=53266 rejectedMaterials=44 sunRays=52016 sunBlocked=433 eligibleReceivers=113427 dynamicHits=0 sunVisible=51583 terrain(eligible/sunlit)=50706/50576 stockPBR(eligible/sunlit)=0/0 catalog(eligible/sunlit)=2560/1007 backfacing=1250 missingColor=31 secondarySky(rays/blocked/visible/rejectedHemisphere)=52020/11575/40445/1246 primarySky(rays/blocked/visible/belowHorizon)=55402/2363/53039/4539 skyEpi(dome/weather/vertical/reference)=[0.262227,0.460884,0.864235][0.42749,0.606573,0.962914][0.276381,0.360623,0.518537][0.748414,0.911408,1.28] skyCalibration=2.01748 transportMean(incoming/replacement/capturedAmbient/reflectanceFog)=[0.583371,0.762364,1.0359][0.0460393,0.0438742,0.037126][0.0565195,0.0494475,0.0419646][0.0753711,0.0542239,0.0327653] transportSamples=214 GPUms(trace/filter/temporal/BLAS/TLAS)=0.219136/0.06512/0.062752/6.4e-05/6.4e-05 CPUrecordMs=0.1157 temporal=on history(accepted/rejected/clamped/dynamic)=111486/1941/305/0 historyResets=14 phase=13 historyBytes=9830400 historyAllocations=6; last completed frame; one bounce, half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain"
+          }
+        },
+        "overcast": {
+          "before": {
+            "counters": {
+              "bounceRays": 113219,
+              "hits": 53317,
+              "eligibleHits": 53289,
+              "rejectedMaterials": 28,
+              "sunRays": 52060,
+              "sunBlocked": 484,
+              "eligibleReceivers": 113373,
+              "sunVisible": 51576,
+              "backfacing": 1229,
+              "missingColor": 21,
+              "secondarySky": {
+                "rays": 52013,
+                "blocked": 11684,
+                "visible": 40329,
+                "rejectedHemisphere": 1276
+              },
+              "primarySky": {
+                "rays": 55392,
+                "blocked": 2326,
+                "visible": 53066,
+                "belowHorizon": 4510
+              }
+            },
+            "energy": null,
+            "raw": "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=33 reflectorInstances=49 completedDispatches=1264 bounceRays=113219 hits=53317 eligibleHits=53289 rejectedMaterials=28 sunRays=52060 sunBlocked=484 eligibleReceivers=113373 dynamicHits=0 sunVisible=51576 terrain(eligible/sunlit)=50741/50593 stockPBR(eligible/sunlit)=0/0 catalog(eligible/sunlit)=2548/983 backfacing=1229 missingColor=21 secondarySky(rays/blocked/visible/rejectedHemisphere)=52013/11684/40329/1276 primarySky(rays/blocked/visible/belowHorizon)=55392/2326/53066/4510 GPUms(trace/filter/temporal/BLAS/TLAS)=0.14848/0.065056/0.063328/6.4e-05/9.6e-05 CPUrecordMs=0.1779 temporal=on history(accepted/rejected/clamped/dynamic)=111136/2237/328/0 historyResets=5 phase=20 historyBytes=9830400 historyAllocations=6; last completed frame; one bounce, half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain"
+          },
+          "after": {
+            "counters": {
+              "bounceRays": 113183,
+              "hits": 53029,
+              "eligibleHits": 52998,
+              "rejectedMaterials": 31,
+              "sunRays": 51717,
+              "sunBlocked": 454,
+              "eligibleReceivers": 113357,
+              "sunVisible": 51263,
+              "backfacing": 1281,
+              "missingColor": 24,
+              "secondarySky": {
+                "rays": 51688,
+                "blocked": 11675,
+                "visible": 40013,
+                "rejectedHemisphere": 1310
+              },
+              "primarySky": {
+                "rays": 55522,
+                "blocked": 2359,
+                "visible": 53163,
+                "belowHorizon": 4632
+              }
+            },
+            "energy": {
+              "rawEpiRGB": {
+                "dome": [
+                  0.429139,
+                  0.420054,
+                  0.340269
+                ],
+                "weather": [
+                  0.561414,
+                  0.591796,
+                  0.647515
+                ],
+                "vertical": [
+                  0.305737,
+                  0.324247,
+                  0.361232
+                ],
+                "reference": [
+                  0.748414,
+                  0.911408,
+                  1.28
+                ]
+              },
+              "calibration": 2.17038,
+              "calibratedEpiRGB": {
+                "dome": [
+                  0.93139470282,
+                  0.91167680052,
+                  0.7385130322200001
+                ],
+                "weather": [
+                  1.21848171732,
+                  1.28442220248,
+                  1.4053536057
+                ],
+                "vertical": [
+                  0.66356547006,
+                  0.7037392038600001,
+                  0.7840107081600001
+                ]
+              },
+              "rawEpiY": {
+                "dome": 0.41622499399999996,
+                "weather": 0.5893596985999999,
+                "vertical": 0.32298209099999997,
+                "reference": 0.903367818
+              },
+              "calibratedEpiY": {
+                "dome": 0.9033664024777199,
+                "weather": 1.2791345026474679,
+                "vertical": 0.7009938706645801
+              },
+              "preCompositionSparseFrameMeans": {
+                "incoming": [
+                  0.744471,
+                  0.791708,
+                  0.861143
+                ],
+                "replacement": [
+                  0.0545702,
+                  0.040724,
+                  0.0259995
+                ],
+                "capturedAmbient": [
+                  0.0562488,
+                  0.0493144,
+                  0.0419408
+                ],
+                "reflectanceFog": [
+                  0.0752245,
+                  0.054114,
+                  0.0327103
+                ],
+                "samples": 214
+              }
+            },
+            "raw": "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=33 reflectorInstances=49 completedDispatches=6494 bounceRays=113183 hits=53029 eligibleHits=52998 rejectedMaterials=31 sunRays=51717 sunBlocked=454 eligibleReceivers=113357 dynamicHits=0 sunVisible=51263 terrain(eligible/sunlit)=50418/50285 stockPBR(eligible/sunlit)=0/0 catalog(eligible/sunlit)=2580/978 backfacing=1281 missingColor=24 secondarySky(rays/blocked/visible/rejectedHemisphere)=51688/11675/40013/1310 primarySky(rays/blocked/visible/belowHorizon)=55522/2359/53163/4632 skyEpi(dome/weather/vertical/reference)=[0.429139,0.420054,0.340269][0.561414,0.591796,0.647515][0.305737,0.324247,0.361232][0.748414,0.911408,1.28] skyCalibration=2.17038 transportMean(incoming/replacement/capturedAmbient/reflectanceFog)=[0.744471,0.791708,0.861143][0.0545702,0.040724,0.0259995][0.0562488,0.0493144,0.0419408][0.0752245,0.054114,0.0327103] transportSamples=214 GPUms(trace/filter/temporal/BLAS/TLAS)=0.357376/0.081888/0.065824/6.4e-05/9.6e-05 CPUrecordMs=0.1191 temporal=on history(accepted/rejected/clamped/dynamic)=111104/2253/358/0 historyResets=19 phase=16 historyBytes=9830400 historyAllocations=8; last completed frame; one bounce, half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain"
+          }
+        },
+        "dusk": {
+          "before": {
+            "counters": {
+              "bounceRays": 113224,
+              "hits": 52940,
+              "eligibleHits": 52908,
+              "rejectedMaterials": 32,
+              "sunRays": 52582,
+              "sunBlocked": 63,
+              "eligibleReceivers": 113408,
+              "sunVisible": 52519,
+              "backfacing": 326,
+              "missingColor": 22,
+              "secondarySky": {
+                "rays": 51624,
+                "blocked": 11561,
+                "visible": 40063,
+                "rejectedHemisphere": 1284
+              },
+              "primarySky": {
+                "rays": 55753,
+                "blocked": 2386,
+                "visible": 53367,
+                "belowHorizon": 4531
+              }
+            },
+            "energy": null,
+            "raw": "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=33 reflectorInstances=49 completedDispatches=1738 bounceRays=113224 hits=52940 eligibleHits=52908 rejectedMaterials=32 sunRays=52582 sunBlocked=63 eligibleReceivers=113408 dynamicHits=0 sunVisible=52519 terrain(eligible/sunlit)=50386/50336 stockPBR(eligible/sunlit)=0/0 catalog(eligible/sunlit)=2522/2183 backfacing=326 missingColor=22 secondarySky(rays/blocked/visible/rejectedHemisphere)=51624/11561/40063/1284 primarySky(rays/blocked/visible/belowHorizon)=55753/2386/53367/4531 GPUms(trace/filter/temporal/BLAS/TLAS)=0.152576/0.064896/0.062272/6.4e-05/6.4e-05 CPUrecordMs=0.1013 temporal=on history(accepted/rejected/clamped/dynamic)=111630/1778/404/0 historyResets=7 phase=9 historyBytes=9830400 historyAllocations=8; last completed frame; one bounce, half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain"
+          },
+          "after": {
+            "counters": {
+              "bounceRays": 113248,
+              "hits": 53275,
+              "eligibleHits": 53246,
+              "rejectedMaterials": 29,
+              "sunRays": 52945,
+              "sunBlocked": 60,
+              "eligibleReceivers": 113416,
+              "sunVisible": 52885,
+              "backfacing": 301,
+              "missingColor": 21,
+              "secondarySky": {
+                "rays": 52050,
+                "blocked": 11682,
+                "visible": 40368,
+                "rejectedHemisphere": 1196
+              },
+              "primarySky": {
+                "rays": 55549,
+                "blocked": 2333,
+                "visible": 53216,
+                "belowHorizon": 4424
+              }
+            },
+            "energy": {
+              "rawEpiRGB": {
+                "dome": [
+                  0.221114,
+                  0.342987,
+                  0.619988
+                ],
+                "weather": [
+                  0.352751,
+                  0.447447,
+                  0.679821
+                ],
+                "vertical": [
+                  0.271069,
+                  0.312797,
+                  0.407291
+                ],
+                "reference": [
+                  0.176345,
+                  0.212659,
+                  0.399316
+                ]
+              },
+              "calibration": 0.64797,
+              "calibratedEpiRGB": {
+                "dome": [
+                  0.14327523858000002,
+                  0.22224528639000002,
+                  0.40173362436000004
+                ],
+                "weather": [
+                  0.22857206547,
+                  0.28993223259,
+                  0.44050361337000005
+                ],
+                "vertical": [
+                  0.17564457993000002,
+                  0.20268307209,
+                  0.26391234927
+                ]
+              },
+              "rawEpiY": {
+                "dome": 0.3370762724,
+                "weather": 0.44409203319999996,
+                "vertical": 0.310748094,
+                "reference": 0.21841527899999996
+              },
+              "calibratedEpiY": {
+                "dome": 0.21841531222702804,
+                "weather": 0.287758314752604,
+                "vertical": 0.20135544246918
+              },
+              "preCompositionSparseFrameMeans": {
+                "incoming": [
+                  0.166898,
+                  0.195661,
+                  0.242214
+                ],
+                "replacement": [
+                  0.0129341,
+                  0.0107085,
+                  0.00767956
+                ],
+                "capturedAmbient": [
+                  0.0133551,
+                  0.0115837,
+                  0.013146
+                ],
+                "reflectanceFog": [
+                  0.0756276,
+                  0.0545538,
+                  0.0328935
+                ],
+                "samples": 214
+              }
+            },
+            "raw": "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=33 reflectorInstances=49 completedDispatches=7921 bounceRays=113248 hits=53275 eligibleHits=53246 rejectedMaterials=29 sunRays=52945 sunBlocked=60 eligibleReceivers=113416 dynamicHits=0 sunVisible=52885 terrain(eligible/sunlit)=50812/50763 stockPBR(eligible/sunlit)=0/0 catalog(eligible/sunlit)=2434/2122 backfacing=301 missingColor=21 secondarySky(rays/blocked/visible/rejectedHemisphere)=52050/11682/40368/1196 primarySky(rays/blocked/visible/belowHorizon)=55549/2333/53216/4424 skyEpi(dome/weather/vertical/reference)=[0.221114,0.342987,0.619988][0.352751,0.447447,0.679821][0.271069,0.312797,0.407291][0.176345,0.212659,0.399316] skyCalibration=0.64797 transportMean(incoming/replacement/capturedAmbient/reflectanceFog)=[0.166898,0.195661,0.242214][0.0129341,0.0107085,0.00767956][0.0133551,0.0115837,0.013146][0.0756276,0.0545538,0.0328935] transportSamples=214 GPUms(trace/filter/temporal/BLAS/TLAS)=0.219136/0.06448/0.063456/6.4e-05/9.6e-05 CPUrecordMs=0.114 temporal=on history(accepted/rejected/clamped/dynamic)=111355/2061/363/0 historyResets=24 phase=7 historyBytes=9830400 historyAllocations=10; last completed frame; one bounce, half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain"
+          }
+        }
+      },
+      "performance": {
+        "1080": {
+          "world": "1920x1080",
+          "AA": "TAA",
+          "order": "off/sun-only/on/on/sun-only/off",
+          "settleSeconds": 3,
+          "sampleSecondsPerInterval": 4,
+          "intervalMedianMeansMs": {
+            "off": {
+              "frame": 3.7388000000000003
+            },
+            "sun-only": {
+              "frame": 4.161325,
+              "trace": 0.29495,
+              "filter": 0.11915,
+              "temporal": 0.10885
+            },
+            "on": {
+              "frame": 4.12415,
+              "trace": 0.3482,
+              "filter": 0.1136,
+              "temporal": 0.10325000000000001
+            }
+          },
+          "totalGIFrameCostMs": 0.38534999999999986,
+          "secondarySkyTraceCostMs": 0.05325000000000002,
+          "note": "Includes calibration on all GI modes. Trace includes lookup integration, not the tiny post-trace diagnostic reduction; whole-frame cost includes both. Short differences include clock/cache variation. No heavy build concurrent with timing."
+        },
+        "1440": {
+          "world": "2560x1440",
+          "AA": "TAA",
+          "order": "off/sun-only/on/on/sun-only/off",
+          "settleSeconds": 3,
+          "sampleSecondsPerInterval": 4,
+          "intervalMedianMeansMs": {
+            "off": {
+              "frame": 3.67495
+            },
+            "sun-only": {
+              "frame": 4.214025,
+              "trace": 0.2821,
+              "filter": 0.12165,
+              "temporal": 0.10619999999999999
+            },
+            "on": {
+              "frame": 4.207675,
+              "trace": 0.3348,
+              "filter": 0.12005,
+              "temporal": 0.10335
+            }
+          },
+          "totalGIFrameCostMs": 0.5327250000000001,
+          "secondarySkyTraceCostMs": 0.05269999999999997,
+          "note": "Includes calibration on all GI modes. Trace includes lookup integration, not the tiny post-trace diagnostic reduction; whole-frame cost includes both. Short differences include clock/cache variation. No heavy build concurrent with timing."
+        }
+      },
+      "pixelMeasurements": {
+        "regions": [
+          {
+            "region": "panel",
+            "box": [
+              1100,
+              550,
+              1650,
+              700
+            ],
+            "modes": {
+              "sky-only": {
+                "RGB": [
+                  0.03637113215717114,
+                  0.035548990079905585,
+                  0.03131158094145407
+                ],
+                "Y": 0.03541783654573604,
+                "minY": 0.03540091462844809,
+                "maxY": 0.03543913025004679,
+                "samples": 6
+              },
+              "sun-only": {
+                "RGB": [
+                  0.03731599537707029,
+                  0.036321779885148356,
+                  0.03136792658879222
+                ],
+                "Y": 0.036175481890734044,
+                "minY": 0.03614125537647544,
+                "maxY": 0.036212737371095996,
+                "samples": 6
+              },
+              "no-sun": {
+                "RGB": [
+                  0.03741652726717368,
+                  0.0369021044876991,
+                  0.03185559589559264
+                ],
+                "Y": 0.036647112850265305,
+                "minY": 0.03663344211895067,
+                "maxY": 0.03667686182483721,
+                "samples": 6
+              },
+              "on": {
+                "RGB": [
+                  0.03836426932833482,
+                  0.0376654507994154,
+                  0.031897769628210434
+                ],
+                "Y": 0.03739759303810267,
+                "minY": 0.037383941546990054,
+                "maxY": 0.03740401460242528,
+                "samples": 6
+              }
+            },
+            "directSunBounceRGB": [
+              0.0009477420611611401,
+              0.0007633463117162967,
+              4.217373261779234e-05
+            ],
+            "secondarySkyRGB": [
+              0.0010482739512645278,
+              0.0013436709142670422,
+              0.0005298430394182138
+            ],
+            "directSunBounceY": 0.0007504801878373583,
+            "secondarySkyY": 0.0012221111473686222,
+            "sunBouncePercentVsNoSun": 2.047856241509965,
+            "secondarySkyPercentVsSunOnly": 3.3782857435318716
+          },
+          {
+            "region": "upper",
+            "box": [
+              1100,
+              480,
+              1500,
+              530
+            ],
+            "modes": {
+              "sky-only": {
+                "RGB": [
+                  0.03436572671652038,
+                  0.03092896941718833,
+                  0.024434385134967346
+                ],
+                "Y": 0.031190715033849965,
+                "minY": 0.03110911868967645,
+                "maxY": 0.03126122008287308,
+                "samples": 6
+              },
+              "sun-only": {
+                "RGB": [
+                  0.035393935843074445,
+                  0.03172671203266522,
+                  0.02446679715561995
+                ],
+                "Y": 0.031982197960635554,
+                "minY": 0.03190110513519268,
+                "maxY": 0.03203136358909459,
+                "samples": 6
+              },
+              "no-sun": {
+                "RGB": [
+                  0.03532769274943483,
+                  0.03212465028191109,
+                  0.024867525786274887
+                ],
+                "Y": 0.032281652721921704,
+                "minY": 0.032199165041385286,
+                "maxY": 0.03235483763496685,
+                "samples": 6
+              },
+              "on": {
+                "RGB": [
+                  0.0364319165922508,
+                  0.03298911768616111,
+                  0.024960366077199883
+                ],
+                "Y": 0.03314138086742878,
+                "minY": 0.03310056996624262,
+                "maxY": 0.033196041656091226,
+                "samples": 6
+              }
+            },
+            "directSunBounceRGB": [
+              0.0011042238428159712,
+              0.000864467404250023,
+              9.284029092499618e-05
+            ],
+            "secondarySkyRGB": [
+              0.0010379807491763537,
+              0.0012624056534958905,
+              0.0004935689215799337
+            ],
+            "directSunBounceY": 0.0008597281455070767,
+            "secondarySkyY": 0.0011591829067932248,
+            "sunBouncePercentVsNoSun": 2.6632098204911787,
+            "secondarySkyPercentVsSunOnly": 3.624462922216836
+          },
+          {
+            "region": "lower",
+            "box": [
+              1100,
+              700,
+              1500,
+              760
+            ],
+            "modes": {
+              "sky-only": {
+                "RGB": [
+                  0.021672900358408558,
+                  0.023435317644734485,
+                  0.019644311932863832
+                ],
+                "Y": 0.02278691711726453,
+                "minY": 0.022721951754394287,
+                "maxY": 0.02284684294252804,
+                "samples": 6
+              },
+              "sun-only": {
+                "RGB": [
+                  0.02201918544855603,
+                  0.023741552845512746,
+                  0.019665676741505
+                ],
+                "Y": 0.023081099282210388,
+                "minY": 0.023012054034028173,
+                "maxY": 0.023154427343557677,
+                "samples": 6
+              },
+              "no-sun": {
+                "RGB": [
+                  0.022335482377129044,
+                  0.024351216389370964,
+                  0.01999723211265832
+                ],
+                "Y": 0.023608313673589676,
+                "minY": 0.023556675064675688,
+                "maxY": 0.02367619130010635,
+                "samples": 6
+              },
+              "on": {
+                "RGB": [
+                  0.02271461576391562,
+                  0.024684667358305965,
+                  0.020037245561163056
+                ],
+                "Y": 0.023930290535584858,
+                "minY": 0.023871548513937132,
+                "maxY": 0.023968645312745434,
+                "samples": 6
+              }
+            },
+            "directSunBounceRGB": [
+              0.00037913338678657524,
+              0.0003334509689350007,
+              4.001344850473529e-05
+            ],
+            "secondarySkyRGB": [
+              0.0006954303153595895,
+              0.0009431145127932195,
+              0.0003715688196580559
+            ],
+            "directSunBounceY": 0.0003219768619951803,
+            "secondarySkyY": 0.0008491912533744708,
+            "sunBouncePercentVsNoSun": 1.3638282956032213,
+            "secondarySkyPercentVsSunOnly": 3.6791629505661354
+          },
+          {
+            "region": "pillar",
+            "box": [
+              930,
+              530,
+              1030,
+              760
+            ],
+            "modes": {
+              "sky-only": {
+                "RGB": [
+                  0.08078996328523802,
+                  0.07940745094401848,
+                  0.08529974138413296
+                ],
+                "Y": 0.08012679643753802,
+                "minY": 0.08003022605259819,
+                "maxY": 0.08025073762127694,
+                "samples": 6
+              },
+              "sun-only": {
+                "RGB": [
+                  0.08292351759925258,
+                  0.08127548922562455,
+                  0.08551900121845092
+                ],
+                "Y": 0.08193224162373994,
+                "minY": 0.08174982804338302,
+                "maxY": 0.08208167678588296,
+                "samples": 6
+              },
+              "no-sun": {
+                "RGB": [
+                  0.08314383400085476,
+                  0.08265643986355026,
+                  0.08684501148969143
+                ],
+                "Y": 0.08306247472854858,
+                "minY": 0.0829484651010535,
+                "maxY": 0.08319303519605482,
+                "samples": 6
+              },
+              "on": {
+                "RGB": [
+                  0.08517849660952075,
+                  0.08444342997139732,
+                  0.08697612963961142
+                ],
+                "Y": 0.08478256605470741,
+                "minY": 0.084662526459361,
+                "maxY": 0.08487475041951356,
+                "samples": 6
+              }
+            },
+            "directSunBounceRGB": [
+              0.0020346626086659853,
+              0.0017869901078470668,
+              0.0001311181499199926
+            ],
+            "secondarySkyRGB": [
+              0.0022549790102681655,
+              0.003167940745772771,
+              0.0014571284211604973
+            ],
+            "directSunBounceY": 0.001720091326158834,
+            "secondarySkyY": 0.0028503244309674857,
+            "sunBouncePercentVsNoSun": 2.070840450853601,
+            "secondarySkyPercentVsSunOnly": 3.4788800775854787
+          },
+          {
+            "region": "control",
+            "box": [
+              80,
+              780,
+              380,
+              900
+            ],
+            "modes": {
+              "sky-only": {
+                "RGB": [
+                  0.07400137909770671,
+                  0.09149351241200435,
+                  0.04159774414898813
+                ],
+                "Y": 0.0841722104007949,
+                "minY": 0.08414512525610383,
+                "maxY": 0.08421758822942527,
+                "samples": 6
+              },
+              "sun-only": {
+                "RGB": [
+                  0.07400457960598364,
+                  0.09149742567442692,
+                  0.041596391325234267
+                ],
+                "Y": 0.08417559192026416,
+                "minY": 0.08414507521830134,
+                "maxY": 0.08421981828452496,
+                "samples": 6
+              },
+              "no-sun": {
+                "RGB": [
+                  0.0740133055097176,
+                  0.0915098725773445,
+                  0.041601705002562266
+                ],
+                "Y": 0.08418673271986775,
+                "minY": 0.08414952203821001,
+                "maxY": 0.08421974246826333,
+                "samples": 6
+              },
+              "on": {
+                "RGB": [
+                  0.07402701441390708,
+                  0.09153330263774333,
+                  0.041603687016676744
+                ],
+                "Y": 0.08420654751351472,
+                "minY": 0.08414507521830134,
+                "maxY": 0.08421981828452496,
+                "samples": 6
+              }
+            },
+            "directSunBounceRGB": [
+              1.3708904189474458e-05,
+              2.3430060398829666e-05,
+              1.9820141144780146e-06
+            ],
+            "secondarySkyRGB": [
+              2.2434807923438216e-05,
+              3.5876963316403e-05,
+              7.2956914424771035e-06
+            ],
+            "directSunBounceY": 1.981479364699056e-05,
+            "secondarySkyY": 3.0955593250561236e-05,
+            "sunBouncePercentVsNoSun": 0.023536717730719515,
+            "secondarySkyPercentVsSunOnly": 0.036775022954259835
+          }
+        ],
+        "weather": {
+          "morning": {
+            "panel": {
+              "off": {
+                "RGB": [
+                  0.05399350263211025,
+                  0.049233367684787074,
+                  0.04162473762400777
+                ],
+                "Y": 0.04969602928419971
+              },
+              "old": {
+                "RGB": [
+                  0.01949516223285669,
+                  0.019076146363111425,
+                  0.015869173593355428
+                ],
+                "Y": 0.018933685703042883
+              },
+              "new": {
+                "RGB": [
+                  0.0383491110207965,
+                  0.037652249273577264,
+                  0.031884213978305556
+                ],
+                "Y": 0.03738394993271746
+              },
+              "sun-only": {
+                "RGB": [
+                  0.03729822438153586,
+                  0.036299236298463856,
+                  0.03132958944860221
+                ],
+                "Y": 0.03615281266236495
+              },
+              "no-sun": {
+                "RGB": [
+                  0.037425683711496224,
+                  0.03690223485617915,
+                  0.03183997468860542
+                ],
+                "Y": 0.03664802489872073
+              },
+              "sky-only": {
+                "RGB": [
+                  0.03636067738695276,
+                  0.03554580493841907,
+                  0.03130747546299659
+                ],
+                "Y": 0.03541303943285183
+              },
+              "newVsOldPercent": 97.44676508868733,
+              "newVsOffPercent": -24.774774823703538,
+              "directSunBounceRGB": [
+                0.0009234273093002773,
+                0.0007500144173981163,
+                4.423928970013341e-05
+              ],
+              "secondarySkyRGB": [
+                0.0010508866392606384,
+                0.0013530129751134073,
+                0.0005546245297033472
+              ],
+              "directSunBounceY": 0.0007359250339967214,
+              "secondarySkyY": 0.0012311372703525023
+            },
+            "upper": {
+              "off": {
+                "RGB": [
+                  0.0517162596072841,
+                  0.043432986494909585,
+                  0.033082493437661294
+                ],
+                "Y": 0.044446704759867076
+              },
+              "old": {
+                "RGB": [
+                  0.018622456147752445,
+                  0.016772351045414694,
+                  0.012391918497299391
+                ],
+                "Y": 0.016849416160197774
+              },
+              "new": {
+                "RGB": [
+                  0.036493427896351203,
+                  0.03304311071906366,
+                  0.025001946129782543
+                ],
+                "Y": 0.033196076067608896
+              },
+              "sun-only": {
+                "RGB": [
+                  0.03547245155405452,
+                  0.03180900613633975,
+                  0.024555069582996695
+                ],
+                "Y": 0.03206412041299454
+              },
+              "no-sun": {
+                "RGB": [
+                  0.035398678891860706,
+                  0.032198706324045395,
+                  0.02493724148102603
+                ],
+                "Y": 0.032354742730296926
+              },
+              "sky-only": {
+                "RGB": [
+                  0.034370346741665475,
+                  0.030923109784592805,
+                  0.024424433599400112
+                ],
+                "Y": 0.031186787941095542
+              },
+              "newVsOldPercent": 97.01617997913614,
+              "newVsOffPercent": -25.312627230842267,
+              "directSunBounceRGB": [
+                0.0010947490044904973,
+                0.0008444043950182681,
+                6.470464875651255e-05
+              ],
+              "secondarySkyRGB": [
+                0.0010209763422966839,
+                0.0012341045827239105,
+                0.00044687654678584807
+              ],
+              "directSunBounceY": 0.0008413333373119651,
+              "secondarySkyY": 0.001131955654614354
+            },
+            "lower": {
+              "off": {
+                "RGB": [
+                  0.03264563947637333,
+                  0.032775794122042096,
+                  0.026289692012074227
+                ],
+                "Y": 0.03227982667203323
+              },
+              "old": {
+                "RGB": [
+                  0.011384599200215655,
+                  0.012357651274314492,
+                  0.009930519273772693
+                ],
+                "Y": 0.011975541472921961
+              },
+              "new": {
+                "RGB": [
+                  0.02272597719467574,
+                  0.024686001424126535,
+                  0.020040689630447524
+                ],
+                "Y": 0.02393390876144167
+              },
+              "sun-only": {
+                "RGB": [
+                  0.02206342119273585,
+                  0.023765496431420223,
+                  0.019684517647498345
+                ],
+                "Y": 0.023108988567476764
+              },
+              "no-sun": {
+                "RGB": [
+                  0.022417420764566976,
+                  0.024416864285881596,
+                  0.02004690715338109
+                ],
+                "Y": 0.023676271688283568
+              },
+              "sky-only": {
+                "RGB": [
+                  0.021643975166900448,
+                  0.02341568475675786,
+                  0.01963235622594317
+                ],
+                "Y": 0.022765862978029353
+              },
+              "newVsOldPercent": 99.85658949583961,
+              "newVsOffPercent": -25.854903111429472,
+              "directSunBounceRGB": [
+                0.0003085564301087626,
+                0.00026913713824493896,
+                -6.2175229335638404e-06
+              ],
+              "secondarySkyRGB": [
+                0.0006625560019398874,
+                0.0009205049927063121,
+                0.00035617198294917926
+              ],
+              "directSunBounceY": 0.0002576370731580999,
+              "secondarySkyY": 0.0008249201939649052
+            },
+            "pillar": {
+              "off": {
+                "RGB": [
+                  0.11943611362272939,
+                  0.10938285971834684,
+                  0.11270553528129001
+                ],
+                "Y": 0.11176007867406307
+              },
+              "old": {
+                "RGB": [
+                  0.04324775482337527,
+                  0.04275368463292562,
+                  0.04320076583878784
+                ],
+                "Y": 0.04289100321847847
+              },
+              "new": {
+                "RGB": [
+                  0.08504920161753877,
+                  0.08432591061471478,
+                  0.08686379902691259
+                ],
+                "Y": 0.08466291782527584
+              },
+              "sun-only": {
+                "RGB": [
+                  0.08280197524058037,
+                  0.08118079880488781,
+                  0.08544387461457294
+                ],
+                "Y": 0.08183325498857531
+              },
+              "no-sun": {
+                "RGB": [
+                  0.08308375942798564,
+                  0.08261454315670627,
+                  0.08681882155666287
+                ],
+                "Y": 0.08301784743645713
+              },
+              "sky-only": {
+                "RGB": [
+                  0.08073500436218803,
+                  0.07935395898471839,
+                  0.0852330260757736
+                ],
+                "Y": 0.08007203787594262
+              },
+              "newVsOldPercent": 97.39085466017039,
+              "newVsOffPercent": -24.245831937729168,
+              "directSunBounceRGB": [
+                0.001965442189553135,
+                0.0017113674580085114,
+                4.497747024971577e-05
+              ],
+              "secondarySkyRGB": [
+                0.0022472263769584,
+                0.0031451118098269754,
+                0.0014199244123396515
+              ],
+              "directSunBounceY": 0.0016450703888187133,
+              "secondarySkyY": 0.0028296628367005315
+            },
+            "control": {
+              "off": {
+                "RGB": [
+                  0.07398156434585057,
+                  0.09146265676553673,
+                  0.041586330697121615
+                ],
+                "Y": 0.08414510577497188
+              },
+              "old": {
+                "RGB": [
+                  0.07398156434585057,
+                  0.09146265676553673,
+                  0.041586330697121615
+                ],
+                "Y": 0.08414510577497188
+              },
+              "new": {
+                "RGB": [
+                  0.07403564246685256,
+                  0.09154545653904335,
+                  0.04161089924838917
+                ],
+                "Y": 0.08421759503091035
+              },
+              "sun-only": {
+                "RGB": [
+                  0.07403556087591913,
+                  0.0915452660172502,
+                  0.041610937063069516
+                ],
+                "Y": 0.08421744415371137
+              },
+              "no-sun": {
+                "RGB": [
+                  0.07403550628728574,
+                  0.09154527557770341,
+                  0.041610931871868026
+                ],
+                "Y": 0.08421743901099929
+              },
+              "sky-only": {
+                "RGB": [
+                  0.07399680711226989,
+                  0.09148680103843618,
+                  0.04159883878437778
+                ],
+                "Y": 0.0841665174549902
+              },
+              "newVsOldPercent": 0.08614791706642588,
+              "newVsOffPercent": 0.08614791706642588,
+              "directSunBounceRGB": [
+                1.361795668175514e-07,
+                1.809613399406107e-07,
+                -3.262347885585326e-08
+              ],
+              "secondarySkyRGB": [
+                8.159093342618995e-08,
+                1.9052179314749118e-07,
+                -3.781468034536051e-08
+              ],
+              "directSunBounceY": 1.5601991105754357e-07,
+              "secondarySkyY": 1.5087719898455863e-07
+            }
+          },
+          "noon": {
+            "panel": {
+              "off": {
+                "RGB": [
+                  0.07769420830461574,
+                  0.06607968059769331,
+                  0.04515052472781513
+                ],
+                "Y": 0.06703784413437981
+              },
+              "old": {
+                "RGB": [
+                  0.04483982314221532,
+                  0.03754335934345407,
+                  0.02001026662777092
+                ],
+                "Y": 0.03782869825299839
+              },
+              "new": {
+                "RGB": [
+                  0.06432125398989541,
+                  0.05702666739502919,
+                  0.03663964091958982
+                ],
+                "Y": 0.057105553193571024
+              },
+              "sun-only": {
+                "RGB": [
+                  0.06329708025228514,
+                  0.05563918792286876,
+                  0.036081887210654126
+                ],
+                "Y": 0.055855218720680784
+              },
+              "no-sun": {
+                "RGB": [
+                  0.06244618860874235,
+                  0.05550506308158588,
+                  0.036561775429402005
+                ],
+                "Y": 0.05561304100017167
+              },
+              "sky-only": {
+                "RGB": [
+                  0.06135600916742635,
+                  0.05407727697162201,
+                  0.035967075078266963
+                ],
+                "Y": 0.05431717885974978
+              },
+              "newVsOldPercent": 50.95828254953159,
+              "newVsOffPercent": -14.815946230160904,
+              "directSunBounceRGB": [
+                0.0018750653811530626,
+                0.0015216043134433158,
+                7.78654901878173e-05
+              ],
+              "secondarySkyRGB": [
+                0.0010241737376102678,
+                0.0013874794721604328,
+                0.000557753708935696
+              ],
+              "directSunBounceY": 0.001492512193399361,
+              "secondarySkyY": 0.0012503344728902416
+            },
+            "upper": {
+              "off": {
+                "RGB": [
+                  0.074597962265877,
+                  0.05885420254522098,
+                  0.036180472594516615
+                ],
+                "Y": 0.06056428255939159
+              },
+              "old": {
+                "RGB": [
+                  0.042693870159308506,
+                  0.033385224958282944,
+                  0.015994426924245447
+                ],
+                "Y": 0.03410862730996347
+              },
+              "new": {
+                "RGB": [
+                  0.06128983375751163,
+                  0.0504031734924245,
+                  0.028994709187179963
+                ],
+                "Y": 0.051171986341943365
+              },
+              "sun-only": {
+                "RGB": [
+                  0.06025432065525744,
+                  0.04921125816332569,
+                  0.028625522982595332
+                ],
+                "Y": 0.050072723169061646
+              },
+              "no-sun": {
+                "RGB": [
+                  0.059577752523544414,
+                  0.04912844236566344,
+                  0.02892941694346996
+                ],
+                "Y": 0.049891596069746566
+              },
+              "sky-only": {
+                "RGB": [
+                  0.058593028159251756,
+                  0.04787876799515577,
+                  0.028462191289041414
+                ],
+                "Y": 0.04875474286786112
+              },
+              "newVsOldPercent": 50.026519322856245,
+              "newVsOffPercent": -15.507978994447413,
+              "directSunBounceRGB": [
+                0.0017120812339672178,
+                0.0012747311267610612,
+                6.529224371000161e-05
+              ],
+              "secondarySkyRGB": [
+                0.001035513102254193,
+                0.0011919153290988124,
+                0.000369186204584631
+              ],
+              "directSunBounceY": 0.0012803902721968035,
+              "secondarySkyY": 0.0010992631728817225
+            },
+            "lower": {
+              "off": {
+                "RGB": [
+                  0.04865010478587184,
+                  0.045248613181273656,
+                  0.028942033818176772
+                ],
+                "Y": 0.04479443526639563
+              },
+              "old": {
+                "RGB": [
+                  0.028870825278722544,
+                  0.026337692851495044,
+                  0.013048450836804951
+                ],
+                "Y": 0.025916753532062985
+              },
+              "new": {
+                "RGB": [
+                  0.04041202488128795,
+                  0.039126474604223575,
+                  0.02345957526515092
+                ],
+                "Y": 0.03826863246084641
+              },
+              "sun-only": {
+                "RGB": [
+                  0.03988114214135115,
+                  0.03827313267832788,
+                  0.023132968959179618
+                ],
+                "Y": 0.03752187566964412
+              },
+              "no-sun": {
+                "RGB": [
+                  0.03912020626037364,
+                  0.03795466836007742,
+                  0.023360643237497102
+                ],
+                "Y": 0.0371487731038301
+              },
+              "sky-only": {
+                "RGB": [
+                  0.03847156141258035,
+                  0.03703179287679342,
+                  0.023026137418583715
+                ],
+                "Y": 0.03632667934341898
+              },
+              "newVsOldPercent": 47.65982326259448,
+              "newVsOffPercent": -14.568333693102309,
+              "directSunBounceRGB": [
+                0.0012918186209143132,
+                0.0011718062441461521,
+                9.893202765381623e-05
+              ],
+              "secondarySkyRGB": [
+                0.0005308827399368027,
+                0.000853341925895694,
+                0.0003266063059713005
+              ],
+              "directSunBounceY": 0.0011198593570163164,
+              "secondarySkyY": 0.0007467567912022924
+            },
+            "pillar": {
+              "off": {
+                "RGB": [
+                  0.16594771151539667,
+                  0.14133942616925654,
+                  0.11994509931396179
+                ],
+                "Y": 0.14502647723489365
+              },
+              "old": {
+                "RGB": [
+                  0.09336777877458455,
+                  0.07851911775759911,
+                  0.0522000535452011
+                ],
+                "Y": 0.07977570665367507
+              },
+              "new": {
+                "RGB": [
+                  0.1366116005591189,
+                  0.1220323995060132,
+                  0.09743839169582476
+                ],
+                "Y": 0.12335625028600786
+              },
+              "sun-only": {
+                "RGB": [
+                  0.1343523312247467,
+                  0.1188281880395594,
+                  0.09601874801876081
+                ],
+                "Y": 0.12048177931122855
+              },
+              "no-sun": {
+                "RGB": [
+                  0.13256438459042238,
+                  0.11854067199936633,
+                  0.09728798876009463
+                ],
+                "Y": 0.11998766956634943
+              },
+              "sky-only": {
+                "RGB": [
+                  0.13006639361856082,
+                  0.11510690121966059,
+                  0.09560754130127856
+                ],
+                "Y": 0.1168794355175596
+              },
+              "newVsOldPercent": 54.6288406087408,
+              "newVsOffPercent": -14.942255622597367,
+              "directSunBounceRGB": [
+                0.004047215968696505,
+                0.0034917275066468773,
+                0.0001504029357301262
+              ],
+              "secondarySkyRGB": [
+                0.002259269334372177,
+                0.0032042114664538046,
+                0.0014196436770639448
+              ],
+              "directSunBounceY": 0.0033685807196584387,
+              "secondarySkyY": 0.0028744709747793025
+            },
+            "control": {
+              "off": {
+                "RGB": [
+                  0.10201676711065166,
+                  0.12021175678685073,
+                  0.04811479766762545
+                ],
+                "Y": 0.11113810153328274
+              },
+              "old": {
+                "RGB": [
+                  0.10202278222087316,
+                  0.12029052895164243,
+                  0.04811889826560027
+                ],
+                "Y": 0.11119601426114863
+              },
+              "new": {
+                "RGB": [
+                  0.10199322743700455,
+                  0.12021012041237158,
+                  0.048116745707158896
+                ],
+                "Y": 0.11113206731209219
+              },
+              "sun-only": {
+                "RGB": [
+                  0.10200310404434228,
+                  0.12025512557395253,
+                  0.04812395279466132
+                ],
+                "Y": 0.11116687512209256
+              },
+              "no-sun": {
+                "RGB": [
+                  0.10199322743700455,
+                  0.12021012041237158,
+                  0.048116745707158896
+                ],
+                "Y": 0.11113206731209219
+              },
+              "sky-only": {
+                "RGB": [
+                  0.10199322743700455,
+                  0.12021012041237158,
+                  0.048116745707158896
+                ],
+                "Y": 0.11113206731209219
+              },
+              "newVsOldPercent": -0.05750831042042881,
+              "newVsOffPercent": -0.00542948017584477,
+              "directSunBounceRGB": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "secondarySkyRGB": [
+                -9.876607337727661e-06,
+                -4.500516158094381e-05,
+                -7.207087502424103e-06
+              ],
+              "directSunBounceY": 0.0,
+              "secondarySkyY": -3.480781000036693e-05
+            }
+          },
+          "overcast": {
+            "panel": {
+              "off": {
+                "RGB": [
+                  0.05517097263235185,
+                  0.049963295722413086,
+                  0.04179249939990138
+                ],
+                "Y": 0.05048051633898072
+              },
+              "old": {
+                "RGB": [
+                  0.022632186689803265,
+                  0.017816254181904603,
+                  0.011229703684755345
+                ],
+                "Y": 0.01836457248718968
+              },
+              "new": {
+                "RGB": [
+                  0.04782332302127518,
+                  0.03789902725965319,
+                  0.02430236254966137
+                ],
+                "Y": 0.039027253346512615
+              },
+              "sun-only": {
+                "RGB": [
+                  0.046208038547370246,
+                  0.036366437680622116,
+                  0.02388211418220985
+                ],
+                "Y": 0.0375573938683074
+              },
+              "no-sun": {
+                "RGB": [
+                  0.04766975106727503,
+                  0.03780936454341799,
+                  0.024293554400399736
+                ],
+                "Y": 0.03892984122606408
+              },
+              "sky-only": {
+                "RGB": [
+                  0.046178173667298685,
+                  0.036332251132086504,
+                  0.02389521274195322
+                ],
+                "Y": 0.03752754009130499
+              },
+              "newVsOldPercent": 112.51381361442698,
+              "newVsOffPercent": -22.688482256319496,
+              "directSunBounceRGB": [
+                0.0001535719540001479,
+                8.966271623520039e-05,
+                8.808149261633341e-06
+              ],
+              "secondarySkyRGB": [
+                0.0016152844739049307,
+                0.001532589579031074,
+                0.00042024836745151867
+              ],
+              "directSunBounceY": 9.741212044853668e-05,
+              "secondarySkyY": 0.0014698594782052118
+            },
+            "upper": {
+              "off": {
+                "RGB": [
+                  0.05274354261578874,
+                  0.044130550238972395,
+                  0.033312543433210544
+                ],
+                "Y": 0.045180612326907545
+              },
+              "old": {
+                "RGB": [
+                  0.02133772560695259,
+                  0.0154824970348067,
+                  0.008715385023185232
+                ],
+                "Y": 0.016238733142005846
+              },
+              "new": {
+                "RGB": [
+                  0.045305037437046586,
+                  0.03305389459213666,
+                  0.018961961283463016
+                ],
+                "Y": 0.034641049976078274
+              },
+              "sun-only": {
+                "RGB": [
+                  0.04364717679159023,
+                  0.03156405823801918,
+                  0.018513712017902254
+                ],
+                "Y": 0.033190694245415944
+              },
+              "no-sun": {
+                "RGB": [
+                  0.0452326460565164,
+                  0.03297362548709083,
+                  0.018924873764179482
+                ],
+                "Y": 0.034565573385756505
+              },
+              "sky-only": {
+                "RGB": [
+                  0.0435916693365869,
+                  0.031560803213391074,
+                  0.018564283985176188
+                ],
+                "Y": 0.03318021666290539
+              },
+              "newVsOldPercent": 113.32359903415056,
+              "newVsOffPercent": -23.32762175636204,
+              "directSunBounceRGB": [
+                7.239138053018873e-05,
+                8.026910504582707e-05,
+                3.708751928353446e-05
+              ],
+              "secondarySkyRGB": [
+                0.001657860645456359,
+                0.0014898363541174797,
+                0.00044824926556076214
+              ],
+              "directSunBounceY": 7.547659032176484e-05,
+              "secondarySkyY": 0.0014503557306623305
+            },
+            "lower": {
+              "off": {
+                "RGB": [
+                  0.03358571949152198,
+                  0.033438945816695806,
+                  0.02649531174879243
+                ],
+                "Y": 0.032968819520261226
+              },
+              "old": {
+                "RGB": [
+                  0.013604020935297995,
+                  0.011828245983072774,
+                  0.007069438620962669
+                ],
+                "Y": 0.011862189846371506
+              },
+              "new": {
+                "RGB": [
+                  0.028733478387920206,
+                  0.025143803055434333,
+                  0.015315171722129291
+                ],
+                "Y": 0.025197340848856206
+              },
+              "sun-only": {
+                "RGB": [
+                  0.027626467798967724,
+                  0.024051935491385543,
+                  0.015009827370689214
+                ],
+                "Y": 0.024159040853663237
+              },
+              "no-sun": {
+                "RGB": [
+                  0.028501225054927488,
+                  0.024992581125357273,
+                  0.015258169320071693
+                ],
+                "Y": 0.02503569429244228
+              },
+              "sky-only": {
+                "RGB": [
+                  0.02766329060907816,
+                  0.024070220164090234,
+                  0.015035154044389612
+                ],
+                "Y": 0.02418177516685228
+              },
+              "newVsOldPercent": 112.41727855640207,
+              "newVsOffPercent": -23.572207875471552,
+              "directSunBounceRGB": [
+                0.00023225333299271844,
+                0.0001512219300770605,
+                5.7002402057597726e-05
+              ],
+              "secondarySkyRGB": [
+                0.0011070105889524826,
+                0.0010918675640487902,
+                0.0003053443514400775
+              ],
+              "directSunBounceY": 0.00016164655641392418,
+              "secondarySkyY": 0.001038299995192966
+            },
+            "pillar": {
+              "off": {
+                "RGB": [
+                  0.1217854766444818,
+                  0.11086276795909457,
+                  0.11320577462672278
+                ],
+                "Y": 0.11335410090701065
+              },
+              "old": {
+                "RGB": [
+                  0.050041211340568895,
+                  0.039705271362116434,
+                  0.03046493616610023
+                ],
+                "Y": 0.041235540000383056
+              },
+              "new": {
+                "RGB": [
+                  0.1059955570221937,
+                  0.0846847493919516,
+                  0.06608602988021463
+                ],
+                "Y": 0.08787259954539366
+              },
+              "sun-only": {
+                "RGB": [
+                  0.10261447995752088,
+                  0.08115111431667425,
+                  0.06495965585893723
+                ],
+                "Y": 0.08454520255126963
+              },
+              "no-sun": {
+                "RGB": [
+                  0.10576322031954234,
+                  0.08450196951514051,
+                  0.06606116444543202
+                ],
+                "Y": 0.08769068531012339
+              },
+              "sky-only": {
+                "RGB": [
+                  0.10251735710556194,
+                  0.08106671784880198,
+                  0.06501480580261182
+                ],
+                "Y": 0.08446817570505422
+              },
+              "newVsOldPercent": 113.09918469499216,
+              "newVsOffPercent": -22.47955844360725,
+              "directSunBounceRGB": [
+                0.00023233670265135342,
+                0.00018277987681108998,
+                2.4865434782611606e-05
+              ],
+              "secondarySkyRGB": [
+                0.003381077064672819,
+                0.003533635075277347,
+                0.001126374021277396
+              ],
+              "directSunBounceY": 0.00018191423527027384,
+              "secondarySkyY": 0.003327396994124028
+            },
+            "control": {
+              "off": {
+                "RGB": [
+                  0.05517819776994372,
+                  0.06999073192483402,
+                  0.03611213709900587
+                ],
+                "Y": 0.06439555261707955
+              },
+              "old": {
+                "RGB": [
+                  0.055187928382078505,
+                  0.06998615901389664,
+                  0.036114510716042374
+                ],
+                "Y": 0.06439452217446702
+              },
+              "new": {
+                "RGB": [
+                  0.05516515223373063,
+                  0.06997200976792077,
+                  0.03611431189796141
+                ],
+                "Y": 0.06437954606994087
+              },
+              "sun-only": {
+                "RGB": [
+                  0.05519453844208307,
+                  0.0699671204108649,
+                  0.03611227148368512
+                ],
+                "Y": 0.0643821493917595
+              },
+              "no-sun": {
+                "RGB": [
+                  0.055181209081612434,
+                  0.06995676301432759,
+                  0.03610679723180658
+                ],
+                "Y": 0.06437151271873433
+              },
+              "sky-only": {
+                "RGB": [
+                  0.05519892027101987,
+                  0.0699985152229479,
+                  0.03611798594513478
+                ],
+                "Y": 0.06440594712230989
+              },
+              "newVsOldPercent": -0.02325679890220478,
+              "newVsOffPercent": -0.024856603427048096,
+              "directSunBounceRGB": [
+                -1.6056847881806835e-05,
+                1.5246753593184392e-05,
+                7.514666154832816e-06
+              ],
+              "secondarySkyRGB": [
+                -2.938620835244571e-05,
+                4.889357055865018e-06,
+                2.040414276288649e-06
+              ],
+              "directSunBounceY": 8.033351206552272e-06,
+              "secondarySkyY": -2.603321818627257e-06
+            }
+          },
+          "dusk": {
+            "panel": {
+              "off": {
+                "RGB": [
+                  0.0671629220124777,
+                  0.04593351213936103,
+                  0.01957108641534051
+                ],
+                "Y": 0.04854351754111136
+              },
+              "old": {
+                "RGB": [
+                  0.0725793758159765,
+                  0.050463757666435786,
+                  0.018972090878024674
+                ],
+                "Y": 0.05289183974290486
+              },
+              "new": {
+                "RGB": [
+                  0.06660697407162477,
+                  0.04509443645884416,
+                  0.014638282766244874
+                ],
+                "Y": 0.04746906765871565
+              },
+              "sun-only": {
+                "RGB": [
+                  0.06627367094967904,
+                  0.044763307912748726,
+                  0.014517580642687721
+                ],
+                "Y": 0.047152669585501704
+              },
+              "no-sun": {
+                "RGB": [
+                  0.0658796059244636,
+                  0.04458145348919598,
+                  0.014610500468450275
+                ],
+                "Y": 0.046945537888836035
+              },
+              "sky-only": {
+                "RGB": [
+                  0.065486166252996,
+                  0.04420273346466981,
+                  0.014462837581270819
+                ],
+                "Y": 0.04658037079268655
+              },
+              "newVsOldPercent": -10.252568469064538,
+              "newVsOffPercent": -2.2133745901000257,
+              "directSunBounceRGB": [
+                0.0007273681471611781,
+                0.0005129829696481764,
+                2.778229779459851e-05
+              ],
+              "secondarySkyRGB": [
+                0.0003333031219457383,
+                0.00033112854609543274,
+                0.00012070212355715267
+              ],
+              "directSunBounceY": 0.0005235297698796122,
+              "secondarySkyY": 0.0003163980732139439
+            },
+            "upper": {
+              "off": {
+                "RGB": [
+                  0.06399381070716874,
+                  0.04084875439391102,
+                  0.015876013914157525
+                ],
+                "Y": 0.04396636150347141
+              },
+              "old": {
+                "RGB": [
+                  0.06887800515282207,
+                  0.04464726933923379,
+                  0.015216835068960717
+                ],
+                "Y": 0.04767384641888894
+              },
+              "new": {
+                "RGB": [
+                  0.0631482121314079,
+                  0.039975835874961375,
+                  0.011851516037938485
+                ],
+                "Y": 0.04287170717484885
+              },
+              "sun-only": {
+                "RGB": [
+                  0.06289609278824836,
+                  0.03966628622322639,
+                  0.011738224119819249
+                ],
+                "Y": 0.04258853701508406
+              },
+              "no-sun": {
+                "RGB": [
+                  0.06241985638168783,
+                  0.039474174590783166,
+                  0.011794118480609194
+                ],
+                "Y": 0.04235392648837494
+              },
+              "sky-only": {
+                "RGB": [
+                  0.062333433560892465,
+                  0.03925894794441068,
+                  0.011711669775336726
+                ],
+                "Y": 0.04217567010266757
+              },
+              "newVsOldPercent": -10.072900772146266,
+              "newVsOffPercent": -2.4897541920455013,
+              "directSunBounceRGB": [
+                0.0007283557497200638,
+                0.0005016612841782092,
+                5.7397557329291055e-05
+              ],
+              "secondarySkyRGB": [
+                0.00025211934315953755,
+                0.00030954965173498467,
+                0.00011329191811923663
+              ],
+              "directSunBounceY": 0.0005177806864739156,
+              "secondarySkyY": 0.00028317015976478757
+            },
+            "lower": {
+              "off": {
+                "RGB": [
+                  0.04385864438309159,
+                  0.03286594343141853,
+                  0.013095351480337145
+                ],
+                "Y": 0.03377555491487614
+              },
+              "old": {
+                "RGB": [
+                  0.047060061645416824,
+                  0.03584420939756812,
+                  0.01267494379237549
+                ],
+                "Y": 0.03655587860876584
+              },
+              "new": {
+                "RGB": [
+                  0.04362415284291848,
+                  0.0323808799803119,
+                  0.009973247779516177
+                ],
+                "Y": 0.03315336874600461
+              },
+              "sun-only": {
+                "RGB": [
+                  0.04328695589685276,
+                  0.03207403827787911,
+                  0.00987348288086931
+                ],
+                "Y": 0.0328550244640088
+              },
+              "no-sun": {
+                "RGB": [
+                  0.0430353009891901,
+                  0.03194782913214736,
+                  0.00993904142896931
+                ],
+                "Y": 0.03271599117678519
+              },
+              "sky-only": {
+                "RGB": [
+                  0.04277158916852365,
+                  0.031662364029980954,
+                  0.00984136365181775
+                ],
+                "Y": 0.032448709067131744
+              },
+              "newVsOldPercent": -9.30769548497553,
+              "newVsOffPercent": -1.8421197532938138,
+              "directSunBounceRGB": [
+                0.0005888518537283741,
+                0.00043305084816454287,
+                3.420635054686601e-05
+              ],
+              "secondarySkyRGB": [
+                0.00033719694606571676,
+                0.00030684170243279463,
+                9.976489864686744e-05
+              ],
+              "directSunBounceY": 0.00043737756921941707,
+              "secondarySkyY": 0.0002983442819958099
+            },
+            "pillar": {
+              "off": {
+                "RGB": [
+                  0.13847584807349872,
+                  0.09342097702397628,
+                  0.04948905589610375
+                ],
+                "Y": 0.09982775790367235
+              },
+              "old": {
+                "RGB": [
+                  0.15047129142986135,
+                  0.10373762488229503,
+                  0.04801136247647984
+                ],
+                "Y": 0.10964976624460776
+              },
+              "new": {
+                "RGB": [
+                  0.13724821787025357,
+                  0.09182089301554859,
+                  0.0362574963647686
+                ],
+                "Y": 0.09746706504147255
+              },
+              "sun-only": {
+                "RGB": [
+                  0.13650861726284075,
+                  0.09097709734123871,
+                  0.035903859772205914
+                ],
+                "Y": 0.09668081072408713
+              },
+              "no-sun": {
+                "RGB": [
+                  0.1356931133148561,
+                  0.09060024323231955,
+                  0.03615421270752794
+                ],
+                "Y": 0.09625598400797686
+              },
+              "sky-only": {
+                "RGB": [
+                  0.1347338005745377,
+                  0.08965163342211523,
+                  0.03574664225974122
+                ],
+                "Y": 0.09534416179679685
+              },
+              "newVsOldPercent": -11.110558298827488,
+              "newVsOffPercent": -2.3647659847050972,
+              "directSunBounceRGB": [
+                0.0015551045553974796,
+                0.0012206497832290414,
+                0.00010328365724066035
+              ],
+              "secondarySkyRGB": [
+                0.0007396006074128214,
+                0.0008437956743098801,
+                0.00035363659256268387
+              ],
+              "directSunBounceY": 0.00121108103349569,
+              "secondarySkyY": 0.0007862543173854178
+            },
+            "control": {
+              "off": {
+                "RGB": [
+                  0.03955605910830276,
+                  0.0420565375667307,
+                  0.018588606222378918
+                ],
+                "Y": 0.03983055120340672
+              },
+              "old": {
+                "RGB": [
+                  0.03948927369307225,
+                  0.04200145108480188,
+                  0.018572602947280352
+                ],
+                "Y": 0.03977579933579111
+              },
+              "new": {
+                "RGB": [
+                  0.039554493351957085,
+                  0.042076679352269705,
+                  0.018591182532500562
+                ],
+                "Y": 0.03984480973821591
+              },
+              "sun-only": {
+                "RGB": [
+                  0.03955622221628499,
+                  0.04206475314537426,
+                  0.01859173404735383
+                ],
+                "Y": 0.03983668749097281
+              },
+              "no-sun": {
+                "RGB": [
+                  0.039562972876773565,
+                  0.04206889800390857,
+                  0.018591085098806918
+                ],
+                "Y": 0.039841040230131325
+              },
+              "sky-only": {
+                "RGB": [
+                  0.03954510168316786,
+                  0.0420562897492621,
+                  0.01858723316312447
+                ],
+                "Y": 0.03982794528089133
+              },
+              "newVsOldPercent": 0.1734984678553042,
+              "newVsOffPercent": 0.035797985160623824,
+              "directSunBounceRGB": [
+                -8.479524816480677e-06,
+                7.78134836113692e-06,
+                9.743369364448307e-08
+              ],
+              "secondarySkyRGB": [
+                -1.728864327907309e-06,
+                1.19262068954476e-05,
+                -5.515148532690695e-07
+              ],
+              "directSunBounceY": 3.7695080845824645e-06,
+              "secondarySkyY": 8.122247243105002e-06
+            }
+          }
+        },
+        "note": "Linearized SDR screenshot means after AA/output; not raw radiometric measurements. Six captures per component mode. Diagnostic differences isolate terms without amplified images."
+      },
+      "screenshots": {
+        "morning": {
+          "off": {
+            "file": "everon-morning-off.png",
+            "sha256": "e3e3e4c5237ea6510da13a78134e7efaa0ccf013603f9c66a7e74015de30b759"
+          },
+          "old": {
+            "file": "everon-morning-old.png",
+            "sha256": "729a11247918edb3f6f4a901ea7845810e773e0350a49b75be9b4dc0d3911b92"
+          },
+          "calibrated": {
+            "file": "everon-morning-calibrated.png",
+            "sha256": "b2b4e7a9d87890b26aebc5063812c225f48e92ae5712fdae504137ef643258e4"
+          }
+        },
+        "noon": {
+          "off": {
+            "file": "everon-noon-off.png",
+            "sha256": "99926f814f4dd1a895f0308716aab06b0cbf9f7fc54955e026f6534f77e1e4ac"
+          },
+          "old": {
+            "file": "everon-noon-old.png",
+            "sha256": "ec22aea849234598e157ea4ee0d0cada6c873f045cc4138b2242117652008ce8"
+          },
+          "calibrated": {
+            "file": "everon-noon-calibrated.png",
+            "sha256": "230ca7a9a477b751ba9dc8eb2aff5ad3b6bba5d21feaa04605facfecbce5785d"
+          }
+        },
+        "overcast": {
+          "off": {
+            "file": "everon-overcast-off.png",
+            "sha256": "fd1caf74579e8f7866ba6118cf84e9cd14b7e55f6b65c5aa8397e2e46063c7f1"
+          },
+          "old": {
+            "file": "everon-overcast-old.png",
+            "sha256": "9b6ec7b192630c6209f1a726f7736205562066dd871cc13a70a0847e6dd397de"
+          },
+          "calibrated": {
+            "file": "everon-overcast-calibrated.png",
+            "sha256": "9705d56e5fa767f4251afb13648f88f21ccd3d65c65badae288b3e10d6f3b77d"
+          }
+        },
+        "dusk": {
+          "off": {
+            "file": "everon-dusk-off.png",
+            "sha256": "f3708a936a0b015d21ebfd8a514021239a17b68d88ab01264401e0dce1a6ccc9"
+          },
+          "old": {
+            "file": "everon-dusk-old.png",
+            "sha256": "ad4a0712041d1eb8d6e43eb3bc4dcb01e46224a254cb5e886a0381c60fcf5b01"
+          },
+          "calibrated": {
+            "file": "everon-dusk-calibrated.png",
+            "sha256": "9ecd1c137d43bfdec764b7c60da202ce09604f45d8dbf8eb7b2de5cb03b09735"
+          }
+        }
+      },
+      "motion": [
+        {
+          "aa": "taa",
+          "missionTimeBefore": 3.432,
+          "missionTimeAfter": 9.089,
+          "BLASbuildsBefore": 252,
+          "BLASbuildsAfter": 252,
+          "image": {
+            "file": "everon-motion-taa.png",
+            "sha256": "a14936ad5330d8c3f919086b81eeb8a239b4869f9635f73cbb55a50f5c48f14e"
+          }
+        },
+        {
+          "aa": "fsr-quality",
+          "missionTimeBefore": 11.227,
+          "missionTimeAfter": 16.909,
+          "BLASbuildsBefore": 252,
+          "BLASbuildsAfter": 252,
+          "image": {
+            "file": "everon-motion-fsr-quality.png",
+            "sha256": "9db792a7a45c52919d0e85f9711710d1b6fdb9622553413a17a7ce82a0686cf0"
+          }
+        }
+      ]
+    }
+  },
+  "initialInvestigation": {
+    "note": "Instrumented old lighting model, identity conversion, 256-sample lookup measurement only. Not the untouched baseline binary used for screenshot comparisons. Final production quadrature uses 1024 samples.",
+    "executableSHA256": "8F4EBDE8C3ACDE77949872F2BF0AC218B644FACF83A303C2B6D2EDD7ACF87CC8",
+    "validation": {
+      "presented": 33787,
+      "errors": 0,
+      "warnings": 0
+    },
+    "rawEnergy": {
+      "file": "initial-uncalibrated-energy.jsonl",
+      "sha256": "647ae8fc6bc1fbd827e39f48f56b312a1cc1a3c8da9ef1c7c9de39db2ff00bd8"
+    }
+  },
+  "independentSkyData": {
+    "counters": {
+      "bounceRays": 113215,
+      "hits": 53379,
+      "eligibleHits": 53349,
+      "rejectedMaterials": 30,
+      "sunRays": 51168,
+      "sunBlocked": 21423,
+      "eligibleReceivers": 113374,
+      "sunVisible": 29745,
+      "backfacing": 2181,
+      "missingColor": 20,
+      "secondarySky": {
+        "rays": 52069,
+        "blocked": 11671,
+        "visible": 40398,
+        "rejectedHemisphere": 1280
+      },
+      "primarySky": {
+        "rays": 55269,
+        "blocked": 2376,
+        "visible": 52893,
+        "belowHorizon": 4567
+      }
+    },
+    "energy": {
+      "rawEpiRGB": {
+        "dome": [
+          0.268212,
+          0.461311,
+          0.858996
+        ],
+        "weather": [
+          0.433574,
+          0.607726,
+          0.958818
+        ],
+        "vertical": [
+          0.268896,
+          0.347719,
+          0.503948
+        ],
+        "reference": [
+          0.748414,
+          0.911408,
+          1.28
+        ]
+      },
+      "calibration": 2.01209,
+      "calibratedEpiRGB": {
+        "dome": [
+          0.5396666830800001,
+          0.9281992499900001,
+          1.7283772616400002
+        ],
+        "weather": [
+          0.8723899096600001,
+          1.2227994073400001,
+          1.9292281096200001
+        ],
+        "vertical": [
+          0.5410429526400001,
+          0.69964192271,
+          1.01398873132
+        ]
+      },
+      "rawEpiY": {
+        "dome": 0.4489710096,
+        "weather": 0.5960501272,
+        "vertical": 0.342240964,
+        "reference": 0.903367818
+      },
+      "calibratedEpiY": {
+        "dome": 0.9033700787060641,
+        "weather": 1.199306500437848,
+        "vertical": 0.68861962125476
+      },
+      "preCompositionSparseFrameMeans": {
+        "incoming": [
+          0.565579,
+          0.741894,
+          1.04829
+        ],
+        "replacement": [
+          0.0430609,
+          0.0404911,
+          0.0342746
+        ],
+        "capturedAmbient": [
+          0.0565951,
+          0.0496332,
+          0.042164
+        ],
+        "reflectanceFog": [
+          0.0756276,
+          0.0544255,
+          0.0329119
+        ],
+        "samples": 214
+      }
+    },
+    "raw": "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=33 reflectorInstances=49 completedDispatches=22259 bounceRays=113215 hits=53379 eligibleHits=53349 rejectedMaterials=30 sunRays=51168 sunBlocked=21423 eligibleReceivers=113374 dynamicHits=0 sunVisible=29745 terrain(eligible/sunlit)=50805/29707 stockPBR(eligible/sunlit)=0/0 catalog(eligible/sunlit)=2544/38 backfacing=2181 missingColor=20 secondarySky(rays/blocked/visible/rejectedHemisphere)=52069/11671/40398/1280 primarySky(rays/blocked/visible/belowHorizon)=55269/2376/52893/4567 skyEpi(dome/weather/vertical/reference)=[0.268212,0.461311,0.858996][0.433574,0.607726,0.958818][0.268896,0.347719,0.503948][0.748414,0.911408,1.28] skyCalibration=2.01209 transportMean(incoming/replacement/capturedAmbient/reflectanceFog)=[0.565579,0.741894,1.04829][0.0430609,0.0404911,0.0342746][0.0565951,0.0496332,0.042164][0.0756276,0.0544255,0.0329119] transportSamples=214 GPUms(trace/filter/temporal/BLAS/TLAS)=0.22528/0.066496/0.064416/6.4e-05/6.4e-05 CPUrecordMs=0.114 temporal=on history(accepted/rejected/clamped/dynamic)=111135/2239/280/0 historyResets=41 phase=12 historyBytes=9830400 historyAllocations=14; last completed frame; one bounce, half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain"
+  },
+  "coast": {
+    "start": {
+      "result": "[\"RTShadows=on capability=available terrainPatches=9 foliageInstances=52 lastCompletedRays=1171117 lastCompletedHits=4171 totalRays=13288694176 rayQueriesExecuted=yes lastWorldDispatch=yes lastTerrainHits=0 lastAlphaHits=0 lastGPUms(rays/compose)=0.3328/0.038976; shared RTAO=off capability=available BLAS=27 cachedBLAS=27 TLAS=2 instances=76 instancedTriangles=10667 completedPasses=16197 lastCompletedRays=0 lastCompletedHits=0 totalRays=300132380 rayQueriesExecuted=yes lastWorldDispatch=no BLASbuilds=553 TLASbuilds=38 lastGPUms(BLAS/TLAS/rays/filter/frame)=6.4e-05/6.4e-05/0/0/3.48221; shared static LOD0 scene radius=160m; dynamic=off; AO radius=4m includes bounded terrain, excludes foliage cards; ambient-only composition; static collection excludes animation/damage; blended effects/proxies excluded; sunlight-only native opaque/cutout and terrain receivers, CSM fallback retained\",\"RTReflections=on capability=available waterRays=1114661 hits=61310 shadedHits=61310 shadedTerrain=51816 shadedAlpha=23 totalWaterRays=209935702 totalShadedHits=11378592 rayQueriesExecuted=yes hitShadingExecuted=yes lastWorldDispatch=yes hitSurface=unavailable (diagnostics disabled) lastGPUms(traceShade/filter)=0.490496/0.162752; shared RTAO=off capability=available BLAS=27 cachedBLAS=27 TLAS=2 instances=76 instancedTriangles=10667 completedPasses=16197 lastCompletedRays=0 lastCompletedHits=0 totalRays=300132380 rayQueriesExecuted=yes lastWorldDispatch=no BLASbuilds=553 TLASbuilds=38 lastGPUms(BLAS/TLAS/rays/filter/frame)=6.4e-05/6.4e-05/0/0/3.48221; shared static LOD0 scene radius=160m; dynamic=off; AO radius=4m includes bounded terrain, excludes foliage cards; ambient-only composition; static collection excludes animation/damage; blended effects/proxies excluded; actual water only, 80m receivers/70m rays, textured hits and weather sky fallback\",\"WaterRefraction requested=on active=on captured=yes composited=yes captures=326 composites=326 lastGPUms(capture/optics)=0.044032/0.123904 fallback=none; raster-only coastal terrain, missing bottom/underwater retains original water\",5.65]",
+      "ok": true
+    },
+    "end": {
+      "result": "[\"RTShadows=on capability=available terrainPatches=9 foliageInstances=52 lastCompletedRays=1178603 lastCompletedHits=2929 totalRays=13570682607 rayQueriesExecuted=yes lastWorldDispatch=yes lastTerrainHits=0 lastAlphaHits=0 lastGPUms(rays/compose)=0.333824/0.038816; shared RTAO=off capability=available BLAS=18 cachedBLAS=18 TLAS=2 instances=76 instancedTriangles=10667 completedPasses=16437 lastCompletedRays=0 lastCompletedHits=0 totalRays=300132380 rayQueriesExecuted=yes lastWorldDispatch=no BLASbuilds=553 TLASbuilds=38 lastGPUms(BLAS/TLAS/rays/filter/frame)=6.4e-05/6.4e-05/0/0/3.49648; shared static LOD0 scene radius=160m; dynamic=off; AO radius=4m includes bounded terrain, excludes foliage cards; ambient-only composition; static collection excludes animation/damage; blended effects/proxies excluded; sunlight-only native opaque/cutout and terrain receivers, CSM fallback retained\",\"RTReflections=on capability=available waterRays=1131618 hits=54540 shadedHits=54540 shadedTerrain=46054 shadedAlpha=55 totalWaterRays=479283365 totalShadedHits=25440179 rayQueriesExecuted=yes hitShadingExecuted=yes lastWorldDispatch=yes hitSurface=unavailable (diagnostics disabled) lastGPUms(traceShade/filter)=0.47616/0.165664; shared RTAO=off capability=available BLAS=18 cachedBLAS=18 TLAS=2 instances=76 instancedTriangles=10667 completedPasses=16437 lastCompletedRays=0 lastCompletedHits=0 totalRays=300132380 rayQueriesExecuted=yes lastWorldDispatch=no BLASbuilds=553 TLASbuilds=38 lastGPUms(BLAS/TLAS/rays/filter/frame)=6.4e-05/6.4e-05/0/0/3.49648; shared static LOD0 scene radius=160m; dynamic=off; AO radius=4m includes bounded terrain, excludes foliage cards; ambient-only composition; static collection excludes animation/damage; blended effects/proxies excluded; actual water only, 80m receivers/70m rays, textured hits and weather sky fallback\",\"WaterRefraction requested=on active=on captured=yes composited=yes captures=566 composites=566 lastGPUms(capture/optics)=0.044032/0.126976 fallback=none; raster-only coastal terrain, missing bottom/underwater retains original water\",11.187]",
+      "ok": true
+    }
+  },
+  "localLights": {
+    "result": "\"requested=on active=2 max=2 resolution=1024 range=160m filter=3x3-PCF RT=not-required depthGPUms=0.109760 vertices=19962,19794 light0=3115.806152,226.014267,6336.315430 dir=0.990346,-0.138295,0.009342 light1=3115.806152,226.015686,6335.573242 dir=0.992502,-0.121660,-0.011798\"",
+    "ok": true
+  },
+  "combinationSmoke": [
+    "RT sunlight",
+    "RT water/refraction",
+    "live coastal waves",
+    "RTAO and SSAO",
+    "TAA/MSAA4/FSR Quality",
+    "clouds/cloud shadows",
+    "fog/rain",
+    "night-eye fallback",
+    "real Jeep local headlights/shadows",
+    "restored stock PBR v3"
+  ],
+  "gl33": {
+    "executableSHA256": "60361FEE10B47883CC82C1A5E5DFC27C2115DE09ED9E715578310D8545A778AA",
+    "result": {
+      "commands": [
+        {
+          "mode": "off",
+          "result": {
+            "result": "\"UNSUPPORTED: PBR prototype requires Vulkan\"",
+            "ok": true
+          }
+        },
+        {
+          "mode": "on",
+          "result": {
+            "result": "\"UNSUPPORTED: PBR prototype requires Vulkan\"",
+            "ok": true
+          }
+        },
+        {
+          "mode": "enhanced",
+          "result": {
+            "result": "\"UNSUPPORTED: PBR prototype requires Vulkan\"",
+            "ok": true
+          }
+        },
+        {
+          "mode": "off",
+          "result": {
+            "result": "\"UNSUPPORTED: PBR prototype requires Vulkan\"",
+            "ok": true
+          }
+        }
+      ],
+      "worldROI": [
+        300,
+        600,
+        1000,
+        850
+      ],
+      "changedPixels": 0
+    }
+  },
+  "tests": {
+    "vulkanCases": 46,
+    "vulkanAssertions": 13992,
+    "gl33Cases": 45,
+    "gl33Assertions": 13952,
+    "driverFreeChecks": 684
+  },
+  "originalSources": [
+    {
+      "file": "DTA\\Data.pbo",
+      "sha256": "1587f9c052ff38967463d851ca85a03efd2db09d063da183046a9b16181d5e2f",
+      "unchanged": true
+    },
+    {
+      "file": "DTA\\Data3D.pbo",
+      "sha256": "10528ef9b5112896898ad8667e83601ff47f95231652c73409d57b7227a8a00f",
+      "unchanged": true
+    },
+    {
+      "file": "Worlds\\abel.wrp",
+      "sha256": "1c13aca4d3300db3546583c82ffa132c1149831e42227f2b47019c74040462a5",
+      "unchanged": true
+    },
+    {
+      "file": "Worlds\\eden.wrp",
+      "sha256": "5a2550b27612fc4c8ccdec55ce2555c1ed23114d46f8b687ce5fb8b273515a79",
+      "unchanged": true
+    }
+  ],
+  "limitations": [
+    "Engine-relative calibration, not measured physical sky radiance or a screenshot brightness target.",
+    "Dome-only luminance anchor retains authored chroma; local clouds are not in the normalization and can change full-sky energy.",
+    "Vertical hemisphere and real occlusion legitimately reduce illumination. Legacy ambient lights all orientations uniformly.",
+    "Bounded unmeasured stock reflectance retains baked artistic shading; terrain palette tint unresolved.",
+    "Finite 25m surface transport, 80m visibility, bounded RT scene and missing lower-horizon outgoing geometry.",
+    "Unsupported material fallback/receiver eligibility unchanged. Nighttime CPU-lit tests exercise fallback, not calibrated moonlight.",
+    "One sky sample, approximate reconstruction, no second surface bounce or indirect specular.",
+    "No exhaustive enclosed-room qualification. Running-camera capture checks are not player-input responsiveness or mission completion tests.",
+    "Diagnostic sparse HDR means are noisy single frames across qualified receivers, not shaded ROI radiometry. Screenshot differences are after AA/output.",
+    "Driver-free policy tests intentionally inject validation errors; actual gameplay logs determine zero-error Vulkan qualification."
+  ]
+}

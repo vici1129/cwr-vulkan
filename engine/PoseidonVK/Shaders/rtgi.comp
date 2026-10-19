@@ -16,9 +16,96 @@
 #include "ray_sky.glsl"
 layout(local_size_x=8,local_size_y=8) in;
 layout(set=0,binding=1) uniform accelerationStructureEXT scene;
-layout(set=0,binding=2,rgba32f) uniform writeonly image2D resultGI;
-layout(set=0,binding=3,std430) buffer Counters { uint count[48]; } counters;
+layout(set=0,binding=2,rgba32f) uniform image2D resultGI;
+layout(set=0,binding=3,std430) buffer Counters { uint count[80]; } counters;
+#ifdef MULTISAMPLE_DEPTH
+layout(set=0,binding=6) uniform sampler2DMS replacedAmbient;
+vec4 capturedAmbient(ivec2 p) { return texelFetch(replacedAmbient,p,0); }
+#else
+layout(set=0,binding=6) uniform sampler2D replacedAmbient;
+vec4 capturedAmbient(ivec2 p) { return texelFetch(replacedAmbient,p,0); }
+#endif
 shared uint counts[24];
+shared vec3 skyDomeIntegral[64],skyWeatherIntegral[64],skyWallIntegral[64];
+shared vec4 reflectanceIntegral[64];
+vec3 calibratedSky(vec3 world,vec3 direction) {
+    return raySkyLinear(world,direction)*uintBitsToFloat(counters.count[51]);
+}
+// A small deterministic quadrature of the existing sky lookup, not extra rays.
+// Independent of receivers, material color, occlusion and final image brightness.
+void measureSkyIrradiance() {
+    uint lane=gl_LocalInvocationIndex;
+    vec3 dome=vec3(0),cloudy=vec3(0),wall=vec3(0);
+    vec3 normal=vec3(-ao.camera[2].x,0,-ao.camera[2].z);
+    normal=dot(normal,normal)>1e-6?normalize(normal):vec3(0,0,1);
+    for(uint j=0;j<16;++j) {
+        uint i=lane+j*64;
+        float u=(float(i/32)+.5)/32,phi=6.2831853*(float(i%32)+.5)/32;
+        vec3 d=giCosineDirection(vec3(0,1,0),u,phi);
+        vec3 base=raySkyDomeLinear(d);
+        dome+=base/1024;
+        cloudy+=raySkyWeatherLinear(ao.camera[3].xyz,d,base)/1024;
+        d=giCosineDirection(normal,u,phi);
+        wall+=raySkyLinear(ao.camera[3].xyz,d)/1024;
+    }
+    skyDomeIntegral[lane]=dome;skyWeatherIntegral[lane]=cloudy;skyWallIntegral[lane]=wall;
+    barrier();
+    for(uint step=32;step>0;step/=2) {
+        if(lane<step) {
+            skyDomeIntegral[lane]+=skyDomeIntegral[lane+step];
+            skyWeatherIntegral[lane]+=skyWeatherIntegral[lane+step];
+            skyWallIntegral[lane]+=skyWallIntegral[lane+step];
+        }
+        barrier();
+    }
+    if(lane==0) {
+        for(uint c=0;c<3;++c) {
+            counters.count[48+c]=floatBitsToUint(skyDomeIntegral[0][c]);
+            counters.count[52+c]=floatBitsToUint(skyWeatherIntegral[0][c]);
+            counters.count[56+c]=floatBitsToUint(skyWallIntegral[0][c]);
+            counters.count[60+c]=floatBitsToUint(rayAmbientLinear()[c]);
+        }
+        counters.count[51]=floatBitsToUint(giSkyCalibration(rayAmbientLinear(),skyDomeIntegral[0]));
+    }
+}
+// Sparse, generic frame diagnostics BEFORE ambient composition/AA/tone mapping.
+// Reads existing transport/receiver/ambient images; no scene-specific ROI or rays.
+void measureTransport() {
+    uint lane=gl_LocalInvocationIndex;
+    vec3 incoming=vec3(0),replacement=vec3(0),ambient=vec3(0);
+    vec4 reflectance=vec4(0);
+    for(uint j=0;j<16;++j) {
+        uint i=lane+j*64;
+        ivec2 q=ivec2((vec2(i%32,i/32)+.5)*vec2(imageSize(resultGI))/32);
+        ivec2 full=min(q*2+1,depthSize()-1);
+        vec4 receiver=giReceiver(full),sampleGI=imageLoad(resultGI,q),old=capturedAmbient(full);
+        if(receiver.w>=0 || sampleGI.a==0 || old.w>=0 || !rtSameDepth(-old.w,-receiver.w)) continue;
+        incoming+=sampleGI.rgb;replacement+=receiver.rgb*sampleGI.rgb;ambient+=old.rgb;
+        reflectance+=vec4(receiver.rgb,1);
+    }
+    skyDomeIntegral[lane]=incoming;skyWeatherIntegral[lane]=replacement;skyWallIntegral[lane]=ambient;
+    reflectanceIntegral[lane]=reflectance;
+    barrier();
+    for(uint step=32;step>0;step/=2) {
+        if(lane<step) {
+            skyDomeIntegral[lane]+=skyDomeIntegral[lane+step];
+            skyWeatherIntegral[lane]+=skyWeatherIntegral[lane+step];
+            skyWallIntegral[lane]+=skyWallIntegral[lane+step];
+            reflectanceIntegral[lane]+=reflectanceIntegral[lane+step];
+        }
+        barrier();
+    }
+    if(lane==0) {
+        float samples=reflectanceIntegral[0].w,inv=1/max(samples,1);
+        for(uint c=0;c<3;++c) {
+            counters.count[64+c]=floatBitsToUint(skyDomeIntegral[0][c]*inv);
+            counters.count[68+c]=floatBitsToUint(skyWeatherIntegral[0][c]*inv);
+            counters.count[72+c]=floatBitsToUint(skyWallIntegral[0][c]*inv);
+            counters.count[76+c]=floatBitsToUint(reflectanceIntegral[0][c]*inv);
+        }
+        counters.count[67]=floatBitsToUint(samples);
+    }
+}
 bool skyBlocked(vec3 origin,vec3 direction,float minimum,inout float sampleData) {
     rayQueryEXT sky;
     rayQueryInitializeEXT(sky,scene,gl_RayFlagsTerminateOnFirstHitEXT,255,origin,minimum,direction,80.0);
@@ -78,7 +165,7 @@ vec4 traceGI(ivec2 pixel) {
                 atomicAdd(counts[21],1);
             else {
                 atomicAdd(counts[22],1);
-                result.rgb=raySkyLinear(world,direction);
+                result.rgb=calibratedSky(world,direction);
             }
         } else atomicAdd(counts[23],1); // below-horizon empty space is not a sky emitter
         return result;
@@ -144,7 +231,7 @@ vec4 traceGI(ivec2 pixel) {
                 atomicAdd(counts[17],1);
             else {
                 atomicAdd(counts[18],1);
-                sky=raySkyLinear(hit.position,skyDirection);
+                sky=calibratedSky(hit.position,skyDirection);
             }
         } else atomicAdd(counts[19],1);
     }
@@ -157,6 +244,8 @@ vec4 traceGI(ivec2 pixel) {
     return result;
 }
 void main() {
+    if(ao.jitter.w==-1) { measureSkyIrradiance();return; }
+    if(ao.jitter.w==-2) { measureTransport();return; }
     if(gl_LocalInvocationIndex<24) counts[gl_LocalInvocationIndex]=0;
     barrier();
     ivec2 p=ivec2(gl_GlobalInvocationID.xy);

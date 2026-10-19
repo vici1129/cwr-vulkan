@@ -216,6 +216,7 @@ struct VulkanContext::RTAOState
     std::array<uint32_t, 8> giCounts{};
     std::array<uint32_t, 8> giSources{};
     std::array<uint32_t, 8> giSkyCounts{};
+    std::array<float, 32> giSkyIrradiance{};
     std::array<uint32_t, 4> giHistoryCounts{};
     uint64_t giFrames = 0;
     bool giDispatched = false, giCompleted = false, giTemporal = false;
@@ -271,6 +272,15 @@ std::string VulkanContext::SetRTGI(std::string_view mode)
             const auto sky=RTGIEnabled() && rt.giDispatched && rt.giCompleted ? rt.giSkyCounts : std::array<uint32_t,8>{};
             out << " secondarySky(rays/blocked/visible/rejectedHemisphere)=" << sky[0] << '/' << sky[1] << '/' << sky[2] << '/' << sky[3]
                 << " primarySky(rays/blocked/visible/belowHorizon)=" << sky[4] << '/' << sky[5] << '/' << sky[6] << '/' << sky[7];
+            if(RTGIEnabled() && rt.giCompleted) {
+                const auto& e=rt.giSkyIrradiance;
+                out << " skyEpi(dome/weather/vertical/reference)=";
+                for(int k : {0,4,8,12}) out << '[' << e[k] << ',' << e[k+1] << ',' << e[k+2] << ']';
+                out << " skyCalibration=" << e[3];
+                out << " transportMean(incoming/replacement/capturedAmbient/reflectanceFog)=";
+                for(int k : {16,20,24,28}) out << '[' << e[k] << ',' << e[k+1] << ',' << e[k+2] << ']';
+                out << " transportSamples=" << e[19];
+            }
             if (RTGIEnabled() && rt.giCompleted && rt.timingSamples)
                 out << " GPUms(trace/filter/temporal/BLAS/TLAS)=" << rt.giRayMs << '/' << rt.giFilterMs << '/'
                     << rt.giTemporalMs << '/'
@@ -810,6 +820,7 @@ void VulkanContext::RetireRTAO()
         std::copy_n(counts + 20, 8, rt.giCounts.begin());
         std::copy_n(counts + 32, 8, rt.giSources.begin());
         std::copy_n(counts + 40, 8, rt.giSkyCounts.begin());
+        std::memcpy(rt.giSkyIrradiance.data(),counts+48,sizeof(rt.giSkyIrradiance));
         rt.giCompleted = slot.giDispatched;
         rt.giTemporal = slot.giTemporal;
         std::copy_n(counts + 28, 4, rt.giHistoryCounts.begin());
@@ -1161,13 +1172,13 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection, bool& ssaoH
         return result;
     };
     if (!slot.counters)
-        slot.counters = buffer(192, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, true);
+        slot.counters = buffer(320, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, true);
     if (!slot.materials)
         slot.materials = buffer(1024 * sizeof(uint64_t), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, true);
     if (!slot.reflectionLight)
         slot.reflectionLight = buffer(sizeof(_reflectionLighting), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, true);
     UploadMappedBuffer(slot.reflectionLight->buffer, _reflectionLighting.data(), sizeof(_reflectionLighting));
-    std::memset(slot.counters->buffer.mapped, 0, 192);
+    std::memset(slot.counters->buffer.mapped, 0, 320);
     if (!slot.queries && _timestampBits && _profile.enabled)
     {
         VkQueryPoolCreateInfo info{VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO};
@@ -1569,6 +1580,18 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection, bool& ssaoH
         vkCmdPushConstants(command, rt.layout, VK_SHADER_STAGE_COMPUTE_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0,
                            sizeof(push), &push);
         stamp(rayStamp);
+        if(effect==3) {
+            const float history=push.jitter[3];
+            push.jitter[3]=-1; // one workgroup integrates the unoccluded sky, without tracing
+            vkCmdPushConstants(command,rt.layout,VK_SHADER_STAGE_COMPUTE_BIT|VK_SHADER_STAGE_FRAGMENT_BIT,0,sizeof(push),&push);
+            vkCmdDispatch(command,1,1,1);
+            VkMemoryBarrier skyReady{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
+            skyReady.srcAccessMask=VK_ACCESS_SHADER_WRITE_BIT;
+            skyReady.dstAccessMask=VK_ACCESS_SHADER_READ_BIT;
+            vkCmdPipelineBarrier(command,VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,0,1,&skyReady,0,nullptr,0,nullptr);
+            push.jitter[3]=history;
+            vkCmdPushConstants(command,rt.layout,VK_SHADER_STAGE_COMPUTE_BIT|VK_SHADER_STAGE_FRAGMENT_BIT,0,sizeof(push),&push);
+        }
         vkCmdDispatch(command, (dispatchExtent.width + 7) / 8, (dispatchExtent.height + 7) / 8, 1);
         stamp(rayStamp + 1);
         VkMemoryBarrier ready{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
@@ -1579,6 +1602,17 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection, bool& ssaoH
                              nullptr, 0, nullptr);
         if (effect == 3)
         {
+            const float history = push.jitter[3];
+            push.jitter[3] = -2; // sparse, pre-composition radiometry; no additional rays
+            vkCmdPushConstants(command, rt.layout, VK_SHADER_STAGE_COMPUTE_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+                               0, sizeof(push), &push);
+            vkCmdDispatch(command, 1, 1, 1);
+            vkCmdPipelineBarrier(command, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+                VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_HOST_BIT,
+                0, 1, &ready, 0, nullptr, 0, nullptr);
+            push.jitter[3] = history;
+            vkCmdPushConstants(command, rt.layout, VK_SHADER_STAGE_COMPUTE_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+                               0, sizeof(push), &push);
             stamp(20);
             if (giTemporal)
             {

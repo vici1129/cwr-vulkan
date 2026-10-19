@@ -1,5 +1,8 @@
 # Diffuse sky in stock RTGI
 
+This records the `ef9c3d9` milestone. Its sky appearance-to-lighting scale is
+subsequently investigated and corrected in [sky irradiance calibration](rtgi-sky-calibration.md).
+
 Public base: `a16aced`. This extends the same developer-only, default-Off,
 one-bounce ambient replacement. It changes illumination, not artwork, material
 classification, receiver eligibility, exposure, presets or player settings.

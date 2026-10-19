@@ -1,0 +1,6 @@
+{"mode": "off", "samples": {"frame": [5.0493, 5.2522], "trace": [], "filter": [], "temporal": []}, "medians": {"frame": 5.15075, "trace": null, "filter": null, "temporal": null}}
+{"mode": "sun-only", "samples": {"frame": [5.774, 5.7112], "trace": [0.6779, 0.6605, 0.6625], "filter": [0.198, 0.1961, 0.1966], "temporal": [0.198, 0.1943, 0.1963]}, "medians": {"frame": 5.7425999999999995, "trace": 0.6625, "filter": 0.1966, "temporal": 0.1963}}
+{"mode": "on", "samples": {"frame": [5.732, 5.68], "trace": [0.8929, 0.8806], "filter": [0.1924, 0.1904], "temporal": [0.1877, 0.1852]}, "medians": {"frame": 5.7059999999999995, "trace": 0.88675, "filter": 0.19140000000000001, "temporal": 0.18645}}
+{"mode": "on", "samples": {"frame": [5.7063, 5.7068], "trace": [0.8868, 0.8714], "filter": [0.1915, 0.1909], "temporal": [0.1869, 0.185]}, "medians": {"frame": 5.70655, "trace": 0.8791, "filter": 0.19119999999999998, "temporal": 0.18595}}
+{"mode": "sun-only", "samples": {"frame": [5.6721, 5.7325], "trace": [0.6595, 0.6758], "filter": [0.1962, 0.1981], "temporal": [0.1942, 0.1987]}, "medians": {"frame": 5.7023, "trace": 0.66765, "filter": 0.19715, "temporal": 0.19645}}
+{"mode": "off", "samples": {"frame": [4.9081, 5.1895], "trace": [], "filter": [], "temporal": []}, "medians": {"frame": 5.0488, "trace": null, "filter": null, "temporal": null}}

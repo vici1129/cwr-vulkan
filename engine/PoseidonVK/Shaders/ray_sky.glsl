@@ -1,7 +1,8 @@
-// Diffuse sky boundary from the stock dome and legacy cloud layers, not ambient.
+// Linear appearance of the stock dome and legacy cloud layers. This backdrop
+// is not calibrated lighting radiance: RTGI supplies its irradiance conversion.
 // No sun disk: SunSkyColor's broad atmospheric lobe is part of the visible sky;
 // the delta direct-sun source is evaluated separately with a shadow ray.
-vec3 raySkyLinear(vec3 world,vec3 direction) {
+vec3 raySkyDomeLinear(vec3 direction) {
     if(direction.y<=0) return vec3(0);
     float lobe=pow(max(dot(direction,weather.sun.xyz),0),6);
     vec3 color=giSkyGradient(legacyLightToLinear(light.zenith.rgb),
@@ -13,6 +14,10 @@ vec3 raySkyLinear(vec3 world,vec3 direction) {
     vec4 texel=textureLod(weatherSky,uv,0);
     if(texel.a>=.99)
         color=texel.rgb*legacyLightToLinear(weather.skyColor.rgb+weather.sunSky.rgb*lobe);
+    return color;
+}
+vec3 raySkyWeatherLinear(vec3 world,vec3 direction,vec3 color) {
+    if(direction.y<=0 || weather.options.y<.5) return color;
     // GI origins are real world positions, not the raster skydome's compressed
     // coordinates. A coarse footprint integrates cloud coverage without a new
     // volume march or high-frequency one-sample cloud shimmer.
@@ -24,4 +29,7 @@ vec3 raySkyLinear(vec3 world,vec3 direction) {
         color=mix(color,cloud.rgb*legacyLightToLinear(weather.cloudColor.rgb),opacity);
     }
     return color;
+}
+vec3 raySkyLinear(vec3 world,vec3 direction) {
+    return raySkyWeatherLinear(world,direction,raySkyDomeLinear(direction));
 }
