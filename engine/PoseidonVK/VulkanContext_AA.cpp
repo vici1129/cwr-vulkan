@@ -198,7 +198,7 @@ bool VulkanContext::CreateAAResources(VkFormat format)
 
     _refractionEnabled = _refractionRequested;
     _shoreFoamEnabled = _shoreFoamRequested;
-    _rtaoTargets = RTAOEnabled();
+    _rtaoTargets = RTAOEnabled() || RTGIEnabled();
     _rtWaterTargets = WaterSurfaceEnabled() || RTGIEnabled() || _rtaoTargets;
     _rtShadowTargets = RTShadowsEnabled() || _rtWaterTargets || _contactEnabled;
     VkAttachmentDescription attachments[6]{};
@@ -258,7 +258,10 @@ bool VulkanContext::CreateAAResources(VkFormat format)
         attachments[baseAttachments] = color;
         attachments[baseAttachments].format = VK_FORMAT_R16G16B16A16_SFLOAT;
         if (_rtWaterTargets)
+        {
             attachments[baseAttachments + 1] = attachments[baseAttachments];
+            if(RTGIEnabled()) attachments[baseAttachments + 1].format=VK_FORMAT_R32G32B32A32_SFLOAT;
+        }
         if (_rtaoTargets)
             attachments[baseAttachments + 2] = attachments[baseAttachments];
         subpass.colorAttachmentCount = _rtaoTargets ? 5 : _rtWaterTargets ? 4 : 3;
@@ -302,7 +305,10 @@ bool VulkanContext::CreateAAResources(VkFormat format)
         attachments[baseAttachments].loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
         attachments[baseAttachments].initialLayout = attachments[baseAttachments].finalLayout;
         if (_rtWaterTargets)
+        {
             attachments[baseAttachments + 1] = attachments[baseAttachments];
+            if(RTGIEnabled()) attachments[baseAttachments + 1].format=VK_FORMAT_R32G32B32A32_SFLOAT;
+        }
         if (_rtaoTargets)
             attachments[baseAttachments + 2] = attachments[baseAttachments];
     }
@@ -330,7 +336,7 @@ bool VulkanContext::CreateAAResources(VkFormat format)
     sampler.mipmapMode = VK_SAMPLER_MIPMAP_MODE_NEAREST;
     sampler.addressModeU = sampler.addressModeV = sampler.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
     Require(vkCreateSampler(_device, &sampler, nullptr, &_aaSampler), "create AA sampler");
-    const VkDescriptorPoolSize size{VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, uint32_t(_images.size() * 6 + 4)};
+    const VkDescriptorPoolSize size{VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, uint32_t(_images.size() * 7 + 4)};
     VkDescriptorPoolCreateInfo pool{VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO};
     pool.maxSets = size.descriptorCount;
     pool.poolSizeCount = 1;
@@ -398,7 +404,7 @@ bool VulkanContext::CreateAAResources(VkFormat format)
         }
         if (_rtWaterTargets)
         {
-            CreateAAImage(target.water, VK_FORMAT_R16G16B16A16_SFLOAT, colorUsage, _worldSamples,
+            CreateAAImage(target.water, RTGIEnabled()?VK_FORMAT_R32G32B32A32_SFLOAT:VK_FORMAT_R16G16B16A16_SFLOAT, colorUsage, _worldSamples,
                           VK_IMAGE_ASPECT_COLOR_BIT);
             views[baseAttachments + 1] = target.water.view;
         }
@@ -407,6 +413,7 @@ bool VulkanContext::CreateAAResources(VkFormat format)
             CreateAAImage(target.ambient, VK_FORMAT_R16G16B16A16_SFLOAT, colorUsage, _worldSamples,
                           VK_IMAGE_ASPECT_COLOR_BIT);
             views[baseAttachments + 2] = target.ambient.view;
+            descriptor(target.ambient.view, false, target.ambientSet);
         }
         framebuffer(_worldPass, views, baseAttachments + (_rtShadowTargets ? 1 : 0) + (_rtWaterTargets ? 1 : 0) + (_rtaoTargets ? 1 : 0),
                     target.scene);

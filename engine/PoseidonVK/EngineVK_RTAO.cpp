@@ -12,6 +12,7 @@
 #include <Poseidon/AI/AIUnit.hpp>
 #include <Poseidon/World/Entities/Vehicles/Transport.hpp>
 #include <chrono>
+#include <cstring>
 
 namespace Poseidon
 {
@@ -160,12 +161,12 @@ void EngineVK::CaptureRayGeometry(Object& object, const Shape& shape, int level,
                     material.alpha = tex->Image(_vk);
                     material.cutoff = flags & IsTransparent ? 192.f / 255 : .5f;
                 }
-                if (tex && (_vk.RTHitDataEnabled() || material.alpha))
+                if (tex && (_vk.RTReflectionsEnabled() || material.alpha))
                 {
                     const auto image = tex->Image(_vk);
                     const auto& pixels = tex->Pixels();
                     _vk.PrepareRTAOAlpha(image, pixels.width, pixels.height, pixels.rgba.data());
-                    if (_vk.RTHitDataEnabled())
+                    if (_vk.RTReflectionsEnabled())
                         material.color = image;
                 }
                 instance.ranges.push_back(std::move(material));
@@ -282,6 +283,7 @@ void EngineVK::CollectRTAOScene()
     int x0, x1, z0, z1;
     ObjRadiusRectangle(x0, x1, z0, z1, position, position, radius);
     std::vector<vk::RTAOInstance> instances;
+    const auto fittedSerial=++_rtFittedSerial;
     std::set<const Object*> visited;
     const size_t sceneLimit = 1024 - (_vk.RTDynamicEnabled() ? DynamicObjects : 0);
     const size_t objectLimit = shadows ? 800 : _vk.RTAOEnabled() ? std::min(size_t(960), sceneLimit) : sceneLimit;
@@ -302,11 +304,23 @@ void EngineVK::CollectRTAOScene()
                 // Stable visual LOD, never collision hulls or proxy placeholders.
                 // Terrain fitting and object animation invalidate the immutable vertices.
                 auto* lod = object->GetShape();
-                if (lod->NLevels() == 0 || object->IsAnimated(0))
+                if (lod->NLevels() == 0)
                     continue;
                 Shape* shape = lod->LevelOpaque(0);
+                // The selected stock wall is CPU/terrain-fitted. Capture the
+                // SAME Animate/Deanimate pose used by raster, including offscreen
+                // walls, instead of substituting its un-fitted source geometry.
+                bool fitted=false;
+                if(shape && (shape->GetOrHints() & ClipLandMask)==ClipLandKeep && shape->NSections()==1)
+                    if(const auto* tex=dynamic_cast<TextureVK*>(shape->GetSection(0).properties.GetTexture()))
+                    {
+                        vk::ShapeLighting material;
+                        std::shared_ptr<vk::TextureImage> color,normal;
+                        fitted=ApplyEnhancedMaterial(*shape,*tex,material,color,normal);
+                    }
+                if(object->IsAnimated(0) && !fitted) continue;
                 if (!shape || shape->IsAnimated() || shape->NVertex() == 0 ||
-                    (shape->GetOrHints() & (ClipLandKeep | ClipLandOn)))
+                    (!fitted && (shape->GetOrHints() & (ClipLandKeep | ClipLandOn))))
                     continue;
                 vk::RTAOInstance instance;
                 std::vector<vk::RTAORange> shadowOnly;
@@ -330,9 +344,21 @@ void EngineVK::CollectRTAOScene()
                     if (hitData)
                         if (auto* tex = dynamic_cast<TextureVK*>(texture); tex && !tex->IsDynamic())
                         {
-                            candidate.color = tex->Image(_vk);
-                            const auto& pixels = tex->Pixels();
-                            _vk.PrepareRTAOAlpha(candidate.color, pixels.width, pixels.height, pixels.rgba.data());
+                            // Ordinary hit color belongs to RT water. GI only
+                            // uploads the explicitly authored enhanced inputs.
+                            if(_vk.RTReflectionsEnabled())
+                            {
+                                candidate.color = tex->Image(_vk);
+                                const auto& pixels = tex->Pixels();
+                                _vk.PrepareRTAOAlpha(candidate.color, pixels.width, pixels.height, pixels.rgba.data());
+                            }
+                            vk::ShapeLighting enhanced;
+                            if (!((flags | object->GetObjSpecial()) & (DisableSun | IsColored | IsLight | IsAlphaFog)) &&
+                                ApplyEnhancedMaterial(*shape, *tex, enhanced, candidate.color, candidate.normalRoughness))
+                            {
+                                candidate.enhanced = {enhanced.pbr[0], enhanced.pbr[2], enhanced.pbr[1], enhanced.pbr[3]};
+                                candidate.sampler |= vk::RayDiffuse;
+                            }
                         }
                     bool extended = false;
                     if ((flags & IsTransparent) || alpha == AlphaStats::Cutout)
@@ -353,19 +379,38 @@ void EngineVK::CollectRTAOScene()
                 }
                 if (instance.ranges.empty() && shadowOnly.empty())
                     continue;
+                std::vector<vk::SectionRange> fittedSections;
+                if(fitted)
+                {
+                    auto& cached=_rtFittedMeshes[object->RenderIdentity()];
+                    cached.seen=fittedSerial;
+                    object->Animate(0);
+                    struct Restore { Object* object; ~Restore(){object->Deanimate(0);} } restore{object};
+                    auto geometry=vk::ExtractShapeGeometry(*shape);
+                    const bool same=cached.geometry.vertices.size()==geometry.vertices.size() &&
+                        cached.geometry.indices==geometry.indices &&
+                        !std::memcmp(cached.geometry.vertices.data(),geometry.vertices.data(),geometry.vertices.size()*sizeof(vk::ShapeVertex));
+                    if(!same || !cached.mesh)
+                    {
+                        cached.mesh=_vk.UploadMesh(geometry.vertices.data(),geometry.vertices.size()*sizeof(vk::ShapeVertex),
+                            geometry.indices.data(),geometry.indices.size()*sizeof(VertexIndex));
+                        cached.geometry=std::move(geometry);
+                    }
+                    instance.mesh=cached.mesh;
+                    fittedSections=cached.geometry.sections;
+                }
                 // Do not force a raster buffer for excluded foliage/effect models.
-                if (!shape->GetVertexBuffer())
+                if (!fitted && !shape->GetVertexBuffer())
                     shape->ConvertToVBuffer(VBStatic);
                 auto* buffer = dynamic_cast<VertexBufferVK*>(shape->GetVertexBuffer());
-                if (!buffer)
+                if (!fitted && !buffer)
                     continue;
-                buffer->Update(*shape, false);
-                instance.mesh = buffer->Buffers();
+                if(!fitted) { buffer->Update(*shape, false); instance.mesh = buffer->Buffers(); }
                 for (auto* ranges : {&instance.ranges, &shadowOnly})
                 {
                     for (auto& range : *ranges)
                     {
-                        const auto section = buffer->Sections().at(range.first);
+                        const auto section = (fitted?fittedSections:buffer->Sections()).at(range.first);
                         range.first = section.begin;
                         range.count = section.end - section.begin;
                     }
@@ -386,6 +431,7 @@ void EngineVK::CollectRTAOScene()
                     break;
             }
         }
+    std::erase_if(_rtFittedMeshes,[&](const auto& entry){return entry.second.seen!=fittedSerial;});
     // Actual subdivided terrain samples and the same 01--10 cell diagonal as
     // Landscape::SurfaceY. Only local patches; height changes invalidate a patch.
     if (shadows || _vk.RTAOEnabled())

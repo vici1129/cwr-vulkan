@@ -1,6 +1,11 @@
 #version 450
 #ifdef MULTISAMPLE_DEPTH
 layout(set = 0, binding = 0) uniform sampler2DMS sceneDepth;
+layout(set = 1, binding = 0) uniform sampler2DMS giAmbient;
+bool replacesAmbient(ivec2 p) {
+    for(int i=0;i<textureSamples(giAmbient);++i) if(texelFetch(giAmbient,p,i).w>=0) return false;
+    return true;
+}
 ivec2 depthSize() { return textureSize(sceneDepth); }
 float readDepth(vec2 uv) {
     ivec2 p = clamp(ivec2(uv*depthSize()),ivec2(0),depthSize()-1);
@@ -10,6 +15,8 @@ float readDepth(vec2 uv) {
 }
 #else
 layout(set = 0, binding = 0) uniform sampler2D sceneDepth;
+layout(set = 1, binding = 0) uniform sampler2D giAmbient;
+bool replacesAmbient(ivec2 p) { return texelFetch(giAmbient,p,0).w<0; }
 ivec2 depthSize() { return textureSize(sceneDepth,0); }
 float readDepth(vec2 uv) { return texture(sceneDepth,uv).r; }
 #endif
@@ -28,6 +35,8 @@ vec3 positionAt(vec2 uv) {
 
 void main() {
     outColor = vec4(1.0);
+    // Visibility is already integrated by the indirect ray for these materials.
+    if(replacesAmbient(clamp(ivec2(texCoord*depthSize()),ivec2(0),depthSize()-1))) return;
     float depth = readDepth(texCoord);
     if (depth >= 0.999999 || depth <= 0.0) return;
     vec3 p = positionAt(texCoord);

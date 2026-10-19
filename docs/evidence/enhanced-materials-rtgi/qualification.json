@@ -1,0 +1,135 @@
+{
+  "publicBase": "85288c02ce844d38af7144c8cbef482f035ab065",
+  "mission": "01TakeTheCar.ABEL",
+  "drawable": [
+    1920,
+    1080
+  ],
+  "vulkanExecutableSHA256": "876E7B2F40525B07D776711D370FAD93668346EFF878F542BAC44E64E1D2B74A",
+  "gl33ExecutableSHA256": "0A7B39B1BDCE2305BB94BC6D572D950F2CAD96B1188ABAC65AC106670E8D914B",
+  "bounceMeasurementExecutableSHA256": "387D2E98880AADDDFD2CDC97A2CFD028A4A21BEB431A028D590CD635AD44D382",
+  "rawRuns": [
+    "enhanced-pbr-release-20261019",
+    "enhanced-pbr-validated-20261019",
+    "enhanced-pbr-gl33-20261019"
+  ],
+  "camera": [
+    3128,
+    228.1,
+    6338,
+    -1,
+    -0.15,
+    -1
+  ],
+  "date": [
+    1985,
+    7,
+    5,
+    9,
+    0
+  ],
+  "visibilityMetres": 1400,
+  "exposure": "ordinary copied-profile brightness; no override",
+  "screenshots": {
+    "legacy": {
+      "file": "malden-legacy.png",
+      "sha256": "529b858fbd583bc409f7dbbd72f0c497af508997685f029106adbbb39b87e34d"
+    },
+    "v3": {
+      "file": "malden-v3.png",
+      "sha256": "515a7cb1933f0060b314ef266b97f90da90062fe890a6f26fa1b8871b435db6f"
+    },
+    "enhanced": {
+      "file": "malden-enhanced.png",
+      "sha256": "4c150142a4509fd7ce5c552b92d2d8b6d1832d86edc2b23a42b843c61a4b47ce"
+    },
+    "sky": {
+      "file": "malden-sky.png",
+      "sha256": "69f9b946d6ffb47bfb34c3b8d0fcf29987257fd070d366362ea21244b7066398"
+    },
+    "gi": {
+      "file": "malden-gi.png",
+      "sha256": "d2466296f32be16d962870e54497febf9592418d972eadd0575e6c09a19d3977"
+    }
+  },
+  "validation": {
+    "submitted": 29595,
+    "presented": 29595,
+    "errors": 0,
+    "warnings": 0
+  },
+  "focusedTests": {
+    "vulkanCases": 50,
+    "vulkanAssertions": 35837,
+    "gl33Cases": 39,
+    "gl33Assertions": 1391,
+    "driverFreeChecks": 624,
+    "stagedShaderVariantsWithoutPreexistingEdits": 8
+  },
+  "combinationSmoke": [
+    "TAA",
+    "MSAA4",
+    "FSR Quality",
+    "RT sunlight",
+    "RTAO",
+    "SSAO",
+    "volumetric clouds/cloud shadows",
+    "fog/rain",
+    "night",
+    "local headlights/shadows",
+    "RT water/refraction",
+    "restored PBR v3"
+  ],
+  "waterStatus": {
+    "result": "[\"RTReflections=on capability=available waterRays=501494 hits=24828 shadedHits=24828 shadedTerrain=20985 shadedAlpha=22 totalWaterRays=69768999 totalShadedHits=3452025 rayQueriesExecuted=yes hitShadingExecuted=yes lastWorldDispatch=yes hitSurface=unavailable (diagnostics disabled) lastGPUms(traceShade/filter)=0.216064/0.056512; shared RTAO=off capability=available BLAS=18 cachedBLAS=18 TLAS=2 instances=76 instancedTriangles=10667 completedPasses=6766 lastCompletedRays=0 lastCompletedHits=0 totalRays=87440312 rayQueriesExecuted=yes lastWorldDispatch=no BLASbuilds=142 TLASbuilds=13 lastGPUms(BLAS/TLAS/rays/filter/frame)=6.4e-05/6.4e-05/0/0/2.52934; shared static LOD0 scene radius=160m; dynamic=off; AO radius=4m includes bounded terrain, excludes foliage cards; ambient-only composition; static collection excludes animation/damage; blended effects/proxies excluded; actual water only, 80m receivers/70m rays, textured hits and weather sky fallback\",\"WaterRefraction requested=on active=on captured=yes composited=yes captures=141 composites=141 lastGPUms(capture/optics)=0.019456/0.033792 fallback=none; raster-only coastal terrain, missing bottom/underwater retains original water\",\"RTGI=on capability=available transport=one-bounce lastWorldDispatch=yes enhancedInstances=0 completedDispatches=5723 bounceRays=0 hits=0 eligibleHits=0 rejectedMaterials=0 sunRays=0 sunBlocked=0 eligibleReceivers=0 dynamicHits=0 GPUms(trace/filter/temporal/BLAS/TLAS)=0.017408/0.01536/0.012864/6.4e-05/6.4e-05 CPUrecordMs=0.0901 temporal=on history(accepted/rejected/clamped/dynamic)=0/0/0/0 historyResets=7 phase=13 historyBytes=3932160 historyAllocations=10; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; enhanced authored materials only; ambient replacement; unit transport gain\",\"requested=on active=on half=640x360 layers=3 steps=32x3 lightSteps=2 history=world-AA position=44.874905 fallback=\"]",
+    "ok": true
+  },
+  "performance": {
+    "aa": "TAA",
+    "order": "off/on/on/off",
+    "offFrameMedianMeanMs": 5.1552,
+    "onFrameMedianMeanMs": 5.614800000000001,
+    "differenceMs": 0.4596000000000009,
+    "stagesMs": {
+      "trace": 0.5345249999999999,
+      "filter": 0.20577499999999999,
+      "temporal": 0.207575
+    },
+    "note": "Short focused timestamp sample; profiler scopes are not additive; no performance guarantee."
+  },
+  "originalSources": [
+    {
+      "source": "DTA\\Data.pbo",
+      "sha256": "1587f9c052ff38967463d851ca85a03efd2db09d063da183046a9b16181d5e2f",
+      "unchanged": true
+    },
+    {
+      "source": "DTA\\Data3D.pbo",
+      "sha256": "10528ef9b5112896898ad8667e83601ff47f95231652c73409d57b7227a8a00f",
+      "unchanged": true
+    },
+    {
+      "source": "Worlds\\abel.wrp",
+      "sha256": "1c13aca4d3300db3546583c82ffa132c1149831e42227f2b47019c74040462a5",
+      "unchanged": true
+    },
+    {
+      "source": "Worlds\\eden.wrp",
+      "sha256": "5a2550b27612fc4c8ccdec55ce2555c1ed23114d46f8b687ce5fb8b273515a79",
+      "unchanged": true
+    }
+  ],
+  "limitations": [
+    "Authored unmeasured material; further artistic refinement needed.",
+    "Unsupported hit endpoints retain legacy ambient; not full physical scene GI.",
+    "Modest local bounce; residual noise; no indirect specular or secondary mip footprints.",
+    "Selected live wall uses CPU terrain fitting; native transform correctness also covered by shared shader compilation and math tests."
+  ],
+  "finalCarrierCheck": {
+    "executableSHA256": "C782E78FA51355C3B22C114B5AEF76D6B24ACD12E056C4F3536B3C4FA3BFD7C1",
+    "presented": 6964,
+    "errors": 0,
+    "warnings": 0,
+    "scope": "Cloud ambient carrier with GI on/RTAO off, then GI off/RTAO on."
+  }
+}

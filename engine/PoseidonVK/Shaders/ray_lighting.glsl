@@ -7,5 +7,7 @@ layout(set=0,binding=8,std430) readonly buffer ReflectionLight {
 // Display-authored engine coefficients, decoded with the existing headroom
 // convention. These are NOT calibrated irradiance or radiance. Keep separate
 // from texture albedo, N dot L, visibility and final display transformations.
-vec3 rayAmbientLinear() { return legacyLightToLinear(light.sceneAmbient.rgb); }
-vec3 raySunlightLinear() { return legacyLightToLinear(light.sceneSunlight.rgb); }
+// Enhanced materials retain the user's ordinary engine brightness/color filter,
+// applied to incident light exactly once, identically to enhanced raster.
+vec3 rayAmbientLinear() { return legacyLightToLinear(light.ambient.rgb); }
+vec3 raySunlightLinear() { return legacyLightToLinear(light.diffuse.rgb); }

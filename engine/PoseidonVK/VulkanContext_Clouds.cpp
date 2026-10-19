@@ -154,6 +154,15 @@ void VulkanContext::CreateCloudResources()
                 outputs[1].colorWriteMask = 15;
             blend.attachmentCount = i ? (_rtWaterTargets ? 4 : _rtShadowTargets ? 3 : temporal ? 2 : 1) : 1;
             blend.pAttachments = outputs;
+            // Match the actual ambient carrier, including GI without RTAO and
+            // a GI fallback before target recreation. Preserve captured light.
+            VkPipelineColorBlendAttachmentState ambientOutputs[]{output, {}, {}, {}, {}};
+            if(i && _rtaoTargets)
+            {
+                ambientOutputs[1].colorWriteMask = temporal ? 15 : 0;
+                blend.attachmentCount = 5;
+                blend.pAttachments = ambientOutputs;
+            }
             samples.rasterizationSamples = i ? _worldSamples : VK_SAMPLE_COUNT_1_BIT;
             pipeline.renderPass = i ? _worldResume : _aaPass;
             Require(vkCreateGraphicsPipelines(_device, VK_NULL_HANDLE, 1, &pipeline, nullptr, &_cloudsPipelines[i]),

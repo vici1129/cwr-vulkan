@@ -12,6 +12,7 @@ namespace Poseidon
 void EngineVK::PrepareMesh(const render::LegacySpec&)
 {
     _softwarePBRLighting.clear();
+    _softwareSourceShape = nullptr;
     // CPU transformation, lighting and clipping are performed by FaceArray.
     if (_softwareMesh || _activeShape)
         throw std::logic_error("Vulkan software mesh preparation requires an idle open frame");
@@ -31,6 +32,7 @@ void EngineVK::CaptureSoftwareMaterial(TLVertexTable& dst, const TLMaterial& mat
             break;
         }
     if (!candidate) return;
+    _softwareSourceShape = shape;
     dst.pbrNormal.resize(dst.NVertex());
     // Explicit inside/half-lit/shining and colored modes retain their authored
     // response. No reconstruction from packed lighting or guessed face normals.
@@ -43,6 +45,9 @@ void EngineVK::CaptureSoftwareMaterial(TLVertexTable& dst, const TLMaterial& mat
     }
     vk::ShapeLighting lighting;
     vk::ShapeMaterial(lighting, mat, *GScene->MainLight(), true);
+    GfxMatrix materialTransform{};
+    ConvertMatrix(materialTransform, worldToModel.InverseGeneral());
+    std::copy_n(&materialTransform._11, 16, lighting.materialToWorld.begin());
     int count = 0;
     const float night = GScene->MainLight()->NightEffect();
     if (night >= .01f)
@@ -257,6 +262,10 @@ void EngineVK::SubmitSoftwareLit(const std::vector<uint32_t>& indices, const vk:
         receiver.sunDirection = {direction.X(), direction.Y(), direction.Z(), 0};
     }
     std::shared_ptr<vk::TextureImage> waterBump;
+    if (material && _softwareSourceShape)
+        if (const auto* texture = dynamic_cast<TextureVK*>(_softwareMip._texture))
+            if (ApplyEnhancedMaterial(*_softwareSourceShape, *texture, receiver, image, waterBump))
+                receiver.rtWater[3] = _vk.RTGIEnabled() ? 2.f : 0.f;
     receiver.rainRipples = _waterSurface ? RainRippleParameters() : std::array<float, 4>{};
     if (_waterSurface && (_vk.WaterSurfaceEnabled() || receiver.rainRipples[0] > 0))
     {

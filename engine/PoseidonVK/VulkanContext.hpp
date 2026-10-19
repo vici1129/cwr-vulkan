@@ -109,6 +109,8 @@ struct RTAORange
     uint32_t sampler = 0; // low three bits: sampler; high bits: RaySurfaceFlags
     float cutoff = 0;
     std::shared_ptr<TextureImage> color; // existing decoded RGBA, uploaded only for a hit-color consumer
+    std::shared_ptr<TextureImage> normalRoughness;
+    std::array<float, 4> enhanced{}; // roughness scale, metallic, F0, identity
     bool operator==(const RTAORange&) const = default;
 };
 struct RTAOInstance
@@ -262,6 +264,7 @@ class VulkanContext
     bool RainRipplesEnabled() const { return _rainRipplesEnabled; }
     std::string SetPBR(std::string_view mode);
     bool PBREnabled() const { return _pbrEnabled; }
+    bool EnhancedMaterialsEnabled() const { return _pbrEnabled && _enhancedMaterials; }
     void RecordPBRDraw(bool software = false) { ++_pbrDraws; if (software) ++_pbrSoftwareDraws; }
     std::string SetWetSurfaces(std::string_view mode);
     std::string SetUnderwater(std::string_view mode);
@@ -383,6 +386,7 @@ class VulkanContext
     uint32_t _rtTerrain = 0, _rtFoliage = 0;
     bool _rtaoRequested = false, _rtaoAvailable = false, _rtaoEnabled = false;
     bool _rtGIEnabled = false;
+    bool _rtGISkyOnly = false; // diagnostic: keep visibility, suppress surface bounce
     std::string _rtGIFailure;
     bool _rtDynamicEnabled = false;
     std::string _rtaoReason = "Vulkan ray-query device has not been initialized";
@@ -569,6 +573,7 @@ class VulkanContext
         VkDescriptorSet motionSet = VK_NULL_HANDLE;
         VkImageView sampledDepth = VK_NULL_HANDLE;
         VkDescriptorSet colorSet = VK_NULL_HANDLE, depthSet = VK_NULL_HANDLE;
+        VkDescriptorSet ambientSet = VK_NULL_HANDLE;
         VkDescriptorSet edgesSet = VK_NULL_HANDLE, weightsSet = VK_NULL_HANDLE, filteredSet = VK_NULL_HANDLE;
         VkFramebuffer scene = VK_NULL_HANDLE, ao = VK_NULL_HANDLE;
         VkFramebuffer edgeFB = VK_NULL_HANDLE, weightFB = VK_NULL_HANDLE, filterFB = VK_NULL_HANDLE;
@@ -605,6 +610,7 @@ class VulkanContext
     bool _refractionRequested = false, _refractionEnabled = false, _waterCaptured = false, _waterRefracted = false;
     bool _shoreFoamRequested = false, _shoreFoamEnabled = false;
     bool _pbrEnabled = false;
+    bool _enhancedMaterials = false;
     uint64_t _pbrDraws = 0;
     uint64_t _pbrSoftwareDraws = 0;
     bool _wetSurfacesEnabled = false, _underwaterEnabled = false;

@@ -298,6 +298,9 @@ class Shape: public Poseidon::VertexTable
 	mutable AutoArray<Offset> _faceIndexToOffset; // built when neccessary
 
 	int _level; // which level of LODShape is this
+	 RStringB _sourceModel;
+	 float _sourceResolution = -1;
+	 uint64_t _sourceFingerprint = 0;
 
 	
 	// named selections	- used for animations...
@@ -335,6 +338,9 @@ class Shape: public Poseidon::VertexTable
 	public:
 	// constructors and destructors
 	uint64_t RenderIdentity() const { return _renderIdentity.Get(); }
+	const RStringB& SourceModel() const { return _sourceModel; }
+	float SourceResolution() const { return _sourceResolution; }
+	uint64_t SourceFingerprint() const { return _sourceFingerprint; }
 	Shape();
 	Shape( const Shape &src, bool copyAnimations=true );
 

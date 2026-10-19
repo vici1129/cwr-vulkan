@@ -6,6 +6,8 @@
 #include "pbr.glsl"
 #include "weather.glsl"
 #include "rain_ripples.glsl"
+#include "material_normal.glsl"
+#include "material_record.glsl"
 layout(location = 0) out vec4 outColor;
 layout(location = 0) in vec2 texCoord;
 layout(location = 1) in vec4 vertexColor;
@@ -92,6 +94,17 @@ void main() {
         }
     }
     vec4 texel = WORLD_TEXTURE(diffuseTexture, texCoord);
+    vec3 materialN=surfaceNormal;
+    float materialRoughness=lighting.pbr.x;
+    if(lighting.pbr.w>.5) {
+        vec4 map=WORLD_TEXTURE(detailTexture,texCoord);
+        mat3 model=mat3(lighting.materialToWorld), worldToModel=inverse(model);
+        vec3 objectNormal=normalize(transpose(model)*surfaceNormal);
+        vec3 mapped=materialNormal(objectNormal,worldToModel*dFdx(shadowWorld),worldToModel*dFdy(shadowWorld),
+            dFdx(texCoord),dFdy(texCoord),normalize(map.xyz*2-1));
+        materialN=normalize(transpose(worldToModel)*mapped);
+        materialRoughness=clamp(map.a*materialRoughness,.045,1);
+    }
     vec3 base, contactBase;
     bool captureSun, separate;
     float csm;
@@ -101,7 +114,7 @@ void main() {
         if((mask & 1)!=0) localShadow.x=localVisibility(0,localDepth0);
         if((mask & 2)!=0) localShadow.y=localVisibility(1,localDepth1);
         vec3 sun;
-        pbrLighting(texel.rgb,draw.color.rgb,shadowWorld,surfaceNormal,localShadow,base,sun);
+        pbrLighting(texel.rgb,draw.color.rgb,shadowWorld,materialN,localShadow,materialRoughness,base,sun);
         captureSun=lighting.rtSun.x>.5;
         // PBR always separates sunlight, including CSM-only and contact-only.
         separate=true;
@@ -110,8 +123,7 @@ void main() {
         outColor=vec4(base+sun*csm,texel.a*draw.color.a);
         contactBase=base;
 #ifdef RT_AO
-        ambientContribution=texel.rgb*legacyLightToLinear(draw.color.rgb)*
-            legacyLightToLinear(max(lighting.ambient.rgb-lighting.rtSun.yzw,vec3(0)))*(1-lighting.pbr.y);
+        ambientContribution=pbrAmbient(texel.rgb,draw.color.rgb);
 #endif
     } else {
     vec3 litColor = vertexColor.rgb;
@@ -206,6 +218,12 @@ void main() {
     // and in-scattered fog are never multiplied by the AO visibility.
     outAmbient=lighting.aoReceiver.x>.5 && aoAmbient.a>.99 ?
         vec4(max(outColor.rgb-ambientRemoved,vec3(0))*visibility,1.0/gl_FragCoord.w):vec4(0);
+    if(lighting.pbr.w>.5 && lighting.aoReceiver.x>.5 && aoAmbient.a>.99)
+        outAmbient=vec4(max(nightResponse(base)-nightResponse(max(base-ambientContribution,vec3(0))),vec3(0))*visibility,
+            1.0/gl_FragCoord.w);
+    // A negative depth reserves this independently captured ambient difference
+    // for RTGI replacement. RTAO rejects it; direct/local/emission remain intact.
+    if(lighting.rtWater.w>1.5 && outAmbient.a>0) outAmbient.a=-outAmbient.a;
 #endif
 #ifdef RT_SUN
     // Alpha is existing CSM visibility. Later use min(CSM,RT), never CSM*RT.
@@ -232,8 +250,9 @@ void main() {
     // Negative view depth tags opaque diffuse GI receivers. RGB is bounded
     // base-texture reflectance times fog transmittance, never lit scene color.
     // Detail/baked lighting and material tint are intentionally not inferred.
-    if(lighting.rtWater.w>.5)
-        outWater=vec4(clamp(texel.rgb,vec3(0),vec3(.8))*visibility,-1.0/gl_FragCoord.w);
+    if(lighting.rtWater.w>1.5)
+        outWater=materialRecord(clamp(texel.rgb*toLinear(draw.color.rgb),0,1)*
+            (1-lighting.pbr.y)*(1-lighting.pbr.z),materialN,visibility,1.0/gl_FragCoord.w);
     // Foam-only rain marker: MIN writes only R; depth, fog and the other normal
     // component survive. Refraction and RT still reject these rain-covered pixels.
     if(draw.reserved<-.5) outWater.x=-2-outColor.a;

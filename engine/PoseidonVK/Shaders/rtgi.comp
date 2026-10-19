@@ -27,20 +27,20 @@ vec4 traceGI(ivec2 pixel) {
     atomicAdd(counts[6],1);
     vec3 worldNormal=normalize(mat3(ao.camera)*n);
     vec4 result=vec4(0,0,0,giSampleData(p.z,worldNormal));
-    // No moon/night emission or eye-adaptation gain. Ambient is a small,
-    // explicitly approximate secondary incident term, only during daylight.
-    float daylight=clamp(ao.sun.w,0,1);
-    if(daylight<=.001) return result;
-    n=worldNormal;
+    // Transport uses the authored shading normal; spatial/history rejection and
+    // offsets use the macro surface, so relief does not fragment the denoiser.
+    n=materialDecodeNormal(giSurface(full).g);
     vec3 world=(ao.camera*vec4(p,1)).xyz;
     vec3 tangent=normalize(cross(abs(n.y)<.95?vec3(0,1,0):vec3(1,0,0),n));
     vec3 bitangent=cross(n,tangent);
-    uvec3 cell=uvec3(ivec3(floor(world*32)));
+    // Subpixel-scale world seeds: centimetre-sized shared seeds correlate whole
+    // screen blocks, making a one-sample visibility estimate impossible to filter.
+    uvec3 cell=uvec3(ivec3(floor(world*512)));
     uint hash=cell.x*1597334677u^cell.y*3812015801u^cell.z*2798796415u;
     hash^=hash>>16;hash*=2246822519u;hash^=hash>>13;
     float u=(float(hash>>16)+.5)/65536;
     float phi=6.2831853*(float(hash&65535u)+.5)/65536;
-    // Eight deterministic phases only with temporal AA. Off/MSAA retain the
+    // Thirty-two deterministic phases only with temporal AA. Off/MSAA retain the
     // original world-stable sample, without accumulating identical rays.
     if(ao.jitter.z>0) {
         float phase=ao.jitter.z-1;
@@ -48,18 +48,35 @@ vec4 traceGI(ivec2 pixel) {
         phi+=giSampleRotation(phase);
     }
     vec3 direction=tangent*cos(phi)*sqrt(u)+bitangent*sin(phi)*sqrt(u)+n*sqrt(1-u);
+    if(dot(direction,worldNormal)<=0) return result;
     rayQueryEXT query;
-    rayQueryInitializeEXT(query,scene,0,255,world+n*ao.settings.y,.005,direction,ao.settings.x);
+    rayQueryInitializeEXT(query,scene,0,255,world+worldNormal*ao.settings.y,.005,direction,ao.settings.x);
     while(rayQueryProceedEXT(query)) {
         if(rayQueryGetIntersectionTypeEXT(query,false)==gl_RayQueryCandidateIntersectionTriangleEXT && opaqueHit(query))
             rayQueryConfirmIntersectionEXT(query);
     }
     atomicAdd(counts[0],1);
-    if(rayQueryGetIntersectionTypeEXT(query,true)!=gl_RayQueryCommittedIntersectionTriangleEXT) return result;
+    if(rayQueryGetIntersectionTypeEXT(query,true)!=gl_RayQueryCommittedIntersectionTriangleEXT) {
+        // Uniform upper-hemisphere environment, calibrated to the engine's
+        // ambient irradiance. This replaces global ambient; it is not extra sky
+        // brightness. A later measured sky can replace this boundary condition.
+        // A finite-range miss below the horizon is unrepresented transport,
+        // not proof of black space. Retain the existing ambient boundary there.
+        result.rgb=rayAmbientLinear();
+        return result;
+    }
     atomicAdd(counts[1],1);
     HitSurface hit=hitSurface(query);
     if(hit.kind==3u) result.a=-result.a;
-    if(!hit.diffuseEligible) { atomicAdd(counts[3],1);return result; }
+    if(!hit.diffuseEligible || hit.materialIdentity==0u) {
+        atomicAdd(counts[3],1);
+        // Incremental material adoption: an unconverted endpoint has unknown
+        // outgoing radiance. Retain its legacy ambient share rather than making
+        // all unconverted ground/buildings perfectly absorbing or using RGB as
+        // albedo. Known enhanced endpoints replace this share with real transport.
+        result.rgb=rayAmbientLinear();
+        return result;
+    }
     atomicAdd(counts[2],1);
     if(hit.kind==3u) atomicAdd(counts[7],1);
     vec3 sun=normalize(ao.sun.xyz);
@@ -84,14 +101,12 @@ vec4 traceGI(ivec2 pixel) {
         }
         visibility=blocked?0:cloudSunlight(hit.position);
     }
-    vec3 incident=rayAmbientLinear()*.15+raySunlightLinear()*cosine*visibility;
-    vec3 reflected=clamp(hit.albedo,vec3(0),vec3(.8))*incident;
+    vec3 incident=raySunlightLinear()*cosine*visibility;
+    vec3 reflected=hit.albedo*incident;
     // Cosine/PDF and Lambertian pi cancel for this single cosine-weighted
-    // sample. Legacy coefficients are uncalibrated; gain/range taper are biased
-    // prototype bounds, not an inverse-square factor on transported radiance.
-    float fade=(1-smoothstep(ao.settings.w*.7,ao.settings.w,distance))*
-               (1-smoothstep(ao.settings.x*.8,ao.settings.x,rayQueryGetIntersectionTEXT(query,true)));
-    result.rgb=reflected*(ao.settings.z*daylight*fade);
+    // sample. Incident sunlight has the same Lambert-reference calibration as
+    // enhanced raster lighting. No arbitrary GI gain or hit-distance falloff.
+    result.rgb=reflected*ao.settings.z; // binary surface-bounce isolation diagnostic, never an artistic gain
     return result;
 }
 void main() {

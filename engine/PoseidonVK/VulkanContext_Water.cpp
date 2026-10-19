@@ -40,7 +40,7 @@ std::string VulkanContext::SetRainRipples(std::string_view mode, float rain)
 std::string VulkanContext::SetPBR(std::string_view mode)
 {
     if (mode == "status") return std::string("PBR prototype=stock-dielectric-v3 requested=") +
-        (_pbrEnabled ? "on" : "off") +
+        (_pbrEnabled ? "on" : "off") + "; enhanced=" + (_enhancedMaterials ? "on" : "off") +
         "; native + captured CPU-lit opaque geometry: data/skala_piskovec2.pac (matte rock), "
         "data/sloupek_bily_orezly_.pac (painted signposts), "
         "data/strecha_tasky_vln.pac + data/strecha_tasky_vln90.pac (roof tiles r=0.90), "
@@ -48,9 +48,11 @@ std::string VulkanContext::SetPBR(std::string_view mode)
         "inspected stone/mortar, concrete, plaster/brick and wood sections; "
         "F0=0.04, metallic=0; unsupported lighting/atlases legacy; no RT requirement; "
         "draws since toggle=" + std::to_string(_pbrDraws) + "; software=" + std::to_string(_pbrSoftwareDraws);
-    if (mode != "on" && mode != "off") return "INVALID: triPBR on, off, status";
-    if (_pbrEnabled != (mode == "on")) { ResetTemporalHistory(); _pbrDraws = {}; _pbrSoftwareDraws = {}; }
-    _pbrEnabled = mode == "on";
+    if (mode != "on" && mode != "off" && mode != "enhanced") return "INVALID: triPBR on, off, enhanced, status";
+    if (_pbrEnabled != (mode != "off") || _enhancedMaterials != (mode == "enhanced"))
+    { ResetTemporalHistory(); _pbrDraws = {}; _pbrSoftwareDraws = {}; }
+    _pbrEnabled = mode != "off";
+    _enhancedMaterials = mode == "enhanced";
     return "OK: PBR stock-dielectric-v3 " + std::string(mode);
 }
 

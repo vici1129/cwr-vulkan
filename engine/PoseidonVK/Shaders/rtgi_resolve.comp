@@ -19,10 +19,10 @@ vec4 resolveGI(ivec2 pixel) {
     vec3 n=transpose(mat3(ao.camera))*worldNormal;
     vec3 sum=vec3(0),moment=vec3(0),low=vec3(1e6),high=vec3(0);
     float weight=0;bool unsafe=raw.a<0;
-    for(int y=-1;y<=1;++y) for(int x=-1;x<=1;++x) {
+    for(int y=-2;y<=2;++y) for(int x=-2;x<=2;++x) {
         ivec2 q=clamp(pixel+ivec2(x,y),ivec2(0),size-1);
         vec4 v=texelFetch(rawGI,q,0);
-        float w=giPlaneWeight(p,n,worldNormal,min(q*2+1,depthSize()-1),v.a)*exp(-float(x*x+y*y)*.7);
+        float w=giPlaneWeight(p,n,worldNormal,min(q*2+1,depthSize()-1),v.a)*exp(-float(x*x+y*y)*.35);
         if(w<=0) continue;
         sum+=v.rgb*w;moment+=v.rgb*v.rgb*w;weight+=w;
         low=min(low,v.rgb);high=max(high,v.rgb);unsafe=unsafe || v.a<0;
@@ -54,8 +54,8 @@ vec4 resolveGI(ivec2 pixel) {
     if(oldWeight>.25) {
         vec3 old=oldSum/oldWeight,clipped=clamp(old,low,high);
         if(any(greaterThan(abs(clipped-old),vec3(.00001)))) atomicAdd(counts[2],1);
-        length=giHistoryLength(oldLength/oldWeight);
-        current=mix(current,clipped,giHistoryWeight(length)); // at most 75% history
+        length=giHistoryLength(oldLength/oldWeight,16.f);
+        current=mix(current,clipped,giHistoryWeight(length)); // at most 15/16 history; depth/normal/lighting gated
         atomicAdd(counts[0],1);
     } else atomicAdd(counts[1],1);
     if(unsafe) atomicAdd(counts[3],1);

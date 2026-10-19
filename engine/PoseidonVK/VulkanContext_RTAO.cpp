@@ -112,8 +112,12 @@ struct RayMaterial
     float cutoff;
     uint64_t color;
     uint32_t colorWidth, colorHeight;
+    uint64_t normalRoughness;
+    uint32_t normalWidth, normalHeight;
+    std::array<float, 4> enhanced;
 };
-static_assert(sizeof(RayMaterial) == 64);
+static_assert(sizeof(RayMaterial) == 96);
+static_assert(offsetof(RayMaterial,normalRoughness)==64 && offsetof(RayMaterial,enhanced)==80);
 struct Push
 {
     std::array<float, 16> camera;
@@ -238,13 +242,16 @@ std::string VulkanContext::SetRTGI(std::string_view mode)
     if (mode == "status")
     {
         std::ostringstream out;
-        out << "RTGI=" << (RTGIEnabled() ? "on" : "off") << " capability=" << _rtaoReason;
+        out << "RTGI=" << (RTGIEnabled() ? "on" : "off") << " capability=" << _rtaoReason
+            << " transport=" << (_rtGISkyOnly?"sky-only-diagnostic":"one-bounce");
         if (!_rtGIFailure.empty()) out << " fallback=" << _rtGIFailure;
         if (_rtao)
         {
             const auto& rt = *_rtao;
             const auto c = RTGIEnabled() && rt.giDispatched && rt.giCompleted ? rt.giCounts : std::array<uint32_t, 8>{};
             out << " lastWorldDispatch=" << (RTGIEnabled() && rt.giDispatched ? "yes" : "no")
+                << " enhancedInstances=" << std::count_if(rt.scene.begin(),rt.scene.end(),[](const auto& instance) {
+                    return std::any_of(instance.ranges.begin(),instance.ranges.end(),[](const auto& range) { return range.enhanced[3]>.5f; }); })
                 << " completedDispatches=" << rt.giFrames << " bounceRays=" << c[0] << " hits=" << c[1]
                 << " eligibleHits=" << c[2] << " rejectedMaterials=" << c[3]
                 << " sunRays=" << c[4] << " sunBlocked=" << c[5] << " eligibleReceivers=" << c[6]
@@ -262,10 +269,12 @@ std::string VulkanContext::SetRTGI(std::string_view mode)
         }
         else out << " lastWorldDispatch=no completedDispatches=0 bounceRays=0 hits=0 eligibleHits=0"
                     " rejectedMaterials=0 sunRays=0 sunBlocked=0 eligibleReceivers=0 dynamicHits=0 GPUtimings=unavailable";
-        out << "; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; approximate stock albedo";
+        out << "; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; enhanced authored materials only; ambient replacement; unit transport gain";
         return out.str();
     }
-    if (mode != "on" && mode != "off") return "INVALID: triRTGI on, off, status";
+    if (mode != "on" && mode != "off" && mode != "sky-only") return "INVALID: triRTGI on, off, sky-only, status";
+    const bool skyOnly=mode=="sky-only";
+    if(skyOnly) mode="on";
     if (mode == "on" && !_rtaoAvailable) return "UNSUPPORTED: " + _rtaoReason;
     if (mode == "on" && !_rtGIFailure.empty()) return "UNSUPPORTED: " + _rtGIFailure;
     if (mode == "on")
@@ -273,6 +282,9 @@ std::string VulkanContext::SetRTGI(std::string_view mode)
         VkPhysicalDeviceFeatures features{};
         vkGetPhysicalDeviceFeatures(_physical, &features);
         if (!features.independentBlend) return "UNSUPPORTED: RTGI requires independent MRT blending";
+        VkPhysicalDeviceProperties properties{};
+        vkGetPhysicalDeviceProperties(_physical,&properties);
+        if(properties.limits.maxColorAttachments<5) return "UNSUPPORTED: RTGI requires five world color attachments";
     }
     if (_rtGIEnabled != (mode == "on"))
     {
@@ -286,6 +298,8 @@ std::string VulkanContext::SetRTGI(std::string_view mode)
             if (!RaySceneEnabled()) _rtao->scene.clear();
         }
     }
+    if(_rtGISkyOnly!=skyOnly) ResetTemporalHistory();
+    _rtGISkyOnly=skyOnly;
     return _rtGIEnabled ? "OK: one-bounce diffuse RTGI enabled (next frame)" : "OK: RTGI off";
 }
 
@@ -1100,7 +1114,7 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection, bool& ssaoH
         }
     }
     std::array<float, 12> giLighting{};
-    for (int i = 0; i < 6; ++i) giLighting[i] = _reflectionLighting[8 + i / 3][i % 3];
+    for (int i = 0; i < 6; ++i) giLighting[i] = _reflectionLighting[i / 3][i % 3];
     std::copy(_rtSun.begin(), _rtSun.end(), giLighting.begin() + 6);
     giLighting[10] = _weatherLighting.cloudColor[3];
     giLighting[11] = _weatherLighting.sun[3];
@@ -1249,7 +1263,10 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection, bool& ssaoH
                      range.alpha ? Address(_device, range.alpha->rayAlpha) : 0, range.first, entry.index16 ? 1u : 0u,
                      range.alpha ? range.alpha->rayWidth : 0, range.alpha ? range.alpha->rayHeight : 0, range.sampler,
                      range.cutoff, range.color ? Address(_device, range.color->rayAlpha) : 0,
-                     range.color ? range.color->rayWidth : 0, range.color ? range.color->rayHeight : 0});
+                     range.color ? range.color->rayWidth : 0, range.color ? range.color->rayHeight : 0,
+                     range.normalRoughness ? Address(_device, range.normalRoughness->rayAlpha) : 0,
+                     range.normalRoughness ? range.normalRoughness->rayWidth : 0,
+                     range.normalRoughness ? range.normalRoughness->rayHeight : 0, range.enhanced});
             }
             if (geometries.empty() || geometries.size() > 1024 || blas->triangles > 1000000)
                 continue;
@@ -1401,7 +1418,7 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection, bool& ssaoH
             {VK_NULL_HANDLE, target.view, VK_IMAGE_LAYOUT_GENERAL},
             {_aaSampler, target.view, VK_IMAGE_LAYOUT_GENERAL}};
         VkDescriptorImageInfo direct{
-            _aaSampler, effect == 0 ? _aaTargets[_image].ambient.view :
+            _aaSampler, effect == 0 || effect == 3 ? _aaTargets[_image].ambient.view :
                 _rtShadowTargets ? _aaTargets[_image].sunlight.view : _aaTargets[_image].color.view,
             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
         VkDescriptorImageInfo water{_aaSampler,
@@ -1507,8 +1524,8 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection, bool& ssaoH
             push.settings[3] = 50.f;
         if (effect == 3)
         {
-            push.settings = {25.f, .02f, .65f, 45.f};
-            rt.giPhase = _taaFrame % 8;
+            push.settings = {25.f, .02f, _rtGISkyOnly?0.f:1.f, 45.f};
+            rt.giPhase = _taaFrame % 32;
             push.jitter[2] = giTemporal ? float(1 + rt.giPhase) : 0.f;
             push.jitter[3] = giTemporal && rt.giHistoryValid ? 1.f : 0.f;
         }

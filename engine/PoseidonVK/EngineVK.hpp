@@ -6,6 +6,7 @@
 #include <PoseidonVK/VulkanContext.hpp>
 #include <PoseidonVK/TextureVK.hpp>
 #include <PoseidonVK/ScreenGeometryVK.hpp>
+#include <PoseidonVK/ShapeGeometryVK.hpp>
 #include <Poseidon/Graphics/Core/ZBiasMath.hpp>
 #include <map>
 #include <Poseidon/Graphics/Rendering/Lighting/Lights.hpp>
@@ -97,6 +98,14 @@ class EngineVK final : public Engine
     std::map<std::pair<int, int>, RTTerrainPatch> _rtTerrainPatches;
     const void* _rtLandscape = nullptr;
     float _rtTerrainGrid = 0;
+    struct FittedRayMesh
+    {
+        vk::ShapeGeometry geometry;
+        std::shared_ptr<vk::MeshBuffers> mesh;
+        uint64_t seen = 0;
+    };
+    std::map<uint64_t, FittedRayMesh> _rtFittedMeshes;
+    uint64_t _rtFittedSerial = 0;
     RString SetRTShadows(RString mode) override { return _vk.SetRTShadows(static_cast<const char*>(mode)).c_str(); }
     RString SetSoftRTShadows(RString mode) override
     {
@@ -304,6 +313,12 @@ class EngineVK final : public Engine
     int _softwareFlags = 0;
     std::vector<vk::ScreenVertex> _softwareVertices;
     std::vector<vk::ShapeLighting> _softwarePBRLighting;
+    const Shape* _softwareSourceShape = nullptr;
+    Ref<Texture> _enhancedAlbedo, _enhancedNormal;
+    bool _enhancedLoadAttempted = false;
+    std::map<const TextureVK*, bool> _enhancedSourceTextures;
+    bool ApplyEnhancedMaterial(const Shape&, const TextureVK&, vk::ShapeLighting&,
+                               std::shared_ptr<vk::TextureImage>&, std::shared_ptr<vk::TextureImage>&);
     std::vector<vk::ScreenVertex> _screenVertices;
     void FlushQueues() override { _vk.FlushScreenBatch(); }
     void SubmitSoftware(const std::vector<uint32_t>& indices);

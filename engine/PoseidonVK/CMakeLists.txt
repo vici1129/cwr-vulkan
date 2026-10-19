@@ -13,6 +13,8 @@ if(NOT Vulkan_GLSLANG_VALIDATOR_EXECUTABLE)
     message(FATAL_ERROR "Vulkan shaders require glslangValidator from the installed Vulkan SDK")
 endif()
 set(VK_SHADER_HEADERS)
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
+    Shaders/material_normal.glsl Shaders/material_record.glsl)
 foreach(kind triangle shape screen shadow gamma ssao csm)
     foreach(stage vert frag)
         if(kind STREQUAL "screen" AND stage STREQUAL "frag")
@@ -138,12 +140,18 @@ foreach(kind contact_shadows contact_shadows_ms contact_shadows_rt contact_shado
     list(APPEND VK_SHADER_HEADERS "${header}")
 endforeach()
 add_custom_target(PoseidonVKShaders DEPENDS ${VK_SHADER_HEADERS})
+foreach(header IN LISTS VK_SHADER_HEADERS)
+    add_custom_command(OUTPUT "${header}" APPEND DEPENDS
+        "${CMAKE_CURRENT_SOURCE_DIR}/Shaders/material_normal.glsl"
+        "${CMAKE_CURRENT_SOURCE_DIR}/Shaders/material_record.glsl")
+endforeach()
 
 add_library(PoseidonVK STATIC VulkanContext.cpp VulkanContext_Gamma.cpp VulkanContext_SSAO.cpp VulkanContext_Triangle.cpp VulkanContext_Mesh.cpp VulkanContext_Texture.cpp TextureVK.cpp BufferVK.cpp VertexBufferVK.cpp
     EngineVK.cpp EngineVK_Shadow.cpp VulkanContext_Shadow.cpp EngineVK_Mesh.cpp EngineVK_2D.cpp EngineVK_Software.cpp EngineVK_Unsupported.cpp GraphicsBackendVK.cpp)
 add_dependencies(PoseidonVK PoseidonVKShaders)
 target_sources(PoseidonVK PRIVATE VulkanContext_AA.cpp EngineVK_Temporal.cpp EngineVK_Atmosphere.cpp EngineVK_RTAO.cpp)
 target_sources(PoseidonVK PRIVATE EngineVK_Weather.cpp)
+target_sources(PoseidonVK PRIVATE EngineVK_Materials.cpp)
 target_include_directories(PoseidonVK PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated")
 target_link_libraries(PoseidonVK PUBLIC Poseidon Vulkan::Vulkan)
 if(WIN32)

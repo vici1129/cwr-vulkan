@@ -33,4 +33,6 @@ layout(set = 2, binding = 0, std140) uniform ShapeLighting {
     vec4 pbr;
     vec4 pbrDiffuse;
     vec4 aoReceiver;
+    mat4 materialToWorld;
+    vec4 materialAmbient, materialSun;
 } lighting;

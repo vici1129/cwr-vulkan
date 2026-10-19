@@ -3,6 +3,13 @@
 #include "rtao_depth.glsl"
 #include "rtgi_receiver.glsl"
 #include "rtgi_sample.glsl"
+#ifdef MULTISAMPLE_DEPTH
+layout(set=0,binding=6) uniform sampler2DMS replacedAmbient;
+vec4 giAmbient(ivec2 p) { return texelFetch(replacedAmbient,p,0); }
+#else
+layout(set=0,binding=6) uniform sampler2D replacedAmbient;
+vec4 giAmbient(ivec2 p) { return texelFetch(replacedAmbient,p,0); }
+#endif
 layout(set=0,binding=4) uniform sampler2D rawGI;
 layout(set=0,binding=12) uniform sampler2D resolvedGI;
 layout(location=0) in vec2 texCoord;
@@ -33,5 +40,11 @@ void main() {
         } else w*=exp(-float(x*x+y*y)*.7);
         sum+=sampleGI.rgb*w;weight+=w;
     }
-    if(weight>.001) outColor.rgb=receiver.rgb*sum/weight;
+    vec4 ambient=giAmbient(full);
+    if(weight>.001 && ambient.w<0 && rtSameDepth(-ambient.w,-receiver.w)) {
+        float fade=1-smoothstep(ao.settings.w*.7,ao.settings.w,length(p));
+        // Replace only captured global ambient, after valid spatial reconstruction.
+        // The signed HDR delta preserves direct/local/emission and in-scattered fog.
+        outColor.rgb=(receiver.rgb*sum/weight-ambient.rgb)*fade;
+    }
 }

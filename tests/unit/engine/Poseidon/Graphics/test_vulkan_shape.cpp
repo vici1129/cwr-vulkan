@@ -478,7 +478,10 @@ TEST_CASE("Vulkan native normals use inverse transpose and materials use the eng
     REQUIRE(offsetof(vk::ShapeLighting, previousMVP) == 1104);
     REQUIRE(offsetof(vk::ShapeLighting, temporal) == 1168);
     REQUIRE(offsetof(vk::ShapeLighting, outputColor) == 1200);
-    REQUIRE(sizeof(vk::ShapeLighting) == 1504);
+    REQUIRE(sizeof(vk::ShapeLighting) == 1600);
+    REQUIRE(offsetof(vk::ShapeLighting, materialToWorld) == 1504);
+    REQUIRE(offsetof(vk::ShapeLighting, materialAmbient) == 1568);
+    REQUIRE(offsetof(vk::ShapeLighting, materialSun) == 1584);
     REQUIRE(offsetof(vk::ShapeLighting, aoReceiver) == 1488);
     REQUIRE(lighting.aoReceiver == std::array<float, 4>{});
     REQUIRE(offsetof(vk::ShapeLighting, pbr) == 1456);

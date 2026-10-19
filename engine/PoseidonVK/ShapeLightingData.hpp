@@ -35,8 +35,10 @@ struct alignas(16) ShapeLighting
     std::array<float, 4> wetSurface{}; // darkening, restrained sun sheen, exponent, relative water height
     std::array<float, 32> localShadowMatrices{};
     std::array<float, 4> localShadowControl{}; // rendered slot mask, resolution, per-slot effective ranges
-    std::array<float, 4> pbr{}; // perceptual roughness (0=legacy), dielectric F0, reserved
+    std::array<float, 4> pbr{}; // roughness (0=legacy), dielectric F0, metallic, enhanced identity (0=v3)
     std::array<float, 4> pbrDiffuse{}; // authored material mode, used for conservative eligibility
     std::array<float, 4> aoReceiver{}; // RTAO ambient capture eligibility, independent of GI/water
+    std::array<float, 16> materialToWorld{}; // linear object transform for tangent-space normal mapping
+    std::array<float, 4> materialAmbient{}, materialSun{}; // same incident light as ray hits
 };
 } // namespace Poseidon::vk

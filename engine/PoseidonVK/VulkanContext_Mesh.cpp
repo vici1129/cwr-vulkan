@@ -430,6 +430,8 @@ void VulkanContext::DrawMesh(const std::shared_ptr<MeshBuffers>& mesh, uint32_t 
         auto receiver = *lighting;
         if (!RTAOEnabled() || !_worldActive || shadow || blend || !depthTest || !depthWrite)
             receiver.aoReceiver[0] = 0;
+        if (RTGIEnabled() && receiver.rtWater[3]>1.5f && _worldActive && !shadow && !blend && depthTest && depthWrite)
+            receiver.aoReceiver[0] = 1;
         if (!RTGIEnabled() || !_worldActive || shadow || blend || !depthTest || !depthWrite || alphaCutoff > 0)
             receiver.rtWater[3] = 0;
         if (!_worldActive || (!_rtWaterTargets && receiver.rainRipples[0] <= 0) || shadow || !depthTest)
@@ -506,7 +508,8 @@ void VulkanContext::DrawMesh(const std::shared_ptr<MeshBuffers>& mesh, uint32_t 
         if (_profile.enabled) ++_profile.stateCommands[0];
     }
     // Immutable descriptor handles identify both image version and sampler.
-    const std::array<VkDescriptorSet, 2> descriptors{sampled->descriptors[sampler], sampledDetail->dataDescriptors[0]};
+    const std::array<VkDescriptorSet, 2> descriptors{sampled->descriptors[sampler],
+        sampledDetail->dataDescriptors[lighting && lighting->pbr[3]>.5f ? sampler : 0]};
     if (_commands.textures != descriptors)
     {
         vkCmdBindDescriptorSets(frame.command, VK_PIPELINE_BIND_POINT_GRAPHICS, _shapeLayout, 0, 2,

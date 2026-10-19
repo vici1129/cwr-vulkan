@@ -122,6 +122,30 @@ LODShapeWithShadow* convertToLODShape(const Poseidon::Model::Model& model, bool 
 
         shape->_resolutions[i] = lodLevel.resolution;
         shape->_lods[i] = new Shape();
+        shape->_lods[i]->_sourceModel = model.sourcePath.c_str();
+        shape->_lods[i]->_sourceResolution = lodLevel.resolution;
+        // Stable source identity BEFORE centering, optimization and mutable clip
+        // hints. Hash fields explicitly: no padding or host pointer bytes.
+        uint64_t digest=1469598103934665603ull;
+        auto word=[&](uint32_t value) { digest=(digest^value)*1099511628211ull; };
+        auto scalar=[&](float value) { uint32_t bits; memcpy(&bits,&value,sizeof(bits)); word(bits); };
+        for(const auto& vertex:mesh.vertices)
+        {
+            scalar(vertex.position.x);scalar(vertex.position.y);scalar(vertex.position.z);
+            scalar(vertex.normal.x);scalar(vertex.normal.y);scalar(vertex.normal.z);
+            scalar(vertex.uv.u);scalar(vertex.uv.v);word(uint32_t(vertex.flags));
+        }
+        for(const auto& tri:mesh.triangles)
+        {
+            word(3);for(auto index:tri.indices) word(index);
+            word(uint32_t(tri.flags));word(tri.materialIndex);
+        }
+        for(const auto& quad:mesh.quads)
+        {
+            word(4);for(auto index:quad.indices) word(index);
+            word(uint32_t(quad.flags));word(quad.materialIndex);
+        }
+        shape->_lods[i]->_sourceFingerprint=digest;
         shape->_lods[i]->Init(vertexCount);
 
         if (isODOL && !mesh.edges.mlodIndices.empty())

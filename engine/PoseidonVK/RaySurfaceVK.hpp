@@ -4,7 +4,7 @@
 
 namespace Poseidon::vk
 {
-// Packed above the three sampler bits in the existing 64-byte ray material.
+// Packed above the three sampler bits in the shared ray material.
 // These describe available inputs, not a physical/PBR material classification.
 constexpr uint32_t RayDiffuse = 8, RayVertexNormals = 16, RayTerrainUV = 32;
 inline uint32_t RaySurfaceFlags(int flags)

@@ -1,27 +1,31 @@
 // Reuse non-water surface records. Positive W remains exclusively water;
 // negative W identifies diffuse reflectance and its original raster depth.
 #include "rtao_coverage.glsl"
+#include "material_record.glsl"
 #ifdef MULTISAMPLE_DEPTH
 layout(set=0,binding=7) uniform sampler2DMS receiverSurface;
+vec4 giSurface(ivec2 p) { return texelFetch(receiverSurface,p,0); }
 vec4 giReceiver(ivec2 p) {
     vec4 s=texelFetch(receiverSurface,p,0);
-    if(s.w>=0 || any(lessThan(s.rgb,vec3(0)))) return vec4(0);
+    if(!enhancedRecord(s)) return vec4(0);
     for(int i=0;i<textureSamples(sceneDepth);++i) {
         vec4 other=texelFetch(receiverSurface,p,i);
         float d=texelFetch(sceneDepth,p,i).r;
-        if(d<=0 || d>=.999999 || other.w>=0 || any(lessThan(other.rgb,vec3(0))) ||
+        if(d<=0 || d>=.999999 || !enhancedRecord(other) ||
+           abs(s.r-other.r)>.5 || dot(materialDecodeNormal(s.g),materialDecodeNormal(other.g))<.995 ||
            !rtSameDepth(-other.w,-s.w) || !rtSameDepth(viewZ(d),-s.w)) return vec4(0);
     }
-    return s;
+    return vec4(materialReflectance(s)*s.b,s.w);
 }
 #else
 layout(set=0,binding=7) uniform sampler2D receiverSurface;
+vec4 giSurface(ivec2 p) { return texelFetch(receiverSurface,p,0); }
 vec4 giReceiver(ivec2 p) {
     vec4 s=texelFetch(receiverSurface,p,0);
     float d=depthAt(p);
-    if(s.w>=0 || any(lessThan(s.rgb,vec3(0))) || d<=0 || d>=.999999 ||
+    if(!enhancedRecord(s) || d<=0 || d>=.999999 ||
        !rtSameDepth(viewZ(d),-s.w)) return vec4(0);
-    return s;
+    return vec4(materialReflectance(s)*s.b,s.w);
 }
 #endif
 vec3 giNormal(ivec2 pixel,vec3 p) {

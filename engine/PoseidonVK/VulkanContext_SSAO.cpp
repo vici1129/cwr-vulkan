@@ -79,8 +79,10 @@ void VulkanContext::CreateSSAOResources(VkFormat format)
     }
     const VkPushConstantRange push{VK_SHADER_STAGE_FRAGMENT_BIT, 0, 8 * sizeof(float)};
     VkPipelineLayoutCreateInfo layout{VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO};
-    layout.setLayoutCount = layout.pushConstantRangeCount = 1;
-    layout.pSetLayouts = &_textureLayout;
+    layout.setLayoutCount = 2;
+    layout.pushConstantRangeCount = 1;
+    const VkDescriptorSetLayout sets[]{_textureLayout,_textureLayout};
+    layout.pSetLayouts = sets;
     layout.pPushConstantRanges = &push;
     Require(vkCreatePipelineLayout(_device, &layout, nullptr, &_ssaoLayout), "create layout");
     VkShaderModule vertex = VK_NULL_HANDLE, fragment = VK_NULL_HANDLE;
@@ -186,8 +188,10 @@ void VulkanContext::DrawSSAO(const std::array<float, 4>& projection)
     vkCmdBeginRenderPass(command, &pass, VK_SUBPASS_CONTENTS_INLINE);
     vkCmdBindPipeline(command, VK_PIPELINE_BIND_POINT_GRAPHICS,
         _worldActive && _worldSamples != VK_SAMPLE_COUNT_1_BIT ? _ssaoMSPipeline : _ssaoPipeline);
-    vkCmdBindDescriptorSets(command, VK_PIPELINE_BIND_POINT_GRAPHICS, _ssaoLayout, 0, 1,
-                            _worldActive ? &_aaTargets[_image].depthSet : &_gammaTargets[_image].depthSet, 0, nullptr);
+    const auto depthSet=_worldActive ? _aaTargets[_image].depthSet : _gammaTargets[_image].depthSet;
+    const VkDescriptorSet sets[]{depthSet,
+        _worldActive && RTGIEnabled() && _aaTargets[_image].ambientSet ? _aaTargets[_image].ambientSet : depthSet};
+    vkCmdBindDescriptorSets(command, VK_PIPELINE_BIND_POINT_GRAPHICS, _ssaoLayout, 0, 2, sets, 0, nullptr);
     const VkViewport viewport{0, 0, float(size.width), float(size.height), 0, 1};
     const VkRect2D scissor{{0, 0}, size};
     vkCmdSetViewport(command, 0, 1, &viewport);

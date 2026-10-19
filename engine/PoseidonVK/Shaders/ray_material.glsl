@@ -5,6 +5,9 @@ struct Material {
     float cutoff;
     uint64_t color;
     uint colorWidth, colorHeight;
+    uint64_t normalRoughness;
+    uint normalWidth, normalHeight;
+    vec4 enhanced;
 };
 layout(buffer_reference,std430,buffer_reference_align=8) readonly buffer Materials { Material m[]; };
 layout(buffer_reference,std430,buffer_reference_align=4) readonly buffer Words { uint data[]; };
