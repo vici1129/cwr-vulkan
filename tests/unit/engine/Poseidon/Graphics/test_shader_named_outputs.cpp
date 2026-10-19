@@ -318,6 +318,81 @@ TEST_CASE("Vulkan AA native-resolution footprint excludes neighboring depth", "[
     }
 }
 
+TEST_CASE("Volumetric clouds match the RTAO world pass without writing its ambient slot", "[Graphics][Shaders][rtao]")
+{
+    const auto root = std::filesystem::path(TESTS_ROOT_DIR).parent_path() / "engine" / "PoseidonVK";
+    const auto clouds = ReadTextFile(root / "VulkanContext_Clouds.cpp");
+    const auto world = ReadTextFile(root / "VulkanContext_AA.cpp");
+    REQUIRE(clouds.find("outputs[]{output, {}, {}, {}, {}}") != std::string::npos);
+    REQUIRE(clouds.find("blend.attachmentCount = i ? (_rtaoTargets ? 5 : _rtWaterTargets ? 4 : _rtShadowTargets ? 3 : temporal ? 2 : 1) : 1;") != std::string::npos);
+    REQUIRE(world.find("subpass.colorAttachmentCount = _rtaoTargets ? 5 : _rtWaterTargets ? 4 : 3;") != std::string::npos);
+    REQUIRE(clouds.find("outputs[4].colorWriteMask") == std::string::npos);
+}
+
+TEST_CASE("Legacy RTAO ambient cannot overlap separately subtracted sunlight", "[Graphics][Shaders][rtao]")
+{
+    const auto root = std::filesystem::path(TESTS_ROOT_DIR).parent_path() / "engine" / "PoseidonVK" / "Shaders";
+    const auto shape = ReadTextFile(root / "shape.frag");
+    REQUIRE(shape.find("vec3 aoBase=captureSun ? max(litColor-directSun.rgb,vec3(0)) : litColor;") != std::string::npos);
+    REQUIRE(shape.find("legacyLightToLinear(draw.color.rgb*aoBase)-") != std::string::npos);
+    REQUIRE(shape.find("max(aoBase-aoAmbient.rgb,vec3(0))") != std::string::npos);
+    REQUIRE(shape.find("vec3 aoReference=lighting.pbr.x<=0.0 && captureSun ? (separate ? base : contactBase) : outColor.rgb;") != std::string::npos);
+    REQUIRE(shape.find("nightResponse(max(aoReference-ambientContribution,vec3(0)))") != std::string::npos);
+    REQUIRE(shape.find("max(ambientResponse-ambientRemoved,vec3(0))*visibility") != std::string::npos);
+    REQUIRE(shape.find("captureSun = lighting.rtSun.x") < shape.find("vec3 aoBase="));
+
+    // Pin the shipped conversion used by this scalar, achromatic counterexample.
+    const auto conversion = ReadTextFile(root / "color_space.glsl");
+    REQUIRE(conversion.find("pow((c + .055) / 1.055, vec3(2.4))") != std::string::npos);
+    REQUIRE(conversion.find("toLinear(min(c, vec3(1))) + max(c - 1., vec3(0))") != std::string::npos);
+    const auto linear = [](double c) {
+        const double bounded = std::clamp(c, 0., 1.);
+        return (bounded <= .04045 ? bounded / 12.92 : std::pow((bounded + .055) / 1.055, 2.4)) + std::max(c - 1., 0.);
+    };
+    const double oldAmbient = linear(1.) - linear(.8);
+    REQUIRE(linear(.2) - .5 * oldAmbient < 0.); // the original black-shadow failure
+    for (double local : {0., .1, 1.2})
+    for (double sun : {0., .2, .8})
+    for (double csm : {0., .4, 1.})
+    for (double rt : {0., .5, 1.})
+    for (double ao : {0., .5, .55})
+    for (double scale : {.3, 1.}) // texture/detail/wetness/fog factors
+    {
+        const double base = linear(.2 + local);
+        const double ambient = base - linear(local);
+        const double direct = linear(.2 + local + sun) - base;
+        const double result = (base + direct * csm - direct * (csm - std::min(csm, rt)) - ambient * ao) * scale;
+        const double expected = (linear(local) + ambient * (1. - ao) + direct * std::min(csm, rt)) * scale;
+        REQUIRE(std::abs(result - expected) < 1e-12);
+        REQUIRE(result >= -1e-12);
+    }
+}
+
+TEST_CASE("Night-eye keeps raster ambient and ordinary AO instead of GI replacement", "[Graphics][Shaders][rtgi-order]")
+{
+    const auto root = std::filesystem::path(TESTS_ROOT_DIR).parent_path() / "engine" / "PoseidonVK";
+    const auto mesh = ReadTextFile(root / "VulkanContext_Mesh.cpp");
+    const auto gate = mesh.find("if (receiver.eyeCoef[3] < 1.f)");
+    REQUIRE(gate != std::string::npos);
+    REQUIRE(std::regex_search(mesh.substr(gate), std::regex(
+        R"(^if \(receiver.eyeCoef\[3\] < 1.f\)\s*receiver.rtWater\[3\] = 0;)")));
+    // Disable the tag before GI can force ambient capture independently of RTAO.
+    REQUIRE(gate < mesh.find("if (!RTAOEnabled() || !_worldActive"));
+    REQUIRE(gate < mesh.find("if (RTGIEnabled() && receiver.rtWater[3]>1.5f"));
+    const auto shape = ReadTextFile(root / "Shaders/shape.frag");
+    REQUIRE(shape.find("if(lighting.rtWater.w>1.5 && outAmbient.a>0) outAmbient.a=-outAmbient.a;") != std::string::npos);
+    REQUIRE(std::regex_search(shape, std::regex(
+        R"(if\(lighting.rtWater.w>1.5\)\s*outWater=materialRecord)")));
+    // Without either negative-depth tag, RTAO remains eligible and SSAO does not
+    // skip this draw. GI reconstruction rejects its empty material record.
+    const auto ssao = ReadTextFile(root / "Shaders/ssao.frag");
+    REQUIRE(ssao.find("texelFetch(giAmbient,p,0).w<0") != std::string::npos);
+    REQUIRE(ssao.find("texelFetch(giAmbient,p,i).w>=0) return false;") != std::string::npos);
+    const auto receiver = ReadTextFile(root / "Shaders/rtgi_receiver.glsl");
+    REQUIRE(receiver.find("if(!enhancedRecord(s)) return vec4(0);") != std::string::npos);
+    REQUIRE(receiver.find("if(!enhancedRecord(s) || d<=0") != std::string::npos);
+}
+
 TEST_CASE("RTGI keeps SSAO after shadow subtraction and before bounce addition", "[Graphics][Shaders][rtgi-order]")
 {
     const auto root = std::filesystem::path(TESTS_ROOT_DIR).parent_path() / "engine" / "PoseidonVK";

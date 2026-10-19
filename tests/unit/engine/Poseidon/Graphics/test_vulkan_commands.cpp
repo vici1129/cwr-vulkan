@@ -205,6 +205,41 @@ struct VulkanCommandStateTest
         if (finalDraws-beforeDraws != 7 || passBegins-beforeBegins != 7 || passEnds-beforeEnds != 7 ||
             finalViewport.width != 960 || finalViewport.height != 540 || outputEncoding[3] != 2)
             throw std::runtime_error("bloom finishes at half resolution with every pass closed before composition");
+
+        // Inspect the real uploaded draw uniforms for native and CPU-lit geometry,
+        // including day/night/day transitions with either ordinary AO path.
+        std::array<unsigned char, 65536> uniformBytes{};
+        auto& page = frame.uniforms.emplace_back();
+        page.buffer.mapped = uniformBytes.data();
+        page.buffer.size = uniformBytes.size();
+        page.set = Handle<VkDescriptorSet>(80);
+        context._worldActive = context._rtaoAvailable = context._rtGIEnabled = true;
+        context._worldShapePipelines.fill(Handle<VkPipeline>(3));
+        context._worldScreenPipelines.fill(Handle<VkPipeline>(4));
+        for (bool software : {false, true})
+        for (bool rtao : {false, true})
+        for (float night : {0.f, .011f, .3f, 1.f, 0.f})
+        {
+            screen = software;
+            context._rtaoEnabled = rtao;
+            context.SetNightEye(night);
+            ShapeLighting source{};
+            source.eyeCoef = context.EyeCoef();
+            source.rtWater[3] = 2;
+            source.aoReceiver[0] = 1;
+            lighting = &source;
+            draw();
+            const auto& uploaded = screen ? frame.screenUniform.value : frame.nativeUniform.value;
+            ++checks;
+            if (uploaded.rtWater[3] != (night > .01f ? 0.f : 2.f))
+                throw std::runtime_error("night-eye must reject GI receivers and restore them in daylight");
+            ++checks;
+            if (uploaded.aoReceiver[0] != (night > .01f && !rtao ? 0.f : 1.f))
+                throw std::runtime_error("night-eye GI fallback must retain ordinary RTAO or SSAO eligibility");
+            ++checks;
+            if (source.rtWater[3] != 2 || source.aoReceiver[0] != 1)
+                throw std::runtime_error("GI fallback must not mutate the caller's lighting state");
+        }
         return checks;
     }
 };

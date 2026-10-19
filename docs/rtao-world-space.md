@@ -76,6 +76,25 @@ database, persistent renderer setting or private SDK is introduced.
 The existing sun/water MRT layout is reused, including its carrier targets in an
 AO-only launch; full-frame timing below includes this allocation/layout choice.
 
+## Follow-up composition fixes
+
+The volumetric-cloud world-composite pipeline now declares the fifth color slot
+required by the RTAO pass, with writes disabled for that slot. Legacy non-PBR AO
+extracts ambient from the sun-independent lighting base whenever sunlight is
+captured, including its night-eye difference. This prevents AO and RT sunlight
+from subtracting overlapping nonlinear lighting contributions. RTAO Off, PBR,
+sunlight visibility and the ray-tracing algorithms are unchanged. Source-contract
+and arithmetic regression checks cover both defects. The Vulkan build and 76
+focused cases (2,610 assertions) pass, as do 624 driver-free policy checks. All
+six RTAO-Off fragment variants compile to byte-identical SPIR-V versus `85288c0`.
+
+A short 1080p Malden validation run with PBR Off, RTAO, RT sunlight and volumetric
+clouds confirmed active clouds with no fallback across TAA, MSAA 4x, FSR Quality
+and AA Off, plus night/day and RTAO Off/On transitions: 6,658 presented frames,
+zero validation errors or warnings. Local evidence is retained
+in `build/shadow-live/rtao-surgical-20261019/`. This is a combination smoke check,
+not a before/after gameplay reproduction of the black-shadow defect.
+
 ## Stock gameplay review
 
 The baseline executable identifies itself as `3.05-afe900a`, SHA256

@@ -131,12 +131,6 @@ void main() {
     if ((localMask & 1) != 0) litColor -= localDirect0 * (1.0-localVisibility(0,localDepth0));
     if ((localMask & 2) != 0) litColor -= localDirect1 * (1.0-localVisibility(1,localDepth1));
     if (localMask != 0) litColor = max(litColor,vec3(0));
-#ifdef RT_AO
-    ambientContribution=texel.rgb*max(legacyLightToLinear(draw.color.rgb*litColor)-
-        legacyLightToLinear(draw.color.rgb*max(litColor-aoAmbient.rgb,vec3(0))),vec3(0));
-    if(draw.detailEnabled>.5 && draw.detailEnabled<1.5)
-        ambientContribution*=legacyLightToLinear(vec3(WORLD_TEXTURE(detailTexture,texCoord*32).a*2));
-#endif
     outColor = vec4(texel.rgb * legacyLightToLinear(draw.color.rgb * litColor),
                     texel.a * draw.color.a * vertexColor.a);
     // Match GL33 TGDetail's 32x UV and PSDetail's alpha modulation.
@@ -170,6 +164,15 @@ void main() {
     }
     base = outColor.rgb;
     captureSun = lighting.rtSun.x > .5 && directSun.a > .99 && draw.detailEnabled < 1.5;
+#ifdef RT_AO
+    // Extract AO from the same sun-independent base used by shadow subtraction.
+    // A difference around sun-lit legacy RGB overlaps the nonlinear sun term.
+    vec3 aoBase=captureSun ? max(litColor-directSun.rgb,vec3(0)) : litColor;
+    ambientContribution=texel.rgb*max(legacyLightToLinear(draw.color.rgb*aoBase)-
+        legacyLightToLinear(draw.color.rgb*max(aoBase-aoAmbient.rgb,vec3(0))),vec3(0));
+    if(draw.detailEnabled>.5 && draw.detailEnabled<1.5)
+        ambientContribution*=legacyLightToLinear(vec3(WORLD_TEXTURE(detailTexture,texCoord*32).a*2));
+#endif
     separate = captureSun && lighting.rtSun.x < 1.5;
     csm = sunlightVisibility(shadowWorld, separate ? 1.0 : fogVisibility);
     if (captureSun) {
@@ -209,7 +212,11 @@ void main() {
     }
     // Keep the night-eye response in its calibrated perceptual domain.
 #ifdef RT_AO
-    vec3 ambientRemoved=nightResponse(max(outColor.rgb-ambientContribution,vec3(0)));
+    // Night-eye is nonlinear too: keep the AO difference on that same base.
+    // PBR and draws without sunlight capture retain their original reference.
+    vec3 aoReference=lighting.pbr.x<=0.0 && captureSun ? (separate ? base : contactBase) : outColor.rgb;
+    vec3 ambientRemoved=nightResponse(max(aoReference-ambientContribution,vec3(0)));
+    vec3 ambientResponse=nightResponse(aoReference);
 #endif
     outColor.rgb = nightResponse(outColor.rgb);
     float visibility = clamp(fogVisibility, 0.0, 1.0);
@@ -217,7 +224,7 @@ void main() {
     // Subtract only the captured ambient difference. Direct/local/emissive light
     // and in-scattered fog are never multiplied by the AO visibility.
     outAmbient=lighting.aoReceiver.x>.5 && aoAmbient.a>.99 ?
-        vec4(max(outColor.rgb-ambientRemoved,vec3(0))*visibility,1.0/gl_FragCoord.w):vec4(0);
+        vec4(max(ambientResponse-ambientRemoved,vec3(0))*visibility,1.0/gl_FragCoord.w):vec4(0);
     if(lighting.pbr.w>.5 && lighting.aoReceiver.x>.5 && aoAmbient.a>.99)
         outAmbient=vec4(max(nightResponse(base)-nightResponse(max(base-ambientContribution,vec3(0))),vec3(0))*visibility,
             1.0/gl_FragCoord.w);

@@ -99,9 +99,9 @@ if(CWR_HAS_VULKAN)
     # Supplemental authored materials are optional and live beside the executable,
     # outside original game archives and the game-data working directory.
     add_custom_target(PoseidonEnhancedMaterials
-        COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
             "${CMAKE_SOURCE_DIR}/materials/enhanced" "$<TARGET_FILE_DIR:PoseidonGame>/materials/enhanced"
-        COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
             "${CMAKE_SOURCE_DIR}/materials/enhanced" "${DIST_DIR}/materials/enhanced"
         VERBATIM)
     add_dependencies(PoseidonGame PoseidonEnhancedMaterials)

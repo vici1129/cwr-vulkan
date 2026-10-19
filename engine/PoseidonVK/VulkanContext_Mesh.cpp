@@ -428,6 +428,10 @@ void VulkanContext::DrawMesh(const std::shared_ptr<MeshBuffers>& mesh, uint32_t 
     if (lighting)
     {
         auto receiver = *lighting;
+        // GI adds linear radiance but captures night-eye-adjusted ambient.
+        // Keep raster lighting and ordinary AO until both share that response.
+        if (receiver.eyeCoef[3] < 1.f)
+            receiver.rtWater[3] = 0;
         if (!RTAOEnabled() || !_worldActive || shadow || blend || !depthTest || !depthWrite)
             receiver.aoReceiver[0] = 0;
         if (RTGIEnabled() && receiver.rtWater[3]>1.5f && _worldActive && !shadow && !blend && depthTest && depthWrite)

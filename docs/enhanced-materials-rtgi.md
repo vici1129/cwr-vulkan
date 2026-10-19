@@ -73,6 +73,12 @@ reconstruction, GI composes `indirect - captured global ambient`; direct/local
 light, emission and fog in-scattering survive. Rejected samples keep raster
 lighting. A distance fade cross-fades the replacement, not its energy gain.
 
+While night-eye is active, draws retain ordinary raster lighting and AO rather
+than recording GI receivers. The captured ambient already includes night-eye,
+but the reconstructed indirect radiance does not yet share that response; even
+the ambient fallback would otherwise change brightness and color. Daytime GI
+replacement resumes when the night-eye response is inactive.
+
 The shared non-water receiver carrier is RGBA32F only while GI is enabled. It
 holds bounded diffuse reflectance, a packed 10-bit octahedral shading normal,
 fog and original depth; positive depth retains the water ABI. GI also reserves

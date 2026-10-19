@@ -147,12 +147,12 @@ void VulkanContext::CreateCloudResources()
             Require(vkCreateShaderModule(_device, &module, nullptr, &fragment), "create fragment shader");
             stages[1].module = fragment;
             output.blendEnable = i ? VK_TRUE : VK_FALSE;
-            VkPipelineColorBlendAttachmentState outputs[]{output, {}, {}, {}};
+            VkPipelineColorBlendAttachmentState outputs[]{output, {}, {}, {}, {}};
             // Clouds replace sky color only. Invalidate temporal correspondence:
             // wind and volume parallax cannot reuse the stock skydome's motion.
             if (i && temporal)
                 outputs[1].colorWriteMask = 15;
-            blend.attachmentCount = i ? (_rtWaterTargets ? 4 : _rtShadowTargets ? 3 : temporal ? 2 : 1) : 1;
+            blend.attachmentCount = i ? (_rtaoTargets ? 5 : _rtWaterTargets ? 4 : _rtShadowTargets ? 3 : temporal ? 2 : 1) : 1;
             blend.pAttachments = outputs;
             // Match the actual ambient carrier, including GI without RTAO and
             // a GI fallback before target recreation. Preserve captured light.
