@@ -1,0 +1,23 @@
+{
+  "commands": [
+    {
+      "result": "\"UNSUPPORTED: PBR prototype requires Vulkan\"",
+      "ok": true
+    },
+    {
+      "result": "\"UNSUPPORTED: PBR prototype requires Vulkan\"",
+      "ok": true
+    },
+    {
+      "result": "\"UNSUPPORTED: PBR prototype requires Vulkan\"",
+      "ok": true
+    }
+  ],
+  "world_roi": [
+    0,
+    150,
+    1920,
+    850
+  ],
+  "changed_pixels": 0
+}

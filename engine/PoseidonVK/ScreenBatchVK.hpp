@@ -15,6 +15,7 @@ struct ScreenVertex
     float directSun[4]{};
     float directLocal[6]{};
     float aoAmbient[4]{};
+    float pbrNormal[3]{};
 };
 struct ScreenState
 {

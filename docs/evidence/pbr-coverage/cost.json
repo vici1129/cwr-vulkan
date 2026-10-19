@@ -1,0 +1,694 @@
+[
+  {
+    "island": "malden",
+    "height": 1080,
+    "summary": {
+      "off": {
+        "gpu": 2.1325,
+        "cpu_frame": 6.196,
+        "record": 6.054,
+        "command": 4.101
+      },
+      "on": {
+        "gpu": 2.1308,
+        "cpu_frame": 6.204,
+        "record": 6.057,
+        "command": 4.078
+      },
+      "delta": {
+        "gpu": -0.0017000000000000348,
+        "cpu_frame": 0.008000000000000007,
+        "record": 0.0030000000000001137,
+        "command": -0.022999999999999687
+      }
+    },
+    "rows": [
+      {
+        "name": "malden-street-off-0",
+        "samples": {
+          "gpu": [
+            2.1673,
+            2.1422
+          ],
+          "cpu_frame": [
+            6.233,
+            6.208
+          ],
+          "record": [
+            6.068,
+            6.062
+          ],
+          "command": [
+            4.127,
+            4.101
+          ]
+        },
+        "median": {
+          "gpu": 2.15475,
+          "cpu_frame": 6.2204999999999995,
+          "record": 6.0649999999999995,
+          "command": 4.114
+        },
+        "log": "Vulkan profile: frames=321 fps=160.44 frame_ms=6.233 p95_ms=6.500 record_ms=6.068 transient/frame=489.0 allocations/frame=0.0 geometry_upload_ms/frame=0.062 texture_uploads=0 texture_upload_ms=0.000 fence_ms/frame=0.002 retire_ms/frame=0.004 acquire_ms/frame=0.002 present_ms/frame=1.906 lit_draws/frame=1129.0 local_lights/frame=0.0 fog_range=414.0..1380.0 shadow_native/frame=0.0 shadow_software/frame=0.0 shadow_triangles/frame=0.0 screen_polygons/frame=111.0 screen_draws/frame=487.0 screen_batches/frame=9.0 polygons/batch=12.33\r\nVulkan commands: frames=321 command_ms=4.127 submit_ms=0.026 retention_ms=0.133 binding_ms=0.208 pipeline=30.0 textures=420.0 lighting=505.0 vertex=549.0 index=549.0 viewport=2.0 scissor=5.0 push=394.0\r\nVulkan GPU: aa=taa scale=100 frame_ms=2.1673 samples=321\r\nVulkan CSM: passes/frame=1.00 vertices/frame=33900 depth_gpu_ms/pass=0.1966 gpu_samples=321\r\nVulkan TAA: resolve_gpu_ms=0.2573 samples=321\r\nVulkan SSAO: enabled=0 passes/frame=0.00 record_ms/frame=0.0000 gpu_ms/pass=-1.0000 gpu_samples=0 radius=1.50 strength=1.20 bias=0.030 fade=80.0\r\nVulkan profile: frames=323 fps=161.09 frame_ms=6.208 p95_ms=6.421 record_ms=6.062 transient/frame=489.0 allocations/frame=0.0 geometry_upload_ms/frame=0.061 texture_uploads=0 texture_upload_ms=0.000 fence_ms/frame=0.002 retire_ms/frame=0.003 acquire_ms/frame=0.002 present_ms/frame=1.929 lit_draws/frame=1129.0 local_lights/frame=0.0 fog_range=414.0..1380.0 shadow_native/frame=0.0 shadow_software/frame=0.0 shadow_triangles/frame=0.0 screen_polygons/frame=110.6 screen_draws/frame=487.0 screen_batches/frame=9.0 polygons/batch=12.35\r\nVulkan commands: frames=323 command_ms=4.101 submit_ms=0.025 retention_ms=0.133 binding_ms=0.209 pipeline=30.0 textures=420.0 lighting=505.0 vertex=549.0 index=549.0 viewport=2.0 scissor=5.0 push=394.0\r\nVulkan GPU: aa=taa scale=100 frame_ms=2.1422 samples=323\r\nVulkan CSM: passes/frame=1.00 vertices/frame=33900 depth_gpu_ms/pass=0.1945 gpu_samples=323\r\nVulkan TAA: resolve_gpu_ms=0.2558 samples=323\r\nVulkan SSAO: enabled=0 passes/frame=0.00 record_ms/frame=0.0000 gpu_ms/pass=-1.0000 gpu_samples=0 radius=1.50 strength=1.20 bias=0.030 fade=80.0\r\n"
+      },
+      {
+        "name": "malden-street-on-1",
+        "samples": {
+          "gpu": [
+            2.1308,
+            2.1285,
+            2.1315
+          ],
+          "cpu_frame": [
+            6.204,
+            6.212,
+            6.194
+          ],
+          "record": [
+            6.058,
+            6.067,
+            6.054
+          ],
+          "command": [
+            4.078,
+            4.072,
+            3.98
+          ]
+        },
+        "median": {
+          "gpu": 2.1308,
+          "cpu_frame": 6.204,
+          "record": 6.058,
+          "command": 4.072
+        },
+        "log": "Vulkan profile: frames=323 fps=161.18 frame_ms=6.204 p95_ms=6.364 record_ms=6.058 transient/frame=487.0 allocations/frame=0.0 geometry_upload_ms/frame=0.061 texture_uploads=0 texture_upload_ms=0.000 fence_ms/frame=0.003 retire_ms/frame=0.002 acquire_ms/frame=0.002 present_ms/frame=1.949 lit_draws/frame=1129.0 local_lights/frame=0.0 fog_range=414.0..1380.0 shadow_native/frame=0.0 shadow_software/frame=0.0 shadow_triangles/frame=0.0 screen_polygons/frame=93.0 screen_draws/frame=485.0 screen_batches/frame=7.0 polygons/batch=13.29\r\nVulkan commands: frames=323 command_ms=4.078 submit_ms=0.024 retention_ms=0.133 binding_ms=0.208 pipeline=30.0 textures=418.0 lighting=512.0 vertex=547.0 index=547.0 viewport=2.0 scissor=3.0 push=394.0\r\nVulkan GPU: aa=taa scale=100 frame_ms=2.1308 samples=323\r\nVulkan CSM: passes/frame=1.00 vertices/frame=33900 depth_gpu_ms/pass=0.1934 gpu_samples=323\r\nVulkan TAA: resolve_gpu_ms=0.2492 samples=323\r\nVulkan SSAO: enabled=0 passes/frame=0.00 record_ms/frame=0.0000 gpu_ms/pass=-1.0000 gpu_samples=0 radius=1.50 strength=1.20 bias=0.030 fade=80.0\r\nVulkan profile: frames=322 fps=160.98 frame_ms=6.212 p95_ms=6.430 record_ms=6.067 transient/frame=487.0 allocations/frame=0.0 geometry_upload_ms/frame=0.063 texture_uploads=0 texture_upload_ms=0.000 fence_ms/frame=0.002 retire_ms/frame=0.003 acquire_ms/frame=0.002 present_ms/frame=1.962 lit_draws/frame=1129.0 local_lights/frame=0.0 fog_range=414.0..1380.0 shadow_native/frame=0.0 shadow_software/frame=0.0 shadow_triangles/frame=0.0 screen_polygons/frame=93.0 screen_draws/frame=485.0 screen_batches/frame=7.0 polygons/batch=13.29\r\nVulkan commands: frames=322 command_ms=4.072 submit_ms=0.025 retention_ms=0.134 binding_ms=0.211 pipeline=30.0 textures=418.0 lighting=512.0 vertex=547.0 index=547.0 viewport=2.0 scissor=3.0 push=394.0\r\nVulkan GPU: aa=taa scale=100 frame_ms=2.1285 samples=322\r\nVulkan CSM: passes/frame=1.00 vertices/frame=33900 depth_gpu_ms/pass=0.1931 gpu_samples=322\r\nVulkan TAA: resolve_gpu_ms=0.2492 samples=322\r\nVulkan SSAO: enabled=0 passes/frame=0.00 record_ms/frame=0.0000 gpu_ms/pass=-1.0000 gpu_samples=0 radius=1.50 strength=1.20 bias=0.030 fade=80.0\r\nVulkan profile: frames=323 fps=161.45 frame_ms=6.194 p95_ms=6.309 record_ms=6.054 transient/frame=487.0 allocations/frame=0.0 geometry_upload_ms/frame=0.061 texture_uploads=0 texture_upload_ms=0.000 fence_ms/frame=0.002 retire_ms/frame=0.002 acquire_ms/frame=0.002 present_ms/frame=2.044 lit_draws/frame=1129.0 local_lights/frame=0.0 fog_range=414.0..1380.0 shadow_native/frame=0.0 shadow_software/frame=0.0 shadow_triangles/frame=0.0 screen_polygons/frame=93.0 screen_draws/frame=485.0 screen_batches/frame=7.0 polygons/batch=13.29\r\nVulkan commands: frames=323 command_ms=3.980 submit_ms=0.024 retention_ms=0.132 binding_ms=0.205 pipeline=30.0 textures=418.0 lighting=512.0 vertex=547.0 index=547.0 viewport=2.0 scissor=3.0 push=394.0\r\nVulkan GPU: aa=taa scale=100 frame_ms=2.1315 samples=323\r\nVulkan CSM: passes/frame=1.00 vertices/frame=33900 depth_gpu_ms/pass=0.1937 gpu_samples=323\r\nVulkan TAA: resolve_gpu_ms=0.2493 samples=323\r\nVulkan SSAO: enabled=0 passes/frame=0.00 record_ms/frame=0.0000 gpu_ms/pass=-1.0000 gpu_samples=0 radius=1.50 strength=1.20 bias=0.030 fade=80.0\r\n"
+      },
+      {
+        "name": "malden-street-on-2",
+        "samples": {
+          "gpu": [
+            2.127,
+            2.1343
+          ],
+          "cpu_frame": [
+            6.204,
+            6.197
+          ],
+          "record": [
+            6.057,
+            6.052
+          ],
+          "command": [
+            4.127,
+            4.108
+          ]
+        },
+        "median": {
+          "gpu": 2.13065,
+          "cpu_frame": 6.2005,
+          "record": 6.0545,
+          "command": 4.1175
+        },
+        "log": "Vulkan profile: frames=323 fps=161.18 frame_ms=6.204 p95_ms=6.386 record_ms=6.057 transient/frame=487.0 allocations/frame=0.0 geometry_upload_ms/frame=0.061 texture_uploads=0 texture_upload_ms=0.000 fence_ms/frame=0.002 retire_ms/frame=0.003 acquire_ms/frame=0.003 present_ms/frame=1.897 lit_draws/frame=1129.0 local_lights/frame=0.0 fog_range=414.0..1380.0 shadow_native/frame=0.0 shadow_software/frame=0.0 shadow_triangles/frame=0.0 screen_polygons/frame=93.0 screen_draws/frame=485.0 screen_batches/frame=7.0 polygons/batch=13.29\r\nVulkan commands: frames=323 command_ms=4.127 submit_ms=0.024 retention_ms=0.132 binding_ms=0.208 pipeline=30.0 textures=418.0 lighting=512.0 vertex=547.0 index=547.0 viewport=2.0 scissor=3.0 push=394.0\r\nVulkan GPU: aa=taa scale=100 frame_ms=2.1270 samples=323\r\nVulkan CSM: passes/frame=1.00 vertices/frame=33900 depth_gpu_ms/pass=0.1932 gpu_samples=323\r\nVulkan TAA: resolve_gpu_ms=0.2491 samples=323\r\nVulkan SSAO: enabled=0 passes/frame=0.00 record_ms/frame=0.0000 gpu_ms/pass=-1.0000 gpu_samples=0 radius=1.50 strength=1.20 bias=0.030 fade=80.0\r\nVulkan profile: frames=323 fps=161.37 frame_ms=6.197 p95_ms=6.317 record_ms=6.052 transient/frame=487.0 allocations/frame=0.0 geometry_upload_ms/frame=0.061 texture_uploads=0 texture_upload_ms=0.000 fence_ms/frame=0.003 retire_ms/frame=0.002 acquire_ms/frame=0.002 present_ms/frame=1.912 lit_draws/frame=1129.0 local_lights/frame=0.0 fog_range=414.0..1380.0 shadow_native/frame=0.0 shadow_software/frame=0.0 shadow_triangles/frame=0.0 screen_polygons/frame=93.0 screen_draws/frame=485.0 screen_batches/frame=7.0 polygons/batch=13.29\r\nVulkan commands: frames=323 command_ms=4.108 submit_ms=0.024 retention_ms=0.132 binding_ms=0.208 pipeline=30.0 textures=418.0 lighting=512.0 vertex=547.0 index=547.0 viewport=2.0 scissor=3.0 push=394.0\r\nVulkan GPU: aa=taa scale=100 frame_ms=2.1343 samples=323\r\nVulkan CSM: passes/frame=1.00 vertices/frame=33900 depth_gpu_ms/pass=0.1937 gpu_samples=323\r\nVulkan TAA: resolve_gpu_ms=0.2493 samples=323\r\nVulkan SSAO: enabled=0 passes/frame=0.00 record_ms/frame=0.0000 gpu_ms/pass=-1.0000 gpu_samples=0 radius=1.50 strength=1.20 bias=0.030 fade=80.0\r\n"
+      },
+      {
+        "name": "malden-street-off-3",
+        "samples": {
+          "gpu": [
+            2.126,
+            2.1258,
+            2.1325
+          ],
+          "cpu_frame": [
+            6.183,
+            6.195,
+            6.196
+          ],
+          "record": [
+            6.043,
+            6.049,
+            6.054
+          ],
+          "command": [
+            3.931,
+            4.068,
+            4.101
+          ]
+        },
+        "median": {
+          "gpu": 2.126,
+          "cpu_frame": 6.195,
+          "record": 6.049,
+          "command": 4.068
+        },
+        "log": "Vulkan profile: frames=324 fps=161.74 frame_ms=6.183 p95_ms=6.194 record_ms=6.043 transient/frame=487.0 allocations/frame=0.0 geometry_upload_ms/frame=0.061 texture_uploads=0 texture_upload_ms=0.000 fence_ms/frame=0.003 retire_ms/frame=0.003 acquire_ms/frame=0.002 present_ms/frame=2.080 lit_draws/frame=1129.0 local_lights/frame=0.0 fog_range=414.0..1380.0 shadow_native/frame=0.0 shadow_software/frame=0.0 shadow_triangles/frame=0.0 screen_polygons/frame=93.0 screen_draws/frame=485.0 screen_batches/frame=7.0 polygons/batch=13.29\r\nVulkan commands: frames=324 command_ms=3.931 submit_ms=0.024 retention_ms=0.131 binding_ms=0.205 pipeline=30.0 textures=418.0 lighting=505.0 vertex=547.0 index=547.0 viewport=2.0 scissor=3.0 push=394.0\r\nVulkan GPU: aa=taa scale=100 frame_ms=2.1260 samples=324\r\nVulkan CSM: passes/frame=1.00 vertices/frame=33900 depth_gpu_ms/pass=0.1934 gpu_samples=324\r\nVulkan TAA: resolve_gpu_ms=0.2553 samples=324\r\nVulkan SSAO: enabled=0 passes/frame=0.00 record_ms/frame=0.0000 gpu_ms/pass=-1.0000 gpu_samples=0 radius=1.50 strength=1.20 bias=0.030 fade=80.0\r\nVulkan profile: frames=323 fps=161.41 frame_ms=6.195 p95_ms=6.337 record_ms=6.049 transient/frame=486.9 allocations/frame=0.0 geometry_upload_ms/frame=0.062 texture_uploads=0 texture_upload_ms=0.000 fence_ms/frame=0.002 retire_ms/frame=0.003 acquire_ms/frame=0.002 present_ms/frame=1.948 lit_draws/frame=1129.0 local_lights/frame=0.0 fog_range=414.0..1380.0 shadow_native/frame=0.0 shadow_software/frame=0.0 shadow_triangles/frame=0.0 screen_polygons/frame=90.6 screen_draws/frame=484.9 screen_batches/frame=6.9 polygons/batch=13.07\r\nVulkan commands: frames=323 command_ms=4.068 submit_ms=0.025 retention_ms=0.132 binding_ms=0.209 pipeline=30.0 textures=417.9 lighting=505.0 vertex=546.9 index=546.9 viewport=2.0 scissor=3.0 push=394.0\r\nVulkan GPU: aa=taa scale=100 frame_ms=2.1258 samples=323\r\nVulkan CSM: passes/frame=1.00 vertices/frame=33900 depth_gpu_ms/pass=0.1933 gpu_samples=323\r\nVulkan TAA: resolve_gpu_ms=0.2552 samples=323\r\nVulkan SSAO: enabled=0 passes/frame=0.00 record_ms/frame=0.0000 gpu_ms/pass=-1.0000 gpu_samples=0 radius=1.50 strength=1.20 bias=0.030 fade=80.0\r\nVulkan profile: frames=323 fps=161.40 frame_ms=6.196 p95_ms=6.338 record_ms=6.054 transient/frame=485.0 allocations/frame=0.0 geometry_upload_ms/frame=0.061 texture_uploads=0 texture_upload_ms=0.000 fence_ms/frame=0.003 retire_ms/frame=0.003 acquire_ms/frame=0.002 present_ms/frame=1.920 lit_draws/frame=1129.0 local_lights/frame=0.0 fog_range=414.0..1380.0 shadow_native/frame=0.0 shadow_software/frame=0.0 shadow_triangles/frame=0.0 screen_polygons/frame=22.0 screen_draws/frame=483.0 screen_batches/frame=5.0 polygons/batch=4.40\r\nVulkan commands: frames=323 command_ms=4.101 submit_ms=0.025 retention_ms=0.133 binding_ms=0.208 pipeline=30.0 textures=416.0 lighting=505.0 vertex=545.0 index=545.0 viewport=2.0 scissor=2.0 push=394.0\r\nVulkan GPU: aa=taa scale=100 frame_ms=2.1325 samples=323\r\nVulkan CSM: passes/frame=1.00 vertices/frame=33900 depth_gpu_ms/pass=0.1941 gpu_samples=323\r\nVulkan TAA: resolve_gpu_ms=0.2554 samples=323\r\nVulkan SSAO: enabled=0 passes/frame=0.00 record_ms/frame=0.0000 gpu_ms/pass=-1.0000 gpu_samples=0 radius=1.50 strength=1.20 bias=0.030 fade=80.0\r\n"
+      }
+    ],
+    "session": {
+      "arguments": [
+        "-C",
+        "C:/Users/KyouKyou/Downloads/cwr-vulkan/game-local/Remastered",
+        "--nosound",
+        "--window",
+        "--width",
+        "1920",
+        "--height",
+        "1080",
+        "--timeout",
+        "2400",
+        "--lang",
+        "English",
+        "--no-splash",
+        "--render",
+        "vk",
+        "--test-mission",
+        "C:/Users/KyouKyou/Downloads/cwr-vulkan/game-local/Remastered/Missions/01TakeTheCar.ABEL",
+        "--harness",
+        "19501"
+      ],
+      "run": "C:\\Users\\KyouKyou\\Downloads\\cwr-vulkan\\build\\shadow-live\\pbr3-cost-malden-1080",
+      "pid": 23332,
+      "exe": "C:\\Users\\KyouKyou\\Downloads\\cwr-vulkan\\dist\\vulkan-local\\PoseidonGame.exe",
+      "sha256": "3703476A6B1E230B0C904806FA60E6AAC2E69EBA44AFEB6962A89C710C13FB5D"
+    }
+  },
+  {
+    "island": "malden",
+    "height": 1440,
+    "summary": {
+      "off": {
+        "gpu": 2.2108,
+        "cpu_frame": 6.192,
+        "record": 6.053,
+        "command": 3.969
+      },
+      "on": {
+        "gpu": 2.2121,
+        "cpu_frame": 6.197,
+        "record": 6.053,
+        "command": 4.089
+      },
+      "delta": {
+        "gpu": 0.0013000000000000789,
+        "cpu_frame": 0.004999999999999893,
+        "record": 0.0,
+        "command": 0.12000000000000055
+      }
+    },
+    "rows": [
+      {
+        "name": "malden-street-off-0",
+        "samples": {
+          "gpu": [
+            2.2172,
+            2.2096
+          ],
+          "cpu_frame": [
+            6.194,
+            6.202
+          ],
+          "record": [
+            6.056,
+            6.06
+          ],
+          "command": [
+            3.988,
+            4.013
+          ]
+        },
+        "median": {
+          "gpu": 2.2134,
+          "cpu_frame": 6.198,
+          "record": 6.058,
+          "command": 4.0005
+        },
+        "log": "Vulkan profile: frames=323 fps=161.45 frame_ms=6.194 p95_ms=6.297 record_ms=6.056 transient/frame=489.0 allocations/frame=0.0 geometry_upload_ms/frame=0.061 texture_uploads=0 texture_upload_ms=0.000 fence_ms/frame=0.002 retire_ms/frame=0.002 acquire_ms/frame=0.002 present_ms/frame=2.037 lit_draws/frame=1129.0 local_lights/frame=0.0 fog_range=414.0..1380.0 shadow_native/frame=0.0 shadow_software/frame=0.0 shadow_triangles/frame=0.0 screen_polygons/frame=112.0 screen_draws/frame=487.0 screen_batches/frame=9.0 polygons/batch=12.44\r\nVulkan commands: frames=323 command_ms=3.988 submit_ms=0.024 retention_ms=0.134 binding_ms=0.205 pipeline=30.0 textures=420.0 lighting=505.0 vertex=549.0 index=549.0 viewport=2.0 scissor=5.0 push=394.0\r\nVulkan GPU: aa=taa scale=100 frame_ms=2.2172 samples=323\r\nVulkan CSM: passes/frame=1.00 vertices/frame=33900 depth_gpu_ms/pass=0.1444 gpu_samples=323\r\nVulkan TAA: resolve_gpu_ms=0.2933 samples=323\r\nVulkan SSAO: enabled=0 passes/frame=0.00 record_ms/frame=0.0000 gpu_ms/pass=-1.0000 gpu_samples=0 radius=1.50 strength=1.20 bias=0.030 fade=80.0\r\nVulkan profile: frames=323 fps=161.24 frame_ms=6.202 p95_ms=6.316 record_ms=6.060 transient/frame=489.0 allocations/frame=0.0 geometry_upload_ms/frame=0.062 texture_uploads=0 texture_upload_ms=0.000 fence_ms/frame=0.002 retire_ms/frame=0.002 acquire_ms/frame=0.002 present_ms/frame=2.017 lit_draws/frame=1129.0 local_lights/frame=0.0 fog_range=414.0..1380.0 shadow_native/frame=0.0 shadow_software/frame=0.0 shadow_triangles/frame=0.0 screen_polygons/frame=111.6 screen_draws/frame=487.0 screen_batches/frame=9.0 polygons/batch=12.46\r\nVulkan commands: frames=323 command_ms=4.013 submit_ms=0.024 retention_ms=0.134 binding_ms=0.206 pipeline=30.0 textures=420.0 lighting=505.0 vertex=549.0 index=549.0 viewport=2.0 scissor=5.0 push=394.0\r\nVulkan GPU: aa=taa scale=100 frame_ms=2.2096 samples=323\r\nVulkan CSM: passes/frame=1.00 vertices/frame=33900 depth_gpu_ms/pass=0.1438 gpu_samples=323\r\nVulkan TAA: resolve_gpu_ms=0.2926 samples=323\r\nVulkan SSAO: enabled=0 passes/frame=0.00 record_ms/frame=0.0000 gpu_ms/pass=-1.0000 gpu_samples=0 radius=1.50 strength=1.20 bias=0.030 fade=80.0\r\n"
+      },
+      {
+        "name": "malden-street-on-1",
+        "samples": {
+          "gpu": [
+            2.2108,
+            2.2144,
+            2.2121
+          ],
+          "cpu_frame": [
+            6.194,
+            6.191,
+            6.201
+          ],
+          "record": [
+            6.052,
+            6.049,
+            6.062
+          ],
+          "command": [
+            4.096,
+            4.026,
+            4.003
+          ]
+        },
+        "median": {
+          "gpu": 2.2121,
+          "cpu_frame": 6.194,
+          "record": 6.052,
+          "command": 4.026
+        },
+        "log": "Vulkan profile: frames=323 fps=161.44 frame_ms=6.194 p95_ms=6.337 record_ms=6.052 transient/frame=487.0 allocations/frame=0.0 geometry_upload_ms/frame=0.061 texture_uploads=0 texture_upload_ms=0.000 fence_ms/frame=0.003 retire_ms/frame=0.003 acquire_ms/frame=0.003 present_ms/frame=1.924 lit_draws/frame=1129.0 local_lights/frame=0.0 fog_range=414.0..1380.0 shadow_native/frame=0.0 shadow_software/frame=0.0 shadow_triangles/frame=0.0 screen_polygons/frame=94.0 screen_draws/frame=485.0 screen_batches/frame=7.0 polygons/batch=13.43\r\nVulkan commands: frames=323 command_ms=4.096 submit_ms=0.024 retention_ms=0.134 binding_ms=0.206 pipeline=30.0 textures=418.0 lighting=512.0 vertex=547.0 index=547.0 viewport=2.0 scissor=3.0 push=394.0\r\nVulkan GPU: aa=taa scale=100 frame_ms=2.2108 samples=323\r\nVulkan CSM: passes/frame=1.00 vertices/frame=33900 depth_gpu_ms/pass=0.1434 gpu_samples=323\r\nVulkan TAA: resolve_gpu_ms=0.2886 samples=323\r\nVulkan SSAO: enabled=0 passes/frame=0.00 record_ms/frame=0.0000 gpu_ms/pass=-1.0000 gpu_samples=0 radius=1.50 strength=1.20 bias=0.030 fade=80.0\r\nVulkan profile: frames=324 fps=161.52 frame_ms=6.191 p95_ms=6.299 record_ms=6.049 transient/frame=487.0 allocations/frame=0.0 geometry_upload_ms/frame=0.061 texture_uploads=0 texture_upload_ms=0.000 fence_ms/frame=0.002 retire_ms/frame=0.002 acquire_ms/frame=0.002 present_ms/frame=1.992 lit_draws/frame=1129.0 local_lights/frame=0.0 fog_range=414.0..1380.0 shadow_native/frame=0.0 shadow_software/frame=0.0 shadow_triangles/frame=0.0 screen_polygons/frame=94.0 screen_draws/frame=485.0 screen_batches/frame=7.0 polygons/batch=13.43\r\nVulkan commands: frames=324 command_ms=4.026 submit_ms=0.024 retention_ms=0.135 binding_ms=0.205 pipeline=30.0 textures=418.0 lighting=512.0 vertex=547.0 index=547.0 viewport=2.0 scissor=3.0 push=394.0\r\nVulkan GPU: aa=taa scale=100 frame_ms=2.2144 samples=324\r\nVulkan CSM: passes/frame=1.00 vertices/frame=33900 depth_gpu_ms/pass=0.1438 gpu_samples=324\r\nVulkan TAA: resolve_gpu_ms=0.2891 samples=324\r\nVulkan SSAO: enabled=0 passes/frame=0.00 record_ms/frame=0.0000 gpu_ms/pass=-1.0000 gpu_samples=0 radius=1.50 strength=1.20 bias=0.030 fade=80.0\r\nVulkan profile: frames=323 fps=161.26 frame_ms=6.201 p95_ms=6.351 record_ms=6.062 transient/frame=487.0 allocations/frame=0.0 geometry_upload_ms/frame=0.062 texture_uploads=0 texture_upload_ms=0.000 fence_ms/frame=0.002 retire_ms/frame=0.002 acquire_ms/frame=0.002 present_ms/frame=2.029 lit_draws/frame=1129.0 local_lights/frame=0.0 fog_range=414.0..1380.0 shadow_native/frame=0.0 shadow_software/frame=0.0 shadow_triangles/frame=0.0 screen_polygons/frame=94.0 screen_draws/frame=485.0 screen_batches/frame=7.0 polygons/batch=13.43\r\nVulkan commands: frames=323 command_ms=4.003 submit_ms=0.024 retention_ms=0.134 binding_ms=0.206 pipeline=30.0 textures=418.0 lighting=512.0 vertex=547.0 index=547.0 viewport=2.0 scissor=3.0 push=394.0\r\nVulkan GPU: aa=taa scale=100 frame_ms=2.2121 samples=323\r\nVulkan CSM: passes/frame=1.00 vertices/frame=33900 depth_gpu_ms/pass=0.1435 gpu_samples=323\r\nVulkan TAA: resolve_gpu_ms=0.2889 samples=323\r\nVulkan SSAO: enabled=0 passes/frame=0.00 record_ms/frame=0.0000 gpu_ms/pass=-1.0000 gpu_samples=0 radius=1.50 strength=1.20 bias=0.030 fade=80.0\r\n"
+      },
+      {
+        "name": "malden-street-on-2",
+        "samples": {
+          "gpu": [
+            2.2202,
+            2.2105
+          ],
+          "cpu_frame": [
+            6.204,
+            6.197
+          ],
+          "record": [
+            6.06,
+            6.053
+          ],
+          "command": [
+            4.089,
+            4.119
+          ]
+        },
+        "median": {
+          "gpu": 2.21535,
+          "cpu_frame": 6.2005,
+          "record": 6.0565,
+          "command": 4.104
+        },
+        "log": "Vulkan profile: frames=323 fps=161.19 frame_ms=6.204 p95_ms=6.335 record_ms=6.060 transient/frame=487.0 allocations/frame=0.0 geometry_upload_ms/frame=0.061 texture_uploads=0 texture_upload_ms=0.000 fence_ms/frame=0.002 retire_ms/frame=0.003 acquire_ms/frame=0.002 present_ms/frame=1.939 lit_draws/frame=1129.0 local_lights/frame=0.0 fog_range=414.0..1380.0 shadow_native/frame=0.0 shadow_software/frame=0.0 shadow_triangles/frame=0.0 screen_polygons/frame=94.0 screen_draws/frame=485.0 screen_batches/frame=7.0 polygons/batch=13.43\r\nVulkan commands: frames=323 command_ms=4.089 submit_ms=0.024 retention_ms=0.135 binding_ms=0.207 pipeline=30.0 textures=418.0 lighting=512.0 vertex=547.0 index=547.0 viewport=2.0 scissor=3.0 push=394.0\r\nVulkan GPU: aa=taa scale=100 frame_ms=2.2202 samples=323\r\nVulkan CSM: passes/frame=1.00 vertices/frame=33900 depth_gpu_ms/pass=0.1443 gpu_samples=323\r\nVulkan TAA: resolve_gpu_ms=0.2897 samples=323\r\nVulkan SSAO: enabled=0 passes/frame=0.00 record_ms/frame=0.0000 gpu_ms/pass=-1.0000 gpu_samples=0 radius=1.50 strength=1.20 bias=0.030 fade=80.0\r\nVulkan profile: frames=323 fps=161.37 frame_ms=6.197 p95_ms=6.309 record_ms=6.053 transient/frame=487.0 allocations/frame=0.0 geometry_upload_ms/frame=0.061 texture_uploads=0 texture_upload_ms=0.000 fence_ms/frame=0.003 retire_ms/frame=0.003 acquire_ms/frame=0.002 present_ms/frame=1.902 lit_draws/frame=1129.0 local_lights/frame=0.0 fog_range=414.0..1380.0 shadow_native/frame=0.0 shadow_software/frame=0.0 shadow_triangles/frame=0.0 screen_polygons/frame=94.0 screen_draws/frame=485.0 screen_batches/frame=7.0 polygons/batch=13.43\r\nVulkan commands: frames=323 command_ms=4.119 submit_ms=0.025 retention_ms=0.135 binding_ms=0.208 pipeline=30.0 textures=418.0 lighting=512.0 vertex=547.0 index=547.0 viewport=2.0 scissor=3.0 push=394.0\r\nVulkan GPU: aa=taa scale=100 frame_ms=2.2105 samples=323\r\nVulkan CSM: passes/frame=1.00 vertices/frame=33900 depth_gpu_ms/pass=0.1434 gpu_samples=323\r\nVulkan TAA: resolve_gpu_ms=0.2886 samples=323\r\nVulkan SSAO: enabled=0 passes/frame=0.00 record_ms/frame=0.0000 gpu_ms/pass=-1.0000 gpu_samples=0 radius=1.50 strength=1.20 bias=0.030 fade=80.0\r\n"
+      },
+      {
+        "name": "malden-street-off-3",
+        "samples": {
+          "gpu": [
+            2.2072,
+            2.2108,
+            2.2156
+          ],
+          "cpu_frame": [
+            6.192,
+            6.189,
+            6.186
+          ],
+          "record": [
+            6.053,
+            6.052,
+            6.047
+          ],
+          "command": [
+            3.951,
+            3.957,
+            3.969
+          ]
+        },
+        "median": {
+          "gpu": 2.2108,
+          "cpu_frame": 6.189,
+          "record": 6.052,
+          "command": 3.957
+        },
+        "log": "Vulkan profile: frames=323 fps=161.49 frame_ms=6.192 p95_ms=6.298 record_ms=6.053 transient/frame=487.0 allocations/frame=0.0 geometry_upload_ms/frame=0.060 texture_uploads=0 texture_upload_ms=0.000 fence_ms/frame=0.003 retire_ms/frame=0.002 acquire_ms/frame=0.003 present_ms/frame=2.071 lit_draws/frame=1129.0 local_lights/frame=0.0 fog_range=414.0..1380.0 shadow_native/frame=0.0 shadow_software/frame=0.0 shadow_triangles/frame=0.0 screen_polygons/frame=94.0 screen_draws/frame=485.0 screen_batches/frame=7.0 polygons/batch=13.43\r\nVulkan commands: frames=323 command_ms=3.951 submit_ms=0.024 retention_ms=0.134 binding_ms=0.205 pipeline=30.0 textures=418.0 lighting=505.0 vertex=547.0 index=547.0 viewport=2.0 scissor=3.0 push=394.0\r\nVulkan GPU: aa=taa scale=100 frame_ms=2.2072 samples=323\r\nVulkan CSM: passes/frame=1.00 vertices/frame=33900 depth_gpu_ms/pass=0.1438 gpu_samples=323\r\nVulkan TAA: resolve_gpu_ms=0.2925 samples=323\r\nVulkan SSAO: enabled=0 passes/frame=0.00 record_ms/frame=0.0000 gpu_ms/pass=-1.0000 gpu_samples=0 radius=1.50 strength=1.20 bias=0.030 fade=80.0\r\nVulkan profile: frames=324 fps=161.58 frame_ms=6.189 p95_ms=6.263 record_ms=6.052 transient/frame=486.9 allocations/frame=0.0 geometry_upload_ms/frame=0.061 texture_uploads=0 texture_upload_ms=0.000 fence_ms/frame=0.002 retire_ms/frame=0.002 acquire_ms/frame=0.002 present_ms/frame=2.065 lit_draws/frame=1129.0 local_lights/frame=0.0 fog_range=414.0..1380.0 shadow_native/frame=0.0 shadow_software/frame=0.0 shadow_triangles/frame=0.0 screen_polygons/frame=90.9 screen_draws/frame=484.9 screen_batches/frame=6.9 polygons/batch=13.15\r\nVulkan commands: frames=324 command_ms=3.957 submit_ms=0.024 retention_ms=0.134 binding_ms=0.205 pipeline=30.0 textures=417.9 lighting=505.0 vertex=546.9 index=546.9 viewport=2.0 scissor=3.0 push=394.0\r\nVulkan GPU: aa=taa scale=100 frame_ms=2.2108 samples=324\r\nVulkan CSM: passes/frame=1.00 vertices/frame=33900 depth_gpu_ms/pass=0.1438 gpu_samples=324\r\nVulkan TAA: resolve_gpu_ms=0.2927 samples=324\r\nVulkan SSAO: enabled=0 passes/frame=0.00 record_ms/frame=0.0000 gpu_ms/pass=-1.0000 gpu_samples=0 radius=1.50 strength=1.20 bias=0.030 fade=80.0\r\nVulkan profile: frames=324 fps=161.65 frame_ms=6.186 p95_ms=6.249 record_ms=6.047 transient/frame=485.0 allocations/frame=0.0 geometry_upload_ms/frame=0.060 texture_uploads=0 texture_upload_ms=0.000 fence_ms/frame=0.002 retire_ms/frame=0.003 acquire_ms/frame=0.002 present_ms/frame=2.047 lit_draws/frame=1129.0 local_lights/frame=0.0 fog_range=414.0..1380.0 shadow_native/frame=0.0 shadow_software/frame=0.0 shadow_triangles/frame=0.0 screen_polygons/frame=23.0 screen_draws/frame=483.0 screen_batches/frame=5.0 polygons/batch=4.60\r\nVulkan commands: frames=324 command_ms=3.969 submit_ms=0.024 retention_ms=0.134 binding_ms=0.204 pipeline=30.0 textures=416.0 lighting=505.0 vertex=545.0 index=545.0 viewport=2.0 scissor=2.0 push=394.0\r\nVulkan GPU: aa=taa scale=100 frame_ms=2.2156 samples=324\r\nVulkan CSM: passes/frame=1.00 vertices/frame=33900 depth_gpu_ms/pass=0.1445 gpu_samples=324\r\nVulkan TAA: resolve_gpu_ms=0.2932 samples=324\r\nVulkan SSAO: enabled=0 passes/frame=0.00 record_ms/frame=0.0000 gpu_ms/pass=-1.0000 gpu_samples=0 radius=1.50 strength=1.20 bias=0.030 fade=80.0\r\n"
+      }
+    ],
+    "session": {
+      "arguments": [
+        "-C",
+        "C:/Users/KyouKyou/Downloads/cwr-vulkan/game-local/Remastered",
+        "--nosound",
+        "--window",
+        "--width",
+        "2560",
+        "--height",
+        "1440",
+        "--timeout",
+        "2400",
+        "--lang",
+        "English",
+        "--no-splash",
+        "--render",
+        "vk",
+        "--test-mission",
+        "C:/Users/KyouKyou/Downloads/cwr-vulkan/game-local/Remastered/Missions/01TakeTheCar.ABEL",
+        "--harness",
+        "19501"
+      ],
+      "run": "C:\\Users\\KyouKyou\\Downloads\\cwr-vulkan\\build\\shadow-live\\pbr3-cost-malden-1440",
+      "pid": 13708,
+      "exe": "C:\\Users\\KyouKyou\\Downloads\\cwr-vulkan\\dist\\vulkan-local\\PoseidonGame.exe",
+      "sha256": "3703476A6B1E230B0C904806FA60E6AAC2E69EBA44AFEB6962A89C710C13FB5D"
+    }
+  },
+  {
+    "island": "everon",
+    "height": 1080,
+    "summary": {
+      "off": {
+        "gpu": 2.1384,
+        "cpu_frame": 6.174,
+        "record": 6.083,
+        "command": 3.041
+      },
+      "on": {
+        "gpu": 2.1369,
+        "cpu_frame": 6.176,
+        "record": 6.087,
+        "command": 3.059
+      },
+      "delta": {
+        "gpu": -0.0015000000000000568,
+        "cpu_frame": 0.0019999999999997797,
+        "record": 0.0039999999999995595,
+        "command": 0.018000000000000238
+      }
+    },
+    "rows": [
+      {
+        "name": "everon-concrete-off-0",
+        "samples": {
+          "gpu": [
+            2.144,
+            2.1301
+          ],
+          "cpu_frame": [
+            6.178,
+            6.174
+          ],
+          "record": [
+            6.077,
+            6.085
+          ],
+          "command": [
+            3.103,
+            3.038
+          ]
+        },
+        "median": {
+          "gpu": 2.1370500000000003,
+          "cpu_frame": 6.176,
+          "record": 6.0809999999999995,
+          "command": 3.0705
+        },
+        "log": "Vulkan profile: frames=324 fps=161.87 frame_ms=6.178 p95_ms=6.200 record_ms=6.077 transient/frame=302.0 allocations/frame=0.0 geometry_upload_ms/frame=0.133 texture_uploads=0 texture_upload_ms=0.000 fence_ms/frame=0.002 retire_ms/frame=0.003 acquire_ms/frame=0.002 present_ms/frame=2.939 lit_draws/frame=904.0 local_lights/frame=0.0 fog_range=414.0..1380.0 shadow_native/frame=0.0 shadow_software/frame=0.0 shadow_triangles/frame=0.0 screen_polygons/frame=112.0 screen_draws/frame=300.0 screen_batches/frame=9.0 polygons/batch=12.44\r\nVulkan commands: frames=324 command_ms=3.103 submit_ms=0.027 retention_ms=0.118 binding_ms=0.174 pipeline=23.0 textures=571.0 lighting=312.0 vertex=369.0 index=369.0 viewport=2.0 scissor=5.0 push=279.0\r\nVulkan GPU: aa=taa scale=100 frame_ms=2.1440 samples=324\r\nVulkan CSM: passes/frame=1.00 vertices/frame=48960 depth_gpu_ms/pass=0.2332 gpu_samples=324\r\nVulkan TAA: resolve_gpu_ms=0.2645 samples=324\r\nVulkan SSAO: enabled=0 passes/frame=0.00 record_ms/frame=0.0000 gpu_ms/pass=-1.0000 gpu_samples=0 radius=1.50 strength=1.20 bias=0.030 fade=80.0\r\nVulkan profile: frames=324 fps=161.98 frame_ms=6.174 p95_ms=6.173 record_ms=6.085 transient/frame=301.6 allocations/frame=0.0 geometry_upload_ms/frame=0.129 texture_uploads=0 texture_upload_ms=0.000 fence_ms/frame=0.002 retire_ms/frame=0.002 acquire_ms/frame=0.002 present_ms/frame=3.016 lit_draws/frame=904.0 local_lights/frame=0.0 fog_range=414.0..1380.0 shadow_native/frame=0.0 shadow_software/frame=0.0 shadow_triangles/frame=0.0 screen_polygons/frame=108.8 screen_draws/frame=299.6 screen_batches/frame=8.6 polygons/batch=12.65\r\nVulkan commands: frames=324 command_ms=3.038 submit_ms=0.024 retention_ms=0.117 binding_ms=0.170 pipeline=23.0 textures=570.6 lighting=312.0 vertex=368.6 index=368.6 viewport=2.0 scissor=4.6 push=279.0\r\nVulkan GPU: aa=taa scale=100 frame_ms=2.1301 samples=324\r\nVulkan CSM: passes/frame=1.00 vertices/frame=48960 depth_gpu_ms/pass=0.2319 gpu_samples=324\r\nVulkan TAA: resolve_gpu_ms=0.2661 samples=324\r\nVulkan SSAO: enabled=0 passes/frame=0.00 record_ms/frame=0.0000 gpu_ms/pass=-1.0000 gpu_samples=0 radius=1.50 strength=1.20 bias=0.030 fade=80.0\r\n"
+      },
+      {
+        "name": "everon-concrete-on-1",
+        "samples": {
+          "gpu": [
+            2.1344,
+            2.1364,
+            2.1369
+          ],
+          "cpu_frame": [
+            6.174,
+            6.176,
+            6.176
+          ],
+          "record": [
+            6.086,
+            6.087,
+            6.087
+          ],
+          "command": [
+            3.068,
+            3.059,
+            3.055
+          ]
+        },
+        "median": {
+          "gpu": 2.1364,
+          "cpu_frame": 6.176,
+          "record": 6.087,
+          "command": 3.059
+        },
+        "log": "Vulkan profile: frames=324 fps=161.97 frame_ms=6.174 p95_ms=6.173 record_ms=6.086 transient/frame=300.0 allocations/frame=0.0 geometry_upload_ms/frame=0.131 texture_uploads=0 texture_upload_ms=0.000 fence_ms/frame=0.002 retire_ms/frame=0.003 acquire_ms/frame=0.002 present_ms/frame=2.987 lit_draws/frame=904.0 local_lights/frame=0.0 fog_range=414.0..1380.0 shadow_native/frame=0.0 shadow_software/frame=0.0 shadow_triangles/frame=0.0 screen_polygons/frame=96.0 screen_draws/frame=298.0 screen_batches/frame=7.0 polygons/batch=13.71\r\nVulkan commands: frames=324 command_ms=3.068 submit_ms=0.025 retention_ms=0.116 binding_ms=0.170 pipeline=23.0 textures=569.0 lighting=315.0 vertex=367.0 index=367.0 viewport=2.0 scissor=3.0 push=279.0\r\nVulkan GPU: aa=taa scale=100 frame_ms=2.1344 samples=324\r\nVulkan CSM: passes/frame=1.00 vertices/frame=48960 depth_gpu_ms/pass=0.2327 gpu_samples=324\r\nVulkan TAA: resolve_gpu_ms=0.2540 samples=324\r\nVulkan SSAO: enabled=0 passes/frame=0.00 record_ms/frame=0.0000 gpu_ms/pass=-1.0000 gpu_samples=0 radius=1.50 strength=1.20 bias=0.030 fade=80.0\r\nVulkan profile: frames=324 fps=161.93 frame_ms=6.176 p95_ms=6.182 record_ms=6.087 transient/frame=300.0 allocations/frame=0.0 geometry_upload_ms/frame=0.129 texture_uploads=0 texture_upload_ms=0.000 fence_ms/frame=0.002 retire_ms/frame=0.002 acquire_ms/frame=0.002 present_ms/frame=2.997 lit_draws/frame=904.0 local_lights/frame=0.0 fog_range=414.0..1380.0 shadow_native/frame=0.0 shadow_software/frame=0.0 shadow_triangles/frame=0.0 screen_polygons/frame=96.0 screen_draws/frame=298.0 screen_batches/frame=7.0 polygons/batch=13.71\r\nVulkan commands: frames=324 command_ms=3.059 submit_ms=0.024 retention_ms=0.116 binding_ms=0.169 pipeline=23.0 textures=569.0 lighting=315.0 vertex=367.0 index=367.0 viewport=2.0 scissor=3.0 push=279.0\r\nVulkan GPU: aa=taa scale=100 frame_ms=2.1364 samples=324\r\nVulkan CSM: passes/frame=1.00 vertices/frame=48960 depth_gpu_ms/pass=0.2329 gpu_samples=324\r\nVulkan TAA: resolve_gpu_ms=0.2562 samples=324\r\nVulkan SSAO: enabled=0 passes/frame=0.00 record_ms/frame=0.0000 gpu_ms/pass=-1.0000 gpu_samples=0 radius=1.50 strength=1.20 bias=0.030 fade=80.0\r\nVulkan profile: frames=324 fps=161.92 frame_ms=6.176 p95_ms=6.173 record_ms=6.087 transient/frame=300.0 allocations/frame=0.0 geometry_upload_ms/frame=0.130 texture_uploads=0 texture_upload_ms=0.000 fence_ms/frame=0.002 retire_ms/frame=0.002 acquire_ms/frame=0.002 present_ms/frame=3.002 lit_draws/frame=904.0 local_lights/frame=0.0 fog_range=414.0..1380.0 shadow_native/frame=0.0 shadow_software/frame=0.0 shadow_triangles/frame=0.0 screen_polygons/frame=96.0 screen_draws/frame=298.0 screen_batches/frame=7.0 polygons/batch=13.71\r\nVulkan commands: frames=324 command_ms=3.055 submit_ms=0.024 retention_ms=0.116 binding_ms=0.169 pipeline=23.0 textures=569.0 lighting=315.0 vertex=367.0 index=367.0 viewport=2.0 scissor=3.0 push=279.0\r\nVulkan GPU: aa=taa scale=100 frame_ms=2.1369 samples=324\r\nVulkan CSM: passes/frame=1.00 vertices/frame=48960 depth_gpu_ms/pass=0.2332 gpu_samples=324\r\nVulkan TAA: resolve_gpu_ms=0.2578 samples=324\r\nVulkan SSAO: enabled=0 passes/frame=0.00 record_ms/frame=0.0000 gpu_ms/pass=-1.0000 gpu_samples=0 radius=1.50 strength=1.20 bias=0.030 fade=80.0\r\n"
+      },
+      {
+        "name": "everon-concrete-on-2",
+        "samples": {
+          "gpu": [
+            2.1372,
+            2.1369
+          ],
+          "cpu_frame": [
+            6.176,
+            6.174
+          ],
+          "record": [
+            6.087,
+            6.084
+          ],
+          "command": [
+            3.054,
+            3.08
+          ]
+        },
+        "median": {
+          "gpu": 2.13705,
+          "cpu_frame": 6.175000000000001,
+          "record": 6.0855,
+          "command": 3.067
+        },
+        "log": "Vulkan profile: frames=324 fps=161.92 frame_ms=6.176 p95_ms=6.173 record_ms=6.087 transient/frame=300.0 allocations/frame=0.0 geometry_upload_ms/frame=0.129 texture_uploads=0 texture_upload_ms=0.000 fence_ms/frame=0.002 retire_ms/frame=0.002 acquire_ms/frame=0.002 present_ms/frame=3.002 lit_draws/frame=904.0 local_lights/frame=0.0 fog_range=414.0..1380.0 shadow_native/frame=0.0 shadow_software/frame=0.0 shadow_triangles/frame=0.0 screen_polygons/frame=96.0 screen_draws/frame=298.0 screen_batches/frame=7.0 polygons/batch=13.71\r\nVulkan commands: frames=324 command_ms=3.054 submit_ms=0.024 retention_ms=0.116 binding_ms=0.169 pipeline=23.0 textures=569.0 lighting=315.0 vertex=367.0 index=367.0 viewport=2.0 scissor=3.0 push=279.0\r\nVulkan GPU: aa=taa scale=100 frame_ms=2.1372 samples=324\r\nVulkan CSM: passes/frame=1.00 vertices/frame=48960 depth_gpu_ms/pass=0.2330 gpu_samples=324\r\nVulkan TAA: resolve_gpu_ms=0.2576 samples=324\r\nVulkan SSAO: enabled=0 passes/frame=0.00 record_ms/frame=0.0000 gpu_ms/pass=-1.0000 gpu_samples=0 radius=1.50 strength=1.20 bias=0.030 fade=80.0\r\nVulkan profile: frames=324 fps=161.97 frame_ms=6.174 p95_ms=6.173 record_ms=6.084 transient/frame=300.0 allocations/frame=0.0 geometry_upload_ms/frame=0.132 texture_uploads=0 texture_upload_ms=0.000 fence_ms/frame=0.002 retire_ms/frame=0.002 acquire_ms/frame=0.002 present_ms/frame=2.973 lit_draws/frame=904.0 local_lights/frame=0.0 fog_range=414.0..1380.0 shadow_native/frame=0.0 shadow_software/frame=0.0 shadow_triangles/frame=0.0 screen_polygons/frame=96.0 screen_draws/frame=298.0 screen_batches/frame=7.0 polygons/batch=13.71\r\nVulkan commands: frames=324 command_ms=3.080 submit_ms=0.024 retention_ms=0.117 binding_ms=0.171 pipeline=23.0 textures=569.0 lighting=315.0 vertex=367.0 index=367.0 viewport=2.0 scissor=3.0 push=279.0\r\nVulkan GPU: aa=taa scale=100 frame_ms=2.1369 samples=324\r\nVulkan CSM: passes/frame=1.00 vertices/frame=48960 depth_gpu_ms/pass=0.2332 gpu_samples=324\r\nVulkan TAA: resolve_gpu_ms=0.2577 samples=324\r\nVulkan SSAO: enabled=0 passes/frame=0.00 record_ms/frame=0.0000 gpu_ms/pass=-1.0000 gpu_samples=0 radius=1.50 strength=1.20 bias=0.030 fade=80.0\r\n"
+      },
+      {
+        "name": "everon-concrete-off-3",
+        "samples": {
+          "gpu": [
+            2.1384,
+            2.141,
+            2.1352
+          ],
+          "cpu_frame": [
+            6.173,
+            6.173,
+            6.176
+          ],
+          "record": [
+            6.074,
+            6.083,
+            6.086
+          ],
+          "command": [
+            3.116,
+            3.041,
+            3.019
+          ]
+        },
+        "median": {
+          "gpu": 2.1384,
+          "cpu_frame": 6.173,
+          "record": 6.083,
+          "command": 3.041
+        },
+        "log": "Vulkan profile: frames=324 fps=161.99 frame_ms=6.173 p95_ms=6.174 record_ms=6.074 transient/frame=300.0 allocations/frame=0.0 geometry_upload_ms/frame=0.133 texture_uploads=0 texture_upload_ms=0.000 fence_ms/frame=0.002 retire_ms/frame=0.003 acquire_ms/frame=0.002 present_ms/frame=2.923 lit_draws/frame=904.0 local_lights/frame=0.0 fog_range=414.0..1380.0 shadow_native/frame=0.0 shadow_software/frame=0.0 shadow_triangles/frame=0.0 screen_polygons/frame=96.0 screen_draws/frame=298.0 screen_batches/frame=7.0 polygons/batch=13.71\r\nVulkan commands: frames=324 command_ms=3.116 submit_ms=0.027 retention_ms=0.118 binding_ms=0.175 pipeline=23.0 textures=569.0 lighting=312.0 vertex=367.0 index=367.0 viewport=2.0 scissor=3.0 push=279.0\r\nVulkan GPU: aa=taa scale=100 frame_ms=2.1384 samples=324\r\nVulkan CSM: passes/frame=1.00 vertices/frame=48960 depth_gpu_ms/pass=0.2328 gpu_samples=324\r\nVulkan TAA: resolve_gpu_ms=0.2623 samples=324\r\nVulkan SSAO: enabled=0 passes/frame=0.00 record_ms/frame=0.0000 gpu_ms/pass=-1.0000 gpu_samples=0 radius=1.50 strength=1.20 bias=0.030 fade=80.0\r\nVulkan profile: frames=324 fps=161.98 frame_ms=6.173 p95_ms=6.173 record_ms=6.083 transient/frame=299.6 allocations/frame=0.0 geometry_upload_ms/frame=0.129 texture_uploads=0 texture_upload_ms=0.000 fence_ms/frame=0.002 retire_ms/frame=0.002 acquire_ms/frame=0.002 present_ms/frame=3.011 lit_draws/frame=904.0 local_lights/frame=0.0 fog_range=414.0..1380.0 shadow_native/frame=0.0 shadow_software/frame=0.0 shadow_triangles/frame=0.0 screen_polygons/frame=80.8 screen_draws/frame=297.6 screen_batches/frame=6.6 polygons/batch=12.24\r\nVulkan commands: frames=324 command_ms=3.041 submit_ms=0.024 retention_ms=0.116 binding_ms=0.170 pipeline=23.0 textures=568.6 lighting=312.0 vertex=366.6 index=366.6 viewport=2.0 scissor=2.8 push=279.0\r\nVulkan GPU: aa=taa scale=100 frame_ms=2.1410 samples=324\r\nVulkan CSM: passes/frame=1.00 vertices/frame=48960 depth_gpu_ms/pass=0.2331 gpu_samples=324\r\nVulkan TAA: resolve_gpu_ms=0.2665 samples=324\r\nVulkan SSAO: enabled=0 passes/frame=0.00 record_ms/frame=0.0000 gpu_ms/pass=-1.0000 gpu_samples=0 radius=1.50 strength=1.20 bias=0.030 fade=80.0\r\nVulkan profile: frames=324 fps=161.92 frame_ms=6.176 p95_ms=6.180 record_ms=6.086 transient/frame=298.0 allocations/frame=0.0 geometry_upload_ms/frame=0.129 texture_uploads=0 texture_upload_ms=0.000 fence_ms/frame=0.002 retire_ms/frame=0.002 acquire_ms/frame=0.002 present_ms/frame=3.037 lit_draws/frame=904.0 local_lights/frame=0.0 fog_range=414.0..1380.0 shadow_native/frame=0.0 shadow_software/frame=0.0 shadow_triangles/frame=0.0 screen_polygons/frame=20.0 screen_draws/frame=296.0 screen_batches/frame=5.0 polygons/batch=4.00\r\nVulkan commands: frames=324 command_ms=3.019 submit_ms=0.024 retention_ms=0.116 binding_ms=0.169 pipeline=23.0 textures=567.0 lighting=312.0 vertex=365.0 index=365.0 viewport=2.0 scissor=2.0 push=279.0\r\nVulkan GPU: aa=taa scale=100 frame_ms=2.1352 samples=324\r\nVulkan CSM: passes/frame=1.00 vertices/frame=48960 depth_gpu_ms/pass=0.2327 gpu_samples=324\r\nVulkan TAA: resolve_gpu_ms=0.2623 samples=324\r\nVulkan SSAO: enabled=0 passes/frame=0.00 record_ms/frame=0.0000 gpu_ms/pass=-1.0000 gpu_samples=0 radius=1.50 strength=1.20 bias=0.030 fade=80.0\r\n"
+      }
+    ],
+    "session": {
+      "arguments": [
+        "-C",
+        "C:/Users/KyouKyou/Downloads/cwr-vulkan/game-local/Remastered",
+        "--nosound",
+        "--window",
+        "--width",
+        "1920",
+        "--height",
+        "1080",
+        "--timeout",
+        "2400",
+        "--lang",
+        "English",
+        "--no-splash",
+        "--render",
+        "vk",
+        "--test-mission",
+        "C:/Users/KyouKyou/Downloads/cwr-vulkan/game-local/Remastered/Missions/06Ninjas.EDEN",
+        "--harness",
+        "19501"
+      ],
+      "run": "C:\\Users\\KyouKyou\\Downloads\\cwr-vulkan\\build\\shadow-live\\pbr3-cost-everon-1080",
+      "pid": 12712,
+      "exe": "C:\\Users\\KyouKyou\\Downloads\\cwr-vulkan\\dist\\vulkan-local\\PoseidonGame.exe",
+      "sha256": "3703476A6B1E230B0C904806FA60E6AAC2E69EBA44AFEB6962A89C710C13FB5D"
+    }
+  },
+  {
+    "island": "everon",
+    "height": 1440,
+    "summary": {
+      "off": {
+        "gpu": 2.205,
+        "cpu_frame": 6.175,
+        "record": 6.085,
+        "command": 3.016
+      },
+      "on": {
+        "gpu": 2.2096,
+        "cpu_frame": 6.176,
+        "record": 6.087,
+        "command": 3.052
+      },
+      "delta": {
+        "gpu": 0.0045999999999999375,
+        "cpu_frame": 0.001000000000000334,
+        "record": 0.0019999999999997797,
+        "command": 0.03600000000000003
+      }
+    },
+    "rows": [
+      {
+        "name": "everon-concrete-off-0",
+        "samples": {
+          "gpu": [
+            2.205,
+            2.2094
+          ],
+          "cpu_frame": [
+            6.175,
+            6.176
+          ],
+          "record": [
+            6.076,
+            6.085
+          ],
+          "command": [
+            3.104,
+            3.036
+          ]
+        },
+        "median": {
+          "gpu": 2.2072000000000003,
+          "cpu_frame": 6.1754999999999995,
+          "record": 6.0805,
+          "command": 3.0700000000000003
+        },
+        "log": "Vulkan profile: frames=324 fps=161.95 frame_ms=6.175 p95_ms=6.174 record_ms=6.076 transient/frame=302.0 allocations/frame=0.0 geometry_upload_ms/frame=0.133 texture_uploads=0 texture_upload_ms=0.000 fence_ms/frame=0.002 retire_ms/frame=0.002 acquire_ms/frame=0.002 present_ms/frame=2.938 lit_draws/frame=904.0 local_lights/frame=0.0 fog_range=414.0..1380.0 shadow_native/frame=0.0 shadow_software/frame=0.0 shadow_triangles/frame=0.0 screen_polygons/frame=112.0 screen_draws/frame=300.0 screen_batches/frame=9.0 polygons/batch=12.44\r\nVulkan commands: frames=324 command_ms=3.104 submit_ms=0.026 retention_ms=0.118 binding_ms=0.176 pipeline=23.0 textures=571.0 lighting=312.0 vertex=369.0 index=369.0 viewport=2.0 scissor=5.0 push=279.0\r\nVulkan GPU: aa=taa scale=100 frame_ms=2.2050 samples=324\r\nVulkan CSM: passes/frame=1.00 vertices/frame=48960 depth_gpu_ms/pass=0.1793 gpu_samples=324\r\nVulkan TAA: resolve_gpu_ms=0.3024 samples=324\r\nVulkan SSAO: enabled=0 passes/frame=0.00 record_ms/frame=0.0000 gpu_ms/pass=-1.0000 gpu_samples=0 radius=1.50 strength=1.20 bias=0.030 fade=80.0\r\nVulkan profile: frames=324 fps=161.91 frame_ms=6.176 p95_ms=6.177 record_ms=6.085 transient/frame=301.6 allocations/frame=0.0 geometry_upload_ms/frame=0.129 texture_uploads=0 texture_upload_ms=0.000 fence_ms/frame=0.002 retire_ms/frame=0.002 acquire_ms/frame=0.002 present_ms/frame=3.018 lit_draws/frame=904.0 local_lights/frame=0.0 fog_range=414.0..1380.0 shadow_native/frame=0.0 shadow_software/frame=0.0 shadow_triangles/frame=0.0 screen_polygons/frame=109.1 screen_draws/frame=299.6 screen_batches/frame=8.6 polygons/batch=12.63\r\nVulkan commands: frames=324 command_ms=3.036 submit_ms=0.024 retention_ms=0.117 binding_ms=0.172 pipeline=23.0 textures=570.6 lighting=312.0 vertex=368.6 index=368.6 viewport=2.0 scissor=4.6 push=279.0\r\nVulkan GPU: aa=taa scale=100 frame_ms=2.2094 samples=324\r\nVulkan CSM: passes/frame=1.00 vertices/frame=48960 depth_gpu_ms/pass=0.1794 gpu_samples=324\r\nVulkan TAA: resolve_gpu_ms=0.3027 samples=324\r\nVulkan SSAO: enabled=0 passes/frame=0.00 record_ms/frame=0.0000 gpu_ms/pass=-1.0000 gpu_samples=0 radius=1.50 strength=1.20 bias=0.030 fade=80.0\r\n"
+      },
+      {
+        "name": "everon-concrete-on-1",
+        "samples": {
+          "gpu": [
+            2.2098,
+            2.2092,
+            2.2096
+          ],
+          "cpu_frame": [
+            6.175,
+            6.176,
+            6.176
+          ],
+          "record": [
+            6.087,
+            6.085,
+            6.087
+          ],
+          "command": [
+            3.051,
+            3.058,
+            3.052
+          ]
+        },
+        "median": {
+          "gpu": 2.2096,
+          "cpu_frame": 6.176,
+          "record": 6.087,
+          "command": 3.052
+        },
+        "log": "Vulkan profile: frames=324 fps=161.94 frame_ms=6.175 p95_ms=6.176 record_ms=6.087 transient/frame=300.0 allocations/frame=0.0 geometry_upload_ms/frame=0.128 texture_uploads=0 texture_upload_ms=0.000 fence_ms/frame=0.002 retire_ms/frame=0.002 acquire_ms/frame=0.002 present_ms/frame=3.004 lit_draws/frame=904.0 local_lights/frame=0.0 fog_range=414.0..1380.0 shadow_native/frame=0.0 shadow_software/frame=0.0 shadow_triangles/frame=0.0 screen_polygons/frame=96.0 screen_draws/frame=298.0 screen_batches/frame=7.0 polygons/batch=13.71\r\nVulkan commands: frames=324 command_ms=3.051 submit_ms=0.024 retention_ms=0.117 binding_ms=0.170 pipeline=23.0 textures=569.0 lighting=315.0 vertex=367.0 index=367.0 viewport=2.0 scissor=3.0 push=279.0\r\nVulkan GPU: aa=taa scale=100 frame_ms=2.2098 samples=324\r\nVulkan CSM: passes/frame=1.00 vertices/frame=48960 depth_gpu_ms/pass=0.1793 gpu_samples=324\r\nVulkan TAA: resolve_gpu_ms=0.2968 samples=324\r\nVulkan SSAO: enabled=0 passes/frame=0.00 record_ms/frame=0.0000 gpu_ms/pass=-1.0000 gpu_samples=0 radius=1.50 strength=1.20 bias=0.030 fade=80.0\r\nVulkan profile: frames=324 fps=161.93 frame_ms=6.176 p95_ms=6.184 record_ms=6.085 transient/frame=300.0 allocations/frame=0.0 geometry_upload_ms/frame=0.129 texture_uploads=0 texture_upload_ms=0.000 fence_ms/frame=0.002 retire_ms/frame=0.002 acquire_ms/frame=0.002 present_ms/frame=2.995 lit_draws/frame=904.0 local_lights/frame=0.0 fog_range=414.0..1380.0 shadow_native/frame=0.0 shadow_software/frame=0.0 shadow_triangles/frame=0.0 screen_polygons/frame=96.0 screen_draws/frame=298.0 screen_batches/frame=7.0 polygons/batch=13.71\r\nVulkan commands: frames=324 command_ms=3.058 submit_ms=0.025 retention_ms=0.116 binding_ms=0.171 pipeline=23.0 textures=569.0 lighting=315.0 vertex=367.0 index=367.0 viewport=2.0 scissor=3.0 push=279.0\r\nVulkan GPU: aa=taa scale=100 frame_ms=2.2092 samples=324\r\nVulkan CSM: passes/frame=1.00 vertices/frame=48960 depth_gpu_ms/pass=0.1796 gpu_samples=324\r\nVulkan TAA: resolve_gpu_ms=0.2948 samples=324\r\nVulkan SSAO: enabled=0 passes/frame=0.00 record_ms/frame=0.0000 gpu_ms/pass=-1.0000 gpu_samples=0 radius=1.50 strength=1.20 bias=0.030 fade=80.0\r\nVulkan profile: frames=324 fps=161.93 frame_ms=6.176 p95_ms=6.178 record_ms=6.087 transient/frame=300.0 allocations/frame=0.0 geometry_upload_ms/frame=0.129 texture_uploads=0 texture_upload_ms=0.000 fence_ms/frame=0.002 retire_ms/frame=0.002 acquire_ms/frame=0.002 present_ms/frame=3.005 lit_draws/frame=904.0 local_lights/frame=0.0 fog_range=414.0..1380.0 shadow_native/frame=0.0 shadow_software/frame=0.0 shadow_triangles/frame=0.0 screen_polygons/frame=96.0 screen_draws/frame=298.0 screen_batches/frame=7.0 polygons/batch=13.71\r\nVulkan commands: frames=324 command_ms=3.052 submit_ms=0.024 retention_ms=0.116 binding_ms=0.170 pipeline=23.0 textures=569.0 lighting=315.0 vertex=367.0 index=367.0 viewport=2.0 scissor=3.0 push=279.0\r\nVulkan GPU: aa=taa scale=100 frame_ms=2.2096 samples=324\r\nVulkan CSM: passes/frame=1.00 vertices/frame=48960 depth_gpu_ms/pass=0.1793 gpu_samples=324\r\nVulkan TAA: resolve_gpu_ms=0.2989 samples=324\r\nVulkan SSAO: enabled=0 passes/frame=0.00 record_ms/frame=0.0000 gpu_ms/pass=-1.0000 gpu_samples=0 radius=1.50 strength=1.20 bias=0.030 fade=80.0\r\n"
+      },
+      {
+        "name": "everon-concrete-on-2",
+        "samples": {
+          "gpu": [
+            2.212,
+            2.2065
+          ],
+          "cpu_frame": [
+            6.177,
+            6.175
+          ],
+          "record": [
+            6.083,
+            6.088
+          ],
+          "command": [
+            3.176,
+            3.047
+          ]
+        },
+        "median": {
+          "gpu": 2.20925,
+          "cpu_frame": 6.176,
+          "record": 6.0855,
+          "command": 3.1115000000000004
+        },
+        "log": "Vulkan profile: frames=324 fps=161.90 frame_ms=6.177 p95_ms=6.174 record_ms=6.083 transient/frame=300.0 allocations/frame=0.0 geometry_upload_ms/frame=0.134 texture_uploads=0 texture_upload_ms=0.000 fence_ms/frame=0.002 retire_ms/frame=0.002 acquire_ms/frame=0.002 present_ms/frame=2.875 lit_draws/frame=904.0 local_lights/frame=0.0 fog_range=414.0..1380.0 shadow_native/frame=0.0 shadow_software/frame=0.0 shadow_triangles/frame=0.0 screen_polygons/frame=96.0 screen_draws/frame=298.0 screen_batches/frame=7.0 polygons/batch=13.71\r\nVulkan commands: frames=324 command_ms=3.176 submit_ms=0.026 retention_ms=0.121 binding_ms=0.178 pipeline=23.0 textures=569.0 lighting=315.0 vertex=367.0 index=367.0 viewport=2.0 scissor=3.0 push=279.0\r\nVulkan GPU: aa=taa scale=100 frame_ms=2.2120 samples=324\r\nVulkan CSM: passes/frame=1.00 vertices/frame=48960 depth_gpu_ms/pass=0.1794 gpu_samples=324\r\nVulkan TAA: resolve_gpu_ms=0.2970 samples=324\r\nVulkan SSAO: enabled=0 passes/frame=0.00 record_ms/frame=0.0000 gpu_ms/pass=-1.0000 gpu_samples=0 radius=1.50 strength=1.20 bias=0.030 fade=80.0\r\nVulkan profile: frames=324 fps=161.95 frame_ms=6.175 p95_ms=6.173 record_ms=6.088 transient/frame=300.0 allocations/frame=0.0 geometry_upload_ms/frame=0.128 texture_uploads=0 texture_upload_ms=0.000 fence_ms/frame=0.002 retire_ms/frame=0.002 acquire_ms/frame=0.002 present_ms/frame=3.010 lit_draws/frame=904.0 local_lights/frame=0.0 fog_range=414.0..1380.0 shadow_native/frame=0.0 shadow_software/frame=0.0 shadow_triangles/frame=0.0 screen_polygons/frame=96.0 screen_draws/frame=298.0 screen_batches/frame=7.0 polygons/batch=13.71\r\nVulkan commands: frames=324 command_ms=3.047 submit_ms=0.024 retention_ms=0.117 binding_ms=0.170 pipeline=23.0 textures=569.0 lighting=315.0 vertex=367.0 index=367.0 viewport=2.0 scissor=3.0 push=279.0\r\nVulkan GPU: aa=taa scale=100 frame_ms=2.2065 samples=324\r\nVulkan CSM: passes/frame=1.00 vertices/frame=48960 depth_gpu_ms/pass=0.1793 gpu_samples=324\r\nVulkan TAA: resolve_gpu_ms=0.2946 samples=324\r\nVulkan SSAO: enabled=0 passes/frame=0.00 record_ms/frame=0.0000 gpu_ms/pass=-1.0000 gpu_samples=0 radius=1.50 strength=1.20 bias=0.030 fade=80.0\r\n"
+      },
+      {
+        "name": "everon-concrete-off-3",
+        "samples": {
+          "gpu": [
+            2.1976,
+            2.2132,
+            2.2032
+          ],
+          "cpu_frame": [
+            6.176,
+            6.175,
+            6.172
+          ],
+          "record": [
+            6.088,
+            6.087,
+            6.085
+          ],
+          "command": [
+            3.012,
+            3.016,
+            3.012
+          ]
+        },
+        "median": {
+          "gpu": 2.2032,
+          "cpu_frame": 6.175,
+          "record": 6.087,
+          "command": 3.012
+        },
+        "log": "Vulkan profile: frames=324 fps=161.91 frame_ms=6.176 p95_ms=6.173 record_ms=6.088 transient/frame=300.0 allocations/frame=0.0 geometry_upload_ms/frame=0.129 texture_uploads=0 texture_upload_ms=0.000 fence_ms/frame=0.002 retire_ms/frame=0.002 acquire_ms/frame=0.002 present_ms/frame=3.045 lit_draws/frame=904.0 local_lights/frame=0.0 fog_range=414.0..1380.0 shadow_native/frame=0.0 shadow_software/frame=0.0 shadow_triangles/frame=0.0 screen_polygons/frame=96.0 screen_draws/frame=298.0 screen_batches/frame=7.0 polygons/batch=13.71\r\nVulkan commands: frames=324 command_ms=3.012 submit_ms=0.024 retention_ms=0.116 binding_ms=0.170 pipeline=23.0 textures=569.0 lighting=312.0 vertex=367.0 index=367.0 viewport=2.0 scissor=3.0 push=279.0\r\nVulkan GPU: aa=taa scale=100 frame_ms=2.1976 samples=324\r\nVulkan CSM: passes/frame=1.00 vertices/frame=48960 depth_gpu_ms/pass=0.1791 gpu_samples=324\r\nVulkan TAA: resolve_gpu_ms=0.2978 samples=324\r\nVulkan SSAO: enabled=0 passes/frame=0.00 record_ms/frame=0.0000 gpu_ms/pass=-1.0000 gpu_samples=0 radius=1.50 strength=1.20 bias=0.030 fade=80.0\r\nVulkan profile: frames=324 fps=161.95 frame_ms=6.175 p95_ms=6.173 record_ms=6.087 transient/frame=299.6 allocations/frame=0.0 geometry_upload_ms/frame=0.128 texture_uploads=0 texture_upload_ms=0.000 fence_ms/frame=0.002 retire_ms/frame=0.002 acquire_ms/frame=0.002 present_ms/frame=3.040 lit_draws/frame=904.0 local_lights/frame=0.0 fog_range=414.0..1380.0 shadow_native/frame=0.0 shadow_software/frame=0.0 shadow_triangles/frame=0.0 screen_polygons/frame=81.7 screen_draws/frame=297.6 screen_batches/frame=6.6 polygons/batch=12.33\r\nVulkan commands: frames=324 command_ms=3.016 submit_ms=0.024 retention_ms=0.116 binding_ms=0.169 pipeline=23.0 textures=568.6 lighting=312.0 vertex=366.6 index=366.6 viewport=2.0 scissor=2.8 push=279.0\r\nVulkan GPU: aa=taa scale=100 frame_ms=2.2132 samples=324\r\nVulkan CSM: passes/frame=1.00 vertices/frame=48960 depth_gpu_ms/pass=0.1797 gpu_samples=324\r\nVulkan TAA: resolve_gpu_ms=0.3032 samples=324\r\nVulkan SSAO: enabled=0 passes/frame=0.00 record_ms/frame=0.0000 gpu_ms/pass=-1.0000 gpu_samples=0 radius=1.50 strength=1.20 bias=0.030 fade=80.0\r\nVulkan profile: frames=325 fps=162.01 frame_ms=6.172 p95_ms=6.173 record_ms=6.085 transient/frame=298.0 allocations/frame=0.0 geometry_upload_ms/frame=0.127 texture_uploads=0 texture_upload_ms=0.000 fence_ms/frame=0.002 retire_ms/frame=0.002 acquire_ms/frame=0.002 present_ms/frame=3.042 lit_draws/frame=904.0 local_lights/frame=0.0 fog_range=414.0..1380.0 shadow_native/frame=0.0 shadow_software/frame=0.0 shadow_triangles/frame=0.0 screen_polygons/frame=20.0 screen_draws/frame=296.0 screen_batches/frame=5.0 polygons/batch=4.00\r\nVulkan commands: frames=325 command_ms=3.012 submit_ms=0.024 retention_ms=0.116 binding_ms=0.170 pipeline=23.0 textures=567.0 lighting=312.0 vertex=365.0 index=365.0 viewport=2.0 scissor=2.0 push=279.0\r\nVulkan GPU: aa=taa scale=100 frame_ms=2.2032 samples=325\r\nVulkan CSM: passes/frame=1.00 vertices/frame=48960 depth_gpu_ms/pass=0.1797 gpu_samples=325\r\nVulkan TAA: resolve_gpu_ms=0.2987 samples=325\r\nVulkan SSAO: enabled=0 passes/frame=0.00 record_ms/frame=0.0000 gpu_ms/pass=-1.0000 gpu_samples=0 radius=1.50 strength=1.20 bias=0.030 fade=80.0\r\n"
+      }
+    ],
+    "session": {
+      "arguments": [
+        "-C",
+        "C:/Users/KyouKyou/Downloads/cwr-vulkan/game-local/Remastered",
+        "--nosound",
+        "--window",
+        "--width",
+        "2560",
+        "--height",
+        "1440",
+        "--timeout",
+        "2400",
+        "--lang",
+        "English",
+        "--no-splash",
+        "--render",
+        "vk",
+        "--test-mission",
+        "C:/Users/KyouKyou/Downloads/cwr-vulkan/game-local/Remastered/Missions/06Ninjas.EDEN",
+        "--harness",
+        "19501"
+      ],
+      "run": "C:\\Users\\KyouKyou\\Downloads\\cwr-vulkan\\build\\shadow-live\\pbr3-cost-everon-1440",
+      "pid": 5268,
+      "exe": "C:\\Users\\KyouKyou\\Downloads\\cwr-vulkan\\dist\\vulkan-local\\PoseidonGame.exe",
+      "sha256": "3703476A6B1E230B0C904806FA60E6AAC2E69EBA44AFEB6962A89C710C13FB5D"
+    }
+  }
+]

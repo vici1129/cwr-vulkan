@@ -724,8 +724,8 @@ int main()
               "PBR prototype defaults off");
         Check(context.SetPBR("on").starts_with("OK:") && context.PBREnabled() && !context.RaySceneEnabled(),
               "PBR needs no ray capable device");
-        Check(context.SetPBR("status").find("stock-dielectric-v2") != std::string::npos &&
-              context.SetPBR("status").find("software/other materials legacy") != std::string::npos,
+        Check(context.SetPBR("status").find("stock-dielectric-v3") != std::string::npos &&
+              context.SetPBR("status").find("captured CPU-lit") != std::string::npos,
               "PBR status identifies the prototype and coverage");
         Check(context.SetPBR("status").find("data/strecha_tasky_vln.pac") != std::string::npos &&
               context.SetPBR("status").find("data/strecha_tasky_vln90.pac") != std::string::npos &&
@@ -734,13 +734,14 @@ int main()
               context.SetPBR("status").find("data/sloupek_bily_orezly_.pac") != std::string::npos,
               "PBR status covers both new and original stock materials");
         context.RecordPBRDraw();
+        context.RecordPBRDraw(true);
         context.SetPBR("on");
-        Check(context.SetPBR("status").find("native draws since toggle=1") != std::string::npos,
+        Check(context.SetPBR("status").find("draws since toggle=2; software=1") != std::string::npos,
               "idempotent PBR control retains native draw telemetry");
         Check(context.SetPBR("invalid").starts_with("INVALID:") && context.PBREnabled(),
               "invalid PBR control preserves mode");
         Check(context.SetPBR("off").starts_with("OK:") && !context.PBREnabled(), "PBR off restores legacy selection");
-        Check(context.SetPBR("status").find("native draws since toggle=0") != std::string::npos,
+        Check(context.SetPBR("status").find("draws since toggle=0; software=0") != std::string::npos,
               "PBR mode change resets telemetry");
         Check(context.SetWetSurfaces("status").find("requested=off") != std::string::npos &&
               context.SetUnderwater("status").find("requested=off") != std::string::npos,

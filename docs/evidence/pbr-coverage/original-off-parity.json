@@ -1,0 +1,31 @@
+{
+  "description": "Preserved e9c4a06 executable versus expanded executable with PBR Off; matched Malden stone wall ROI, excluding HUD and streaming transitions",
+  "roi": [
+    100,
+    600,
+    900,
+    820
+  ],
+  "metric": {
+    "bounds": null,
+    "mean_rgb": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "max_rgb": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  }
+}

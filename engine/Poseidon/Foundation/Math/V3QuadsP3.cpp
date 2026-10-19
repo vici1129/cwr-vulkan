@@ -363,6 +363,7 @@ void TLVertexTable::DoMaterialLightingQ(const TLMaterial& mat, const Matrix4& wo
         return; // safety: nothing to light
     }
 
+    if (GEngine) GEngine->CaptureSoftwareMaterial(*this, mat, worldToModel, lights, mesh, beg, end);
 #if 1 // TL_COUNTERS
 #endif
     // apply directional light to all normals at the TLVertexTable level

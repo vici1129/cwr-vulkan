@@ -1,0 +1,22 @@
+[
+  {
+    "Algorithm": "SHA256",
+    "Hash": "1587F9C052FF38967463D851CA85A03EFD2DB09D063DA183046A9B16181D5E2F",
+    "Path": "game-local\\Remastered\\DTA\\Data.pbo"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "10528EF9B5112896898AD8667E83601FF47F95231652C73409D57B7227A8A00F",
+    "Path": "game-local\\Remastered\\DTA\\Data3D.pbo"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "1C13ACA4D3300DB3546583C82FFA132C1149831E42227F2B47019C74040462A5",
+    "Path": "game-local\\Remastered\\Worlds\\abel.wrp"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "5A2550B27612FC4C8CCDEC55CE2555C1ED23114D46F8B687CE5FB8B273515A79",
+    "Path": "game-local\\Remastered\\Worlds\\eden.wrp"
+  }
+]

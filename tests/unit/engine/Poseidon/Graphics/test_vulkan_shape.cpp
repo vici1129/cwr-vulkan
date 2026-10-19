@@ -33,7 +33,7 @@ TEST_CASE("Ray diffuse metadata rejects unsupported lighting without changing sa
     }
 }
 
-TEST_CASE("PBR prototype only selects inspected stock dielectric textures", "[Graphics][vulkan-shape]")
+TEST_CASE("PBR only selects inspected stock dielectric textures", "[Graphics][vulkan-shape]")
 {
     REQUIRE(vk::PBRMaterial("data\\skala_piskovec2.pac", 0) == .85f);
     REQUIRE(vk::PBRMaterial("data\\sloupek_bily_orezly_.pac", 0) == .6f);
@@ -46,12 +46,47 @@ TEST_CASE("PBR prototype only selects inspected stock dielectric textures", "[Gr
         REQUIRE(vk::PBRMaterial("data\\strecha_tasky_vln90.pac", power) == .90f);
         REQUIRE(vk::PBRMaterial("data\\prkna_dark.pac", power) == .85f);
     }
+    for (auto name : {"data\\kamennazed.pac", "data\\plot_beton_0301_side.pac", "data\\plot_beton_02_side.pac",
+                      "data\\betonpoprask_top.pac", "data\\omlacena_bocni_zed.pac", "data\\stodola_f.pac"})
+        REQUIRE(vk::PBRMaterial(name, 5) == .90f);
+    REQUIRE(vk::PBRMaterial("data\\telegraf_sloup.pac", 0) == .85f);
     for (auto name : {"data\\mutt_kapotag.pac", "data\\sloupek_bily_orezly_.paa", "addon\\sloupek_bily_orezly_.pac",
                       "data\\redbarel.pac", "data\\beton_universal.pac", "data\\newplot.pac",
-                      "data\\newplot2.paa", "data\\paleta_front.pac", "data\\kamennazed.pac",
-                      "data\\telegraf_sloup.pac", "addon\\prkna_dark.pac", "data\\prkna_dark.paa",
+                      "data\\newplot2.paa", "data\\paleta_front.pac", "data\\domek1_side.pac",
+                      "data\\cihldum_back.pac", "addon\\prkna_dark.pac", "data\\prkna_dark.paa",
                       "addon\\strecha_tasky_vln.pac", "data\\strecha_tasky_vln90.paa", ""})
         REQUIRE(vk::PBRMaterial(name, 5) == 0);
+}
+
+TEST_CASE("CPU PBR normals match native inverse transpose including scale and orientation", "[Graphics][vulkan-shape]")
+{
+    Matrix4 modelToWorld = MIdentity;
+    modelToWorld(0,0)=0; modelToWorld(0,2)=4;
+    modelToWorld(1,1)=3; modelToWorld(2,0)=-2; modelToWorld(2,2)=0;
+    modelToWorld.SetPosition(Vector3(10,20,30));
+    vk::ShapeLighting native;
+    vk::ShapeWorld(native, modelToWorld);
+    Vector3 n(1,2,3);
+    const auto sw = vk::SoftwarePBRNormal(modelToWorld.InverseGeneral(), n);
+    for (int row=0; row<3; ++row)
+        REQUIRE(sw[row] == Catch::Approx(-native.normal[row]*n.X()-native.normal[4+row]*n.Y()-native.normal[8+row]*n.Z()));
+    REQUIRE(sw.X() == Catch::Approx(-.75f));
+    REQUIRE(sw.Y() == Catch::Approx(-2.f/3));
+    REQUIRE(sw.Z() == Catch::Approx(.5f));
+}
+
+TEST_CASE("CPU clipping preserves PBR normals but rejects mixed lighting modes", "[Graphics][vulkan-shape]")
+{
+    TLVertexTable table;
+    for(int i=0;i<3;++i) table.AddPos();
+    table.pbrNormal={{1,0,0,1},{0,1,0,1},{}};
+    table.InterpolateHDR(2,0,1,.25f);
+    REQUIRE(table.pbrNormal[2] == std::array<float,4>{.75f,.25f,0,1});
+    table.pbrNormal[1][3]=2;
+    table.InterpolateHDR(2,0,1,.25f);
+    REQUIRE(table.pbrNormal[2] == std::array<float,4>{});
+    table.ReleaseTables();
+    REQUIRE(table.pbrNormal.empty());
 }
 
 TEST_CASE("Wet response excludes unclassified and vegetated stock surfaces", "[Graphics][vulkan-shape]")

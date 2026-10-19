@@ -85,6 +85,7 @@ TLVertexTable::TLVertexTable(const IAnimator* anim, const Shape& src, const Matr
 
 void TLVertexTable::ReleaseTables()
 {
+    pbrNormal.clear();
     hdrColor.clear();
     directSun.clear();
     aoAmbient.clear();
@@ -125,6 +126,7 @@ int TLVertexTable::AddPos()
 
 void TLVertexTable::DoTransformPoints(const VertexTable& src, const Matrix4& posView, int beg, int end)
 {
+    pbrNormal.clear();
     hdrColor.clear();
     directSun.clear();
     aoAmbient.clear();
@@ -153,6 +155,7 @@ void TLVertexTable::DoTransformPoints(const VertexTable& src, const Matrix4& pos
 
 void TLVertexTable::DoTransformPoints(const IAnimator* anim, const Shape& src, const Matrix4& posView)
 {
+    pbrNormal.clear();
     hdrColor.clear();
     directSun.clear();
     aoAmbient.clear();
@@ -455,6 +458,7 @@ void TLVertexTable::DoMaterialLightingP(const TLMaterial& mat, const Matrix4& wo
         return; // safety: nothing to light
     }
 
+    if (GEngine) GEngine->CaptureSoftwareMaterial(*this, mat, worldToModel, lights, mesh, beg, end);
     // perform lighting
     // first of all apply directional light to all normals
     // this can be done at TLVertexTable level

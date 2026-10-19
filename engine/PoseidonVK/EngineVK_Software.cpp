@@ -5,14 +5,85 @@
 #include <Poseidon/World/Scene/Scene.hpp>
 #include <Poseidon/World/Scene/Camera/Camera.hpp>
 #include <Poseidon/IO/ParamFileExt.hpp>
+#include <PoseidonVK/PBRMaterialVK.hpp>
 
 namespace Poseidon
 {
 void EngineVK::PrepareMesh(const render::LegacySpec&)
 {
+    _softwarePBRLighting.clear();
     // CPU transformation, lighting and clipping are performed by FaceArray.
     if (_softwareMesh || _activeShape)
         throw std::logic_error("Vulkan software mesh preparation requires an idle open frame");
+}
+void EngineVK::CaptureSoftwareMaterial(TLVertexTable& dst, const TLMaterial& mat, const Matrix4& worldToModel,
+                                       const LightList& lights, const VertexTable& mesh, int beg, int end)
+{
+    if (!_vk.PBREnabled() || !_shadowWorld || _waterSurface) return;
+    const auto* shape = dynamic_cast<const Shape*>(&mesh);
+    if (!shape) return; // Colorized terrain has its own lighting; never invent material inputs.
+    bool candidate = false;
+    for (int s = 0; s < shape->NSections(); ++s)
+        if (const auto* texture = dynamic_cast<TextureVK*>(shape->GetSection(s).properties.GetTexture());
+            texture && vk::PBRMaterial(texture->MaterialKey(), mat.specularPower) > 0)
+        {
+            candidate = true;
+            break;
+        }
+    if (!candidate) return;
+    dst.pbrNormal.resize(dst.NVertex());
+    // Explicit inside/half-lit/shining and colored modes retain their authored
+    // response. No reconstruction from packed lighting or guessed face normals.
+    if ((mat.specFlags & (DisableSun | IsShadow | IsLight | IsColored | IsAlphaFog | NoDropdown | NoZBuf)) ||
+        mat.diffuse.R() < .99f || mat.diffuse.G() < .99f || mat.diffuse.B() < .99f ||
+        mesh.NNorm() != mesh.NVertex())
+    {
+        for (int i = beg; i < end; ++i) dst.pbrNormal[i] = {};
+        return;
+    }
+    vk::ShapeLighting lighting;
+    vk::ShapeMaterial(lighting, mat, *GScene->MainLight(), true);
+    int count = 0;
+    const float night = GScene->MainLight()->NightEffect();
+    if (night >= .01f)
+        for (int i = 0; i < lights.Size(); ++i)
+        {
+            if (!lights[i]) continue;
+            LightDescription light;
+            lights[i]->GetDescription(light);
+            // Preserve the complete local-light set or leave the range legacy.
+            if ((light.type != LTPoint && light.type != LTSpotLight) || count == int(lighting.localLights.size()))
+            {
+                for (int v = beg; v < end; ++v) dst.pbrNormal[v] = {};
+                return;
+            }
+            vk::ShapeLight(lighting.localLights[count], light, mat, GScene->GetCamera()->Position(), night);
+            for (int slot = 0; slot < _localShadowCount; ++slot)
+                if (_vk.LocalShadowsEnabled() && lights[i].GetRef() == static_cast<Light*>(_localShadowLights[slot]))
+                    lighting.localLights[count].diffuse[3] = float(slot + 1);
+            ++count;
+        }
+    lighting.localCount[0] = float(count);
+    _softwarePBRLighting.push_back(lighting);
+    const float slot = float(_softwarePBRLighting.size());
+    // Inverse transpose(model->world) = transpose(world->model). Stock engine
+    // normals face inward; use the same sign as ExtractShapeGeometry.
+    for (int i = beg; i < end; ++i)
+    {
+        if (dst.Clip(i) & ClipUserMask)
+        {
+            dst.pbrNormal[i] = {};
+            continue;
+        }
+        const auto& n = mesh.Norm(i);
+        Vector3 normal = vk::SoftwarePBRNormal(worldToModel, n);
+        if (normal.SquareSize() > 1e-12f)
+        {
+            normal.Normalize();
+            dst.pbrNormal[i] = {normal.X(), normal.Y(), normal.Z(), slot};
+        }
+        else dst.pbrNormal[i] = {};
+    }
 }
 void EngineVK::BeginMesh(TLVertexTable& mesh, const render::LegacySpec&)
 {
@@ -62,6 +133,47 @@ void EngineVK::DrawSection(const FaceArray& faces, Offset begin, Offset end)
 }
 void EngineVK::SubmitSoftware(const std::vector<uint32_t>& indices)
 {
+    auto* texture = dynamic_cast<TextureVK*>(_softwareMip._texture);
+    const auto state = vk::SoftwareAlpha(_softwareFlags, texture ? texture->GetAlphaClass() : AlphaStats::Opaque);
+    if (!_softwareMesh || !_vk.PBREnabled() || !_shadowWorld || _waterSurface || !texture ||
+        texture->IsTransparent() || state.blend || !state.depthWrite || !state.depthTest ||
+        (_softwareFlags & (DisableSun | IsShadow | IsLight | IsColored | IsAlphaFog | NoDropdown | SpecularTexture)) ||
+        vk::PBRMaterial(texture->MaterialKey(), 0) == 0 || _softwareMesh->pbrNormal.empty())
+    {
+        SubmitSoftwareLit(indices, nullptr);
+        return;
+    }
+    // A texture section can span multiple vertex lighting modes. Split only at
+    // actual captured-material boundaries, preserving face order and fallback.
+    const auto material = [&](size_t i) -> int {
+        int slot = 0;
+        for (size_t k = 0; k < 3; ++k)
+        {
+            const auto index = indices[i+k];
+            if (index >= _softwareMesh->pbrNormal.size()) return 0;
+            const int next = int(_softwareMesh->pbrNormal[index][3]);
+            if (next <= 0 || next > int(_softwarePBRLighting.size()) || (k && slot != next)) return 0;
+            slot = next;
+        }
+        return slot;
+    };
+    for (size_t begin = 0; begin < indices.size();)
+    {
+        const int slot = material(begin);
+        size_t end = begin + 3;
+        while (end < indices.size() && material(end) == slot) end += 3;
+        const auto* lighting = slot ? &_softwarePBRLighting[slot-1] : nullptr;
+        if (begin == 0 && end == indices.size()) SubmitSoftwareLit(indices, lighting);
+        else
+        {
+            std::vector<uint32_t> part(indices.begin()+begin, indices.begin()+end);
+            SubmitSoftwareLit(part, lighting);
+        }
+        begin = end;
+    }
+}
+void EngineVK::SubmitSoftwareLit(const std::vector<uint32_t>& indices, const vk::ShapeLighting* material)
+{
     if (!_softwareMesh)
         throw std::logic_error("Vulkan software drawing requires BeginMesh");
     if (!_vk.FrameOpen())
@@ -96,6 +208,11 @@ void EngineVK::SubmitSoftware(const std::vector<uint32_t>& indices)
         std::fill_n(_softwareVertices[index].aoAmbient, 4, 0.f);
         if (index < _softwareMesh->aoAmbient.size())
             std::copy_n(_softwareMesh->aoAmbient[index].begin(), 4, _softwareVertices[index].aoAmbient);
+        if (material)
+        {
+            std::copy_n(_softwareMesh->pbrNormal[index].begin(), 3, _softwareVertices[index].pbrNormal);
+            _softwareVertices[index].aoAmbient[3] = 1.f;
+        }
         // TL already contains the scene Fog8 visibility in specular.a. Alpha
         // fog is already in color.a; it must not also get an RGB fog mix.
         _softwareVertices[index].fog =
@@ -119,9 +236,15 @@ void EngineVK::SubmitSoftware(const std::vector<uint32_t>& indices)
                               : state.blend;
     const float cutoff = shadow ? std::max(1, (GetShadowFactor() * 7) >> 4) / 255.f :
                                  state.cutoff;
-    vk::ShapeLighting receiver;
+    vk::ShapeLighting receiver = material ? *material : vk::ShapeLighting{};
+    if (material)
+    {
+        const auto* texture = static_cast<TextureVK*>(_softwareMip._texture);
+        receiver.pbr = {vk::PBRMaterial(texture->MaterialKey(), int(receiver.specular[3])), .04f, 0, 0};
+        _vk.RecordPBRDraw(true);
+    }
     receiver.aoReceiver[0] = _vk.RTAOEnabled() && _shadowWorld && !_waterSurface &&
-        !_softwareMesh->aoAmbient.empty() && !blend &&
+        (!_softwareMesh->aoAmbient.empty() || material) && !blend &&
         !(_softwareFlags & (NoZBuf | NoZWrite | IsLight | DisableSun | NoDropdown | IsShadow | IsAlphaFog)) ? 1.f : 0.f;
     receiver.rtWater[3] = _vk.RTGIEnabled() && _shadowWorld && !_waterSurface && image &&
         alpha == AlphaStats::Opaque && !blend && cutoff == 0 &&
@@ -158,7 +281,7 @@ void EngineVK::SubmitSoftware(const std::vector<uint32_t>& indices)
     const bool atmosphere = _shadowWorld && _vk.AtmosphereEnabled();
     const bool localShadows = _vk.LocalShadowsEnabled() && !_softwareMesh->directLocal.empty();
     if (_shadowWorld &&
-        (_shadowTuning.enabled || atmosphere || _vk.SeparateSunlight() || receiver.rtWater[0] || localShadows || receiver.wetSurface[0]) &&
+        (_shadowTuning.enabled || atmosphere || _vk.SeparateSunlight() || receiver.rtWater[0] || localShadows || receiver.wetSurface[0] || material) &&
         !(_softwareFlags & (DisableSun | NoZBuf | NoDropdown | IsLight | IsShadow | IsAlphaFog)) && GScene &&
         GScene->GetCamera())
     {
@@ -171,7 +294,7 @@ void EngineVK::SubmitSoftware(const std::vector<uint32_t>& indices)
         receiver.atmosphereSun[3] = atmosphere ? 1.f : 0.f;
         receiver.rtSun[0] = (_vk.RTShadowsEnabled() || _vk.CloudShadowsActive() || ((_vk.ContactShadowsEligible() ||
                 (_vk.SoftShadowsEligible() && _shadowTuning.enabled)) && !_waterSurface)) &&
-                !_softwareMesh->directSun.empty() ?
+                (!_softwareMesh->directSun.empty() || material) ?
                 (_vk.RTShadowsEnabled() || _vk.SoftShadowsEligible() || _vk.CloudShadowsActive() ? 1.f : 2.f) : 0.f;
     }
     if (receiver.rtWater[0] && receiver.shadowReceiver[1] <= 0)
@@ -181,7 +304,7 @@ void EngineVK::SubmitSoftware(const std::vector<uint32_t>& indices)
                  (_softwareFlags & NoZBuf) == 0, nullptr, waterBump, 0, {0, -1, 0}, mesh.vertexOffset, mesh.indexOffset,
                  (_softwareFlags & NoZWrite) == 0,
                  receiver.shadowReceiver[0] || receiver.atmosphereSun[3] || receiver.rtSun[0] || receiver.rtWater[0] ||
-                         _temporalTerrain || localShadows || receiver.wetSurface[0] || receiver.rtWater[3] || receiver.aoReceiver[0]
+                         _temporalTerrain || localShadows || receiver.wetSurface[0] || receiver.rtWater[3] || receiver.aoReceiver[0] || material
                      ? &receiver
                      : nullptr,
                  shadow, !shadow && (_softwareFlags & IsLight) != 0);

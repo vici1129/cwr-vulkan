@@ -98,7 +98,7 @@ shipped. Renderer capability and requested/active state must be distinguished.
 | Atmospheric perspective | Automatic candidate | Vulkan shape shader tints the original fog's in-scattered light. Original extinction, view distance and horizon endpoint remain; fades with weather/night/NVG. No extra pass or RT requirement. |
 | Wet surfaces | Automatic candidate | Rain-driven, classified road/soil/rock/sand response with about two seconds of simulation-time smoothing. Excludes mixed grass, foliage, clothing and unidentified atlases. No shelter tracing, puddles or accumulated wetness system. No extra pass. |
 | Underwater | Automatic candidate | Existing world composite, camera below animated sea and above seabed; HUD excluded. No extra pass, caustics or replacement underside geometry. |
-| Limited PBR | Automatic candidate | Five explicitly supported stock texture identities, native opaque geometry only; dielectric response. Does not convert arbitrary stock materials. No new assets or RT requirement. |
+| Stock PBR | Automatic candidate | Inspected rough dielectric stone/mortar, plaster/brick, concrete, timber and roofs on native and captured CPU-lit opaque geometry. Mixed atlases/special lighting retain legacy shading. See [coverage and evidence](pbr-coverage.md). No new assets or RT requirement. |
 | Bloom | On/Off candidate | Four-level HDR pyramid, threshold 1.25, strength .15; world only, before tone mapping. SDR works; an HDR display is not required. Bright source response is deliberately small. |
 | Ambient occlusion | On/Off candidate | Existing SSAO at strength 1.2, radius 1.5 m, bias .03, fade 80 m. Full-resolution depth pass. RTAO is a separate implementation, not automatically selected on an RT GPU. |
 | Volumetric lighting | On/Off candidate | Existing half-resolution, 48-step, 400 m sunlight integration plus CSM depth. Weather/night/NVG gates remain. Surface shadows Off would not eliminate its CSM depth dependency. |
@@ -180,7 +180,7 @@ scene-complexity/visibility purpose; do not relabel them as shader quality or
 silently change them with these new presets.
 
 Automatic in Vulkan: atmospheric perspective, classified wet surfaces, bounded
-underwater optics and the existing five-texture PBR allowlist. Retain their
+underwater optics and the inspected stock PBR allowlist. Retain their
 current numerical response, weather/time/NVG gates and fallback behavior.
 Rain ripples belong to Water Enhanced rather than a separate weather slider.
 Sky reflections and dynamic RT geometry are dependencies owned by the relevant

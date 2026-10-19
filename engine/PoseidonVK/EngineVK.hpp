@@ -118,6 +118,8 @@ class EngineVK final : public Engine
     bool _waterSurface = false;
     RString SetRainRipples(RString mode) override;
     RString SetPBR(RString mode) override { return _vk.SetPBR(static_cast<const char*>(mode)).c_str(); }
+    void CaptureSoftwareMaterial(TLVertexTable&, const TLMaterial&, const Matrix4&,
+                                 const LightList&, const VertexTable&, int, int) override;
     RString SetWetSurfaces(RString mode) override { return _vk.SetWetSurfaces(static_cast<const char*>(mode)).c_str(); }
     RString SetUnderwater(RString mode) override { return _vk.SetUnderwater(static_cast<const char*>(mode)).c_str(); }
     void UpdateEnvironment();
@@ -301,9 +303,11 @@ class EngineVK final : public Engine
     MipInfo _softwareMip;
     int _softwareFlags = 0;
     std::vector<vk::ScreenVertex> _softwareVertices;
+    std::vector<vk::ShapeLighting> _softwarePBRLighting;
     std::vector<vk::ScreenVertex> _screenVertices;
     void FlushQueues() override { _vk.FlushScreenBatch(); }
     void SubmitSoftware(const std::vector<uint32_t>& indices);
+    void SubmitSoftwareLit(const std::vector<uint32_t>& indices, const vk::ShapeLighting* material);
     void SubmitScreen(const MipInfo&, const Vertex2DAbs*, int, const Rect2DAbs&, int, float fog = 1, const Color* light = nullptr);
     void DrawDecalColor(Vector3Par, float, float, float, PackedColor, const MipInfo&, int, const Color*);
     void StopAfterFailure(const std::exception& error);

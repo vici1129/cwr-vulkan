@@ -171,8 +171,8 @@ void EngineVK::PrepareTriangleTL(const MipInfo& mip, const render::LegacySpec& s
         !((_shapeFlags | render::MergeLegacy(spec)) &
           (IsColored | IsLight | DisableSun | NoDropdown | IsShadow | IsAlphaFog | SpecularTexture)) ? 1.f : 0.f;
     _lighting.pbr = {};
-    // Only the native opaque world path has the original surface normals and
-    // separate light/material inputs. Never relabel CPU-lit or blended geometry.
+    // Native sections use original normals and separate light/material inputs.
+    // CPU-lit sections capture equivalent inputs in EngineVK_Software.cpp.
     if (_vk.PBREnabled() && _shadowWorld && !_waterSurface && !_sectionBlend &&
         _sectionDepthTest && _sectionDepthWrite && _secondaryMode == 0 &&
         _lighting.ambient[3] > 0 &&

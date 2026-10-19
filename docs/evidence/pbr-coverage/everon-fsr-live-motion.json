@@ -1,0 +1,14 @@
+{
+  "before": {
+    "result": "[5090,10490,-0.00187302]",
+    "ok": true
+  },
+  "after": {
+    "result": "[5091.18,10489.6,-0.00184059]",
+    "ok": true
+  },
+  "status": {
+    "result": "\"active=fsr-quality requested=fsr-quality scale=100 requestedScale=100 sampleMask=15 world=1280x720 output=1920x1080 fsr=available fsrDispatches=8944 fsrResets=1\"",
+    "ok": true
+  }
+}

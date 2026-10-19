@@ -1,0 +1,2 @@
+{"aa": "taa", "before": {"result": "[3116,6345,-0.00137329]", "ok": true}, "after": {"result": "[3116.22,6345.26,-0.00137329]", "ok": true}}
+{"aa": "fsr-quality", "before": {"result": "[3116,6345,-0.00137329]", "ok": true}, "after": {"result": "[3113.71,6344.85,-0.00137329]", "ok": true}}

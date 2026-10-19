@@ -426,6 +426,10 @@ class Engine : public IGraphicsEngine
     virtual RString SetRainRipples(RString) { return "UNSUPPORTED: rain ripples require Vulkan"; }
     virtual RString SetShoreFoam(RString) { return "UNSUPPORTED: shoreline foam requires Vulkan"; }
     virtual RString SetPBR(RString) { return "UNSUPPORTED: PBR prototype requires Vulkan"; }
+    // Optional Vulkan input capture before CPU lighting/packing. Other backends
+    // keep their existing lighting and vertex streams.
+    virtual void CaptureSoftwareMaterial(TLVertexTable&, const TLMaterial&, const Matrix4&,
+                                         const LightList&, const VertexTable&, int, int) {}
     virtual RString SetWetSurfaces(RString) { return "UNSUPPORTED: wet surfaces require Vulkan"; }
     virtual RString SetUnderwater(RString) { return "UNSUPPORTED: underwater rendering requires Vulkan"; }
     virtual RString SetCloudShadows(RString) { return "UNSUPPORTED: cloud shadows require Vulkan"; }

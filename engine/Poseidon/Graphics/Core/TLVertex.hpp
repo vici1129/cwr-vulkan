@@ -94,9 +94,23 @@ class TLVertexTable
     // Two Vulkan-selected spotlight contributions, in the same unclamped legacy
     // lighting domain as hdrColor. Kept through CPU clipping; empty when Off.
     std::vector<std::array<float, 6>> directLocal;
+    // Original outward world normal + captured material slot (0 = unsupported).
+    // Vulkan only; independent of the already lit color and legacy TL layout.
+    std::vector<std::array<float, 4>> pbrNormal;
     void PreserveHDRColor(int vertex, ColorVal color);
     void InterpolateHDR(int dst, int a, int b, float t)
     {
+        if (!pbrNormal.empty())
+        {
+            pbrNormal.resize(NVertex());
+            if (pbrNormal[a][3] > 0 && pbrNormal[a][3] == pbrNormal[b][3])
+            {
+                for (int k = 0; k < 3; ++k)
+                    pbrNormal[dst][k] = pbrNormal[a][k] * (1 - t) + pbrNormal[b][k] * t;
+                pbrNormal[dst][3] = pbrNormal[a][3];
+            }
+            else pbrNormal[dst] = {}; // Never blend different authored lighting modes.
+        }
         if (!aoAmbient.empty())
         {
             aoAmbient.resize(NVertex());

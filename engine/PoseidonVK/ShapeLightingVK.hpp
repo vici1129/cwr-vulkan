@@ -6,6 +6,13 @@
 
 namespace Poseidon::vk
 {
+inline Vector3 SoftwarePBRNormal(const Matrix4& worldToModel, Vector3Par n)
+{
+    return Vector3(
+        -(worldToModel(0,0)*n.X()+worldToModel(1,0)*n.Y()+worldToModel(2,0)*n.Z()),
+        -(worldToModel(0,1)*n.X()+worldToModel(1,1)*n.Y()+worldToModel(2,1)*n.Z()),
+        -(worldToModel(0,2)*n.X()+worldToModel(1,2)*n.Y()+worldToModel(2,2)*n.Z()));
+}
 inline void ShapeWorld(ShapeLighting& out, Matrix4Val relativeWorld)
 {
     GfxMatrix matrix{};

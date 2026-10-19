@@ -1,5 +1,15 @@
 # Vulkan backend development
 
+## PBR coverage beyond native prototypes (2026-10-19)
+
+The [stock PBR coverage record](pbr-coverage.md) supersedes the five-texture,
+native-only limit below. Inspected stone/mortar, concrete, plaster/brick, wood
+and roof sections share the existing dielectric BRDF. Vulkan now preserves
+original CPU normals and unlit material/light inputs through clipping; eligible
+software geometry replaces vertex lighting without applying lighting twice.
+The record includes stock LOD/atlas boundaries, real-island comparisons and cost.
+RTGI remains parked; other RT features and graphics controls are unchanged.
+
 ## RTAO world-space coverage (2026-10-19)
 
 The [RTAO coverage and lighting record](rtao-world-space.md) supersedes the original
