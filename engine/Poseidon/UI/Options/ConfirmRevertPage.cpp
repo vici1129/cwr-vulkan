@@ -23,8 +23,8 @@ void ConfirmRevertPage::UpdateCountdownText(OptionsShell& shell)
     int seconds = int(m_timeRemaining + 0.5f);
     if (seconds < 0)
         seconds = 0;
-    char buf[64];
-    snprintf(buf, sizeof(buf), LocalizeString("STR_DISP_MAIN_OPT_CONFIRM_REVERT_COUNTDOWN"), seconds);
+    char buf[256];
+    snprintf(buf, sizeof(buf), LocalizeStringWithFallback("STR_DISP_MAIN_OPT_CONFIRM_REVERT_COUNTDOWN", "Reverting in %d s."), seconds);
     SetCtrlText(shell, kIdcCountdown, buf);
 }
 

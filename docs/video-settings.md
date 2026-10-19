@@ -51,7 +51,7 @@ device's scene-color/depth formats (2x/4x/8x where supported). TAA also requires
 independent attachment blending. Native render-scale choices are **100%, 125%,
 150% and 200%**, filtered against framebuffer limits.
 
-AMD **FSR 3.1.4 Native AA, Quality, Balanced and Performance** appear only when
+**FSR Native AA, Quality, Balanced and Performance** (FSR 3.1.4) appear only when
 the public FSR build and renderer requirements are
 available. Otherwise the AA hint explains the unavailable capability. Selecting
 FSR sets independent scale to 100% and disables that control: FSR owns its
@@ -95,7 +95,8 @@ Vulkan AA is requested during the normal graphics boot path before ordinary
 world rendering. The UI observes the active renderer after deferred activation,
 including FSR fallback, rather than saving a rejected request as successful.
 
-Object detail offers the engine's existing 0.5x/0.75x/1x/2x LOD-size multipliers.
+Object Detail offers **0.5x / 0.75x / 1x / 2x**; higher values keep objects
+detailed at greater distances.
 An explicit choice is loaded when each Scene is created. Old configs without
 `objectLodConfigured` retain their original 1x scene default; applying unrelated
 settings does not opt them into an old auto-detected tier.
@@ -128,7 +129,24 @@ and ordinary window resizing without overwriting staged edits.
 No original PBOs, addon assets or mission UI resources are edited. The existing
 `RscOptionsShell`/scroll-list resource classes and notebook styling are reused.
 New text uses normal localization keys with an English fallback. Existing
-translated labels are reused where their meaning is unchanged.
+translated labels are reused where their meaning is unchanged. The engine's
+UTF-8 CSV supplement (`engine/Poseidon/UI/Locale/video.utf8.csv`) provides
+English, French, Italian, Spanish, German, Czech, Polish and Russian text for
+new labels, choices, help and status/error messages. It is embedded at build
+time and read by the existing stringtable parser; no installed asset is replaced.
+Mission, campaign and game/mod stringtables take priority. Missing translations
+and unrecognized languages fall back to English, including in developer builds.
+
+Change text language in Game Settings, then reopen Video Settings. Labels,
+choices and help follow that language. Long focused text scrolls using the
+resource's font and available width, including UTF-8 text and mod-sized cells.
+Unfocused text is clipped to its cell; keyboard/controller focus reveals the
+rest. Other notebook pages keep their existing sizing behavior.
+
+Unavailable RT/FSR hints distinguish unsupported devices, unavailable builds,
+session initialization failures and diagnostic startup disables. They do not
+present developer commands as player instructions. Removing a startup disable
+requires restarting the game, not just reopening the menu.
 
 An addon-owned replacement `RscDisplayOptionsVideo` keeps the original dialog.
 Mods replacing their entire bin resource without addon ownership may set
@@ -140,7 +158,9 @@ control IDs remain intact.
 See the [verification record](evidence/graphics-menu/README.md) for build,
 regression and direct gameplay checks, and the
 [automatic startup checks](evidence/automatic-capabilities/README.md) for RT/FSR
-detection, saved preferences and unsupported-feature fallback.
+detection, saved preferences and unsupported-feature fallback. The
+[localization and polish checks](evidence/video-polish/README.md) cover the final
+copy, language fallbacks, navigation and display/save regression checks.
 
 Developer commands remain unchanged. For diagnostics, `CWR_VK_RTAO=0` disables
 shared ray-query initialization and `CWR_VK_FSR=0` disables FSR initialization

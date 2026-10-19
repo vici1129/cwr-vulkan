@@ -39,6 +39,13 @@ file(GLOB_RECURSE POSEIDON_ALL_SOURCES CONFIGURE_DEPENDS
 set(ALL_SOURCES ${POSEIDON_ALL_SOURCES})
 set(POSEIDON_BUILD_INFO_HEADER "${CMAKE_BINARY_DIR}/generated/Poseidon/Core/BuildInfo.hpp")
 
+# Engine-owned menu additions travel with the executable; stock/mod tables keep
+# lookup priority. Embed the CSV so packaging needs no edits to game data.
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "UI/Locale/video.utf8.csv")
+file(READ "${CMAKE_CURRENT_SOURCE_DIR}/UI/Locale/video.utf8.csv" VIDEO_STRINGS)
+configure_file("UI/Locale/VideoStringtableData.hpp.in"
+    "${CMAKE_BINARY_DIR}/generated/Poseidon/UI/Locale/VideoStringtableData.hpp" @ONLY)
+
 # ============================================================
 # Platform Exclusions (apply to ALL sources before split)
 # ============================================================

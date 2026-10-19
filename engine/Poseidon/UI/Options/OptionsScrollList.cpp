@@ -5,6 +5,7 @@ namespace Poseidon
 
 } // namespace Poseidon
 #include <Poseidon/UI/Options/OptionsScrollList.hpp>
+#include <Poseidon/Graphics/Core/Engine.hpp>
 #include <Poseidon/UI/Options/MeterWidget.hpp>
 #include <Poseidon/UI/Options/NotebookTheme.hpp>
 #include <Poseidon/UI/UITestEngine.hpp>
@@ -227,7 +228,28 @@ int OptionsScrollList::RowLabelInnerChars(int row) const
     Kind kind = m_provider.RowKind(row);
     if (kind == KindBinding && m_provider.BindingUsesChevronUi(row))
         return kBindingLabelInnerChars;
-    return kLabelInnerChars;
+    return CellChars(SlotIdcLabel(SlotForRow(row)), m_provider.RowLabel(row), kLabelInnerChars);
+}
+
+int OptionsScrollList::CellChars(int idc, const char* text, int fallback) const
+{
+    if (!m_provider.MeasureTextCells() || !m_notebook || !text || !GEngine)
+        return fallback;
+    auto* control = dynamic_cast<C3DStatic*>(m_notebook->GetCtrl(idc));
+    if (!control) return fallback;
+    const int length = Utf8Length(text);
+    // Fit a complete UTF-8 prefix using the resource's own font and geometry.
+    // Mod controls can therefore use different widths without fixed budgets.
+    int lo = 0, hi = length;
+    while (lo < hi)
+    {
+        int mid = (lo + hi + 1) / 2;
+        std::string prefix(text, Utf8AdvanceCodepoints(text, mid) - text);
+        if (control->MeasureTextFraction(prefix.c_str()) <= .96f) lo = mid;
+        else hi = mid - 1;
+    }
+    // A short string still needs room for subsequent characters when marqueeing.
+    return lo == length ? std::max(fallback, length) : std::max(1, lo);
 }
 
 bool OptionsScrollList::RowLabelNeedsMarquee(int row) const
@@ -254,7 +276,7 @@ bool OptionsScrollList::FocusedStepperValueNeedsMarquee() const
         return false;
     int idx = m_provider.RowValue(m_rowFocus) % row.count;
     const char* val = (row.options && row.count > 0) ? row.options[idx] : "";
-    return Utf8Length(val) > kInnerChars;
+    return Utf8Length(val) > CellChars(SlotIdcValStep(SlotForRow(m_rowFocus)), val, kInnerChars);
 }
 
 bool OptionsScrollList::FocusedBindingCellNeedsMarquee() const
@@ -272,6 +294,18 @@ bool OptionsScrollList::FocusedBindingCellNeedsMarquee() const
 
 void OptionsScrollList::SetRowValue(int labelIdc, const char* text, const char* semanticText)
 {
+    std::string fitted;
+    if (m_provider.MeasureTextCells() && text)
+    {
+        const int length = Utf8Length(text);
+        const int fit = CellChars(labelIdc, text, length);
+        if (fit < length)
+        {
+            fitted.assign(text, Utf8AdvanceCodepoints(text, fit) - text);
+            if (!semanticText) semanticText = text;
+            text = fitted.c_str();
+        }
+    }
     IControl* ctrl = m_notebook ? m_notebook->GetCtrl(labelIdc) : nullptr;
     if (!ctrl)
         ctrl = m_host.GetCtrl(labelIdc);
@@ -577,7 +611,8 @@ void OptionsScrollList::RenderSlot(int slot, int logicalRow)
         int idx = (row.count > 0) ? (m_provider.RowValue(logicalRow) % row.count) : 0;
         const char* val = (row.options && row.count > 0) ? row.options[idx] : "";
         char buf[80];
-        FormatCell(val, kInnerChars, isStepper && focused, GlobalTickCount() - m_marqueeStartMs, buf, sizeof(buf));
+        FormatCell(val, CellChars(idcValStep, val, kInnerChars), isStepper && focused,
+                   GlobalTickCount() - m_marqueeStartMs, buf, sizeof(buf));
         SetRowValue(idcValStep, buf, val);
         SetRowValue(idcValBar, "");
     }
@@ -755,12 +790,13 @@ void OptionsScrollList::UpdateRowHighlight()
     if (!desc)
         desc = "";
     int descCpLen = Utf8Length(desc);
-    if (descCpLen > kHintInnerChars)
+    const int hintChars = CellChars(kIdcHint, desc, kHintInnerChars);
+    if (descCpLen > hintChars)
     {
         DWORD elapsed = GlobalTickCount() - m_marqueeStartMs;
-        int offset = MarqueeOffset(elapsed, descCpLen, kHintInnerChars);
-        char buf[128];
-        FormatMarquee(desc, offset, kHintInnerChars, buf, sizeof(buf));
+        int offset = MarqueeOffset(elapsed, descCpLen, hintChars);
+        char buf[512];
+        FormatMarquee(desc, offset, hintChars, buf, sizeof(buf));
         SetRowValue(kIdcHint, buf, desc);
     }
     else

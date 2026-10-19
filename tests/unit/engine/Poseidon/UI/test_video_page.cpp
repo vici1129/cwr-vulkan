@@ -8,6 +8,8 @@
 #include <Poseidon/Core/resincl.hpp>
 #include <Poseidon/Foundation/Common/GamePaths.hpp>
 #include <Poseidon/IO/ParamFile/ParamFile.hpp>
+#include <Poseidon/Asset/Formats/Common/CsvReader.hpp>
+#include <Poseidon/IO/Streams/QStream.hpp>
 #include <SDL3/SDL_keycode.h>
 #include <catch2/catch_approx.hpp>
 #include <catch2/generators/catch_generators.hpp>
@@ -17,6 +19,7 @@
 #include <iterator>
 #include <optional>
 #include <random>
+#include <set>
 
 using namespace Poseidon;
 namespace Poseidon
@@ -49,6 +52,7 @@ struct FileSnapshot
 struct VideoEngine : EngineDummy
 {
     bool vulkan = true, rt = false, fsr = false, reject = false, pending = false, failDisplay = false;
+    std::string rtReason = "Ray-query hardware unavailable", fsrReason = "FSR compute features unavailable";
     int qualityCalls = 0, imageCalls = 0, displayCalls = 0, vsync = 1, width = 1280, height = 720;
     int samples = 0;
     int refresh = 0, refreshWidth = 0, monitor = 0;
@@ -60,14 +64,14 @@ struct VideoEngine : EngineDummy
     bool HasVulkanGraphics() const override { return vulkan; }
     GraphicsQuality GetGraphicsQuality() const override { return quality; }
     ImageQuality GetImageQuality() const override { return image; }
-    RString GraphicsQualityRTUnavailable() const override { return rt ? "" : "Ray-query hardware unavailable"; }
+    RString GraphicsQualityRTUnavailable() const override { return rt ? "" : rtReason.c_str(); }
     RString GraphicsQualityError() const override { return reject ? "Request rejected" : ""; }
     RString ImageQualityUnavailable(const ImageQuality& q) const override
     {
         if (q.aa == "msaa8")
             return "Unsupported sample count";
         if (q.IsFSR() && !fsr)
-            return "FSR compute features unavailable";
+            return fsrReason.c_str();
         if (q.IsFSR() && q.scale != 100)
             return "FSR owns scale";
         return "";
@@ -270,6 +274,84 @@ TEST_CASE("Video page has compact sections and stages without renderer calls", "
     CHECK(std::string(p.Rows().SliderValueText(p.At(VideoPage::Gamma))) == "1.4");
     CHECK(f.Saved().vulkan == GraphicsQuality{});
 }
+TEST_CASE("Video translation supplement covers supported languages and preserves mod priority", "[UI][VideoPage][video-locale]")
+{
+    struct LanguageGuard
+    {
+        RString previous = GLanguage;
+        ~LanguageGuard() { SetLanguage(previous.GetLength() ? previous : RString("English")); }
+    } language;
+    const auto csv = std::filesystem::path(TESTS_ROOT_DIR).parent_path() / "engine/Poseidon/UI/Locale/video.utf8.csv";
+    std::ifstream input(csv, std::ios::binary);
+    REQUIRE(input.good());
+    std::string data{std::istreambuf_iterator<char>(input), std::istreambuf_iterator<char>()};
+    QIStream stream(data.data(), int(data.size()));
+    auto rows = Asset::Formats::CsvReadAll(stream);
+    REQUIRE(rows.size() > 60);
+    REQUIRE(rows[0].size() == 9);
+    std::set<std::string> keys;
+    for (size_t i = 1; i < rows.size(); ++i)
+    {
+        REQUIRE(rows[i].size() == 9);
+        CHECK(keys.insert(rows[i][0]).second);
+        CHECK_FALSE(rows[i][1].empty());
+    }
+    for (size_t column = 1; column < rows[0].size(); ++column)
+    {
+        REQUIRE(SetLanguage(rows[0][column].c_str()));
+        Fixture f;
+        f.engine.rt = f.engine.fsr = true;
+        f.Open();
+        for (const char* key : {"STR_VIDEO_TITLE", "STR_VIDEO_RT", "STR_VIDEO_AA_fsr-quality",
+                                "STR_VIDEO_OBJECT_HELP", "STR_VIDEO_SAVE_ERROR"})
+        {
+            auto row = std::find_if(rows.begin() + 1, rows.end(), [&](const auto& r) { return r[0] == key; });
+            REQUIRE(row != rows.end());
+            CHECK(std::string(LocalizeStringWithFallback(key, "MISSING")) == (*row)[column]);
+        }
+        CHECK(std::string(f.page->TitleText()) == LocalizeString("STR_VIDEO_TITLE").Data());
+        // Empty translation cells inherit the English baseline, not an empty label.
+        CHECK(std::string(LocalizeString("STR_VIDEO_AA_fxaa")) == "FXAA");
+        CHECK(f.page->Choice(VideoPage::AA, LocalizeString("STR_VIDEO_AA_fsr-quality").Data()) >= 0);
+        f.page->Set(VideoPage::Fps, 2);
+        f.page->Action(VideoPage::Apply, *f.shell);
+        f.page->Tick(*f.shell);
+        REQUIRE(SetLanguage(column == 1 ? "French" : "English"));
+        CHECK(std::string(f.page->Rows().RowDescription(f.page->At(VideoPage::Apply))) == LocalizeString("STR_VIDEO_SAVED").Data());
+    }
+    REQUIRE(SetLanguage("NoSuchLanguage"));
+    CHECK(std::string(LocalizeString("STR_VIDEO_TITLE")) == "Video Settings");
+    CHECK(std::string(LocalizeStringWithFallback("STR_VIDEO_MOD_MISSING", "English fallback")) == "English fallback");
+    REQUIRE(SetLanguage("English"));
+    CHECK(std::string(LocalizeString("STR_VIDEO_AA_fxaa")) == "FXAA");
+    const auto mod = std::filesystem::temp_directory_path() / ("video-strings-" + std::to_string(std::random_device{}()) + ".utf8.csv");
+    std::ofstream(mod) << "LANGUAGE,English\nSTR_VIDEO_TITLE,Mod Video\n";
+    LoadStringtable("Mission", mod.string().c_str(), 0, true);
+    CHECK(std::string(LocalizeString("STR_VIDEO_TITLE")) == "Mod Video");
+    // Clear just the test mission table, preserving the existing global resources.
+    std::ofstream(mod) << "LANGUAGE,English\n";
+    LoadStringtable("Mission", mod.string().c_str(), 0, true);
+    std::filesystem::remove(mod);
+    CHECK(std::string(LocalizeString("STR_VIDEO_TITLE")) == "Video Settings");
+}
+
+TEST_CASE("Video copy matches object choices and keeps diagnostics out of player hints", "[UI][VideoPage][video-locale]")
+{
+    SetLanguage("English");
+    Fixture f;
+    f.Open();
+    auto& p = *f.page;
+    const std::string help = p.Rows().RowDescription(p.At(VideoPage::Objects));
+    for (const char* choice : {"0.5x", "0.75x", "1x", "2x"}) CHECK(help.find(choice) != std::string::npos);
+    CHECK(help.find("4x") == std::string::npos);
+    f.engine.fsrReason = "FSR not included in this build";
+    f.engine.rtReason = "disabled by CWR_VK_RTAO=0; restart without the override";
+    f.shell->PopPage(); f.Open();
+    CHECK(std::string(f.page->Rows().RowDescription(f.page->At(VideoPage::AA))) == LocalizeString("STR_VIDEO_FSR_BUILD").Data());
+    CHECK(std::string(f.page->Rows().RowDescription(f.page->At(VideoPage::Water))) == LocalizeString("STR_VIDEO_DISABLED_SESSION").Data());
+    CHECK(std::string(f.page->Rows().RowDescription(f.page->At(VideoPage::Water))).find("CWR_VK") == std::string::npos);
+}
+
 TEST_CASE("Video presets change exactly the validated groups and derive Custom", "[UI][VideoPage]")
 {
     Fixture f;
@@ -304,16 +386,16 @@ TEST_CASE("Video filters device capabilities and explains unavailable features",
     auto& p = *f.page;
     CHECK(p.Choice(VideoPage::AA, "MSAA 8x") == -1);
     CHECK(p.Choice(VideoPage::AA, "MSAA 4x") >= 0);
-    CHECK(p.Choice(VideoPage::AA, "FSR 3.1.4 Quality") == -1);
-    CHECK(std::string(p.Rows().RowDescription(p.At(VideoPage::AA))).find("FSR compute features unavailable") != std::string::npos);
+    CHECK(p.Choice(VideoPage::AA, "FSR Quality") == -1);
+    CHECK(std::string(p.Rows().RowDescription(p.At(VideoPage::AA))) == "FSR is not supported by this device.");
     CHECK(p.Rows().RowFor(p.At(VideoPage::Shadows)).count == 2);
     CHECK(p.Rows().RowFor(p.At(VideoPage::Water)).count == 2);
     p.Set(VideoPage::Water, 2);
     CHECK(p.Value(VideoPage::Water) == 0);
-    CHECK(std::string(p.Rows().RowDescription(p.At(VideoPage::Water))).find("Ray-query hardware unavailable") != std::string::npos);
+    CHECK(std::string(p.Rows().RowDescription(p.At(VideoPage::Water))) == "Ray tracing is not supported by this device.");
     p.Set(VideoPage::Shadows, 2);
     CHECK(p.Value(VideoPage::Shadows) == 0);
-    CHECK(std::string(p.Rows().RowDescription(p.At(VideoPage::Shadows))).find("Ray-query hardware unavailable") != std::string::npos);
+    CHECK(std::string(p.Rows().RowDescription(p.At(VideoPage::Shadows))) == "Ray tracing is not supported by this device.");
 }
 TEST_CASE("Video RT water and shadows apply independently and volume does not redefine presets", "[UI][VideoPage]")
 {
@@ -390,7 +472,7 @@ TEST_CASE("Video switches FSR and independent scale as one coherent bundle", "[U
     auto& p = *f.page;
     p.Set(VideoPage::Scale, 3);
     CHECK(p.Value(VideoPage::Scale) == 3);
-    p.Set(VideoPage::AA, p.Choice(VideoPage::AA, "FSR 3.1.4 Quality"));
+    p.Set(VideoPage::AA, p.Choice(VideoPage::AA, "FSR Quality"));
     CHECK(p.Value(VideoPage::Scale) == 0);
     CHECK(p.Rows().IsDisabled(p.At(VideoPage::Scale)));
     p.Set(VideoPage::Scale, 3);
@@ -458,7 +540,7 @@ TEST_CASE("Video rejected requests restore previous state and never save request
     CHECK(f.Saved().vulkan == GraphicsQuality{});
     CHECK(p.Value(VideoPage::Overall) == 0);
     CHECK(f.engine.gamma == 1.2f);
-    CHECK(std::string(p.Rows().RowDescription(p.At(VideoPage::Overall))) == "Request rejected");
+    CHECK(std::string(p.Rows().RowDescription(p.At(VideoPage::Overall))) == "Could not apply these settings. Previous values restored.");
 }
 TEST_CASE("Video display confirmation reverts or keeps without applying staged graphics early", "[UI][VideoPage]")
 {

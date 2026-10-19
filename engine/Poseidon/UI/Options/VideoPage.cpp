@@ -44,10 +44,10 @@ const char* aaLabels[] = {"Off",
                           "MSAA 2x",
                           "MSAA 4x",
                           "MSAA 8x",
-                          "FSR 3.1.4 Native AA",
-                          "FSR 3.1.4 Quality",
-                          "FSR 3.1.4 Balanced",
-                          "FSR 3.1.4 Performance"};
+                          "FSR Native AA",
+                          "FSR Quality",
+                          "FSR Balanced",
+                          "FSR Performance"};
 int Samples(const std::string& aa)
 {
     return aa == "msaa2" ? 2 : aa == "msaa4" ? 4 : aa == "msaa8" ? 8 : 0;
@@ -71,6 +71,18 @@ int Index(const T (&values)[N], T value)
 const char* Text(const char* key, const char* english)
 {
     return LocalizeStringWithFallback(key, english);
+}
+const char* Unavailable(const std::string& reason, bool fsr)
+{
+    if (reason.find("=0") != std::string::npos)
+        return Text("STR_VIDEO_DISABLED_SESSION", "Disabled by a startup override. Remove it and restart to use this option.");
+    if (fsr && (reason.find("build") != std::string::npos || reason.find("compiled") != std::string::npos))
+        return Text("STR_VIDEO_FSR_BUILD", "FSR is unavailable in this version of the game.");
+    if (reason.find("failed") != std::string::npos || reason.find("initializ") != std::string::npos ||
+        reason.find("entry point") != std::string::npos || reason.find("missing vk") != std::string::npos)
+        return Text("STR_VIDEO_RESTART", "Unavailable this session. Restart the game to try again.");
+    return fsr ? Text("STR_VIDEO_FSR_DEVICE", "FSR is not supported by this device.")
+               : Text("STR_VIDEO_RT_DEVICE", "Ray tracing is not supported by this device.");
 }
 } // namespace
 
@@ -206,7 +218,7 @@ void VideoPage::Unmount(OptionsShell& shell)
 }
 void VideoPage::OnReshown(OptionsShell& shell)
 {
-    RefreshLocalizedChoices();
+    RebuildLists(); // Also refresh Native/Default and monitor labels after a language switch.
     ScrollListPage::OnReshown(shell);
 }
 
@@ -263,8 +275,8 @@ const char* VideoPage::VideoProvider::RowLabel(int i) const
                                  "STR_VIDEO_IMAGE",
                                  "STR_VIDEO_AA",
                                  "STR_VIDEO_SCALE",
-                                 "STR_DISP_MAIN_OPT_GAME_VIEW_DISTANCE",
-                                 "STR_DISP_MAIN_OPT_GAME_RESPECT_MISSION_VIEW_DISTANCE",
+                                 "STR_VIDEO_VIEW",
+                                 "STR_VIDEO_MISSION",
                                  "STR_DISP_MAIN_OPT_GRAPHICS_TERRAIN_DETAIL",
                                  "STR_VIDEO_OBJECTS",
                                  "STR_VIDEO_GRAPHICS",
@@ -317,8 +329,8 @@ const char* VideoPage::VideoProvider::RowLabel(int i) const
 }
 const char* VideoPage::VideoProvider::RowDescription(int i) const
 {
-    if (!page->m_status.empty())
-        return page->m_status.c_str();
+    if (page->m_statusKey)
+        return Text(page->m_statusKey, page->m_statusFallback);
     Row row = page->m_rows.at(i);
     int d = page->DisplayRow(row);
     if (d >= 0)
@@ -326,67 +338,68 @@ const char* VideoPage::VideoProvider::RowDescription(int i) const
     switch (row)
     {
         case AA:
+            if (!page->m_vulkan)
+                return Text("STR_VIDEO_AA_RASTER_HELP", "Smooth jagged edges.");
             if (page->m_vulkan && !page->m_fsrReason.empty())
-                return page->m_fsrReason.c_str();
-            return Text("STR_VIDEO_AA_HELP", "Supported AA modes only. FSR 3.1.4 owns internal resolution; native "
-                                             "output and HUD stay full resolution.");
+                return Unavailable(page->m_fsrReason, true);
+            return Text("STR_VIDEO_AA_HELP", "Smooth jagged edges. FSR improves performance while keeping the interface sharp.");
         case Scale:
-            return Text("STR_VIDEO_SCALE_HELP",
-                        "Supersampling: 100%, 125%, 150% or 200%. FSR owns its scale and disables this control.");
+            if (page->m_vulkan && page->m_image.IsFSR())
+                return Text("STR_VIDEO_FSR_SCALE_HELP", "FSR controls render resolution. Choose another AA mode to change render scale.");
+            return Text("STR_VIDEO_SCALE_HELP", "Higher values improve sharpness but reduce performance. 100% uses the display resolution.");
         case Overall:
-            return Text("STR_VIDEO_OVERALL_HELP", "Standard or Enhanced sets shadows, clouds, water and AO only. "
-                                                  "Display, AA, volumetric lighting and scene detail stay independent.");
+            return Text("STR_VIDEO_OVERALL_HELP", "Set shadows, clouds, water and ambient occlusion together. Other settings stay unchanged.");
         case Shadows:
             if (!page->m_rtReason.empty())
-                return page->m_rtReason.c_str();
-            return Text("STR_VIDEO_SHADOW_HELP", "Standard: CSM. Enhanced: soft CSM, contact and local shadows. Ray "
-                                                 "Traced adds soft sunlight and dynamic casters.");
+                return Unavailable(page->m_rtReason, false);
+            return Text("STR_VIDEO_SHADOW_HELP", "Enhanced adds softer, more detailed shadows. Ray Traced adds realistic sunlight shadows.");
         case Clouds:
             return Text("STR_VIDEO_CLOUD_HELP",
-                        "Standard: stock clouds. Enhanced: volumetric clouds with synchronized cloud shadows.");
+                        "Enhanced adds three-dimensional clouds and moving cloud shadows.");
         case Water:
             if (!page->m_rtReason.empty())
-                return page->m_rtReason.c_str();
+                return Unavailable(page->m_rtReason, false);
             return Text("STR_VIDEO_WATER_HELP",
-                        "Standard: stock water. Enhanced: refraction, shoreline foam and rain ripples. Ray Traced "
-                        "adds hardware reflections, weather sky/clouds and supported dynamic geometry.");
+                        "Enhanced adds clear shallows, shore foam and rain ripples. Ray Traced adds detailed reflections.");
         case AO:
-            return Text("STR_VIDEO_AO_HELP", "Existing SSAO at validated parameters; not ray-traced AO.");
+            return Text("STR_VIDEO_AO_HELP", "Add subtle shading where surfaces meet.");
         case VolumetricLighting:
-            return Text("STR_VIDEO_VOLUMETRIC_LIGHTING_HELP", "Volumetric sunlight in eligible weather and fog. "
-                        "Independent of graphics presets; Off by default.");
+            return Text("STR_VIDEO_VOLUMETRIC_LIGHTING_HELP", "Show sunlight through mist and fog. Independent of Overall Quality.");
         case Terrain:
             return Text(
                 "STR_VIDEO_TERRAIN_HELP",
-                "Original terrain grids. Finest 3.125 m is expensive and not fully compatible with original content.");
+                "Smaller values add terrain detail. 3.125 m may cause problems with original missions.");
         case Objects:
             return Text("STR_VIDEO_OBJECT_HELP",
-                        "Geometry LOD bias at the same distance: 0.5x, 1x, 2x or 4x. Does not alter view distance.");
+                        "Object detail at the same distance: 0.5x / 0.75x / 1x / 2x. Higher values show more detail.");
         case ViewDistance:
             return Text("STR_VIDEO_VIEW_HELP",
-                        "Preferred visibility distance. A mission may cap it when Mission View Limit is enabled.");
+                        "How far you can see. Mission View Limit lets missions use a shorter distance.");
         case MissionView:
             return Text("STR_VIDEO_MISSION_HELP",
-                        "Respect mission visibility limits, retaining your preferred distance for other missions.");
+                        "Allow missions to limit visibility. Your preferred view distance is remembered.");
         case Particles:
             return Text("STR_VIDEO_PARTICLES_HELP",
-                        "Original smoke, dust and muzzle flashes. Independent of clouds and graphics presets.");
+                        "Show smoke, dust and muzzle flashes.");
         case Apply:
-            return Text("STR_VIDEO_APPLY_HELP", "Apply and save staged settings. Display changes require Keep within "
-                                                "15 seconds; Revert or timeout restores them.");
+            return Text("STR_VIDEO_APPLY_HELP", "Apply and save changes. Confirm display changes with Keep.");
         case OK:
-            return Text("STR_VIDEO_OK_HELP", "Apply, save and return. Display changes still require confirmation.");
+            return Text("STR_VIDEO_OK_HELP", "Apply and save changes, then return.");
         case Cancel:
-            return Text("STR_VIDEO_CANCEL_HELP", "Discard unapplied changes and return. Escape also cancels.");
+            return Text("STR_VIDEO_CANCEL_HELP", "Discard unapplied changes and return.");
         case Vsync:
-            return Text("STR_VIDEO_VSYNC_HELP", "Off, On or Adaptive. Unavailable Adaptive falls back to On and the "
-                                                "displayed value follows the renderer.");
+            return Text("STR_VIDEO_VSYNC_HELP", "Reduce screen tearing. If Adaptive is unavailable, On is used instead.");
         case Fps:
             return Text("STR_VIDEO_FPS_HELP",
-                        "Independent frame pacing limit. Unlimited retains the engine's safety ceiling.");
+                        "Limit the frame rate to reduce power use and heat.");
+        case ObjectShadows:
+        case VehicleShadows:
+            return Text("STR_VIDEO_LEGACY_SHADOW_HELP", "Show shadows cast by these objects.");
+        case Multitexturing:
+            return Text("STR_VIDEO_TEXTURE_HELP", "Add fine surface detail to textures.");
         default:
             return Text("STR_VIDEO_STAGE_HELP",
-                        "Changes are staged until Apply or OK; browsing does not recreate rendering resources.");
+                        "Choose settings, then Apply or OK to save.");
     }
 }
 
@@ -562,7 +575,7 @@ void VideoPage::VideoProvider::SetRowValue(int i, int v)
     if (d >= 0)
     {
         page->m_display.SetRowValue(d, v);
-        page->m_status.clear();
+        page->m_statusKey = nullptr;
         return;
     }
     auto& c = page->m_graphics;
@@ -686,7 +699,7 @@ void VideoPage::VideoProvider::SetRowValue(int i, int v)
         default:
             break;
     }
-    page->m_status.clear();
+    page->m_statusKey = nullptr;
 }
 const char* VideoPage::VideoProvider::SliderValueText(int i) const
 {
@@ -811,13 +824,15 @@ void VideoPage::Commit(OptionsShell& shell, bool close)
     }
     if (m_vulkan)
     {
-        m_status = static_cast<const char*>(GEngine->ImageQualityUnavailable(m_image));
-        if (!m_status.empty())
+        if (GEngine->ImageQualityUnavailable(m_image).GetLength())
+        {
+            Status("STR_VIDEO_IMAGE_ERROR", "These image settings are unavailable. Choose another option.");
             return;
+        }
         if (m_quality != m_oldQuality && (!m_quality.Valid() ||
             ((m_quality.shadows == 2 || m_quality.water == 2) && !m_rtReason.empty())))
         {
-            m_status = Text("STR_VIDEO_GROUP_ERROR", "Select supported graphics groups before applying.");
+            Status("STR_VIDEO_GROUP_ERROR", "Choose available graphics options before applying.");
             return;
         }
     }
@@ -843,16 +858,16 @@ void VideoPage::ApplySelection()
 {
     if (m_vulkan)
     {
-        m_status = static_cast<const char*>(GEngine->ApplyImageQuality(m_image));
-        if (!m_status.empty())
+        if (GEngine->ApplyImageQuality(m_image).GetLength())
         {
+            Status("STR_VIDEO_RENDER_ERROR", "Could not apply these settings. Previous values restored.");
             Restore();
             return;
         }
         if ((m_quality != m_oldQuality || m_retrySave) && m_quality != GEngine->GetGraphicsQuality() &&
             !GEngine->ApplyGraphicsQuality(m_quality))
         {
-            m_status = static_cast<const char*>(GEngine->GraphicsQualityError());
+            Status("STR_VIDEO_RENDER_ERROR", "Could not apply these settings. Previous values restored.");
             Restore();
             return;
         }
@@ -886,7 +901,7 @@ void VideoPage::ApplySelection()
     }
     m_applying = true;
     m_waitFrames = 0;
-    m_status = Text("STR_VIDEO_APPLYING", "Applying video settings...");
+    Status("STR_VIDEO_APPLYING", "Applying video settings...");
 }
 void VideoPage::Restore()
 {
@@ -1034,16 +1049,15 @@ bool VideoPage::Finish(OptionsShell& shell)
                      ((m_quality != m_oldQuality || m_retrySave) &&
                       (GEngine->GraphicsQualityError().GetLength() || GEngine->GetGraphicsQuality() != m_quality))))
     {
-        m_status = Text("STR_VIDEO_RENDER_ERROR", "Renderer could not activate these settings. Nothing saved; "
-                                                  "restoring previous values. Restart may be required.");
+        Status("STR_VIDEO_RENDER_ERROR", "Could not apply these settings. Previous values restored.");
         Restore();
         return false;
     }
     if (!m_vulkan && (GEngine->GetMsaaSamples() != Samples(m_image.aa) ||
                       std::abs(GEngine->GetRenderScale() * 100 - m_image.scale) > .1f))
     {
-        m_status = Text("STR_VIDEO_RENDER_ERROR",
-                        "Renderer rejected AA or render scale. Nothing saved; restoring previous values.");
+        Status("STR_VIDEO_RENDER_ERROR",
+                        "Could not apply these settings. Previous values restored.");
         Restore();
         return false;
     }
@@ -1054,8 +1068,7 @@ bool VideoPage::Finish(OptionsShell& shell)
         (m_pending.windowMode != DisplayConfig::Borderless && m_pending.resolutionWidth > 0 &&
          (modeWidth != m_pending.resolutionWidth || modeHeight != m_pending.resolutionHeight)))
     {
-        m_status =
-            Text("STR_VIDEO_DISPLAY_ERROR", "Display change failed. Nothing saved; reverting to the previous display.");
+        Status("STR_VIDEO_DISPLAY_ERROR", "Could not change the display. Previous settings restored.");
         Restore();
         return false;
     }
@@ -1070,7 +1083,7 @@ bool VideoPage::Finish(OptionsShell& shell)
     {
         m_retrySave = true;
         m_close = false;
-        m_status = Text("STR_VIDEO_SAVE_ERROR", "Settings are active, but could not be saved. Retry Apply.");
+        Status("STR_VIDEO_SAVE_ERROR", "Settings are active, but could not be saved. Try Apply again.");
         return false;
     }
     m_retrySave = false;
@@ -1089,7 +1102,7 @@ bool VideoPage::Finish(OptionsShell& shell)
         m_objectShadows = m_oldObjects = GScene->GetObjectShadows();
         m_vehicleShadows = m_oldVehicles = GScene->GetVehicleShadows();
     }
-    m_status = Text("STR_VIDEO_SAVED", "Video settings applied and saved.");
+    Status("STR_VIDEO_SAVED", "Video settings applied and saved.");
     if (m_close)
     {
         shell.PopPage();

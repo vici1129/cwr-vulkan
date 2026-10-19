@@ -75,6 +75,7 @@ class VideoPage : public DisplayPage
         const char* SliderValueText(int) const override;
         void OnRowAction(int, Display&) override;
         int PinnedFooterRow() const override { return RowCount() - 1; }
+        bool MeasureTextCells() const override { return true; }
     } m_video;
     std::vector<Row> m_rows;
     std::vector<std::string> m_aaModes;
@@ -91,7 +92,10 @@ class VideoPage : public DisplayPage
     bool m_qualityTouched = false, m_imageTouched = false;
     bool m_shadowsTouched = false, m_waterTouched = false;
     int m_waitFrames = 0;
-    std::string m_status, m_rtReason, m_fsrReason;
+    std::string m_rtReason, m_fsrReason;
+    const char* m_statusKey = nullptr;
+    const char* m_statusFallback = "";
+    void Status(const char* key, const char* fallback) { m_statusKey = key; m_statusFallback = fallback; }
     void Capture();
     void CaptureDisplay();
     void ObserveWindowSize();

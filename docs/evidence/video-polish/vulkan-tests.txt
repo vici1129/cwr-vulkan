@@ -1,0 +1,4 @@
+﻿Filters: [VideoPage],[DisplayPage],[ConfirmRevertPage],[optionsUI],[GraphicsConfig],[DisplayConfig],[ShadowIsolation],[stringtable],[controller-ui],[WindowMetrics],[WindowPlacement]
+Randomness seeded to: 2602711764
+===============================================================================
+All tests passed (1604 assertions in 139 test cases)

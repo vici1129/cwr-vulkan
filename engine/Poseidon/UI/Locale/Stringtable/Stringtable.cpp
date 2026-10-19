@@ -24,6 +24,7 @@ using Poseidon::QIFStreamB;
 #include <vector>
 #include <Poseidon/UI/Locale/Stringtable/Stringtable.hpp>
 #include <Poseidon/UI/Locale/Stringtable/CodepageTranscode.hpp>
+#include <Poseidon/UI/Locale/VideoStringtableData.hpp>
 namespace Poseidon
 {
 
@@ -69,6 +70,8 @@ class StringTableDynamic : public StringTableMap
     void Init();
     void Add(RString name, RString value, bool fromUtf8, std::set<std::string>& appliedInBatch);
     void Load(const char* filename, std::set<std::string>& appliedInBatch);
+    void Load(QIStream& stream, const char* filename, std::set<std::string>& appliedInBatch,
+              const char* language = nullptr);
 };
 
 void StringTableDynamic::Init()
@@ -282,6 +285,12 @@ void StringTableDynamic::Load(const char* filename, std::set<std::string>& appli
 {
     QIFStreamB f;
     f.AutoOpen(filename);
+    Load(f, filename, appliedInBatch);
+}
+
+void StringTableDynamic::Load(QIStream& f, const char* filename, std::set<std::string>& appliedInBatch, const char* language)
+{
+    if (!language) language = GLanguage;
     bool fileIsUtf8 = HasUtf8CsvSuffix(filename);
     int column = -1;
     int headerColumns = 0;
@@ -310,7 +319,7 @@ void StringTableDynamic::Load(const char* filename, std::set<std::string>& appli
                 {
                     legacyCommaColumn = c;
                 }
-                if (stricmp(row[c].c_str(), (const char*)GLanguage) == 0)
+                if (stricmp(row[c].c_str(), language) == 0)
                 {
                     column = c - 1; // column index into value columns (0-based after key)
                     columnCp = fileIsUtf8 ? Poseidon::Codepage::Utf8 : Poseidon::CodepageForLanguage(row[c].c_str());
@@ -377,6 +386,8 @@ class StringTable
     StringTableDynamic _tableGlobal;
     StringTableDynamic _tableCampaign;
     StringTableDynamic _tableMission;
+    StringTableDynamic _tableVideo;
+    RString _videoLanguage;
     AutoArray<StringTableItem> _registered;
     AutoArray<LoadedEntry> _loaded;
 
@@ -390,6 +401,7 @@ class StringTable
 
     RString Localize(int ids);
     RString Localize(const char* str);
+    RString Find(const char* str);
 
     bool SetLanguage(RString newLang);
 
@@ -566,6 +578,18 @@ bool StringTable::SetLanguage(RString newLang)
 
 RString StringTable::Localize(const char* str)
 {
+    RString value = Find(str);
+    if (value.GetLength()) return value;
+    RptF("String %s not found", str);
+#if _ENABLE_CHEATS
+    return "!!! MISSING STRING";
+#else
+    return "";
+#endif
+}
+
+RString StringTable::Find(const char* str)
+{
     const StringTableItem& item1 = _tableMission[str];
     if (!_tableMission.IsNull(item1))
     {
@@ -584,12 +608,25 @@ RString StringTable::Localize(const char* str)
         return item3.value;
     }
 
-    RptF("String %s not found", (const char*)str);
-#if _ENABLE_CHEATS
-    return "!!! MISSING STRING";
-#else
+    // Last-priority engine supplement, using the same UTF-8 CSV reader and
+    // language selection as asset tables. A mod's localized value always wins.
+    const char* language = GLanguage.GetLength() ? GLanguage.Data() : "English";
+    if (!_videoLanguage.GetLength() || stricmp(_videoLanguage, language) != 0)
+    {
+        _tableVideo.Init();
+        QIStream stream(CwrVideoStrings, sizeof(CwrVideoStrings) - 1);
+        std::set<std::string> applied;
+        _tableVideo.Load(stream, "builtin-video.utf8.csv", applied, "English");
+        if (stricmp(language, "English") != 0)
+        {
+            QIStream translated(CwrVideoStrings, sizeof(CwrVideoStrings) - 1);
+            _tableVideo.Load(translated, "builtin-video.utf8.csv", applied, language);
+        }
+        _videoLanguage = language;
+    }
+    const auto& item = _tableVideo[str];
+    if (!_tableVideo.IsNull(item)) return item.value;
     return "";
-#endif
 }
 
 // Meyer's singleton accessors - no global constructors!
@@ -636,7 +673,7 @@ RString LocalizeString(const char* str)
 
 const char* LocalizeStringWithFallback(const char* key, const char* fallback)
 {
-    RString s = LocalizeString(key);
+    RString s = GetStringTable().Find(key);
     return s.GetLength() > 0 ? s.Data() : fallback;
 }
 

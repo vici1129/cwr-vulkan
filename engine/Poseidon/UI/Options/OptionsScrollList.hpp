@@ -187,6 +187,9 @@ public:
 		// stays reachable on pages whose content overflows the visible
 		// slot count.  Returns the row index to pin, or -1 for no pin.
 		virtual int PinnedFooterRow() const { return -1; }
+        // Video uses actual notebook font widths for localized text. Other
+        // pages retain their existing character budgets and presentation.
+        virtual bool MeasureTextCells() const { return false; }
 
 		// Optional: capture-conflict lookup.  Capture modals call this
 		// after a key is pressed to ask "is this combo already bound?"
@@ -328,6 +331,7 @@ private:
 
 	void FocusFocusedRow();
 	int  RowLabelInnerChars(int row) const;
+    int CellChars(int idc, const char* text, int fallback) const;
 	bool RowLabelNeedsMarquee(int row) const;
 	bool FocusedStepperValueNeedsMarquee() const;
 	bool FocusedBindingCellNeedsMarquee() const;
