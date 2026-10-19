@@ -81,7 +81,7 @@ class VideoPage : public DisplayPage
     mutable std::vector<std::string> m_choices;
     mutable std::vector<const char*> m_choicePtrs;
     mutable std::string m_valueText;
-    GraphicsConfig m_graphics, m_saved;
+    GraphicsConfig m_graphics, m_saved, m_liveGraphics; // Staged, rollback, last applied.
     ImageQuality m_image, m_oldImage;
     GraphicsQuality m_quality, m_oldQuality;
     float m_view = 900, m_oldView = 900;
@@ -94,6 +94,7 @@ class VideoPage : public DisplayPage
     std::string m_status, m_rtReason, m_fsrReason;
     void Capture();
     void CaptureDisplay();
+    void ObserveWindowSize();
     void BuildRows();
     void Commit(OptionsShell&, bool close);
     void ApplySelection();

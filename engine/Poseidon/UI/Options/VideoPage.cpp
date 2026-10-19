@@ -150,7 +150,7 @@ void VideoPage::Capture()
     }
     m_view = m_oldView = GetSelectedPreferredViewDistance();
     m_missionView = m_oldMissionView = GetRespectMissionViewDistance();
-    m_saved = m_graphics;
+    m_saved = m_liveGraphics = m_graphics;
     BuildRows();
 }
 
@@ -163,6 +163,26 @@ void VideoPage::CaptureDisplay()
         GEngine->GetVideoResolution(m_applied.resolutionWidth, m_applied.resolutionHeight);
         m_applied.refreshRate = m_applied.windowMode == DisplayConfig::Fullscreen ? GEngine->RefreshRate() : 0;
         m_pending = m_applied;
+        RebuildLists();
+    }
+}
+void VideoPage::ObserveWindowSize()
+{
+    // A user resize is live, not a failed display request. Merge dimensions
+    // only when no mode/monitor/size edit is staged; preserve every other row.
+    if (!GEngine || GEngine->GetCurrentWindowMode() != WindowMode::Windowed ||
+        m_applied.windowMode != DisplayConfig::Windowed || m_pending.windowMode != m_applied.windowMode ||
+        GEngine->GetCurrentMonitor() != m_applied.monitor || m_pending.monitor != m_applied.monitor ||
+        m_pending.resolutionWidth != m_applied.resolutionWidth ||
+        m_pending.resolutionHeight != m_applied.resolutionHeight)
+        return;
+    int width = 0, height = 0;
+    GEngine->GetVideoResolution(width, height);
+    if (width > 0 && height > 0 &&
+        (width != m_applied.resolutionWidth || height != m_applied.resolutionHeight))
+    {
+        m_applied.resolutionWidth = m_pending.resolutionWidth = width;
+        m_applied.resolutionHeight = m_pending.resolutionHeight = height;
         RebuildLists();
     }
 }
@@ -776,6 +796,7 @@ void VideoPage::Commit(OptionsShell& shell, bool close)
 {
     if (!GEngine || m_applying)
         return;
+    ObserveWindowSize();
     if (!Dirty())
     {
         if (close)
@@ -822,7 +843,8 @@ void VideoPage::ApplySelection()
             Restore();
             return;
         }
-        if (m_quality != m_oldQuality && !GEngine->ApplyGraphicsQuality(m_quality))
+        if ((m_quality != m_oldQuality || m_retrySave) && m_quality != GEngine->GetGraphicsQuality() &&
+            !GEngine->ApplyGraphicsQuality(m_quality))
         {
             m_status = static_cast<const char*>(GEngine->GraphicsQualityError());
             Restore();
@@ -834,21 +856,23 @@ void VideoPage::ApplySelection()
         m_graphics.msaaSamples = Samples(m_image.aa);
         m_graphics.renderScale = m_image.scale / 100.f;
         // One meaningful On/Off control per legacy gate, not fake shadow tiers.
-        if (m_objectShadows != m_oldObjects || m_vehicleShadows != m_oldVehicles)
+        if (m_objectShadows != m_oldObjects || m_vehicleShadows != m_oldVehicles || m_retrySave)
             m_graphics.shadowQuality =
                 (m_objectShadows || m_vehicleShadows) ? GraphicsConfig::TierHigh : GraphicsConfig::TierOff;
     }
     auto common = m_graphics;
     common.shadowQuality = m_saved.shadowQuality; // Individual GL33 gates below own this UI transaction.
-    ApplyGraphicsConfigToEngine(common, &m_saved);
+    ApplyGraphicsConfigToEngine(common, &m_liveGraphics);
+    m_liveGraphics = common;
     if (!m_vulkan && GScene)
     {
-        if (m_objectShadows != m_oldObjects)
+        if ((m_objectShadows != m_oldObjects || m_retrySave) && m_objectShadows != GScene->GetObjectShadows())
             GScene->SetObjectShadows(m_objectShadows);
-        if (m_vehicleShadows != m_oldVehicles)
+        if ((m_vehicleShadows != m_oldVehicles || m_retrySave) && m_vehicleShadows != GScene->GetVehicleShadows())
             GScene->SetVehicleShadows(m_vehicleShadows);
     }
-    if (m_view != m_oldView || m_missionView != m_oldMissionView)
+    if ((m_view != m_oldView || m_missionView != m_oldMissionView || m_retrySave) &&
+        (m_view != GetSelectedPreferredViewDistance() || m_missionView != GetRespectMissionViewDistance()))
     {
         SetSelectedPreferredViewDistance(m_view);
         SetRespectMissionViewDistance(m_missionView);
@@ -862,8 +886,9 @@ void VideoPage::Restore()
 {
     ApplyToEngine(m_applied);
     auto common = m_saved;
-    common.shadowQuality = m_graphics.shadowQuality;
-    ApplyGraphicsConfigToEngine(common, &m_graphics);
+    common.shadowQuality = m_liveGraphics.shadowQuality;
+    ApplyGraphicsConfigToEngine(common, &m_liveGraphics);
+    m_liveGraphics = common;
     if (m_vulkan)
     {
         GEngine->ApplyImageQuality(m_oldImage);
@@ -872,12 +897,12 @@ void VideoPage::Restore()
     }
     if (GScene)
     {
-        if (m_objectShadows != m_oldObjects || (m_vulkan && m_quality != m_oldQuality))
+        if (GScene->GetObjectShadows() != m_oldObjects)
             GScene->SetObjectShadows(m_oldObjects);
-        if (m_vehicleShadows != m_oldVehicles || (m_vulkan && m_quality != m_oldQuality))
+        if (GScene->GetVehicleShadows() != m_oldVehicles)
             GScene->SetVehicleShadows(m_oldVehicles);
     }
-    if (m_view != m_oldView || m_missionView != m_oldMissionView)
+    if (GetSelectedPreferredViewDistance() != m_oldView || GetRespectMissionViewDistance() != m_oldMissionView)
     {
         SetSelectedPreferredViewDistance(m_oldView);
         SetRespectMissionViewDistance(m_oldMissionView);
@@ -1000,7 +1025,7 @@ bool VideoPage::Finish(OptionsShell& shell)
     int modeWidth = 0, modeHeight = 0;
     GEngine->GetVideoResolution(modeWidth, modeHeight);
     if (m_vulkan && (GEngine->ImageQualityUnavailable(m_image).GetLength() || GEngine->GetImageQuality() != m_image ||
-                     (m_quality != m_oldQuality &&
+                     ((m_quality != m_oldQuality || m_retrySave) &&
                       (GEngine->GraphicsQualityError().GetLength() || GEngine->GetGraphicsQuality() != m_quality))))
     {
         m_status = Text("STR_VIDEO_RENDER_ERROR", "Renderer could not activate these settings. Nothing saved; "
@@ -1033,6 +1058,7 @@ bool VideoPage::Finish(OptionsShell& shell)
     m_graphics.vsync = interval < 0 ? GraphicsConfig::VsyncAdaptive
                        : interval   ? GraphicsConfig::VsyncOn
                                     : GraphicsConfig::VsyncOff;
+    m_liveGraphics.vsync = m_graphics.vsync;
     m_applying = false;
     if (!Save())
     {
@@ -1067,6 +1093,8 @@ bool VideoPage::Finish(OptionsShell& shell)
 }
 void VideoPage::OnSimulate(OptionsShell& shell)
 {
+    if (!m_applying)
+        ObserveWindowSize();
     if (m_applying && m_waitFrames++ >= 2 && GEngine && !GEngine->ImageQualityPending() &&
         !GEngine->GraphicsQualityPending())
         if (Finish(shell))

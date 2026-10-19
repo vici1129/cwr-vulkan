@@ -10,6 +10,7 @@
 #include <Poseidon/IO/ParamFile/ParamFile.hpp>
 #include <SDL3/SDL_keycode.h>
 #include <catch2/catch_approx.hpp>
+#include <catch2/generators/catch_generators.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <filesystem>
 #include <fstream>
@@ -50,7 +51,7 @@ struct VideoEngine : EngineDummy
     bool vulkan = true, rt = false, fsr = false, reject = false, pending = false, failDisplay = false;
     int qualityCalls = 0, imageCalls = 0, displayCalls = 0, vsync = 1, width = 1280, height = 720;
     int samples = 0;
-    int refresh = 0, refreshWidth = 0;
+    int refresh = 0, refreshWidth = 0, monitor = 0;
     int logicalWidth = 0, logicalHeight = 0;
     float gamma = 1.2f, scale = 1.f;
     WindowMode mode = WindowMode::Windowed;
@@ -140,6 +141,27 @@ struct VideoEngine : EngineDummy
         out.Add(120);
     }
     int RefreshRate() const override { return refresh; }
+    int GetCurrentMonitor() const override { return monitor; }
+    bool SwitchMonitor(int index) override
+    {
+        if (failDisplay || index < 0 || index > 1) return false;
+        monitor = index;
+        return true;
+    }
+    void ListMonitors(FindArray<MonitorInfo>& out) override
+    {
+        out.Clear();
+        for (int i = 0; i < 2; ++i)
+        {
+            MonitorInfo info{};
+            info.index = i;
+            info.name = i ? "Portrait" : "Landscape";
+            info.w = i ? 1080 : 1920;
+            info.h = i ? 1920 : 1080;
+            info.refresh = i ? 75 : 165;
+            out.Add(info);
+        }
+    }
     bool SwitchRefreshRate(int hz) override
     {
         if (mode != WindowMode::Fullscreen)
@@ -582,6 +604,116 @@ TEST_CASE("Video failed bundle save cannot leave a new gamma on disk after Cance
     REQUIRE(original.Save(f.display.path));
 }
 
+TEST_CASE("Video merges a live resize without discarding staged gamma and FPS", "[UI][VideoPage]")
+{
+    const bool vulkan = GENERATE(true, false);
+    {
+        Fixture f;
+        f.engine.vulkan = vulkan;
+        f.Open();
+        auto& p = *f.page;
+        p.Set(VideoPage::Gamma, 50);
+        p.Set(VideoPage::Fps, 2);
+        // Logical window size differs from drawable pixels on a scaled desktop.
+        f.engine.width = 1800;
+        f.engine.height = 1200;
+        f.engine.logicalWidth = 1200;
+        f.engine.logicalHeight = 800;
+        SECTION("Resize observed by the normal page tick") { p.Tick(*f.shell); }
+        SECTION("Resize immediately before Apply") {}
+        CHECK(p.Value(VideoPage::Gamma) == 50);
+        p.Action(VideoPage::Apply, *f.shell);
+        p.Tick(*f.shell);
+        CHECK(f.engine.gamma == 1.4f);
+        CHECK(gUserFpsCap == 60);
+        CHECK(f.Saved().gamma == 1.4f);
+        CHECK(f.Saved().fpsCap == 60);
+        CHECK(f.engine.displayCalls == 0);
+        DisplayConfig cfg;
+        REQUIRE(cfg.Load(f.display.path));
+        CHECK(cfg.resolutionWidth == 1200);
+        CHECK(cfg.resolutionHeight == 800);
+    }
+}
+
+TEST_CASE("Video live resize does not replace an explicitly staged window size", "[UI][VideoPage]")
+{
+    Fixture f;
+    f.Open();
+    auto& p = *f.page;
+    p.Set(VideoPage::Resolution, p.Choice(VideoPage::Resolution, "800x600"));
+    f.engine.width = 1100;
+    f.engine.height = 700;
+    p.Tick(*f.shell);
+    CHECK(p.Value(VideoPage::Resolution) == p.Choice(VideoPage::Resolution, "800x600"));
+    p.Action(VideoPage::Apply, *f.shell);
+    CHECK(f.engine.width == 800);
+    CHECK(f.engine.height == 600);
+    f.shell->OnButtonClicked(9201); // Keep the deliberate display change.
+    p.Tick(*f.shell);
+    DisplayConfig cfg;
+    REQUIRE(cfg.Load(f.display.path));
+    CHECK(cfg.resolutionWidth == 800);
+    CHECK(cfg.resolutionHeight == 600);
+}
+
+TEST_CASE("Video unrelated Apply preserves developer changes outside the failed-save retry", "[UI][VideoPage]")
+{
+    Fixture f;
+    f.Open();
+    auto& p = *f.page;
+    p.Set(VideoPage::Gamma, 50);
+    f.engine.quality = GraphicsQuality::Enhanced();
+    SetSelectedPreferredViewDistance(1234.f);
+    p.Action(VideoPage::Apply, *f.shell);
+    p.Tick(*f.shell);
+    CHECK(f.engine.qualityCalls == 0);
+    CHECK(f.engine.quality == GraphicsQuality::Enhanced());
+    CHECK(GetSelectedPreferredViewDistance() == 1234.f);
+    CHECK(f.Saved().vulkan == GraphicsQuality{});
+}
+
+TEST_CASE("Video retry and Cancel use live state after editing failed-save values back", "[UI][VideoPage]")
+{
+    const bool vulkan = GENERATE(true, false);
+    {
+        Fixture f;
+        f.engine.vulkan = vulkan;
+        gUserFpsCap = 30;
+        f.Open();
+        auto& p = *f.page;
+        DisplayConfig original;
+        REQUIRE(original.Load(f.display.path));
+        std::filesystem::remove(f.display.path);
+        std::filesystem::create_directory(f.display.path);
+        p.Set(VideoPage::Gamma, 50);
+        p.Set(VideoPage::Fps, 2);
+        if (vulkan) p.Set(VideoPage::Overall, 1);
+        p.Action(VideoPage::Apply, *f.shell);
+        p.Tick(*f.shell);
+        CHECK(f.engine.gamma == 1.4f);
+        CHECK(gUserFpsCap == 60);
+        CHECK(f.Saved().gamma == 1.2f);
+        CHECK(std::string(p.Rows().RowDescription(p.At(VideoPage::Apply))).find("could not be saved") != std::string::npos);
+        std::filesystem::remove(f.display.path);
+        REQUIRE(original.Save(f.display.path));
+        p.Set(VideoPage::Gamma, 39); // 1.2, equal to the original saved value.
+        p.Set(VideoPage::Fps, 1);    // 30, equal to the original live value.
+        if (vulkan) p.Set(VideoPage::Overall, 0);
+        SECTION("Cancel") { f.shell->OnButtonClicked(IDC_CANCEL); }
+        SECTION("Retry Apply")
+        {
+            p.Action(VideoPage::Apply, *f.shell);
+            p.Tick(*f.shell);
+            CHECK(std::string(p.Rows().RowDescription(p.At(VideoPage::Apply))) == "Video settings applied and saved.");
+        }
+        CHECK(f.engine.gamma == 1.2f);
+        CHECK(gUserFpsCap == 30);
+        CHECK(f.Saved().gamma == 1.2f);
+        if (vulkan) CHECK(f.engine.quality == GraphicsQuality{});
+    }
+}
+
 #ifdef _WIN32
 TEST_CASE("Video rolls back a partial bundle when the display file is read-only", "[UI][VideoPage]")
 {
@@ -601,6 +733,40 @@ TEST_CASE("Video rolls back a partial bundle when the display file is read-only"
     CHECK(f.Saved().gamma == 1.4f);
 }
 #endif
+
+TEST_CASE("Video exclusive monitor change starts with the target native mode", "[UI][VideoPage]")
+{
+    Fixture f;
+    f.engine.mode = WindowMode::Fullscreen;
+    f.engine.width = 1920;
+    f.engine.height = 1080;
+    f.engine.refresh = 165;
+    f.Open();
+    auto& p = *f.page;
+    p.Set(VideoPage::Monitor, 1);
+    CHECK(p.Value(VideoPage::Resolution) == 0);
+    CHECK(p.Value(VideoPage::Refresh) == 0);
+    p.Action(VideoPage::Apply, *f.shell);
+    CHECK(f.engine.monitor == 1);
+    CHECK(f.engine.mode == WindowMode::Fullscreen);
+    CHECK(f.engine.width == 1080);
+    CHECK(f.engine.height == 1920);
+    SECTION("Keep")
+    {
+        f.shell->OnButtonClicked(9201);
+        p.Tick(*f.shell);
+        DisplayConfig cfg;
+        REQUIRE(cfg.Load(f.display.path));
+        CHECK(cfg.monitor == 1);
+    }
+    SECTION("Revert")
+    {
+        f.shell->OnButtonClicked(9202);
+        CHECK(f.engine.monitor == 0);
+        CHECK(f.engine.width == 1920);
+        CHECK(f.engine.height == 1080);
+    }
+}
 
 TEST_CASE("Video applies Vulkan refresh only after entering exclusive mode at the selected size", "[UI][VideoPage]")
 {

@@ -226,3 +226,30 @@ Final clean run labels: `video-modernization-object-vk`,
 `video-modernization-object-vk-restart`, `video-modernization-object-gl33`,
 `video-modernization-object-gl33-restart` and
 `video-modernization-object-return-vk`.
+
+## Surgical settings-flow follow-up (2026-10-19)
+
+On top of `d0177be`, exclusive monitor switching selects an SDL fullscreen mode
+owned by the target output, synchronizes the move, and starts that output at
+Native/default refresh. This includes differently oriented monitors. Window
+resizes merge only unstaged dimensions, without discarding gamma/FPS edits.
+Failed-save Retry/Cancel compares against the last applied common settings (and
+actual image/group/scene state), not the subsequently edited UI values. Saved
+rollback values and ordinary unrelated developer changes remain independent.
+
+Vulkan and GL33 public builds pass; each focused UI/configuration/shadow-isolation
+suite passes **958 assertions / 110 cases**. Policy/lifetime guards pass **520**.
+New regressions cover Keep/Revert on an exclusive monitor change, logical versus
+drawable resize with staged edits, preservation of an explicit staged size,
+failed-save/edit-back/Retry and Cancel on both renderers, and unrelated developer
+state. No shaders, effect mappings, config schema or private SDKs change.
+
+Direct stock Malden checks use copied profiles and `--nosound`. Actual exclusive
+switching succeeds **1920x1080@165 → 1080x1920@100 → 1920x1080@165** without a
+Windowed workaround. Both renderers retain staged gamma/FPS through a real
+1280x720 window resize and pass isolated writer-failure/edit-back/Retry/Cancel
+checks, reopening the page to verify actual gamma. Logs/assertions are retained
+locally under `build/shadow-live/video-flow-final-*` and
+`build/video-flow-*-tests.txt`.
+Both games close normally. The final Vulkan run submits/presents **5,774 / 5,774**
+frames with **zero validation errors and warnings**.

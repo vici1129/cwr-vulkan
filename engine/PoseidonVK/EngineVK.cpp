@@ -490,6 +490,24 @@ bool EngineVK::SwitchMonitor(int index)
     if (!displays || index < 0 || index >= count) { SDL_free(displays); return false; }
     const auto target = displays[index];
     SDL_free(displays);
+    if (_mode == WindowMode::Fullscreen)
+    {
+        // Exclusive windows ignore position requests. Select a mode owned by
+        // the target display, then wait before the caller applies size/Hz.
+        const auto* current = SDL_GetWindowFullscreenMode(_window);
+        SDL_DisplayMode closest{};
+        if (!SDL_GetClosestFullscreenDisplayMode(target, current ? current->w : _width,
+                current ? current->h : _height, current ? current->refresh_rate : 0.f, true, &closest))
+        {
+            const auto* desktop = SDL_GetDesktopDisplayMode(target);
+            if (!desktop || !SDL_GetClosestFullscreenDisplayMode(target, desktop->w, desktop->h, 0.f, true, &closest))
+                return false;
+        }
+        if (!SDL_SetWindowFullscreenMode(_window, &closest) || !SDL_SyncWindow(_window))
+            return false;
+        _vk.RequestRecreation();
+        return SDL_GetDisplayForWindow(_window) == target;
+    }
     SDL_Rect bounds{};
     if (!SDL_GetDisplayBounds(target, &bounds)) return false;
     int width = 0, height = 0;

@@ -276,6 +276,12 @@ void DisplayPage::DisplayProvider::SetRowValue(int row, int v)
             if (v >= 0 && v < (int)m_page->m_monitors.size())
             {
                 p.monitor = v;
+                // An exclusive mode belongs to its display. Start at Native
+                // on the new output, not an unsupported old size/refresh.
+                if (p.windowMode == DisplayConfig::Fullscreen && p.monitor != m_page->m_applied.monitor)
+                {
+                    p.resolutionWidth = p.resolutionHeight = p.refreshRate = 0;
+                }
                 // Resolution / refresh lists depend on monitor — rebuild
                 // and re-validate the pending values against the new lists.
                 m_page->RebuildLists();

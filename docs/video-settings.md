@@ -12,6 +12,13 @@ Revert, Escape and timeout restore the previous display without committing the
 other staged settings. Failed activation is not saved. A write failure is shown
 explicitly and Apply can retry.
 
+Exclusive-fullscreen monitor changes start at the target output's Native
+resolution/default refresh, rather than reusing a mode owned by the old monitor.
+An ordinary window resize preserves staged gamma/FPS and other non-display edits;
+it does not replace a deliberately staged mode/monitor/window-size selection.
+If saving fails, subsequent edits, Retry and Cancel compare against the last
+live-applied values, separately from the saved rollback values.
+
 ## Consolidation audit
 
 | Previous option/path | Unified behavior |
