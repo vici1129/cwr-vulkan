@@ -1,0 +1,140 @@
+[
+  {
+    "file": "malden-wall.webp",
+    "kind": "ordinary 1:1 crops with labels; lossless, no contrast/exposure adjustment",
+    "roi": [
+      380,
+      400,
+      1600,
+      1080
+    ],
+    "sources": [
+      "rtao-final-malden-1080\\wall-off-off.png",
+      "rtao-final-malden-1080\\wall-off-ssao.png",
+      "rtao-base-malden-1080\\wall-off-rtao.png",
+      "rtao-final-malden-1080\\wall-off-rtao.png"
+    ],
+    "source_sha256": [
+      "e818a0c73153f8793adf97797a1cfd4ebb2dffb35c4d3602b93c5e78099dd604",
+      "d935d841f8e0fbfaea3d06ef06f8b08cf78147ff53be1430ecb22e591d830f52",
+      "627d4e5b2158b03711b4c3c01e2401d91ea426a149240b207f403ff8c00d342f",
+      "b41b0149c3bfbe0c28a03f2a0086b6135bca60332608b51742075a116c74d0b8"
+    ],
+    "sha256": "8d6e73ef70785e1d966b7106484f1dda676b6bb57efdcec7356fd17a5c48b399"
+  },
+  {
+    "file": "malden-rock.webp",
+    "kind": "ordinary 1:1 crops with labels; lossless, no contrast/exposure adjustment",
+    "roi": [
+      500,
+      450,
+      1800,
+      1080
+    ],
+    "sources": [
+      "rtao-final-malden-1080\\rock-off-off.png",
+      "rtao-final-malden-1080\\rock-off-ssao.png",
+      "rtao-base-malden-extra\\rock-fixed-off-rtao.png",
+      "rtao-final-malden-1080\\rock-off-rtao.png"
+    ],
+    "source_sha256": [
+      "b93dc08dc0180818c75b92df3eb205a662598ae0c95b7fbf4a6fddf0698c4ff6",
+      "16de9a9e5406b8b9cf14427ffb58a08de9b9728ccf970286bdca7f03a828d5ec",
+      "d92c4b7c82a311ea63304446bdd651ee0c56d63758fe31d4547e9521296e8400",
+      "fdc2730db8aedd013f3d8188d85b26dc3df09c7becf965eb2d98819a026b3c68"
+    ],
+    "sha256": "8ba46dc99353d0571bbca8d8c6673fea591f44a3bb289f757ec1481a15835bbf"
+  },
+  {
+    "file": "malden-uaz.webp",
+    "kind": "ordinary 1:1 crops with labels; lossless, no contrast/exposure adjustment",
+    "roi": [
+      550,
+      350,
+      1530,
+      900
+    ],
+    "sources": [
+      "rtao-final-malden-perf1080\\vehicle-fixed-off-off.png",
+      "rtao-final-malden-perf1080\\vehicle-fixed-off-ssao.png",
+      "rtao-base-malden-vehicle-fixed\\vehicle-fixed-off-rtao.png",
+      "rtao-final-malden-perf1080\\vehicle-fixed-off-rtao.png"
+    ],
+    "source_sha256": [
+      "a3a90400873a1811f1a4ab2382d400d1483c481a55eb3ec03fbe4f678a5d9aeb",
+      "f928efa8d04a87d9fd86e27403608dda9000d3d3eead2cce6b1e6872f7f00f4d",
+      "9942c3c3481771b3d664b231687df04ed0360aefde23ab3938840f6b13cbf43c",
+      "c512c878c7495bbffd6306ce8f69ec39fe8d5f582ffd9071b25cb8015004c1ec"
+    ],
+    "sha256": "18079e4c45f61fac8ee649396420e6ccc90efdb1a3b7e8aa6d0f1a9532f8ab26"
+  },
+  {
+    "file": "malden-offscreen.webp",
+    "kind": "ordinary 1:1 crops with labels; lossless, no contrast/exposure adjustment",
+    "roi": [
+      1100,
+      400,
+      1900,
+      1050
+    ],
+    "sources": [
+      "rtao-final-malden-1080\\offscreen-weather1-off-off.png",
+      "rtao-final-malden-1080\\offscreen-weather1-off-ssao.png",
+      "rtao-base-malden-extra\\offscreen-weather1-off-rtao.png",
+      "rtao-final-malden-1080\\offscreen-weather1-off-rtao.png"
+    ],
+    "source_sha256": [
+      "fefb1e686c2791be719ac938d13041b59add59ab54a273fe3eb44f4bc22a7fa0",
+      "567621c01649cd8560ba20ae2d39ce8fb8e1c42df36698f01a9b0702bc5b5dd2",
+      "3b82ae2ceef96ef2a8a745e79ae319c4ab5b155a0cc6b6071b476a17bdaf2727",
+      "975fd50c16bb0c5b6e5f509b003c0794d20d610d55a520b116de394f2286445d"
+    ],
+    "sha256": "92177600a19fe57db75d5ccf4c78a6a78c3734752f1281b7bed720cad7916c35"
+  },
+  {
+    "file": "everon-brick.webp",
+    "kind": "ordinary 1:1 crops with labels; lossless, no contrast/exposure adjustment",
+    "roi": [
+      380,
+      400,
+      1700,
+      1080
+    ],
+    "sources": [
+      "rtao-final-everon-1080\\brick-off-off.png",
+      "rtao-final-everon-1080\\brick-off-ssao.png",
+      "rtao-base-everon-1080\\brick-off-rtao.png",
+      "rtao-final-everon-1080\\brick-off-rtao.png"
+    ],
+    "source_sha256": [
+      "6445f41c0ea27b4ce6328fea072cf124fdcbbccb43bd7e12753e7b4063b6b0d1",
+      "2c3ef4935358266587253eeddeedcd0f355ac89e45845b413b0bafa777b8547e",
+      "392036f87d798d7a27b26d21ba8d274483f6f964da25c27877fb777c9281785f",
+      "1d75a855e02724e41dc3b2080d6334f372b1eb31ee3577ed1ed569ced2a0a0d0"
+    ],
+    "sha256": "76e80f77d5332f926e3e93a1423f8c94a8bd5a5a6f0596efde67db09816a31d6"
+  },
+  {
+    "file": "everon-barn.webp",
+    "kind": "ordinary 1:1 crops with labels; lossless, no contrast/exposure adjustment",
+    "roi": [
+      900,
+      300,
+      1740,
+      1080
+    ],
+    "sources": [
+      "rtao-final-everon-1080\\barn-off-off.png",
+      "rtao-final-everon-1080\\barn-off-ssao.png",
+      "rtao-base-everon-1080\\barn-off-rtao.png",
+      "rtao-final-everon-1080\\barn-off-rtao.png"
+    ],
+    "source_sha256": [
+      "becada9cc54a4968c03155e88d05a84a47d97a4897e81fec3e6e88f2e946b62f",
+      "29ede5aedc9199f5887e7e812b1bb82b7ffaebf3da05953ae14025ebb866cf58",
+      "d015a1745847be2f3ba56012ffe0a85f406fd53a437692533f1a102b35f95dd5",
+      "adcd92b20155847b9fbb7bf096771764437422ffbceeb2e7ccc264f1aa6d00fa"
+    ],
+    "sha256": "fe9341f5e09f43b79a4cc4f775a3c895efa099db5810be57166278e62f3d4ce0"
+  }
+]

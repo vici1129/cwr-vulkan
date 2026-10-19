@@ -87,6 +87,7 @@ void TLVertexTable::ReleaseTables()
 {
     hdrColor.clear();
     directSun.clear();
+    aoAmbient.clear();
     directLocal.clear();
     previousClip.clear();
     _clip.Clear();
@@ -126,6 +127,7 @@ void TLVertexTable::DoTransformPoints(const VertexTable& src, const Matrix4& pos
 {
     hdrColor.clear();
     directSun.clear();
+    aoAmbient.clear();
     directLocal.clear();
     previousClip.clear();
     // this is the most common case
@@ -153,6 +155,7 @@ void TLVertexTable::DoTransformPoints(const IAnimator* anim, const Shape& src, c
 {
     hdrColor.clear();
     directSun.clear();
+    aoAmbient.clear();
     directLocal.clear();
     previousClip.clear();
     int i;
@@ -1041,6 +1044,12 @@ void TLVertexTable::DoLightingColorized(const LightList& lights,
         PoseidonAssert(index >= 0 && index < 256);
         Color colorize = colors[index];
         colorI = colorI * colorize * 2;
+        if (GEngine && GEngine->SeparateAmbient() && !(spec & (DisableSun | IsWater | IsLight)))
+        {
+            const Color ambient = sun->AmbientPrecalc() * colorize * 2;
+            aoAmbient.resize(NVertex());
+            aoAmbient[i] = {ambient.R(), ambient.G(), ambient.B(), 1};
+        }
         if (someLights && GEngine->LocalShadowLight(0) && !(spec & (DisableSun | IsWater | IsLight)))
         {
             directLocal.resize(NVertex());

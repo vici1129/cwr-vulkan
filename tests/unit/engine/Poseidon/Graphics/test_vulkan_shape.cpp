@@ -132,6 +132,20 @@ TEST_CASE("Clipping preserves the two selected local contributions independently
     REQUIRE(table.directLocal.empty());
 }
 
+TEST_CASE("RTAO terrain ambient survives clipping and releases with the TL table", "[Graphics][vulkan-shape][rtao]")
+{
+    TLVertexTable table;
+    for (int i = 0; i < 3; ++i) table.AddPos();
+    table.aoAmbient = {{{.2f, .4f, .6f, 1}}, {{.6f, .8f, 1.f, 1}}};
+    table.InterpolateHDR(2, 0, 1, .25f);
+    REQUIRE(table.aoAmbient[2][0] == Catch::Approx(.3f));
+    REQUIRE(table.aoAmbient[2][1] == Catch::Approx(.5f));
+    REQUIRE(table.aoAmbient[2][2] == Catch::Approx(.7f));
+    REQUIRE(table.aoAmbient[2][3] == 1);
+    table.ReleaseTables();
+    REQUIRE(table.aoAmbient.empty());
+}
+
 #if CWR_HAS_VULKAN
 TEST_CASE("RTAO instance coordinates and depth reconstruction agree with raster geometry", "[Graphics][vulkan-shape][rtao]")
 {
@@ -429,7 +443,9 @@ TEST_CASE("Vulkan native normals use inverse transpose and materials use the eng
     REQUIRE(offsetof(vk::ShapeLighting, previousMVP) == 1104);
     REQUIRE(offsetof(vk::ShapeLighting, temporal) == 1168);
     REQUIRE(offsetof(vk::ShapeLighting, outputColor) == 1200);
-    REQUIRE(sizeof(vk::ShapeLighting) == 1488);
+    REQUIRE(sizeof(vk::ShapeLighting) == 1504);
+    REQUIRE(offsetof(vk::ShapeLighting, aoReceiver) == 1488);
+    REQUIRE(lighting.aoReceiver == std::array<float, 4>{});
     REQUIRE(offsetof(vk::ShapeLighting, pbr) == 1456);
     REQUIRE(offsetof(vk::ShapeLighting, pbrDiffuse) == 1472);
     REQUIRE(lighting.pbr == std::array<float, 4>{});

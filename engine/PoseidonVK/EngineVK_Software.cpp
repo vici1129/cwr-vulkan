@@ -93,6 +93,9 @@ void EngineVK::SubmitSoftware(const std::vector<uint32_t>& indices)
             std::copy_n(_softwareMesh->directSun[index].begin(), 4, _softwareVertices[index].directSun);
         if (index < _softwareMesh->directLocal.size())
             std::copy_n(_softwareMesh->directLocal[index].begin(), 6, _softwareVertices[index].directLocal);
+        std::fill_n(_softwareVertices[index].aoAmbient, 4, 0.f);
+        if (index < _softwareMesh->aoAmbient.size())
+            std::copy_n(_softwareMesh->aoAmbient[index].begin(), 4, _softwareVertices[index].aoAmbient);
         // TL already contains the scene Fog8 visibility in specular.a. Alpha
         // fog is already in color.a; it must not also get an RGB fog mix.
         _softwareVertices[index].fog =
@@ -117,6 +120,9 @@ void EngineVK::SubmitSoftware(const std::vector<uint32_t>& indices)
     const float cutoff = shadow ? std::max(1, (GetShadowFactor() * 7) >> 4) / 255.f :
                                  state.cutoff;
     vk::ShapeLighting receiver;
+    receiver.aoReceiver[0] = _vk.RTAOEnabled() && _shadowWorld && !_waterSurface &&
+        !_softwareMesh->aoAmbient.empty() && !blend &&
+        !(_softwareFlags & (NoZBuf | NoZWrite | IsLight | DisableSun | NoDropdown | IsShadow | IsAlphaFog)) ? 1.f : 0.f;
     receiver.rtWater[3] = _vk.RTGIEnabled() && _shadowWorld && !_waterSurface && image &&
         alpha == AlphaStats::Opaque && !blend && cutoff == 0 &&
         !(_softwareFlags & (NoZBuf | NoZWrite | IsColored | IsLight | DisableSun | NoDropdown |
@@ -175,7 +181,7 @@ void EngineVK::SubmitSoftware(const std::vector<uint32_t>& indices)
                  (_softwareFlags & NoZBuf) == 0, nullptr, waterBump, 0, {0, -1, 0}, mesh.vertexOffset, mesh.indexOffset,
                  (_softwareFlags & NoZWrite) == 0,
                  receiver.shadowReceiver[0] || receiver.atmosphereSun[3] || receiver.rtSun[0] || receiver.rtWater[0] ||
-                         _temporalTerrain || localShadows || receiver.wetSurface[0] || receiver.rtWater[3]
+                         _temporalTerrain || localShadows || receiver.wetSurface[0] || receiver.rtWater[3] || receiver.aoReceiver[0]
                      ? &receiver
                      : nullptr,
                  shadow, !shadow && (_softwareFlags & IsLight) != 0);

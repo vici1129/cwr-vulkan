@@ -198,9 +198,10 @@ bool VulkanContext::CreateAAResources(VkFormat format)
 
     _refractionEnabled = _refractionRequested;
     _shoreFoamEnabled = _shoreFoamRequested;
-    _rtWaterTargets = WaterSurfaceEnabled() || RTGIEnabled();
+    _rtaoTargets = RTAOEnabled();
+    _rtWaterTargets = WaterSurfaceEnabled() || RTGIEnabled() || _rtaoTargets;
     _rtShadowTargets = RTShadowsEnabled() || _rtWaterTargets || _contactEnabled;
-    VkAttachmentDescription attachments[5]{};
+    VkAttachmentDescription attachments[6]{};
     auto& color = attachments[0];
     color.format = format;
     color.samples = _worldSamples;
@@ -245,8 +246,10 @@ bool VulkanContext::CreateAAResources(VkFormat format)
         colorRef,
         {temporal ? 2u : VK_ATTACHMENT_UNUSED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL},
         {baseAttachments, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL},
-        {baseAttachments + 1, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL}};
+        {baseAttachments + 1, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL},
+        {baseAttachments + 2, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL}};
     const VkAttachmentReference sunResolves[]{resolveRef,
+                                              {VK_ATTACHMENT_UNUSED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL},
                                               {VK_ATTACHMENT_UNUSED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL},
                                               {VK_ATTACHMENT_UNUSED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL},
                                               {VK_ATTACHMENT_UNUSED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL}};
@@ -256,7 +259,9 @@ bool VulkanContext::CreateAAResources(VkFormat format)
         attachments[baseAttachments].format = VK_FORMAT_R16G16B16A16_SFLOAT;
         if (_rtWaterTargets)
             attachments[baseAttachments + 1] = attachments[baseAttachments];
-        subpass.colorAttachmentCount = _rtWaterTargets ? 4 : 3;
+        if (_rtaoTargets)
+            attachments[baseAttachments + 2] = attachments[baseAttachments];
+        subpass.colorAttachmentCount = _rtaoTargets ? 5 : _rtWaterTargets ? 4 : 3;
         subpass.pColorAttachments = sunRefs;
         if (_worldSamples != VK_SAMPLE_COUNT_1_BIT)
             subpass.pResolveAttachments = sunResolves;
@@ -277,7 +282,7 @@ bool VulkanContext::CreateAAResources(VkFormat format)
     dependencies[1].dstSubpass = VK_SUBPASS_EXTERNAL;
     dependencies[1].dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
     VkRenderPassCreateInfo pass{VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO};
-    pass.attachmentCount = baseAttachments + (_rtShadowTargets ? 1 : 0) + (_rtWaterTargets ? 1 : 0);
+    pass.attachmentCount = baseAttachments + (_rtShadowTargets ? 1 : 0) + (_rtWaterTargets ? 1 : 0) + (_rtaoTargets ? 1 : 0);
     pass.pAttachments = attachments;
     pass.subpassCount = 1;
     pass.pSubpasses = &subpass;
@@ -298,6 +303,8 @@ bool VulkanContext::CreateAAResources(VkFormat format)
         attachments[baseAttachments].initialLayout = attachments[baseAttachments].finalLayout;
         if (_rtWaterTargets)
             attachments[baseAttachments + 1] = attachments[baseAttachments];
+        if (_rtaoTargets)
+            attachments[baseAttachments + 2] = attachments[baseAttachments];
     }
     Require(vkCreateRenderPass(_device, &pass, nullptr, &_worldResume), "create world resume");
     // SMAA's discard in edge detection requires a zero-cleared intermediate.
@@ -371,7 +378,7 @@ bool VulkanContext::CreateAAResources(VkFormat format)
         Require(vkCreateImageView(_device, &view, nullptr, &target.sampledDepth), "create sampled world depth");
         descriptor(target.color.view, false, target.colorSet);
         descriptor(target.sampledDepth, true, target.depthSet);
-        VkImageView views[]{target.color.view, target.depth.view, target.color.view, VK_NULL_HANDLE, VK_NULL_HANDLE};
+        VkImageView views[]{target.color.view, target.depth.view, target.color.view, VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE};
         if (temporal)
         {
             CreateAAImage(target.motion, VK_FORMAT_R16G16B16A16_SFLOAT, colorUsage, VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_ASPECT_COLOR_BIT);
@@ -395,7 +402,13 @@ bool VulkanContext::CreateAAResources(VkFormat format)
                           VK_IMAGE_ASPECT_COLOR_BIT);
             views[baseAttachments + 1] = target.water.view;
         }
-        framebuffer(_worldPass, views, baseAttachments + (_rtShadowTargets ? 1 : 0) + (_rtWaterTargets ? 1 : 0),
+        if (_rtaoTargets)
+        {
+            CreateAAImage(target.ambient, VK_FORMAT_R16G16B16A16_SFLOAT, colorUsage, _worldSamples,
+                          VK_IMAGE_ASPECT_COLOR_BIT);
+            views[baseAttachments + 2] = target.ambient.view;
+        }
+        framebuffer(_worldPass, views, baseAttachments + (_rtShadowTargets ? 1 : 0) + (_rtWaterTargets ? 1 : 0) + (_rtaoTargets ? 1 : 0),
                     target.scene);
         framebuffer(_ssaoPass, &target.color.view, 1, target.ao);
         if ((_renderScale != 100 || _bloomEnabled || _shaftsEnabled) && (_aaMode == AAMode::FXAA || _aaMode == AAMode::SMAA))
@@ -607,7 +620,7 @@ void VulkanContext::BeginAAWorld()
     if (IsFSR(_aaMode)) JitterFSR();
     _worldActive = _worldPassOpen = true;
     _commands = {};
-    VkClearValue clears[5]{};
+    VkClearValue clears[6]{};
     std::copy(_clearColor.begin(), _clearColor.end(), clears[0].color.float32);
     clears[1].depthStencil.depth = 1;
     VkRenderPassBeginInfo pass{VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO};
@@ -619,6 +632,8 @@ void VulkanContext::BeginAAWorld()
                                                  : 2;
     pass.pClearValues = clears;
     if (_rtWaterTargets)
+        ++pass.clearValueCount;
+    if (_rtaoTargets)
         ++pass.clearValueCount;
     vkCmdBeginRenderPass(command, &pass, VK_SUBPASS_CONTENTS_INLINE);
 }
@@ -785,7 +800,7 @@ void VulkanContext::DestroyAAResources() noexcept
         if (target.sampledDepth)
             vkDestroyImageView(_device, target.sampledDepth, nullptr);
         for (auto* image : {&target.color, &target.depth, &target.multisample, &target.edges, &target.weights,
-                            &target.filtered, &target.motion, &target.sunlight, &target.water})
+                            &target.filtered, &target.motion, &target.sunlight, &target.water, &target.ambient})
         {
             if (image->view)
                 vkDestroyImageView(_device, image->view, nullptr);

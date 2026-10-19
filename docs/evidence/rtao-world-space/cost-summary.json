@@ -1,0 +1,98 @@
+[
+  {
+    "island": "malden",
+    "output_height": 1080,
+    "aa": "taa",
+    "off": 1.8129499999999998,
+    "ssao": 2.1557,
+    "previous_rtao": 2.21205,
+    "improved_rtao": 2.2414,
+    "trace": 0.1531,
+    "filter": 0.1481,
+    "increment_vs_off": 0.4284500000000002
+  },
+  {
+    "island": "malden",
+    "output_height": 1080,
+    "aa": "fsr-quality",
+    "off": 2.09255,
+    "ssao": 2.1186,
+    "previous_rtao": 2.17975,
+    "improved_rtao": 2.19085,
+    "trace": 0.0881,
+    "filter": 0.08205000000000001,
+    "increment_vs_off": 0.09830000000000005
+  },
+  {
+    "island": "malden",
+    "output_height": 1440,
+    "aa": "taa",
+    "off": 2.2714499999999997,
+    "ssao": 2.45745,
+    "previous_rtao": 2.82815,
+    "improved_rtao": 3.0308,
+    "trace": 0.213,
+    "filter": 0.2113,
+    "increment_vs_off": 0.7593500000000004
+  },
+  {
+    "island": "malden",
+    "output_height": 1440,
+    "aa": "fsr-quality",
+    "off": 2.2268499999999998,
+    "ssao": 2.3029,
+    "previous_rtao": 2.4675000000000002,
+    "improved_rtao": 2.5938,
+    "trace": 0.1004,
+    "filter": 0.0942,
+    "increment_vs_off": 0.3669500000000001
+  },
+  {
+    "island": "everon",
+    "output_height": 1080,
+    "aa": "taa",
+    "off": 2.0387500000000003,
+    "ssao": 2.11505,
+    "previous_rtao": 2.0965,
+    "improved_rtao": 2.1688,
+    "trace": 0.2017,
+    "filter": 0.1977,
+    "increment_vs_off": 0.13004999999999978
+  },
+  {
+    "island": "everon",
+    "output_height": 1080,
+    "aa": "fsr-quality",
+    "off": 2.02015,
+    "ssao": 2.0938499999999998,
+    "previous_rtao": 2.11325,
+    "improved_rtao": 2.1095499999999996,
+    "trace": 0.1055,
+    "filter": 0.0993,
+    "increment_vs_off": 0.08939999999999948
+  },
+  {
+    "island": "everon",
+    "output_height": 1440,
+    "aa": "taa",
+    "off": 2.12115,
+    "ssao": 2.1971,
+    "previous_rtao": 2.2861000000000002,
+    "improved_rtao": 2.57105,
+    "trace": 0.2304,
+    "filter": 0.2324,
+    "increment_vs_off": 0.44989999999999997
+  },
+  {
+    "island": "everon",
+    "output_height": 1440,
+    "aa": "fsr-quality",
+    "off": 2.1234,
+    "ssao": 2.1745,
+    "previous_rtao": 2.2037,
+    "improved_rtao": 2.29575,
+    "trace": 0.1082,
+    "filter": 0.1033,
+    "increment_vs_off": 0.17234999999999978
+  }
+]

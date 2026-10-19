@@ -1,0 +1,82 @@
+[
+  {
+    "island": "malden",
+    "scene": "house",
+    "roi": [
+      20,
+      400,
+      620,
+      650
+    ],
+    "max_difference": 0,
+    "mean_rgb": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "island": "malden",
+    "scene": "offscreen",
+    "roi": [
+      1100,
+      400,
+      1900,
+      1050
+    ],
+    "max_difference": 0,
+    "mean_rgb": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "island": "malden",
+    "scene": "wall",
+    "roi": [
+      1250,
+      450,
+      1500,
+      850
+    ],
+    "max_difference": 0,
+    "mean_rgb": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "island": "everon",
+    "scene": "barn",
+    "roi": [
+      1350,
+      350,
+      1650,
+      750
+    ],
+    "max_difference": 0,
+    "mean_rgb": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "island": "everon",
+    "scene": "brick",
+    "roi": [
+      1200,
+      450,
+      1550,
+      750
+    ],
+    "max_difference": 0,
+    "mean_rgb": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  }
+]

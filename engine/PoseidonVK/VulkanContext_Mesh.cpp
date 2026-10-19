@@ -8,8 +8,11 @@
 #include <PoseidonVK/Shaders/shape_sun.frag.hpp>
 #include <PoseidonVK/Shaders/shape_water.frag.hpp>
 #include <PoseidonVK/Shaders/shape_water_temporal.frag.hpp>
+#include <PoseidonVK/Shaders/shape_ao.frag.hpp>
+#include <PoseidonVK/Shaders/shape_ao_temporal.frag.hpp>
 #include <PoseidonVK/Shaders/shape_sun_temporal.frag.hpp>
 #include <PoseidonVK/Shaders/shadow_sun.frag.hpp>
+#include <PoseidonVK/Shaders/shadow_ao.frag.hpp>
 #include <PoseidonVK/Shaders/shape_temporal.frag.hpp>
 #include <PoseidonVK/Shaders/screen.vert.hpp>
 #include <PoseidonVK/Shaders/shadow.frag.hpp>
@@ -205,6 +208,16 @@ void VulkanContext::CreateShapePipeline(bool translucent, bool screen, bool dept
             shader.pCode = TemporalEnabled() ? Cwrshape_water_temporal_frag : Cwrshape_water_frag;
             shader.codeSize = TemporalEnabled() ? sizeof(Cwrshape_water_temporal_frag) : sizeof(Cwrshape_water_frag);
         }
+        if (_worldActive && _rtaoTargets && !shadow)
+        {
+            shader.pCode = TemporalEnabled() ? Cwrshape_ao_temporal_frag : Cwrshape_ao_frag;
+            shader.codeSize = TemporalEnabled() ? sizeof(Cwrshape_ao_temporal_frag) : sizeof(Cwrshape_ao_frag);
+        }
+        if (_worldActive && _rtaoTargets && shadow)
+        {
+            shader.pCode = Cwrshadow_ao_frag;
+            shader.codeSize = sizeof(Cwrshadow_ao_frag);
+        }
         Require(vkCreateShaderModule(_device, &shader, nullptr, &fragment), "create fragment shader");
         VkPipelineShaderStageCreateInfo stages[2]{};
         stages[0].sType = stages[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -227,11 +240,12 @@ void VulkanContext::CreateShapePipeline(bool translucent, bool screen, bool dept
             {4, 0, VK_FORMAT_R32G32B32A32_SFLOAT, 11 * sizeof(float)},
             {5, 0, VK_FORMAT_R32G32B32A32_SFLOAT, 15 * sizeof(float)},
             {6, 0, VK_FORMAT_R32G32B32_SFLOAT, 19 * sizeof(float)},
-            {7, 0, VK_FORMAT_R32G32B32_SFLOAT, 22 * sizeof(float)}};
+            {7, 0, VK_FORMAT_R32G32B32_SFLOAT, 22 * sizeof(float)},
+            {8, 0, VK_FORMAT_R32G32B32A32_SFLOAT, 25 * sizeof(float)}};
         VkPipelineVertexInputStateCreateInfo input{VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO};
         input.vertexBindingDescriptionCount = 1;
         input.pVertexBindingDescriptions = screen ? &screenBinding : &binding;
-        input.vertexAttributeDescriptionCount = screen ? 8 : 3;
+        input.vertexAttributeDescriptionCount = screen ? 9 : 3;
         input.pVertexAttributeDescriptions = screen ? screenAttributes : attributes;
         VkPipelineInputAssemblyStateCreateInfo assembly{VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO};
         assembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
@@ -273,7 +287,7 @@ void VulkanContext::CreateShapePipeline(bool translucent, bool screen, bool dept
         VkPipelineColorBlendStateCreateInfo blend{VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO};
         blend.attachmentCount = 1;
         blend.pAttachments = &attachment;
-        VkPipelineColorBlendAttachmentState temporalAttachments[]{attachment, {}, {}, {}};
+        VkPipelineColorBlendAttachmentState temporalAttachments[]{attachment, {}, {}, {}, {}};
         if (TemporalEnabled())
         {
             // Projected shadows only modulate color; keep the receiving surface's motion.
@@ -307,8 +321,15 @@ void VulkanContext::CreateShapePipeline(bool translucent, bool screen, bool dept
             if (shadow)
                 temporalAttachments[2] = attachment;
             temporalAttachments[2].colorWriteMask = shadow ? 7 : 15;
-            blend.attachmentCount = _rtWaterTargets ? 4 : 3;
+            blend.attachmentCount = _rtaoTargets ? 5 : _rtWaterTargets ? 4 : 3;
             blend.pAttachments = temporalAttachments;
+        }
+        if (_worldActive && _rtaoTargets)
+        {
+            // Unsupported/translucent draws invalidate ambient coverage. Legacy
+            // projected shadows modulate its RGB exactly as they modulate color.
+            if (shadow) temporalAttachments[4] = attachment;
+            temporalAttachments[4].colorWriteMask = shadow ? 7 : 15;
         }
         const VkDynamicState states[] = {VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR};
         VkPipelineDynamicStateCreateInfo dynamic{VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO};
@@ -406,6 +427,8 @@ void VulkanContext::DrawMesh(const std::shared_ptr<MeshBuffers>& mesh, uint32_t 
     if (lighting)
     {
         auto receiver = *lighting;
+        if (!RTAOEnabled() || !_worldActive || shadow || blend || !depthTest || !depthWrite)
+            receiver.aoReceiver[0] = 0;
         if (!RTGIEnabled() || !_worldActive || shadow || blend || !depthTest || !depthWrite || alphaCutoff > 0)
             receiver.rtWater[3] = 0;
         if (!_worldActive || (!_rtWaterTargets && receiver.rainRipples[0] <= 0) || shadow || !depthTest)

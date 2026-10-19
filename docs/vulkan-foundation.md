@@ -1,5 +1,15 @@
 # Vulkan backend development
 
+## RTAO world-space coverage (2026-10-19)
+
+The [RTAO coverage and lighting record](rtao-world-space.md) supersedes the original
+AO terrain-mask/composition limitations documented below. RTAO now reuses bounded
+terrain patches as occluders and subtracts only captured ambient lighting, with
+4 m rays at the existing strength/sample count. Stock Malden/Everon four-way
+comparisons, validation receipts, costs and remaining exclusions are linked there.
+It remains developer-only and default Off; SSAO remains independently available.
+RTGI remains parked and unchanged.
+
 ## Final player graphics controls (2026-10-19)
 
 The unified [Video Settings](video-settings.md#vulkan-water-and-lighting) now adds
@@ -3982,8 +3992,9 @@ tests do not constitute hardware qualification on non-RTX devices.
 
 ## First hardware ray-query ambient occlusion (2026-10-11)
 
-The following records the original AO milestone. Its AO geometry mask remains
-unchanged; the sunlight section above describes the later shared-scene extension.
+The following records the original AO milestone. The current terrain mask and
+ambient-only composition are documented in the RTAO coverage record above;
+the sunlight section describes the earlier shared-scene extension.
 
 Based on public `main` **2bd25ff**. RTAO defaults **Off**. With Vulkan
 device capabilities now detected automatically at process startup, use:

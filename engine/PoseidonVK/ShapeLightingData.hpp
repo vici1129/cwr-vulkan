@@ -37,5 +37,6 @@ struct alignas(16) ShapeLighting
     std::array<float, 4> localShadowControl{}; // rendered slot mask, resolution, per-slot effective ranges
     std::array<float, 4> pbr{}; // perceptual roughness (0=legacy), dielectric F0, reserved
     std::array<float, 4> pbrDiffuse{}; // authored material mode, used for conservative eligibility
+    std::array<float, 4> aoReceiver{}; // RTAO ambient capture eligibility, independent of GI/water
 };
 } // namespace Poseidon::vk

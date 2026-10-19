@@ -105,6 +105,7 @@ class EngineVK final : public Engine
     RString SetContactShadows(RString mode) override { return _vk.SetContactShadows(static_cast<const char*>(mode)).c_str(); }
     RString SetSoftShadows(RString mode) override { return _vk.SetSoftShadows(static_cast<const char*>(mode)).c_str(); }
     bool SeparateSunlight() const override { return _vk.SeparateSunlight() || _vk.WetRain() > 0; }
+    bool SeparateAmbient() const override { return _vk.RTAOEnabled(); }
     RString SetLocalShadows(RString mode) override;
     int PrepareLocalShadows() override;
     Light* LocalShadowLight(int slot) const override;

@@ -362,7 +362,7 @@ class VulkanContext
     void DestroyWeather() noexcept;
     struct RTAOState;
     std::shared_ptr<RTAOState> _rtao;
-    bool _rtShadowsEnabled = false, _rtShadowTargets = false;
+    bool _rtShadowsEnabled = false, _rtShadowTargets = false, _rtaoTargets = false;
     bool _softRTShadowsEnabled = false;
     bool _contactRequested = false, _contactEnabled = false, _contactDrew = false;
     bool _softShadowsEnabled = false;
@@ -565,7 +565,7 @@ class VulkanContext
     };
     struct AATarget
     {
-        DepthAttachment color, depth, multisample, edges, weights, filtered, motion, sunlight, water;
+        DepthAttachment color, depth, multisample, edges, weights, filtered, motion, sunlight, water, ambient;
         VkDescriptorSet motionSet = VK_NULL_HANDLE;
         VkImageView sampledDepth = VK_NULL_HANDLE;
         VkDescriptorSet colorSet = VK_NULL_HANDLE, depthSet = VK_NULL_HANDLE;

@@ -692,7 +692,8 @@ std::string VulkanContext::SetRTAO(std::string_view mode)
             out << " BLAS=0 TLAS=0 instances=0 completedPasses=0 rayQueriesExecuted=no";
         out << "; shared static LOD0 scene radius=" << (RTShadowsEnabled() || RTHitDataEnabled() ? 160 : 80)
             << "m; dynamic=" << (_rtDynamicEnabled ? "on" : "off")
-            << "; AO mask excludes terrain/foliage; static collection excludes animation/damage; blended "
+            << "; AO radius=4m includes bounded terrain, excludes foliage cards; ambient-only composition; "
+               "static collection excludes animation/damage; blended "
                "effects/proxies excluded";
         return out.str();
     }
@@ -700,6 +701,16 @@ std::string VulkanContext::SetRTAO(std::string_view mode)
         return "INVALID: triRTAO on, off, status";
     if (mode == "on" && !_rtaoAvailable)
         return "UNSUPPORTED: " + _rtaoReason;
+    if (mode == "on")
+    {
+        VkPhysicalDeviceFeatures features{};
+        VkPhysicalDeviceProperties properties{};
+        vkGetPhysicalDeviceFeatures(_physical, &features);
+        vkGetPhysicalDeviceProperties(_physical, &properties);
+        if (!features.independentBlend || properties.limits.maxColorAttachments < 5)
+            return "UNSUPPORTED: RTAO ambient capture requires independent blending and five color attachments";
+    }
+    if (_rtaoEnabled != (mode == "on")) _recreate = true;
     _rtaoEnabled = mode == "on";
     ResetTemporalHistory();
     if (!_rtaoEnabled && _rtao)
@@ -994,15 +1005,10 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection, bool& ssaoH
             samples.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
             VkPipelineColorBlendAttachmentState output{};
             output.blendEnable = VK_TRUE;
-            output.srcColorBlendFactor = VK_BLEND_FACTOR_ZERO;
-            output.dstColorBlendFactor = VK_BLEND_FACTOR_SRC_COLOR;
-            output.colorBlendOp = output.alphaBlendOp = VK_BLEND_OP_ADD;
-            if (i >= 2)
-            {
-                output.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
-                output.dstColorBlendFactor = VK_BLEND_FACTOR_ONE;
-                output.colorBlendOp = VK_BLEND_OP_REVERSE_SUBTRACT;
-            }
+            output.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
+            output.dstColorBlendFactor = VK_BLEND_FACTOR_ONE;
+            output.colorBlendOp = VK_BLEND_OP_REVERSE_SUBTRACT;
+            output.alphaBlendOp = VK_BLEND_OP_ADD;
             output.srcAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
             if (i >= 4)
             {
@@ -1395,7 +1401,8 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection, bool& ssaoH
             {VK_NULL_HANDLE, target.view, VK_IMAGE_LAYOUT_GENERAL},
             {_aaSampler, target.view, VK_IMAGE_LAYOUT_GENERAL}};
         VkDescriptorImageInfo direct{
-            _aaSampler, _rtShadowTargets ? _aaTargets[_image].sunlight.view : _aaTargets[_image].color.view,
+            _aaSampler, effect == 0 ? _aaTargets[_image].ambient.view :
+                _rtShadowTargets ? _aaTargets[_image].sunlight.view : _aaTargets[_image].color.view,
             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
         VkDescriptorImageInfo water{_aaSampler,
                                     _rtWaterTargets ? _aaTargets[_image].water.view : _aaTargets[_image].color.view,
@@ -1492,6 +1499,10 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection, bool& ssaoH
         push.camera = rt.camera;
         push.projection = projection;
         push.sun = _rtSun;
+        // Reach ground from standing-height wall/vehicle receivers and retain
+        // nearby structures beyond SSAO's short contact neighborhood. Strength,
+        // surface bias, ray count and the 60m receiver bound remain unchanged.
+        if (effect == 0) push.settings[0] = 4.f;
         if (effect)
             push.settings[3] = 50.f;
         if (effect == 3)

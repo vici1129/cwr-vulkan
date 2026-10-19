@@ -1,0 +1,50 @@
+[
+  {
+    "aa": "taa",
+    "before": {
+      "result": "[4903,7090,-0.00137329]",
+      "ok": true
+    },
+    "after": {
+      "result": "[4904.76,7089.53,-0.00135803]",
+      "ok": true
+    },
+    "run": "rtao-final-everon-1080"
+  },
+  {
+    "aa": "fsr-quality",
+    "before": {
+      "result": "[4903,7090,-0.00135803]",
+      "ok": true
+    },
+    "after": {
+      "result": "[4904.67,7089.22,-0.00135803]",
+      "ok": true
+    },
+    "run": "rtao-final-everon-1080"
+  },
+  {
+    "aa": "taa",
+    "before": {
+      "result": "[7215,7708,-0.00175476]",
+      "ok": true
+    },
+    "after": {
+      "result": "[7216.15,7706.56,-0.00172424]",
+      "ok": true
+    },
+    "run": "rtao-final-malden-1080"
+  },
+  {
+    "aa": "fsr-quality",
+    "before": {
+      "result": "[7215,7708,-0.00167847]",
+      "ok": true
+    },
+    "after": {
+      "result": "[7215.79,7706.32,-0.00166321]",
+      "ok": true
+    },
+    "run": "rtao-final-malden-1080"
+  }
+]

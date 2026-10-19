@@ -1,0 +1,284 @@
+[
+  {
+    "run": "rtao-final-everon-1080",
+    "before": "barn-off-off.png",
+    "after": "barn-off-off-restored.png",
+    "roi": [
+      1,
+      32,
+      1921,
+      800
+    ],
+    "bounds": null,
+    "max_difference": 0,
+    "mean_rgb": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "run": "rtao-final-everon-1080",
+    "before": "brick-off-off.png",
+    "after": "brick-off-off-restored.png",
+    "roi": [
+      1,
+      32,
+      1921,
+      800
+    ],
+    "bounds": null,
+    "max_difference": 0,
+    "mean_rgb": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "run": "rtao-final-everon-1080",
+    "before": "yard-off-off.png",
+    "after": "yard-off-off-restored.png",
+    "roi": [
+      1,
+      32,
+      1921,
+      800
+    ],
+    "bounds": null,
+    "max_difference": 0,
+    "mean_rgb": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "run": "rtao-final-everon-1080",
+    "before": "ssao-preference-before.png",
+    "after": "ssao-preference-restored.png",
+    "full_frame_max_difference": 0,
+    "full_frame_bounds": null,
+    "roi": [
+      1,
+      32,
+      1921,
+      800
+    ],
+    "max_difference": 0,
+    "mean_rgb": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "run": "rtao-final-malden-1080",
+    "before": "house-off-off.png",
+    "after": "house-off-off-restored.png",
+    "roi": [
+      1,
+      32,
+      1921,
+      800
+    ],
+    "bounds": null,
+    "max_difference": 0,
+    "mean_rgb": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "run": "rtao-final-malden-1080",
+    "before": "offscreen-off-off.png",
+    "after": "offscreen-off-off-restored.png",
+    "roi": [
+      1,
+      32,
+      1921,
+      800
+    ],
+    "bounds": null,
+    "max_difference": 0,
+    "mean_rgb": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "run": "rtao-final-malden-1080",
+    "before": "offscreen-weather0-off-off.png",
+    "after": "offscreen-weather0-off-off-restored.png",
+    "roi": [
+      1,
+      32,
+      1921,
+      800
+    ],
+    "bounds": null,
+    "max_difference": 0,
+    "mean_rgb": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "run": "rtao-final-malden-1080",
+    "before": "offscreen-weather1-off-off.png",
+    "after": "offscreen-weather1-off-off-restored.png",
+    "roi": [
+      1,
+      32,
+      1921,
+      800
+    ],
+    "bounds": null,
+    "max_difference": 0,
+    "mean_rgb": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "run": "rtao-final-malden-1080",
+    "before": "rock-off-off.png",
+    "after": "rock-off-off-restored.png",
+    "roi": [
+      1,
+      32,
+      1921,
+      800
+    ],
+    "bounds": null,
+    "max_difference": 0,
+    "mean_rgb": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "run": "rtao-final-malden-1080",
+    "before": "vehicle-weather0-off-off.png",
+    "after": "vehicle-weather0-off-off-restored.png",
+    "roi": [
+      1,
+      32,
+      1921,
+      800
+    ],
+    "bounds": [
+      0,
+      137,
+      1895,
+      493
+    ],
+    "max_difference": 222,
+    "mean_rgb": [
+      0.3968268500434028,
+      0.4243109809027778,
+      0.35517578125
+    ]
+  },
+  {
+    "run": "rtao-final-malden-1080",
+    "before": "vehicle-weather1-off-off.png",
+    "after": "vehicle-weather1-off-off-restored.png",
+    "roi": [
+      1,
+      32,
+      1921,
+      800
+    ],
+    "bounds": null,
+    "max_difference": 0,
+    "mean_rgb": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "run": "rtao-final-malden-1080",
+    "before": "wall-fixed-off-off.png",
+    "after": "wall-fixed-off-off-restored.png",
+    "roi": [
+      1,
+      32,
+      1921,
+      800
+    ],
+    "bounds": null,
+    "max_difference": 0,
+    "mean_rgb": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "run": "rtao-final-malden-1080",
+    "before": "wall-off-off.png",
+    "after": "wall-off-off-restored.png",
+    "roi": [
+      1,
+      32,
+      1921,
+      800
+    ],
+    "bounds": null,
+    "max_difference": 0,
+    "mean_rgb": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "run": "rtao-final-malden-perf1080",
+    "before": "vehicle-fixed-off-off.png",
+    "after": "vehicle-fixed-off-off-restored.png",
+    "roi": [
+      1,
+      32,
+      1921,
+      800
+    ],
+    "bounds": null,
+    "max_difference": 0,
+    "mean_rgb": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "run": "rtao-final-malden-perf1080",
+    "before": "ssao-preference-before.png",
+    "after": "ssao-preference-restored.png",
+    "full_frame_max_difference": 134,
+    "full_frame_bounds": [
+      97,
+      873,
+      894,
+      895
+    ],
+    "roi": [
+      1,
+      32,
+      1921,
+      800
+    ],
+    "max_difference": 0,
+    "mean_rgb": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  }
+]

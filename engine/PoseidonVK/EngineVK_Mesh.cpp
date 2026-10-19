@@ -158,6 +158,11 @@ void EngineVK::PrepareTriangleTL(const MipInfo& mip, const render::LegacySpec& s
     _sectionAlphaCutoff = state.cutoff;
     _sectionDepthTest = state.depthTest;
     _sectionDepthWrite = state.depthWrite;
+    _lighting.aoReceiver[0] = _vk.RTAOEnabled() && _shadowWorld && !_waterSurface &&
+        !_sectionBlend && _sectionDepthTest && _sectionDepthWrite && _lighting.ambient[3] > 0 &&
+        _secondaryMode < 1.5f &&
+        !((_shapeFlags | render::MergeLegacy(spec)) &
+          (IsColored | IsLight | DisableSun | NoDropdown | IsShadow | IsAlphaFog)) ? 1.f : 0.f;
     // Spare water component marks diffuse receivers; it does not enable water.
     _lighting.rtWater[3] = _vk.RTGIEnabled() && _shadowWorld && !_waterSurface &&
         mip._texture && alpha == AlphaStats::Opaque && !_sectionBlend &&

@@ -1,0 +1,4 @@
+Filters: [vulkan-shape]
+Randomness seeded to: 3467937940
+===============================================================================
+All tests passed (680 assertions in 29 test cases)

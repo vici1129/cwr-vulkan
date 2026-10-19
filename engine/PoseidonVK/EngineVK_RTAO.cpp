@@ -284,7 +284,7 @@ void EngineVK::CollectRTAOScene()
     std::vector<vk::RTAOInstance> instances;
     std::set<const Object*> visited;
     const size_t sceneLimit = 1024 - (_vk.RTDynamicEnabled() ? DynamicObjects : 0);
-    const size_t objectLimit = shadows ? 800 : sceneLimit;
+    const size_t objectLimit = shadows ? 800 : _vk.RTAOEnabled() ? std::min(size_t(960), sceneLimit) : sceneLimit;
     for (int z = z0; z <= z1 && instances.size() < objectLimit; ++z)
         for (int x = x0; x <= x1 && instances.size() < objectLimit; ++x)
         {
@@ -388,7 +388,7 @@ void EngineVK::CollectRTAOScene()
         }
     // Actual subdivided terrain samples and the same 01--10 cell diagonal as
     // Landscape::SurfaceY. Only local patches; height changes invalidate a patch.
-    if (shadows)
+    if (shadows || _vk.RTAOEnabled())
     {
         const float grid = land->GetTerrainGrid();
         if (_rtLandscape != land || _rtTerrainGrid != grid)
@@ -475,7 +475,8 @@ void EngineVK::CollectRTAOScene()
                 vk::RTAOInstance instance;
                 instance.mesh = patch.mesh;
                 instance.index16 = false;
-                instance.mask = 2;
+                // Bit 2 is AO terrain; foliage's shadow-only bit remains separate.
+                instance.mask = 2 | (_vk.RTAOEnabled() ? 4 : 0);
                 instance.kind = 2;
                 instance.ranges = patch.ranges;
                 Matrix4 model(MIdentity);

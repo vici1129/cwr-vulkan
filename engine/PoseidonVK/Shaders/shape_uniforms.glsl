@@ -32,4 +32,5 @@ layout(set = 2, binding = 0, std140) uniform ShapeLighting {
     vec4 localShadowControl;
     vec4 pbr;
     vec4 pbrDiffuse;
+    vec4 aoReceiver;
 } lighting;

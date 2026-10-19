@@ -1,0 +1,4 @@
+Filters: [Graphics] ~[.fixture] ~[.fixture]
+Randomness seeded to: 1749025221
+===============================================================================
+All tests passed (42762 assertions in 384 test cases)

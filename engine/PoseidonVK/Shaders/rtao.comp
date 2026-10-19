@@ -25,6 +25,9 @@ layout(constant_id=0) const bool hitDiagnostics=false;
 shared uint surfaceEligible, surfaceVertex, surfaceFace, surfaceUnavailable, surfaceInvalid;
 #endif
 #include "ray_material.glsl"
+#if !defined(SUN_SHADOW) && !defined(WATER_REFLECTION)
+#include "rtao_ambient.glsl"
+#endif
 
 #ifdef WATER_REFLECTION
 #include "rtao_water.glsl"
@@ -39,6 +42,10 @@ vec4 traceAO(ivec2 pixel) {
 #endif
     float depth=depthAt(full);
     vec3 p=positionAt(full);
+#if !defined(SUN_SHADOW) && !defined(WATER_REFLECTION)
+    vec4 ambient=ambientAt(full);
+    if(ambient.w<=0 || max(max(ambient.r,ambient.g),ambient.b)<.00001) return vec4(1,p.z,0,0);
+#endif
     float cameraDistance=length(p);
     if(depth<=0 || depth>=.999999 || p.z<=0 || cameraDistance>=ao.settings.w)
 #ifdef SUN_SHADOW
@@ -137,7 +144,7 @@ vec4 traceAO(ivec2 pixel) {
         float phi=angle+float(i)*2.39996323;
         vec3 direction=tangent*cos(phi)*sqrt(u)+bitangent*sin(phi)*sqrt(u)+n*sqrt(1-u);
         rayQueryEXT query;
-        rayQueryInitializeEXT(query,scene,0,1,
+        rayQueryInitializeEXT(query,scene,0,5,
             world+n*ao.settings.y,.01,direction,ao.settings.x);
         while(rayQueryProceedEXT(query)) {
             if(rayQueryGetIntersectionTypeEXT(query,false)==gl_RayQueryCandidateIntersectionTriangleEXT && opaqueHit(query))

@@ -14,6 +14,7 @@ struct ScreenVertex
     float previousClip[4]{};
     float directSun[4]{};
     float directLocal[6]{};
+    float aoAmbient[4]{};
 };
 struct ScreenState
 {

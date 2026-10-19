@@ -434,6 +434,7 @@ class Engine : public IGraphicsEngine
     virtual bool DrawVolumetricClouds() { return false; }
     virtual RString SetSkyReflections(RString) { return "UNSUPPORTED: sky reflections require Vulkan RT water reflections"; }
     virtual bool SeparateSunlight() const { return false; }
+    virtual bool SeparateAmbient() const { return false; }
     virtual void NextFrame();                             // swap frames - get ready for next frame
     virtual bool InitDrawDone() { return true; }
     void Pause() override = 0;   // stop and prepare everything for GDI

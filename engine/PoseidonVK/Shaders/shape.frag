@@ -17,6 +17,10 @@ layout(location = 6) in vec4 directSun;
 layout(location = 7) in vec3 localDirect0;
 layout(location = 8) in vec3 localDirect1;
 layout(location = 9) in vec3 surfaceNormal;
+layout(location = 10) in vec4 aoAmbient;
+#ifdef RT_AO
+layout(location = 4) out vec4 outAmbient;
+#endif
 layout(set = 3, binding = 6) uniform sampler2DArray localDepth0;
 layout(set = 3, binding = 7) uniform sampler2DArray localDepth1;
 
@@ -66,6 +70,7 @@ vec3 nightResponse(vec3 color) {
     return toLinear(mix(vec3(luminance),perceptual,clamp(luminance+lighting.eyeCoef.a,0.0,1.0)));
 }
 void main() {
+    vec3 ambientContribution=vec3(0);
     vec3 waterNormal=vec3(0,1,0), originalWaterNormal=waterNormal;
     if(lighting.rtWater.x>.5) {
         vec3 geometric=normalize(cross(dFdx(shadowWorld),dFdy(shadowWorld)));
@@ -104,12 +109,22 @@ void main() {
         sun*=cloudSunlight(shadowWorld+weather.camera.xyz);
         outColor=vec4(base+sun*csm,texel.a*draw.color.a);
         contactBase=base;
+#ifdef RT_AO
+        ambientContribution=texel.rgb*legacyLightToLinear(draw.color.rgb)*
+            legacyLightToLinear(max(lighting.ambient.rgb-lighting.rtSun.yzw,vec3(0)))*(1-lighting.pbr.y);
+#endif
     } else {
     vec3 litColor = vertexColor.rgb;
     int localMask = int(lighting.localShadowControl.x);
     if ((localMask & 1) != 0) litColor -= localDirect0 * (1.0-localVisibility(0,localDepth0));
     if ((localMask & 2) != 0) litColor -= localDirect1 * (1.0-localVisibility(1,localDepth1));
     if (localMask != 0) litColor = max(litColor,vec3(0));
+#ifdef RT_AO
+    ambientContribution=texel.rgb*max(legacyLightToLinear(draw.color.rgb*litColor)-
+        legacyLightToLinear(draw.color.rgb*max(litColor-aoAmbient.rgb,vec3(0))),vec3(0));
+    if(draw.detailEnabled>.5 && draw.detailEnabled<1.5)
+        ambientContribution*=legacyLightToLinear(vec3(WORLD_TEXTURE(detailTexture,texCoord*32).a*2));
+#endif
     outColor = vec4(texel.rgb * legacyLightToLinear(draw.color.rgb * litColor),
                     texel.a * draw.color.a * vertexColor.a);
     // Match GL33 TGDetail's 32x UV and PSDetail's alpha modulation.
@@ -164,6 +179,9 @@ void main() {
     // Contact-only capture must not change legacy CSM shading where no ray
     // hits. Preserve its original scene result, including ambient and fog.
     contactBase = base*csm;
+#ifdef RT_AO
+    ambientContribution*=wetDiffuse*(separate?1:csm);
+#endif
     if(lighting.rtWater.x>.5 && lighting.rainRipples.x>0) {
         // Broad, bounded response on the existing lit water (also without RT).
         // Use only the change in normal: no new light, gloss lobe or Fresnel term.
@@ -178,8 +196,17 @@ void main() {
     }
     }
     // Keep the night-eye response in its calibrated perceptual domain.
+#ifdef RT_AO
+    vec3 ambientRemoved=nightResponse(max(outColor.rgb-ambientContribution,vec3(0)));
+#endif
     outColor.rgb = nightResponse(outColor.rgb);
     float visibility = clamp(fogVisibility, 0.0, 1.0);
+#ifdef RT_AO
+    // Subtract only the captured ambient difference. Direct/local/emissive light
+    // and in-scattered fog are never multiplied by the AO visibility.
+    outAmbient=lighting.aoReceiver.x>.5 && aoAmbient.a>.99 ?
+        vec4(max(outColor.rgb-ambientRemoved,vec3(0))*visibility,1.0/gl_FragCoord.w):vec4(0);
+#endif
 #ifdef RT_SUN
     // Alpha is existing CSM visibility. Later use min(CSM,RT), never CSM*RT.
     outSun = captureSun ? vec4(max(outColor.rgb-nightResponse(separate ? base : contactBase),vec3(0))*visibility/max(csm,.0001),csm) : vec4(0);

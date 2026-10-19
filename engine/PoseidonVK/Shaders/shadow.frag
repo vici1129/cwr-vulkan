@@ -6,6 +6,9 @@ layout(location = 0) out vec4 outColor;
 #ifdef RT_SUN
 layout(location = 2) out vec4 outSun;
 #endif
+#ifdef RT_AO
+layout(location = 4) out vec4 outAmbient;
+#endif
 layout(set = 0, binding = 0) uniform sampler2D diffuseTexture;
 layout(push_constant) uniform ShapeDraw { mat4 mvp; vec4 color; float alphaCutoff; } draw;
 void main() {
@@ -17,5 +20,8 @@ void main() {
     outColor = vec4(0.0, 0.0, 0.0, alpha);
 #ifdef RT_SUN
     outSun=outColor;
+#endif
+#ifdef RT_AO
+    outAmbient=outColor;
 #endif
 }
