@@ -276,8 +276,8 @@ void EngineVK::DrawSectionTL(const Shape& shape, int begin, int end)
                 GfxMatrix matrix{};
                 ConvertMatrix(matrix, _shapeModelWorld);
                 std::copy_n(&matrix._11, 16, _lighting.materialToWorld.begin());
-                _lighting.rtWater[3] = _vk.RTGIEnabled() ? 2.f : 0.f;
             }
+            vk::QualifyGIReceiver(_lighting, false);
         }
     if (_lighting.pbr[0] > 0) _vk.RecordPBRDraw();
     _vk.DrawMesh(buffer->Buffers(), range.begin, range.end - range.begin, sizeof(VertexIndex) == 2, _shapeMVP, color,

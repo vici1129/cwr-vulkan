@@ -21,8 +21,9 @@ void EngineVK::ApplyStockPBR(const TextureVK& texture, vk::ShapeLighting& lighti
     auto rgba = [](ColorVal c) { return std::array<float, 4>{c.R(), c.G(), c.B(), 0}; };
     lighting.materialAmbient = rgba(GScene->MainLight()->Ambient() * GetAccomodateEye());
     lighting.materialSun = rgba(GScene->MainLight()->Diffuse() * GetAccomodateEye());
-    // This is reflector material semantics only. The caller still requires a
-    // validated catalog receiver before reserving any legacy ambient for GI.
+    lighting.pbrDiffuse[3] = texture.IsDynamic() ? 0.f : float(vk::StockPBRMaterials[id - 64].receiverFamily);
+    // Identity alone never reserves ambient: the caller still requires opaque
+    // world geometry and the independently captured PBR lighting contract.
 }
 bool EngineVK::ApplyEnhancedMaterial(const Shape& shape, const TextureVK& texture, vk::ShapeLighting& lighting,
                                      std::shared_ptr<vk::TextureImage>& albedo,
@@ -124,6 +125,7 @@ bool EngineVK::ApplyEnhancedMaterial(const Shape& shape, const TextureVK& textur
     auto rgba = [](ColorVal c, bool map) { return std::array<float, 4>{c.R(), c.G(), c.B(), float(map)}; };
     lighting.materialAmbient = rgba(GScene->MainLight()->Ambient() * GetAccomodateEye(), maps.normal);
     lighting.materialSun = rgba(GScene->MainLight()->Diffuse() * GetAccomodateEye(), maps.roughness);
+    lighting.pbrDiffuse[3] = 1; // validated catalog; same receiver contract as stock PBR
     return true;
 }
 } // namespace Poseidon

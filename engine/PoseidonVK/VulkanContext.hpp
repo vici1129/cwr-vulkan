@@ -386,6 +386,7 @@ class VulkanContext
     uint32_t _rtTerrain = 0, _rtFoliage = 0;
     bool _rtaoRequested = false, _rtaoAvailable = false, _rtaoEnabled = false;
     bool _rtGIEnabled = false;
+    static constexpr float GIReceiverDistance = 45.f;
     unsigned _rtGIComponents = 3; // binary diagnostics: bit 0 sun bounce, bit 1 secondary sky
     std::string _rtGIFailure;
     bool _rtDynamicEnabled = false;

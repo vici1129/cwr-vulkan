@@ -217,6 +217,7 @@ struct VulkanContext::RTAOState
     std::array<uint32_t, 8> giSources{};
     std::array<uint32_t, 8> giSkyCounts{};
     std::array<float, 32> giSkyIrradiance{};
+    std::array<uint32_t, 16> giReceiverFamilies{};
     std::array<uint32_t, 4> giHistoryCounts{};
     uint64_t giFrames = 0;
     bool giDispatched = false, giCompleted = false, giTemporal = false;
@@ -272,6 +273,12 @@ std::string VulkanContext::SetRTGI(std::string_view mode)
             const auto sky=RTGIEnabled() && rt.giDispatched && rt.giCompleted ? rt.giSkyCounts : std::array<uint32_t,8>{};
             out << " secondarySky(rays/blocked/visible/rejectedHemisphere)=" << sky[0] << '/' << sky[1] << '/' << sky[2] << '/' << sky[3]
                 << " primarySky(rays/blocked/visible/belowHorizon)=" << sky[4] << '/' << sky[5] << '/' << sky[6] << '/' << sky[7];
+            if (RTGIEnabled() && rt.giCompleted) {
+                out << " receiverPixels(native/CPU)=";
+                constexpr const char* families[]{"catalog","rock","roof","wood","facade","stone","concrete"};
+                for (int i=1;i<=7;++i)
+                    out << families[i-1] << ':' << rt.giReceiverFamilies[i] << '/' << rt.giReceiverFamilies[i+8] << ',';
+            }
             if(RTGIEnabled() && rt.giCompleted) {
                 const auto& e=rt.giSkyIrradiance;
                 out << " skyEpi(dome/weather/vertical/reference)=";
@@ -821,6 +828,7 @@ void VulkanContext::RetireRTAO()
         std::copy_n(counts + 32, 8, rt.giSources.begin());
         std::copy_n(counts + 40, 8, rt.giSkyCounts.begin());
         std::memcpy(rt.giSkyIrradiance.data(),counts+48,sizeof(rt.giSkyIrradiance));
+        std::copy_n(counts+80,16,rt.giReceiverFamilies.begin());
         rt.giCompleted = slot.giDispatched;
         rt.giTemporal = slot.giTemporal;
         std::copy_n(counts + 28, 4, rt.giHistoryCounts.begin());
@@ -1172,13 +1180,13 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection, bool& ssaoH
         return result;
     };
     if (!slot.counters)
-        slot.counters = buffer(320, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, true);
+        slot.counters = buffer(384, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, true);
     if (!slot.materials)
         slot.materials = buffer(1024 * sizeof(uint64_t), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, true);
     if (!slot.reflectionLight)
         slot.reflectionLight = buffer(sizeof(_reflectionLighting), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, true);
     UploadMappedBuffer(slot.reflectionLight->buffer, _reflectionLighting.data(), sizeof(_reflectionLighting));
-    std::memset(slot.counters->buffer.mapped, 0, 320);
+    std::memset(slot.counters->buffer.mapped, 0, 384);
     if (!slot.queries && _timestampBits && _profile.enabled)
     {
         VkQueryPoolCreateInfo info{VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO};
@@ -1557,7 +1565,7 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection, bool& ssaoH
             push.settings[3] = 50.f;
         if (effect == 3)
         {
-            push.settings = {25.f, .02f, float(_rtGIComponents), 45.f};
+            push.settings = {25.f, .02f, float(_rtGIComponents), GIReceiverDistance};
             rt.giPhase = _taaFrame % 32;
             push.jitter[2] = giTemporal ? float(1 + rt.giPhase) : 0.f;
             push.jitter[3] = giTemporal && rt.giHistoryValid ? 1.f : 0.f;

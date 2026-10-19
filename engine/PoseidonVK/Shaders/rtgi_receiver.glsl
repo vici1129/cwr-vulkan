@@ -13,6 +13,7 @@ vec4 giReceiver(ivec2 p) {
         float d=texelFetch(sceneDepth,p,i).r;
         if(d<=0 || d>=.999999 || !enhancedRecord(other) ||
            abs(s.r-other.r)>.5 || dot(materialDecodeNormal(s.g),materialDecodeNormal(other.g))<.995 ||
+           materialReceiverClass(s.g)!=materialReceiverClass(other.g) ||
            !rtSameDepth(-other.w,-s.w) || !rtSameDepth(viewZ(d),-s.w)) return vec4(0);
     }
     return vec4(materialReflectance(s)*s.b,s.w);

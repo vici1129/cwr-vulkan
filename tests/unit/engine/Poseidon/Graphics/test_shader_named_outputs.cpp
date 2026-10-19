@@ -380,9 +380,14 @@ TEST_CASE("Night-eye keeps raster ambient and ordinary AO instead of GI replacem
     REQUIRE(gate < mesh.find("if (!RTAOEnabled() || !_worldActive"));
     REQUIRE(gate < mesh.find("if (RTGIEnabled() && receiver.rtWater[3]>1.5f"));
     const auto shape = ReadTextFile(root / "Shaders/shape.frag");
-    REQUIRE(shape.find("if(lighting.rtWater.w>1.5 && outAmbient.a>0) outAmbient.a=-outAmbient.a;") != std::string::npos);
+    REQUIRE(shape.find("giReceiverReady=lighting.rtWater.w>1.5 && outAmbient.a>0 &&") != std::string::npos);
+    REQUIRE(shape.find("lighting.pbr.x>0 && lighting.pbr.w>.5 && dot(materialN,materialN)>.5") != std::string::npos);
+    REQUIRE(shape.find("length(shadowWorld)<lighting.aoReceiver.y;") != std::string::npos);
+    REQUIRE(mesh.find("receiver.aoReceiver[1] = GIReceiverDistance;") != std::string::npos);
+    REQUIRE(ReadTextFile(root / "VulkanContext_RTAO.cpp").find("float(_rtGIComponents), GIReceiverDistance}") != std::string::npos);
+    REQUIRE(shape.find("if(giReceiverReady) outAmbient.a=-outAmbient.a;") != std::string::npos);
     REQUIRE(std::regex_search(shape, std::regex(
-        R"(if\(lighting.rtWater.w>1.5\)\s*outWater=materialRecord)")));
+        R"(if\(giReceiverReady\)\s*outWater=materialRecord)")));
     // Without either negative-depth tag, RTAO remains eligible and SSAO does not
     // skip this draw. GI reconstruction rejects its empty material record.
     const auto ssao = ReadTextFile(root / "Shaders/ssao.frag");

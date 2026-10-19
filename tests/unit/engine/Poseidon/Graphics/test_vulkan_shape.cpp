@@ -19,6 +19,59 @@
 
 using namespace Poseidon;
 
+TEST_CASE("Stock GI receivers require qualified identity and independent opaque lighting gates",
+          "[Graphics][vulkan-shape][enhanced-material]")
+{
+    for (unsigned i=0;i<std::size(vk::StockPBRMaterials);++i)
+        for (bool software : {false,true})
+        {
+            vk::ShapeLighting l;
+            l.pbr={.9f,.04f,0,float(64+i)};
+            const auto family=vk::StockPBRMaterials[i].receiverFamily;
+            l.pbrDiffuse[3]=float(family);
+            // No opaque-world prerequisite: identity alone cannot reserve ambient.
+            vk::QualifyGIReceiver(l,software);
+            REQUIRE(l.rtWater[3]==0);
+            l.rtWater[3]=1;
+            vk::QualifyGIReceiver(l,software);
+            REQUIRE(l.rtWater[3]==(family?2.f:1.f));
+            REQUIRE(l.pbrDiffuse[3]==float(family+(family && software?8:0)));
+            l.rtWater[3]=1;l.pbr[0]=0;
+            vk::QualifyGIReceiver(l,software);
+            REQUIRE(l.rtWater[3]==1);
+        }
+    for (float identity : {0.f,1.5f,63.f,87.f,1000.f,-1.f,std::numeric_limits<float>::quiet_NaN()})
+    {
+        vk::ShapeLighting l;l.rtWater[3]=1;l.pbr={.9f,.04f,0,identity};l.pbrDiffuse[3]=1;
+        vk::QualifyGIReceiver(l,true);
+        REQUIRE(l.rtWater[3]==1); // unknown identities and terrain remain legacy
+    }
+    for (const auto* material : vk::EnhancedCatalog)
+    {
+        vk::ShapeLighting l;l.rtWater[3]=1;l.pbr={.9f,.04f,0,float(material->id)};l.pbrDiffuse[3]=1;
+        vk::QualifyGIReceiver(l,false);REQUIRE(l.rtWater[3]==2);
+    }
+}
+
+namespace ReceiverRecordMath {
+#define CWR_MATERIAL_CLASS_ONLY
+#include <PoseidonVK/Shaders/material_record.glsl>
+#undef CWR_MATERIAL_CLASS_ONLY
+#undef CWR_MATERIAL_RECORD
+}
+TEST_CASE("GI family records preserve every original normal bit in exact float integers",
+          "[Graphics][vulkan-shape][enhanced-material]")
+{
+    for(int family=1;family<=15;++family)
+        for(unsigned normal : {0u,1u,511u,1023u,524287u,1048575u})
+        {
+            const float code=ReceiverRecordMath::materialReceiverCode(float(normal),family);
+            REQUIRE(ReceiverRecordMath::materialReceiverClass(code)==family);
+            REQUIRE((unsigned(code)&1048575u)==normal);
+            REQUIRE(code<=16777215.f);
+        }
+}
+
 TEST_CASE("Ray diffuse metadata rejects unsupported lighting without changing sampler bits",
           "[Graphics][vulkan-shape][ray-surface]")
 {

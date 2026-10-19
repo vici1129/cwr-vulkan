@@ -435,7 +435,10 @@ void VulkanContext::DrawMesh(const std::shared_ptr<MeshBuffers>& mesh, uint32_t 
         if (!RTAOEnabled() || !_worldActive || shadow || blend || !depthTest || !depthWrite)
             receiver.aoReceiver[0] = 0;
         if (RTGIEnabled() && receiver.rtWater[3]>1.5f && _worldActive && !shadow && !blend && depthTest && depthWrite)
+        {
             receiver.aoReceiver[0] = 1;
+            receiver.aoReceiver[1] = GIReceiverDistance;
+        }
         if (!RTGIEnabled() || !_worldActive || shadow || blend || !depthTest || !depthWrite || alphaCutoff > 0)
             receiver.rtWater[3] = 0;
         if (!_worldActive || (!_rtWaterTargets && receiver.rainRipples[0] <= 0) || shadow || !depthTest)

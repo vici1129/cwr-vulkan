@@ -36,8 +36,8 @@ struct alignas(16) ShapeLighting
     std::array<float, 32> localShadowMatrices{};
     std::array<float, 4> localShadowControl{}; // rendered slot mask, resolution, per-slot effective ranges
     std::array<float, 4> pbr{}; // roughness (0=legacy), dielectric F0, metallic, enhanced identity (0=v3)
-    std::array<float, 4> pbrDiffuse{}; // authored material mode, used for conservative eligibility
-    std::array<float, 4> aoReceiver{}; // RTAO ambient capture eligibility, independent of GI/water
+    std::array<float, 4> pbrDiffuse{}; // RGB: authored mode; W: GI family, +8 for captured CPU-lit receiver
+    std::array<float, 4> aoReceiver{}; // X: ambient capture eligibility; Y: shared GI receiver distance
     std::array<float, 16> materialToWorld{}; // linear object transform for tangent-space normal mapping
     std::array<float, 4> materialAmbient{}, materialSun{}; // RGB: hit incident light; W: normal/roughness map present
 };

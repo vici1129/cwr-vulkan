@@ -72,6 +72,7 @@ vec3 nightResponse(vec3 color) {
     return toLinear(mix(vec3(luminance),perceptual,clamp(luminance+lighting.eyeCoef.a,0.0,1.0)));
 }
 void main() {
+    bool giReceiverReady=false;
     vec3 ambientContribution=vec3(0);
     vec3 waterNormal=vec3(0,1,0), originalWaterNormal=waterNormal;
     if(lighting.rtWater.x>.5) {
@@ -232,7 +233,10 @@ void main() {
             1.0/gl_FragCoord.w);
     // A negative depth reserves this independently captured ambient difference
     // for RTGI replacement. RTAO rejects it; direct/local/emission remain intact.
-    if(lighting.rtWater.w>1.5 && outAmbient.a>0) outAmbient.a=-outAmbient.a;
+    giReceiverReady=lighting.rtWater.w>1.5 && outAmbient.a>0 &&
+        lighting.pbr.x>0 && lighting.pbr.w>.5 && dot(materialN,materialN)>.5 &&
+        length(shadowWorld)<lighting.aoReceiver.y;
+    if(giReceiverReady) outAmbient.a=-outAmbient.a;
 #endif
 #ifdef RT_SUN
     // Alpha is existing CSM visibility. Later use min(CSM,RT), never CSM*RT.
@@ -259,9 +263,9 @@ void main() {
     // Negative view depth tags opaque diffuse GI receivers. RGB is bounded
     // base-texture reflectance times fog transmittance, never lit scene color.
     // Detail/baked lighting and material tint are intentionally not inferred.
-    if(lighting.rtWater.w>1.5)
+    if(giReceiverReady)
         outWater=materialRecord(materialDiffuse(texel.rgb*toLinear(draw.color.rgb),lighting.pbr.w,
-            lighting.pbr.y,lighting.pbr.z),materialN,visibility,1.0/gl_FragCoord.w);
+            lighting.pbr.y,lighting.pbr.z),materialN,visibility,1.0/gl_FragCoord.w,int(lighting.pbrDiffuse.w));
     // Foam-only rain marker: MIN writes only R; depth, fog and the other normal
     // component survive. Refraction and RT still reject these rain-covered pixels.
     if(draw.reserved<-.5) outWater.x=-2-outColor.a;

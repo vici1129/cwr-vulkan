@@ -1,0 +1,2550 @@
+{
+  "publicBase": "78e39d99a82215f2ea2206c69d43edfc9223466b",
+  "adapter": "NVIDIA GeForce RTX 4060 Ti",
+  "initialWorktree": "clean",
+  "route": "Existing muted original-mission harness, copied profiles, 1400m visibility, ordinary brightness; matched render-camera gameplay checks, not mission completion or player-input responsiveness.",
+  "receiverContract": "Exact existing stock/catalog identity plus opaque-world PBR/captured-lighting gate; both ambient and material records require the same valid fragment. Terrain/signpost/mixed atlas/unsupported modes retain fallback.",
+  "primarySamples": "Unchanged one sample per eligible half-resolution receiver; one surface bounce, 25m transport, 45m receivers, 80m visibility. No gain or sky/reflectance/composition changes.",
+  "scenes": {
+    "malden": {
+      "mission": "01TakeTheCar.ABEL",
+      "camera": [
+        5439,
+        50,
+        2811,
+        -1,
+        0.2,
+        0
+      ],
+      "dates": {
+        "morning": [
+          1985,
+          7,
+          5,
+          9,
+          0
+        ],
+        "noon": [
+          1985,
+          7,
+          5,
+          12,
+          0
+        ],
+        "overcast": [
+          1985,
+          7,
+          5,
+          12,
+          0
+        ],
+        "dusk": [
+          1985,
+          7,
+          5,
+          17,
+          30
+        ]
+      },
+      "weatherCommands": "triCheatWeather 0 except overcast 1; fog/rain zero; legacy clouds, cloud shadows on.",
+      "rawRuns": {
+        "before": "receiver-before-malden",
+        "1080": "receiver-final-malden-1080",
+        "1440": "receiver-final-malden-1440"
+      },
+      "baselineExecutableSHA256": "345AD3268023B348C4D4A41FA6D8F18FFA2DDE87CCDC85DCEA58334B64E93976",
+      "executableSHA256": "CFC13CDC8BA0186CDCF4F6F2F0E7428D1A59CDB1E728BFAAB3336656F1BE65E5",
+      "before": {
+        "counters": {
+          "bounceRays": 0,
+          "hits": 0,
+          "eligibleHits": 0,
+          "rejectedMaterials": 0,
+          "sunRays": 0,
+          "sunBlocked": 0,
+          "eligibleReceivers": 0,
+          "sunVisible": 0
+        },
+        "receiverFamilies": null,
+        "raw": "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=0 reflectorInstances=13 completedDispatches=1675 bounceRays=0 hits=0 eligibleHits=0 rejectedMaterials=0 sunRays=0 sunBlocked=0 eligibleReceivers=0 dynamicHits=0 sunVisible=0 terrain(eligible/sunlit)=0/0 stockPBR(eligible/sunlit)=0/0 catalog(eligible/sunlit)=0/0 backfacing=0 missingColor=0 secondarySky(rays/blocked/visible/rejectedHemisphere)=0/0/0/0 primarySky(rays/blocked/visible/belowHorizon)=0/0/0/0 skyEpi(dome/weather/vertical/reference)=[0.268212,0.461311,0.858996][0.344304,0.527703,0.903868][0.268072,0.366573,0.531562][0.748414,0.911408,1.28] skyCalibration=2.01209 transportMean(incoming/replacement/capturedAmbient/reflectanceFog)=[0,0,0][0,0,0][0,0,0][0,0,0] transportSamples=0 GPUms(trace/filter/temporal/BLAS/TLAS)=0.128/0.026144/0.02512/6.4e-05/6.4e-05 CPUrecordMs=0.1374 temporal=on history(accepted/rejected/clamped/dynamic)=0/0/0/0 historyResets=6 phase=13 historyBytes=9830400 historyAllocations=2; last completed frame; one bounce, half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain"
+      },
+      "weather": {
+        "morning": {
+          "counters": {
+            "bounceRays": 87168,
+            "hits": 12988,
+            "eligibleHits": 7728,
+            "rejectedMaterials": 5260,
+            "sunRays": 7728,
+            "sunBlocked": 258,
+            "eligibleReceivers": 87195,
+            "sunVisible": 7470
+          },
+          "receiverFamilies": {
+            "catalog": {
+              "native": 0,
+              "CPU": 0
+            },
+            "rock": {
+              "native": 0,
+              "CPU": 0
+            },
+            "roof": {
+              "native": 87116,
+              "CPU": 0
+            },
+            "wood": {
+              "native": 79,
+              "CPU": 0
+            },
+            "facade": {
+              "native": 0,
+              "CPU": 0
+            },
+            "stone": {
+              "native": 0,
+              "CPU": 0
+            },
+            "concrete": {
+              "native": 0,
+              "CPU": 0
+            }
+          },
+          "raw": "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=0 reflectorInstances=13 completedDispatches=959 bounceRays=87168 hits=12988 eligibleHits=7728 rejectedMaterials=5260 sunRays=7728 sunBlocked=258 eligibleReceivers=87195 dynamicHits=0 sunVisible=7470 terrain(eligible/sunlit)=456/229 stockPBR(eligible/sunlit)=7272/7241 catalog(eligible/sunlit)=0/0 backfacing=0 missingColor=5259 secondarySky(rays/blocked/visible/rejectedHemisphere)=6679/786/5893/1049 primarySky(rays/blocked/visible/belowHorizon)=69532/0/69532/4648 receiverPixels(native/CPU)=catalog:0/0,rock:0/0,roof:87116/0,wood:79/0,facade:0/0,stone:0/0,concrete:0/0, skyEpi(dome/weather/vertical/reference)=[0.268212,0.461311,0.858996][0.346792,0.528588,0.900166][0.268637,0.366156,0.528813][0.748414,0.911408,1.28] skyCalibration=2.01209 transportMean(incoming/replacement/capturedAmbient/reflectanceFog)=[0.764745,1.07903,1.68842][0.0999329,0.124225,0.171771][0.0980196,0.105325,0.129972][0.130989,0.115731,0.101555] transportSamples=174 GPUms(trace/filter/temporal/BLAS/TLAS)=0.259072/0.058592/0.052512/6.4e-05/6.4e-05 CPUrecordMs=0.1238 temporal=on history(accepted/rejected/clamped/dynamic)=86504/691/123/0 historyResets=3 phase=6 historyBytes=9830400 historyAllocations=4; last completed frame; one bounce, half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain"
+        },
+        "noon": {
+          "counters": {
+            "bounceRays": 87091,
+            "hits": 12928,
+            "eligibleHits": 7679,
+            "rejectedMaterials": 5249,
+            "sunRays": 7678,
+            "sunBlocked": 118,
+            "eligibleReceivers": 87121,
+            "sunVisible": 7560
+          },
+          "receiverFamilies": {
+            "catalog": {
+              "native": 0,
+              "CPU": 0
+            },
+            "rock": {
+              "native": 0,
+              "CPU": 0
+            },
+            "roof": {
+              "native": 87049,
+              "CPU": 0
+            },
+            "wood": {
+              "native": 72,
+              "CPU": 0
+            },
+            "facade": {
+              "native": 0,
+              "CPU": 0
+            },
+            "stone": {
+              "native": 0,
+              "CPU": 0
+            },
+            "concrete": {
+              "native": 0,
+              "CPU": 0
+            }
+          },
+          "raw": "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=0 reflectorInstances=13 completedDispatches=1381 bounceRays=87091 hits=12928 eligibleHits=7679 rejectedMaterials=5249 sunRays=7678 sunBlocked=118 eligibleReceivers=87121 dynamicHits=0 sunVisible=7560 terrain(eligible/sunlit)=420/304 stockPBR(eligible/sunlit)=7259/7256 catalog(eligible/sunlit)=0/0 backfacing=1 missingColor=5248 secondarySky(rays/blocked/visible/rejectedHemisphere)=6665/759/5906/1014 primarySky(rays/blocked/visible/belowHorizon)=69721/0/69721/4442 receiverPixels(native/CPU)=catalog:0/0,rock:0/0,roof:87049/0,wood:72/0,facade:0/0,stone:0/0,concrete:0/0, skyEpi(dome/weather/vertical/reference)=[0.262227,0.460884,0.864235][0.341394,0.528808,0.905952][0.235258,0.320169,0.48612][0.748414,0.911408,1.28] skyCalibration=2.01748 transportMean(incoming/replacement/capturedAmbient/reflectanceFog)=[0.626447,0.914441,1.48689][0.0804925,0.10378,0.149011][0.0985214,0.105768,0.130559][0.131724,0.116015,0.102051] transportSamples=173 GPUms(trace/filter/temporal/BLAS/TLAS)=0.259072/0.058368/0.052096/6.4e-05/6.4e-05 CPUrecordMs=0.1164 temporal=on history(accepted/rejected/clamped/dynamic)=86588/533/427/0 historyResets=5 phase=9 historyBytes=9830400 historyAllocations=6; last completed frame; one bounce, half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain"
+        },
+        "overcast": {
+          "counters": {
+            "bounceRays": 87118,
+            "hits": 12984,
+            "eligibleHits": 7778,
+            "rejectedMaterials": 5206,
+            "sunRays": 7778,
+            "sunBlocked": 130,
+            "eligibleReceivers": 87147,
+            "sunVisible": 7648
+          },
+          "receiverFamilies": {
+            "catalog": {
+              "native": 0,
+              "CPU": 0
+            },
+            "rock": {
+              "native": 0,
+              "CPU": 0
+            },
+            "roof": {
+              "native": 87076,
+              "CPU": 0
+            },
+            "wood": {
+              "native": 71,
+              "CPU": 0
+            },
+            "facade": {
+              "native": 0,
+              "CPU": 0
+            },
+            "stone": {
+              "native": 0,
+              "CPU": 0
+            },
+            "concrete": {
+              "native": 0,
+              "CPU": 0
+            }
+          },
+          "raw": "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=0 reflectorInstances=13 completedDispatches=1836 bounceRays=87118 hits=12984 eligibleHits=7778 rejectedMaterials=5206 sunRays=7778 sunBlocked=130 eligibleReceivers=87147 dynamicHits=0 sunVisible=7648 terrain(eligible/sunlit)=452/324 stockPBR(eligible/sunlit)=7326/7324 catalog(eligible/sunlit)=0/0 backfacing=0 missingColor=5206 secondarySky(rays/blocked/visible/rejectedHemisphere)=6708/785/5923/1070 primarySky(rays/blocked/visible/belowHorizon)=69626/0/69626/4508 receiverPixels(native/CPU)=catalog:0/0,rock:0/0,roof:87076/0,wood:71/0,facade:0/0,stone:0/0,concrete:0/0, skyEpi(dome/weather/vertical/reference)=[0.429139,0.420054,0.340269][0.456137,0.466295,0.456035][0.231646,0.239774,0.244891][0.748414,0.911408,1.28] skyCalibration=2.17038 transportMean(incoming/replacement/capturedAmbient/reflectanceFog)=[0.852801,0.885945,0.913533][0.108309,0.0999583,0.0916486][0.0980975,0.105447,0.130164][0.131057,0.115686,0.101848] transportSamples=174 GPUms(trace/filter/temporal/BLAS/TLAS)=0.262144/0.058048/0.052512/6.4e-05/6.4e-05 CPUrecordMs=0.1134 temporal=on history(accepted/rejected/clamped/dynamic)=86722/425/211/0 historyResets=7 phase=27 historyBytes=9830400 historyAllocations=8; last completed frame; one bounce, half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain"
+        },
+        "dusk": {
+          "counters": {
+            "bounceRays": 64493,
+            "hits": 10003,
+            "eligibleHits": 6619,
+            "rejectedMaterials": 3384,
+            "sunRays": 2321,
+            "sunBlocked": 1675,
+            "eligibleReceivers": 64506,
+            "sunVisible": 646
+          },
+          "receiverFamilies": {
+            "catalog": {
+              "native": 0,
+              "CPU": 0
+            },
+            "rock": {
+              "native": 0,
+              "CPU": 0
+            },
+            "roof": {
+              "native": 64506,
+              "CPU": 0
+            },
+            "wood": {
+              "native": 0,
+              "CPU": 0
+            },
+            "facade": {
+              "native": 0,
+              "CPU": 0
+            },
+            "stone": {
+              "native": 0,
+              "CPU": 0
+            },
+            "concrete": {
+              "native": 0,
+              "CPU": 0
+            }
+          },
+          "raw": "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=0 reflectorInstances=13 completedDispatches=2251 bounceRays=64493 hits=10003 eligibleHits=6619 rejectedMaterials=3384 sunRays=2321 sunBlocked=1675 eligibleReceivers=64506 dynamicHits=0 sunVisible=646 terrain(eligible/sunlit)=240/37 stockPBR(eligible/sunlit)=6379/609 catalog(eligible/sunlit)=0/0 backfacing=4298 missingColor=3384 secondarySky(rays/blocked/visible/rejectedHemisphere)=5716/618/5098/903 primarySky(rays/blocked/visible/belowHorizon)=51342/0/51342/3148 receiverPixels(native/CPU)=catalog:0/0,rock:0/0,roof:64506/0,wood:0/0,facade:0/0,stone:0/0,concrete:0/0, skyEpi(dome/weather/vertical/reference)=[0.221114,0.342987,0.619988][0.28399,0.391514,0.644481][0.188088,0.237109,0.347835][0.176345,0.212659,0.399316] skyCalibration=0.64797 transportMean(incoming/replacement/capturedAmbient/reflectanceFog)=[0.158516,0.218083,0.366848][0.0204102,0.0245803,0.0357041][0.0220715,0.023513,0.0386336][0.125125,0.110503,0.0969144] transportSamples=129 GPUms(trace/filter/temporal/BLAS/TLAS)=0.242688/0.048416/0.04496/6.4e-05/6.4e-05 CPUrecordMs=0.12 temporal=on history(accepted/rejected/clamped/dynamic)=64147/359/181/0 historyResets=9 phase=4 historyBytes=9830400 historyAllocations=10; last completed frame; one bounce, half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain"
+        }
+      },
+      "coveragePercentOfHalfResolutionGrid": 16.82002314814815,
+      "existingCatalogWall": {
+        "before": {
+          "counters": {
+            "bounceRays": 214715,
+            "hits": 155463,
+            "eligibleHits": 108233,
+            "rejectedMaterials": 47230,
+            "sunRays": 106497,
+            "sunBlocked": 41889,
+            "eligibleReceivers": 214867,
+            "sunVisible": 64608
+          },
+          "receiverFamilies": null,
+          "raw": "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=15 reflectorInstances=39 completedDispatches=2185 bounceRays=214715 hits=155463 eligibleHits=108233 rejectedMaterials=47230 sunRays=106497 sunBlocked=41889 eligibleReceivers=214867 dynamicHits=0 sunVisible=64608 terrain(eligible/sunlit)=64992/30693 stockPBR(eligible/sunlit)=579/451 catalog(eligible/sunlit)=42662/33464 backfacing=1736 missingColor=47193 secondarySky(rays/blocked/visible/rejectedHemisphere)=85972/51117/34855/22261 primarySky(rays/blocked/visible/belowHorizon)=58592/1391/57201/660 skyEpi(dome/weather/vertical/reference)=[0.268212,0.461311,0.858996][0.29169,0.481425,0.871462][0.224598,0.3203,0.493832][0.748414,0.911408,1.28] skyCalibration=2.01209 transportMean(incoming/replacement/capturedAmbient/reflectanceFog)=[0.394615,0.53675,0.800861][0.0397118,0.0489197,0.0741046][0.0718755,0.0791266,0.111842][0.096014,0.0868913,0.0873884] transportSamples=426 GPUms(trace/filter/temporal/BLAS/TLAS)=0.528384/0.108864/0.354432/6.4e-05/6.4e-05 CPUrecordMs=0.1171 temporal=on history(accepted/rejected/clamped/dynamic)=208436/6431/984/0 historyResets=7 phase=11 historyBytes=9830400 historyAllocations=2; last completed frame; one bounce, half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain"
+        },
+        "after": {
+          "counters": {
+            "bounceRays": 214917,
+            "hits": 155674,
+            "eligibleHits": 108586,
+            "rejectedMaterials": 47088,
+            "sunRays": 106801,
+            "sunBlocked": 42478,
+            "eligibleReceivers": 215051,
+            "sunVisible": 64323
+          },
+          "receiverFamilies": {
+            "catalog": {
+              "native": 0,
+              "CPU": 215051
+            },
+            "rock": {
+              "native": 0,
+              "CPU": 0
+            },
+            "roof": {
+              "native": 0,
+              "CPU": 0
+            },
+            "wood": {
+              "native": 0,
+              "CPU": 0
+            },
+            "facade": {
+              "native": 0,
+              "CPU": 0
+            },
+            "stone": {
+              "native": 0,
+              "CPU": 0
+            },
+            "concrete": {
+              "native": 0,
+              "CPU": 0
+            }
+          },
+          "raw": "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=15 reflectorInstances=39 completedDispatches=2788 bounceRays=214917 hits=155674 eligibleHits=108586 rejectedMaterials=47088 sunRays=106801 sunBlocked=42478 eligibleReceivers=215051 dynamicHits=0 sunVisible=64323 terrain(eligible/sunlit)=65673/30754 stockPBR(eligible/sunlit)=610/470 catalog(eligible/sunlit)=42303/33099 backfacing=1785 missingColor=47050 secondarySky(rays/blocked/visible/rejectedHemisphere)=86579/51804/34775/22007 primarySky(rays/blocked/visible/belowHorizon)=58619/1349/57270/624 receiverPixels(native/CPU)=catalog:0/215051,rock:0/0,roof:0/0,wood:0/0,facade:0/0,stone:0/0,concrete:0/0, skyEpi(dome/weather/vertical/reference)=[0.268212,0.461311,0.858996][0.505298,0.673557,1.01105][0.292275,0.380086,0.535568][0.748414,0.911408,1.28] skyCalibration=2.01209 transportMean(incoming/replacement/capturedAmbient/reflectanceFog)=[0.523902,0.666665,0.936083][0.0489296,0.0559008,0.0788356][0.0715192,0.078697,0.111207][0.0954948,0.086384,0.0867943] transportSamples=430 GPUms(trace/filter/temporal/BLAS/TLAS)=0.55808/0.108384/0.110016/6.4e-05/6.4e-05 CPUrecordMs=0.1262 temporal=on history(accepted/rejected/clamped/dynamic)=207037/8014/663/0 historyResets=12 phase=28 historyBytes=9830400 historyAllocations=12; last completed frame; one bounce, half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain"
+        }
+      },
+      "performance": {
+        "1080": {
+          "world": "1920x1080",
+          "AA": "TAA",
+          "order": "off/on/on/off",
+          "settleSeconds": 3,
+          "sampleSecondsPerInterval": 4,
+          "intervalMedianMeansMs": {
+            "off": {
+              "frame": 4.228775
+            },
+            "on": {
+              "frame": 4.784325,
+              "trace": 0.4127,
+              "filter": 0.116425,
+              "temporal": 0.099125
+            }
+          },
+          "totalGIFrameCostMs": 0.5555500000000002,
+          "note": "Full GI vs GI-Off, including existing calibrated sky, capture, filtering and diagnostics; not isolated receiver-policy overhead. Short intervals include clock/cache variation. No heavy build concurrent with timing."
+        },
+        "1440": {
+          "world": "2560x1440",
+          "AA": "TAA",
+          "order": "off/on/on/off",
+          "settleSeconds": 3,
+          "sampleSecondsPerInterval": 4,
+          "intervalMedianMeansMs": {
+            "off": {
+              "frame": 4.4498
+            },
+            "on": {
+              "frame": 4.79785,
+              "trace": 0.432925,
+              "filter": 0.11410000000000001,
+              "temporal": 0.100175
+            }
+          },
+          "totalGIFrameCostMs": 0.34805000000000064,
+          "note": "Full GI vs GI-Off, including existing calibrated sky, capture, filtering and diagnostics; not isolated receiver-policy overhead. Short intervals include clock/cache variation. No heavy build concurrent with timing."
+        }
+      },
+      "validation": {
+        "1080": {
+          "presented": 33485,
+          "errors": 0,
+          "warnings": 0,
+          "validation": "on",
+          "synchronizationValidation": "on",
+          "loaderDiagnostics": {
+            "ERROR": 1,
+            "WARNING": 6
+          }
+        },
+        "1440": {
+          "presented": 7344,
+          "errors": 0,
+          "warnings": 0,
+          "validation": "on",
+          "synchronizationValidation": "on",
+          "loaderDiagnostics": {
+            "ERROR": 1,
+            "WARNING": 6
+          }
+        }
+      },
+      "baselineValidation": {
+        "presented": 24426,
+        "errors": 0,
+        "warnings": 0,
+        "validation": "on",
+        "synchronizationValidation": "on",
+        "loaderDiagnostics": {
+          "ERROR": 1,
+          "WARNING": 6
+        }
+      },
+      "pixelMeasurements": {
+        "note": "Linearized SDR means after AA/output, not raw HDR radiometry. Original captures unamplified. Six interleaved samples per bounce mode. On minus sky-only isolates combined sun/sky surface bounce, not direct sun alone.",
+        "weather": {
+          "morning": {
+            "leftRoof": {
+              "v3": {
+                "RGB": [
+                  0.23288524486617473,
+                  0.20939385601896496,
+                  0.1545378522582497
+                ],
+                "Y": 0.2104275218163581
+              },
+              "enhanced": {
+                "RGB": [
+                  0.23274417680013634,
+                  0.20930500250162523,
+                  0.1544853345355063
+                ],
+                "Y": 0.2103301909303349
+              },
+              "gi": {
+                "RGB": [
+                  0.21997619758920195,
+                  0.214303219362795,
+                  0.18113129881209075
+                ],
+                "Y": 0.21311428186996828
+              },
+              "GIchangePercent": 1.3236763240306981
+            },
+            "rightRoof": {
+              "v3": {
+                "RGB": [
+                  0.2799316371556475,
+                  0.24713250585270755,
+                  0.16581381365638087
+                ],
+                "Y": 0.24823439159113778
+              },
+              "enhanced": {
+                "RGB": [
+                  0.27996681962220765,
+                  0.24714144365846308,
+                  0.1658339765670035
+                ],
+                "Y": 0.2482497194643518
+              },
+              "gi": {
+                "RGB": [
+                  0.27811118876052204,
+                  0.26307891415803936,
+                  0.2026151064994875
+                ],
+                "Y": 0.26190928882557973
+              },
+              "GIchangePercent": 5.502350371513476
+            },
+            "legacyFacade": {
+              "v3": {
+                "RGB": [
+                  0.4958074304414513,
+                  0.41934729467129345,
+                  0.3276286587659995
+                ],
+                "Y": 0.42898063402366676
+              },
+              "enhanced": {
+                "RGB": [
+                  0.4947937648377284,
+                  0.41866072232419455,
+                  0.327010349681547
+                ],
+                "Y": 0.4282294502577727
+              },
+              "gi": {
+                "RGB": [
+                  0.4958074304414513,
+                  0.41934729467129345,
+                  0.3276286587659995
+                ],
+                "Y": 0.42898063402366676
+              },
+              "GIchangePercent": 0.17541618528147396
+            }
+          },
+          "noon": {
+            "leftRoof": {
+              "v3": {
+                "RGB": [
+                  0.20766149755687266,
+                  0.19059777299418848,
+                  0.14986678304099013
+                ],
+                "Y": 0.19128474336159423
+              },
+              "enhanced": {
+                "RGB": [
+                  0.20759350206298416,
+                  0.1905624862758512,
+                  0.14983464099132116
+                ],
+                "Y": 0.19124272980265258
+              },
+              "gi": {
+                "RGB": [
+                  0.18925107683135675,
+                  0.1897581272980837,
+                  0.17237481055040801
+                ],
+                "Y": 0.18839525289967535
+              },
+              "GIchangePercent": -1.4889334124835063
+            },
+            "rightRoof": {
+              "v3": {
+                "RGB": [
+                  0.26259316164369306,
+                  0.23464799721373428,
+                  0.16290623768957002
+                ],
+                "Y": 0.23540938413389884
+              },
+              "enhanced": {
+                "RGB": [
+                  0.26259666991877145,
+                  0.2346600031472824,
+                  0.16291399463801512
+                ],
+                "Y": 0.23541927668853185
+              },
+              "gi": {
+                "RGB": [
+                  0.2540633658858613,
+                  0.24411608485999559,
+                  0.19547419725067416
+                ],
+                "Y": 0.24271893252070162
+              },
+              "GIchangePercent": 3.1007043836208226
+            },
+            "legacyFacade": {
+              "v3": {
+                "RGB": [
+                  0.3077426252271275,
+                  0.30570322814506146,
+                  0.29230678347295685
+                ],
+                "Y": 0.3051695806593827
+              },
+              "enhanced": {
+                "RGB": [
+                  0.30758946979862467,
+                  0.30556863999443185,
+                  0.2921515696521632
+                ],
+                "Y": 0.3050295559320914
+              },
+              "gi": {
+                "RGB": [
+                  0.3072739077700086,
+                  0.3053149156914803,
+                  0.29190436415610427
+                ],
+                "Y": 0.30476315558652123
+              },
+              "GIchangePercent": -0.0873359123368056
+            }
+          },
+          "overcast": {
+            "leftRoof": {
+              "v3": {
+                "RGB": [
+                  0.10225584273655275,
+                  0.10671886392270508,
+                  0.1277260367953285
+                ],
+                "Y": 0.10728674349993249
+              },
+              "enhanced": {
+                "RGB": [
+                  0.10221883153979473,
+                  0.10668953595265981,
+                  0.1276955458493732
+                ],
+                "Y": 0.10725569810902741
+              },
+              "gi": {
+                "RGB": [
+                  0.11011996804561994,
+                  0.09773580313814596,
+                  0.0828716126287008
+                ],
+                "Y": 0.09929548204269298
+              },
+              "GIchangePercent": -7.421718572231684
+            },
+            "rightRoof": {
+              "v3": {
+                "RGB": [
+                  0.10570998193675854,
+                  0.10983752245808784,
+                  0.13001773830910116
+                ],
+                "Y": 0.11041701892769638
+              },
+              "enhanced": {
+                "RGB": [
+                  0.10572215811337286,
+                  0.10984926191566367,
+                  0.13002419127650464
+                ],
+                "Y": 0.11042846954714937
+              },
+              "gi": {
+                "RGB": [
+                  0.12306746297782466,
+                  0.11035425155919716,
+                  0.09645703553088636
+                ],
+                "Y": 0.11205370130955333
+              },
+              "GIchangePercent": 1.4717506898979993
+            },
+            "legacyFacade": {
+              "v3": {
+                "RGB": [
+                  0.3072739077700086,
+                  0.3053149156914803,
+                  0.2919047289522144
+                ],
+                "Y": 0.3047631819248004
+              },
+              "enhanced": {
+                "RGB": [
+                  0.30711694385506644,
+                  0.30516828178011834,
+                  0.29175462313430944
+                ],
+                "Y": 0.3046141011830249
+              },
+              "gi": {
+                "RGB": [
+                  0.30729155497237354,
+                  0.30533387448417904,
+                  0.29187509096652303
+                ],
+                "Y": 0.3047783531859944
+              },
+              "GIchangePercent": 0.053921339272067215
+            }
+          },
+          "dusk": {
+            "leftRoof": {
+              "v3": {
+                "RGB": [
+                  0.023823829902103858,
+                  0.02471284974198959,
+                  0.039633916564336756
+                ],
+                "Y": 0.025601145148603347
+              },
+              "enhanced": {
+                "RGB": [
+                  0.02380470675131716,
+                  0.02469455336735711,
+                  0.03962567657638355
+                ],
+                "Y": 0.025583399072478724
+              },
+              "gi": {
+                "RGB": [
+                  0.020690583607135705,
+                  0.024389419339627946,
+                  0.03460346834962315
+                ],
+                "Y": 0.024340501201421748
+              },
+              "GIchangePercent": -4.858220237020894
+            },
+            "rightRoof": {
+              "v3": {
+                "RGB": [
+                  0.02312383708801745,
+                  0.02435687430885789,
+                  0.04002530074626704
+                ],
+                "Y": 0.025225990984488154
+              },
+              "enhanced": {
+                "RGB": [
+                  0.023132462425244506,
+                  0.02436182657287136,
+                  0.04003228931607734
+                ],
+                "Y": 0.02523187116514536
+              },
+              "gi": {
+                "RGB": [
+                  0.022229252807597254,
+                  0.02458098092024765,
+                  0.03792352262994362
+                ],
+                "Y": 0.025044335034938223
+              },
+              "GIchangePercent": -0.7432509819810473
+            },
+            "legacyFacade": {
+              "v3": {
+                "RGB": [
+                  0.07242688666739833,
+                  0.07128014452517172,
+                  0.09098261051154245
+                ],
+                "Y": 0.07294645994882507
+              },
+              "enhanced": {
+                "RGB": [
+                  0.07254173541508331,
+                  0.0713617424862623,
+                  0.09111603151239302
+                ],
+                "Y": 0.07303886865061629
+              },
+              "gi": {
+                "RGB": [
+                  0.07256631713519678,
+                  0.0713807197619627,
+                  0.09114860149054642
+                ],
+                "Y": 0.07306001882431601
+              },
+              "GIchangePercent": 0.028957422384090492
+            }
+          }
+        },
+        "bounce": {
+          "leftRoof": {
+            "on": {
+              "RGB": [
+                0.2220341884803575,
+                0.2159672796314156,
+                0.1818352065644809
+              ],
+              "Y": 0.21479276877726797,
+              "minY": 0.2147226130787999,
+              "maxY": 0.21484018174884573,
+              "samples": 6
+            },
+            "sky-only": {
+              "RGB": [
+                0.218946331531481,
+                0.21343974371794416,
+                0.18008995872984968
+              ],
+              "Y": 0.21220258981096166,
+              "minY": 0.21215661836443328,
+              "maxY": 0.21223481263848942,
+              "samples": 6
+            },
+            "surfaceBounceRGB": [
+              0.003087856948876505,
+              0.002527535913471435,
+              0.0017452478346312306
+            ],
+            "surfaceBounceY": 0.0025901789663062896,
+            "percent": 1.220616095502756
+          },
+          "rightRoof": {
+            "on": {
+              "RGB": [
+                0.27666965716089764,
+                0.26196490781312975,
+                0.20130254208840093
+              ],
+              "Y": 0.2607113147191398,
+              "minY": 0.2606826674322749,
+              "maxY": 0.2607451130539409,
+              "samples": 6
+            },
+            "sky-only": {
+              "RGB": [
+                0.2746340101427792,
+                0.2602734674441233,
+                0.19999834624685262
+              ],
+              "Y": 0.2589746550714146,
+              "minY": 0.25893597158422643,
+              "maxY": 0.2590181904380745,
+              "samples": 6
+            },
+            "surfaceBounceRGB": [
+              0.002035647018118425,
+              0.0016914403690064805,
+              0.0013041958415483113
+            ],
+            "surfaceBounceY": 0.0017366596477252,
+            "percent": 0.670590582405178
+          },
+          "legacyFacade": {
+            "on": {
+              "RGB": [
+                0.4975146118150534,
+                0.4202968477862448,
+                0.32769014845964795
+              ],
+              "Y": 0.43002714072738923,
+              "minY": 0.4297632508955945,
+              "maxY": 0.43030809647235324,
+              "samples": 6
+            },
+            "sky-only": {
+              "RGB": [
+                0.49767307948505146,
+                0.42042070419945843,
+                0.32777113355827264
+              ],
+              "Y": 0.43015526018488187,
+              "minY": 0.42994323675202395,
+              "maxY": 0.4303805059123906,
+              "samples": 6
+            },
+            "surfaceBounceRGB": [
+              -0.0001584676699980525,
+              -0.00012385641321360774,
+              -8.098509862469738e-05
+            ],
+            "surfaceBounceY": -0.00012811945749266137,
+            "percent": -0.029784468388831347
+          }
+        }
+      },
+      "motion": [
+        {
+          "aa": "taa",
+          "missionTimeBefore": 8.676,
+          "missionTimeAfter": 14.113,
+          "BLASbuildsBefore": 96,
+          "BLASbuildsAfter": 98,
+          "image": {
+            "file": "malden-motion-taa.png",
+            "sha256": "bd576ee894c31a16d190177dbfebade72675d87c2649b1d905b337cd189740fc"
+          }
+        },
+        {
+          "aa": "fsr-quality",
+          "missionTimeBefore": 16.138,
+          "missionTimeAfter": 21.577,
+          "BLASbuildsBefore": 98,
+          "BLASbuildsAfter": 100,
+          "image": {
+            "file": "malden-motion-fsr-quality.png",
+            "sha256": "15442ef172adeef5df320da2752f4355fb967213349157bc39e26ea8a79101c1"
+          }
+        }
+      ],
+      "distanceSweep": [
+        {
+          "counters": {
+            "bounceRays": 87191,
+            "hits": 13019,
+            "eligibleHits": 7658,
+            "rejectedMaterials": 5361,
+            "sunRays": 7658,
+            "sunBlocked": 242,
+            "eligibleReceivers": 87218,
+            "sunVisible": 7416
+          },
+          "receiverFamilies": {
+            "catalog": {
+              "native": 0,
+              "CPU": 0
+            },
+            "rock": {
+              "native": 0,
+              "CPU": 0
+            },
+            "roof": {
+              "native": 87143,
+              "CPU": 0
+            },
+            "wood": {
+              "native": 75,
+              "CPU": 0
+            },
+            "facade": {
+              "native": 0,
+              "CPU": 0
+            },
+            "stone": {
+              "native": 0,
+              "CPU": 0
+            },
+            "concrete": {
+              "native": 0,
+              "CPU": 0
+            }
+          },
+          "raw": "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=0 reflectorInstances=13 completedDispatches=3880 bounceRays=87191 hits=13019 eligibleHits=7658 rejectedMaterials=5361 sunRays=7658 sunBlocked=242 eligibleReceivers=87218 dynamicHits=0 sunVisible=7416 terrain(eligible/sunlit)=466/247 stockPBR(eligible/sunlit)=7192/7169 catalog(eligible/sunlit)=0/0 backfacing=0 missingColor=5360 secondarySky(rays/blocked/visible/rejectedHemisphere)=6618/779/5839/1040 primarySky(rays/blocked/visible/belowHorizon)=69533/0/69533/4639 receiverPixels(native/CPU)=catalog:0/0,rock:0/0,roof:87143/0,wood:75/0,facade:0/0,stone:0/0,concrete:0/0, skyEpi(dome/weather/vertical/reference)=[0.268212,0.461311,0.858996][0.346792,0.528588,0.900166][0.268637,0.366156,0.528813][0.748414,0.911408,1.28] skyCalibration=2.01209 transportMean(incoming/replacement/capturedAmbient/reflectanceFog)=[0.61683,0.928307,1.51785][0.0799476,0.105644,0.151843][0.0976005,0.105011,0.129528][0.130561,0.115168,0.10142] transportSamples=174 GPUms(trace/filter/temporal/BLAS/TLAS)=0.26112/0.05904/0.052224/6.4e-05/6.4e-05 CPUrecordMs=0.1951 temporal=on history(accepted/rejected/clamped/dynamic)=86548/670/192/0 historyResets=27 phase=0 historyBytes=9830400 historyAllocations=12; last completed frame; one bounce, half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain"
+        },
+        {
+          "counters": {
+            "bounceRays": 23717,
+            "hits": 3210,
+            "eligibleHits": 1934,
+            "rejectedMaterials": 1276,
+            "sunRays": 1934,
+            "sunBlocked": 51,
+            "eligibleReceivers": 23738,
+            "sunVisible": 1883
+          },
+          "receiverFamilies": {
+            "catalog": {
+              "native": 0,
+              "CPU": 0
+            },
+            "rock": {
+              "native": 0,
+              "CPU": 0
+            },
+            "roof": {
+              "native": 23712,
+              "CPU": 0
+            },
+            "wood": {
+              "native": 26,
+              "CPU": 0
+            },
+            "facade": {
+              "native": 0,
+              "CPU": 0
+            },
+            "stone": {
+              "native": 0,
+              "CPU": 0
+            },
+            "concrete": {
+              "native": 0,
+              "CPU": 0
+            }
+          },
+          "raw": "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=0 reflectorInstances=15 completedDispatches=3147 bounceRays=23717 hits=3210 eligibleHits=1934 rejectedMaterials=1276 sunRays=1934 sunBlocked=51 eligibleReceivers=23738 dynamicHits=0 sunVisible=1883 terrain(eligible/sunlit)=107/60 stockPBR(eligible/sunlit)=1827/1823 catalog(eligible/sunlit)=0/0 backfacing=0 missingColor=1276 secondarySky(rays/blocked/visible/rejectedHemisphere)=1680/185/1495/254 primarySky(rays/blocked/visible/belowHorizon)=19243/0/19243/1264 receiverPixels(native/CPU)=catalog:0/0,rock:0/0,roof:23712/0,wood:26/0,facade:0/0,stone:0/0,concrete:0/0, skyEpi(dome/weather/vertical/reference)=[0.268212,0.461311,0.858996][0.346866,0.528652,0.900211][0.268684,0.366197,0.528837][0.748414,0.911408,1.28] skyCalibration=2.01209 transportMean(incoming/replacement/capturedAmbient/reflectanceFog)=[0.725649,1.06047,1.71323][0.0817951,0.107901,0.153234][0.0924595,0.10018,0.124499][0.123693,0.109804,0.0971405] transportSamples=48 GPUms(trace/filter/temporal/BLAS/TLAS)=0.206848/0.037152/0.031264/6.4e-05/6.4e-05 CPUrecordMs=0.1219 temporal=on history(accepted/rejected/clamped/dynamic)=23007/731/106/0 historyResets=17 phase=3 historyBytes=9830400 historyAllocations=12; last completed frame; one bounce, half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain"
+        },
+        {
+          "counters": {
+            "bounceRays": 8025,
+            "hits": 1134,
+            "eligibleHits": 666,
+            "rejectedMaterials": 468,
+            "sunRays": 666,
+            "sunBlocked": 20,
+            "eligibleReceivers": 8036,
+            "sunVisible": 646
+          },
+          "receiverFamilies": {
+            "catalog": {
+              "native": 0,
+              "CPU": 0
+            },
+            "rock": {
+              "native": 0,
+              "CPU": 0
+            },
+            "roof": {
+              "native": 8033,
+              "CPU": 0
+            },
+            "wood": {
+              "native": 3,
+              "CPU": 0
+            },
+            "facade": {
+              "native": 0,
+              "CPU": 0
+            },
+            "stone": {
+              "native": 0,
+              "CPU": 0
+            },
+            "concrete": {
+              "native": 0,
+              "CPU": 0
+            }
+          },
+          "raw": "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=0 reflectorInstances=15 completedDispatches=3290 bounceRays=8025 hits=1134 eligibleHits=666 rejectedMaterials=468 sunRays=666 sunBlocked=20 eligibleReceivers=8036 dynamicHits=0 sunVisible=646 terrain(eligible/sunlit)=35/17 stockPBR(eligible/sunlit)=631/629 catalog(eligible/sunlit)=0/0 backfacing=0 missingColor=468 secondarySky(rays/blocked/visible/rejectedHemisphere)=579/44/535/87 primarySky(rays/blocked/visible/belowHorizon)=6429/0/6429/462 receiverPixels(native/CPU)=catalog:0/0,rock:0/0,roof:8033/0,wood:3/0,facade:0/0,stone:0/0,concrete:0/0, skyEpi(dome/weather/vertical/reference)=[0.268212,0.461311,0.858996][0.346969,0.528743,0.900276][0.268755,0.366259,0.528876][0.748414,0.911408,1.28] skyCalibration=2.01209 transportMean(incoming/replacement/capturedAmbient/reflectanceFog)=[0.777456,1.03176,1.44525][0.0890495,0.103246,0.1296][0.0867233,0.0933609,0.117968][0.115686,0.102451,0.0921569] transportSamples=16 GPUms(trace/filter/temporal/BLAS/TLAS)=0.2048/0.031488/0.025344/6.4e-05/9.6e-05 CPUrecordMs=0.1327 temporal=on history(accepted/rejected/clamped/dynamic)=7561/475/37/0 historyResets=19 phase=18 historyBytes=9830400 historyAllocations=12; last completed frame; one bounce, half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain"
+        },
+        {
+          "counters": {
+            "bounceRays": 0,
+            "hits": 0,
+            "eligibleHits": 0,
+            "rejectedMaterials": 0,
+            "sunRays": 0,
+            "sunBlocked": 0,
+            "eligibleReceivers": 0,
+            "sunVisible": 0
+          },
+          "receiverFamilies": {
+            "catalog": {
+              "native": 0,
+              "CPU": 0
+            },
+            "rock": {
+              "native": 0,
+              "CPU": 0
+            },
+            "roof": {
+              "native": 0,
+              "CPU": 0
+            },
+            "wood": {
+              "native": 0,
+              "CPU": 0
+            },
+            "facade": {
+              "native": 0,
+              "CPU": 0
+            },
+            "stone": {
+              "native": 0,
+              "CPU": 0
+            },
+            "concrete": {
+              "native": 0,
+              "CPU": 0
+            }
+          },
+          "raw": "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=0 reflectorInstances=15 completedDispatches=3432 bounceRays=0 hits=0 eligibleHits=0 rejectedMaterials=0 sunRays=0 sunBlocked=0 eligibleReceivers=0 dynamicHits=0 sunVisible=0 terrain(eligible/sunlit)=0/0 stockPBR(eligible/sunlit)=0/0 catalog(eligible/sunlit)=0/0 backfacing=0 missingColor=0 secondarySky(rays/blocked/visible/rejectedHemisphere)=0/0/0/0 primarySky(rays/blocked/visible/belowHorizon)=0/0/0/0 receiverPixels(native/CPU)=catalog:0/0,rock:0/0,roof:0/0,wood:0/0,facade:0/0,stone:0/0,concrete:0/0, skyEpi(dome/weather/vertical/reference)=[0.268212,0.461311,0.858996][0.347075,0.528836,0.900343][0.26881,0.366309,0.528907][0.748414,0.911408,1.28] skyCalibration=2.01209 transportMean(incoming/replacement/capturedAmbient/reflectanceFog)=[0,0,0][0,0,0][0,0,0][0,0,0] transportSamples=0 GPUms(trace/filter/temporal/BLAS/TLAS)=0.186368/0.025856/0.024608/6.4e-05/6.4e-05 CPUrecordMs=0.1075 temporal=on history(accepted/rejected/clamped/dynamic)=0/0/0/0 historyResets=21 phase=0 historyBytes=9830400 historyAllocations=12; last completed frame; one bounce, half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain"
+        },
+        {
+          "counters": {
+            "bounceRays": 0,
+            "hits": 0,
+            "eligibleHits": 0,
+            "rejectedMaterials": 0,
+            "sunRays": 0,
+            "sunBlocked": 0,
+            "eligibleReceivers": 0,
+            "sunVisible": 0
+          },
+          "receiverFamilies": {
+            "catalog": {
+              "native": 0,
+              "CPU": 0
+            },
+            "rock": {
+              "native": 0,
+              "CPU": 0
+            },
+            "roof": {
+              "native": 0,
+              "CPU": 0
+            },
+            "wood": {
+              "native": 0,
+              "CPU": 0
+            },
+            "facade": {
+              "native": 0,
+              "CPU": 0
+            },
+            "stone": {
+              "native": 0,
+              "CPU": 0
+            },
+            "concrete": {
+              "native": 0,
+              "CPU": 0
+            }
+          },
+          "raw": "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=0 reflectorInstances=15 completedDispatches=3561 bounceRays=0 hits=0 eligibleHits=0 rejectedMaterials=0 sunRays=0 sunBlocked=0 eligibleReceivers=0 dynamicHits=0 sunVisible=0 terrain(eligible/sunlit)=0/0 stockPBR(eligible/sunlit)=0/0 catalog(eligible/sunlit)=0/0 backfacing=0 missingColor=0 secondarySky(rays/blocked/visible/rejectedHemisphere)=0/0/0/0 primarySky(rays/blocked/visible/belowHorizon)=0/0/0/0 receiverPixels(native/CPU)=catalog:0/0,rock:0/0,roof:0/0,wood:0/0,facade:0/0,stone:0/0,concrete:0/0, skyEpi(dome/weather/vertical/reference)=[0.268212,0.461311,0.858996][0.347239,0.52898,0.900447][0.268895,0.366383,0.52895][0.748414,0.911408,1.28] skyCalibration=2.01209 transportMean(incoming/replacement/capturedAmbient/reflectanceFog)=[0,0,0][0,0,0][0,0,0][0,0,0] transportSamples=0 GPUms(trace/filter/temporal/BLAS/TLAS)=0.185344/0.025472/0.024448/6.4e-05/6.4e-05 CPUrecordMs=0.1095 temporal=on history(accepted/rejected/clamped/dynamic)=0/0/0/0 historyResets=23 phase=1 historyBytes=9830400 historyAllocations=12; last completed frame; one bounce, half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain"
+        },
+        {
+          "counters": {
+            "bounceRays": 0,
+            "hits": 0,
+            "eligibleHits": 0,
+            "rejectedMaterials": 0,
+            "sunRays": 0,
+            "sunBlocked": 0,
+            "eligibleReceivers": 0,
+            "sunVisible": 0
+          },
+          "receiverFamilies": {
+            "catalog": {
+              "native": 0,
+              "CPU": 0
+            },
+            "rock": {
+              "native": 0,
+              "CPU": 0
+            },
+            "roof": {
+              "native": 0,
+              "CPU": 0
+            },
+            "wood": {
+              "native": 0,
+              "CPU": 0
+            },
+            "facade": {
+              "native": 0,
+              "CPU": 0
+            },
+            "stone": {
+              "native": 0,
+              "CPU": 0
+            },
+            "concrete": {
+              "native": 0,
+              "CPU": 0
+            }
+          },
+          "raw": "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=0 reflectorInstances=12 completedDispatches=3688 bounceRays=0 hits=0 eligibleHits=0 rejectedMaterials=0 sunRays=0 sunBlocked=0 eligibleReceivers=0 dynamicHits=0 sunVisible=0 terrain(eligible/sunlit)=0/0 stockPBR(eligible/sunlit)=0/0 catalog(eligible/sunlit)=0/0 backfacing=0 missingColor=0 secondarySky(rays/blocked/visible/rejectedHemisphere)=0/0/0/0 primarySky(rays/blocked/visible/belowHorizon)=0/0/0/0 receiverPixels(native/CPU)=catalog:0/0,rock:0/0,roof:0/0,wood:0/0,facade:0/0,stone:0/0,concrete:0/0, skyEpi(dome/weather/vertical/reference)=[0.268212,0.461311,0.858996][0.347509,0.529219,0.900623][0.269007,0.36648,0.529005][0.748414,0.911408,1.28] skyCalibration=2.01209 transportMean(incoming/replacement/capturedAmbient/reflectanceFog)=[0,0,0][0,0,0][0,0,0][0,0,0] transportSamples=0 GPUms(trace/filter/temporal/BLAS/TLAS)=0.187392/0.026112/0.025376/6.4e-05/9.6e-05 CPUrecordMs=0.1054 temporal=on history(accepted/rejected/clamped/dynamic)=0/0/0/0 historyResets=25 phase=0 historyBytes=9830400 historyAllocations=12; last completed frame; one bounce, half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain"
+        },
+        {
+          "counters": {
+            "bounceRays": 87191,
+            "hits": 13019,
+            "eligibleHits": 7658,
+            "rejectedMaterials": 5361,
+            "sunRays": 7658,
+            "sunBlocked": 242,
+            "eligibleReceivers": 87218,
+            "sunVisible": 7416
+          },
+          "receiverFamilies": {
+            "catalog": {
+              "native": 0,
+              "CPU": 0
+            },
+            "rock": {
+              "native": 0,
+              "CPU": 0
+            },
+            "roof": {
+              "native": 87143,
+              "CPU": 0
+            },
+            "wood": {
+              "native": 75,
+              "CPU": 0
+            },
+            "facade": {
+              "native": 0,
+              "CPU": 0
+            },
+            "stone": {
+              "native": 0,
+              "CPU": 0
+            },
+            "concrete": {
+              "native": 0,
+              "CPU": 0
+            }
+          },
+          "raw": "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=0 reflectorInstances=13 completedDispatches=3880 bounceRays=87191 hits=13019 eligibleHits=7658 rejectedMaterials=5361 sunRays=7658 sunBlocked=242 eligibleReceivers=87218 dynamicHits=0 sunVisible=7416 terrain(eligible/sunlit)=466/247 stockPBR(eligible/sunlit)=7192/7169 catalog(eligible/sunlit)=0/0 backfacing=0 missingColor=5360 secondarySky(rays/blocked/visible/rejectedHemisphere)=6618/779/5839/1040 primarySky(rays/blocked/visible/belowHorizon)=69533/0/69533/4639 receiverPixels(native/CPU)=catalog:0/0,rock:0/0,roof:87143/0,wood:75/0,facade:0/0,stone:0/0,concrete:0/0, skyEpi(dome/weather/vertical/reference)=[0.268212,0.461311,0.858996][0.346792,0.528588,0.900166][0.268637,0.366156,0.528813][0.748414,0.911408,1.28] skyCalibration=2.01209 transportMean(incoming/replacement/capturedAmbient/reflectanceFog)=[0.61683,0.928307,1.51785][0.0799476,0.105644,0.151843][0.0976005,0.105011,0.129528][0.130561,0.115168,0.10142] transportSamples=174 GPUms(trace/filter/temporal/BLAS/TLAS)=0.26112/0.05904/0.052224/6.4e-05/6.4e-05 CPUrecordMs=0.1951 temporal=on history(accepted/rejected/clamped/dynamic)=86548/670/192/0 historyResets=27 phase=0 historyBytes=9830400 historyAllocations=12; last completed frame; one bounce, half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain"
+        }
+      ],
+      "screenshots": {
+        "morning": {
+          "v3": {
+            "file": "malden-morning-v3.png",
+            "sha256": "95fc051bc31a903edb4aa418e46afd1bfa9ba0714d36c7af1f5dc4801b87f747"
+          },
+          "enhanced": {
+            "file": "malden-morning-enhanced.png",
+            "sha256": "c4bd36973c076fc4668fb665b5130c22a9f47b60334d53d3be5f7d9e7da72323"
+          },
+          "gi": {
+            "file": "malden-morning-gi.png",
+            "sha256": "dade96222f54144ed61c43b98450e85e3b7e185b295e74de6be528bb6aa8d4f8"
+          }
+        },
+        "noon": {
+          "v3": {
+            "file": "malden-noon-v3.png",
+            "sha256": "1a6813dd3f3a574932130144d825f69aa096be05cab4516e3eb3196e382adbb4"
+          },
+          "enhanced": {
+            "file": "malden-noon-enhanced.png",
+            "sha256": "11ce0898be4627be318dbf27cb40b9fd19066654c2110c0400a794890a178905"
+          },
+          "gi": {
+            "file": "malden-noon-gi.png",
+            "sha256": "d02e5675ff27a5f8f91888c057e5256a8bfebfa7b3d604741707d14337fa8f7f"
+          }
+        },
+        "overcast": {
+          "v3": {
+            "file": "malden-overcast-v3.png",
+            "sha256": "97c88d70b514cebd76b8b6b8aad00ddd7b4f24002d01435b5bbb80947bb97a73"
+          },
+          "enhanced": {
+            "file": "malden-overcast-enhanced.png",
+            "sha256": "34d20b4b27cc05c9a8afb5ccb92efca8da5d9feda5e7459589011b0ff965cdb9"
+          },
+          "gi": {
+            "file": "malden-overcast-gi.png",
+            "sha256": "c68c2f3ea39006a0319769ca9522e5fb73bcec09b8e5683851b5d2e0adf35efc"
+          }
+        },
+        "dusk": {
+          "v3": {
+            "file": "malden-dusk-v3.png",
+            "sha256": "e7df99f60ef2fb6bfb12bc12d301cfea94bc4ea13f5c3485165ae0066506d182"
+          },
+          "enhanced": {
+            "file": "malden-dusk-enhanced.png",
+            "sha256": "e3179c280c54051c3ab56d69fe6d2b362b003323850b57dc50f756c2e334263b"
+          },
+          "gi": {
+            "file": "malden-dusk-gi.png",
+            "sha256": "29267b37d9eeadd4593be55aebe91083a9455f390d068aba6bea7c1e73720c95"
+          }
+        }
+      }
+    },
+    "everon": {
+      "mission": "05HeavyMetal.Eden",
+      "camera": [
+        2225,
+        28.5,
+        7382,
+        0,
+        0.04,
+        1
+      ],
+      "dates": {
+        "morning": [
+          1985,
+          7,
+          5,
+          9,
+          0
+        ],
+        "noon": [
+          1985,
+          7,
+          5,
+          12,
+          0
+        ],
+        "overcast": [
+          1985,
+          7,
+          5,
+          12,
+          0
+        ],
+        "dusk": [
+          1985,
+          7,
+          5,
+          17,
+          30
+        ]
+      },
+      "weatherCommands": "triCheatWeather 0 except overcast 1; fog/rain zero; legacy clouds, cloud shadows on.",
+      "rawRuns": {
+        "before": "receiver-before-everon",
+        "1080": "receiver-final-everon-1080",
+        "1440": "receiver-final-everon-1440"
+      },
+      "baselineExecutableSHA256": "345AD3268023B348C4D4A41FA6D8F18FFA2DDE87CCDC85DCEA58334B64E93976",
+      "executableSHA256": "CFC13CDC8BA0186CDCF4F6F2F0E7428D1A59CDB1E728BFAAB3336656F1BE65E5",
+      "before": {
+        "counters": {
+          "bounceRays": 0,
+          "hits": 0,
+          "eligibleHits": 0,
+          "rejectedMaterials": 0,
+          "sunRays": 0,
+          "sunBlocked": 0,
+          "eligibleReceivers": 0,
+          "sunVisible": 0
+        },
+        "receiverFamilies": null,
+        "raw": "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=0 reflectorInstances=6 completedDispatches=558 bounceRays=0 hits=0 eligibleHits=0 rejectedMaterials=0 sunRays=0 sunBlocked=0 eligibleReceivers=0 dynamicHits=0 sunVisible=0 terrain(eligible/sunlit)=0/0 stockPBR(eligible/sunlit)=0/0 catalog(eligible/sunlit)=0/0 backfacing=0 missingColor=0 secondarySky(rays/blocked/visible/rejectedHemisphere)=0/0/0/0 primarySky(rays/blocked/visible/belowHorizon)=0/0/0/0 skyEpi(dome/weather/vertical/reference)=[0.268212,0.461311,0.858996][0.521813,0.688425,1.02252][0.265787,0.348813,0.507432][0.748414,0.911408,1.28] skyCalibration=2.01209 transportMean(incoming/replacement/capturedAmbient/reflectanceFog)=[0,0,0][0,0,0][0,0,0][0,0,0] transportSamples=0 GPUms(trace/filter/temporal/BLAS/TLAS)=0.123904/0.022304/0.024032/6.4e-05/6.4e-05 CPUrecordMs=0.0886 temporal=on history(accepted/rejected/clamped/dynamic)=0/0/0/0 historyResets=1 phase=16 historyBytes=9830400 historyAllocations=2; last completed frame; one bounce, half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain"
+      },
+      "weather": {
+        "morning": {
+          "counters": {
+            "bounceRays": 92393,
+            "hits": 45682,
+            "eligibleHits": 40266,
+            "rejectedMaterials": 5416,
+            "sunRays": 35821,
+            "sunBlocked": 7139,
+            "eligibleReceivers": 92506,
+            "sunVisible": 28682
+          },
+          "receiverFamilies": {
+            "catalog": {
+              "native": 0,
+              "CPU": 0
+            },
+            "rock": {
+              "native": 0,
+              "CPU": 0
+            },
+            "roof": {
+              "native": 0,
+              "CPU": 0
+            },
+            "wood": {
+              "native": 1129,
+              "CPU": 0
+            },
+            "facade": {
+              "native": 91377,
+              "CPU": 0
+            },
+            "stone": {
+              "native": 0,
+              "CPU": 0
+            },
+            "concrete": {
+              "native": 0,
+              "CPU": 0
+            }
+          },
+          "raw": "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=0 reflectorInstances=6 completedDispatches=554 bounceRays=92393 hits=45682 eligibleHits=40266 rejectedMaterials=5416 sunRays=35821 sunBlocked=7139 eligibleReceivers=92506 dynamicHits=0 sunVisible=28682 terrain(eligible/sunlit)=32182/28225 stockPBR(eligible/sunlit)=8084/457 catalog(eligible/sunlit)=0/0 backfacing=4445 missingColor=5416 secondarySky(rays/blocked/visible/rejectedHemisphere)=35611/10417/25194/4655 primarySky(rays/blocked/visible/belowHorizon)=38879/1408/37471/7832 receiverPixels(native/CPU)=catalog:0/0,rock:0/0,roof:0/0,wood:1129/0,facade:91377/0,stone:0/0,concrete:0/0, skyEpi(dome/weather/vertical/reference)=[0.268212,0.461311,0.858996][0.521687,0.688302,1.02241][0.266009,0.349013,0.507577][0.748414,0.911408,1.28] skyCalibration=2.01209 transportMean(incoming/replacement/capturedAmbient/reflectanceFog)=[0.540809,0.709777,1.0204][0.121169,0.131161,0.178721][0.16458,0.162976,0.217086][0.220051,0.179022,0.169597] transportSamples=186 GPUms(trace/filter/temporal/BLAS/TLAS)=0.290816/0.05712/0.050144/6.4e-05/6.4e-05 CPUrecordMs=0.0949 temporal=on history(accepted/rejected/clamped/dynamic)=90523/1983/432/0 historyResets=1 phase=12 historyBytes=9830400 historyAllocations=2; last completed frame; one bounce, half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain"
+        },
+        "noon": {
+          "counters": {
+            "bounceRays": 92383,
+            "hits": 45520,
+            "eligibleHits": 39862,
+            "rejectedMaterials": 5658,
+            "sunRays": 35445,
+            "sunBlocked": 2667,
+            "eligibleReceivers": 92499,
+            "sunVisible": 32778
+          },
+          "receiverFamilies": {
+            "catalog": {
+              "native": 0,
+              "CPU": 0
+            },
+            "rock": {
+              "native": 0,
+              "CPU": 0
+            },
+            "roof": {
+              "native": 0,
+              "CPU": 0
+            },
+            "wood": {
+              "native": 1142,
+              "CPU": 0
+            },
+            "facade": {
+              "native": 91357,
+              "CPU": 0
+            },
+            "stone": {
+              "native": 0,
+              "CPU": 0
+            },
+            "concrete": {
+              "native": 0,
+              "CPU": 0
+            }
+          },
+          "raw": "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=0 reflectorInstances=6 completedDispatches=1433 bounceRays=92383 hits=45520 eligibleHits=39862 rejectedMaterials=5658 sunRays=35445 sunBlocked=2667 eligibleReceivers=92499 dynamicHits=0 sunVisible=32778 terrain(eligible/sunlit)=31947/29922 stockPBR(eligible/sunlit)=7915/2856 catalog(eligible/sunlit)=0/0 backfacing=4417 missingColor=5658 secondarySky(rays/blocked/visible/rejectedHemisphere)=35264/10360/24904/4598 primarySky(rays/blocked/visible/belowHorizon)=38939/1432/37507/7924 receiverPixels(native/CPU)=catalog:0/0,rock:0/0,roof:0/0,wood:1142/0,facade:91357/0,stone:0/0,concrete:0/0, skyEpi(dome/weather/vertical/reference)=[0.262227,0.460884,0.864235][0.515663,0.686914,1.02611][0.266459,0.352533,0.513572][0.748414,0.911408,1.28] skyCalibration=2.01748 transportMean(incoming/replacement/capturedAmbient/reflectanceFog)=[0.514001,0.675721,0.92111][0.116709,0.125731,0.159204][0.166208,0.16481,0.217925][0.222173,0.18088,0.170217] transportSamples=185 GPUms(trace/filter/temporal/BLAS/TLAS)=0.288768/0.056608/0.049696/6.4e-05/6.4e-05 CPUrecordMs=0.1051 temporal=on history(accepted/rejected/clamped/dynamic)=90378/2121/306/0 historyResets=3 phase=9 historyBytes=9830400 historyAllocations=4; last completed frame; one bounce, half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain"
+        },
+        "overcast": {
+          "counters": {
+            "bounceRays": 92421,
+            "hits": 45680,
+            "eligibleHits": 40155,
+            "rejectedMaterials": 5525,
+            "sunRays": 35697,
+            "sunBlocked": 2623,
+            "eligibleReceivers": 92516,
+            "sunVisible": 33074
+          },
+          "receiverFamilies": {
+            "catalog": {
+              "native": 0,
+              "CPU": 0
+            },
+            "rock": {
+              "native": 0,
+              "CPU": 0
+            },
+            "roof": {
+              "native": 0,
+              "CPU": 0
+            },
+            "wood": {
+              "native": 1141,
+              "CPU": 0
+            },
+            "facade": {
+              "native": 91375,
+              "CPU": 0
+            },
+            "stone": {
+              "native": 0,
+              "CPU": 0
+            },
+            "concrete": {
+              "native": 0,
+              "CPU": 0
+            }
+          },
+          "raw": "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=0 reflectorInstances=6 completedDispatches=2319 bounceRays=92421 hits=45680 eligibleHits=40155 rejectedMaterials=5525 sunRays=35697 sunBlocked=2623 eligibleReceivers=92516 dynamicHits=0 sunVisible=33074 terrain(eligible/sunlit)=32009/30064 stockPBR(eligible/sunlit)=8146/3010 catalog(eligible/sunlit)=0/0 backfacing=4458 missingColor=5524 secondarySky(rays/blocked/visible/rejectedHemisphere)=35425/10363/25062/4730 primarySky(rays/blocked/visible/belowHorizon)=38724/1505/37219/8017 receiverPixels(native/CPU)=catalog:0/0,rock:0/0,roof:0/0,wood:1141/0,facade:91375/0,stone:0/0,concrete:0/0, skyEpi(dome/weather/vertical/reference)=[0.429139,0.420054,0.340269][0.693873,0.753929,0.906035][0.290755,0.307922,0.342882][0.748414,0.911408,1.28] skyCalibration=2.17038 transportMean(incoming/replacement/capturedAmbient/reflectanceFog)=[0.548284,0.599312,0.684102][0.118343,0.100491,0.10656][0.165425,0.163955,0.217071][0.221142,0.18003,0.169714] transportSamples=184 GPUms(trace/filter/temporal/BLAS/TLAS)=0.28672/0.057344/0.050016/6.4e-05/6.4e-05 CPUrecordMs=0.107 temporal=on history(accepted/rejected/clamped/dynamic)=90691/1825/439/0 historyResets=5 phase=13 historyBytes=9830400 historyAllocations=6; last completed frame; one bounce, half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain"
+        },
+        "dusk": {
+          "counters": {
+            "bounceRays": 92432,
+            "hits": 45769,
+            "eligibleHits": 40164,
+            "rejectedMaterials": 5605,
+            "sunRays": 35718,
+            "sunBlocked": 6925,
+            "eligibleReceivers": 92516,
+            "sunVisible": 28793
+          },
+          "receiverFamilies": {
+            "catalog": {
+              "native": 0,
+              "CPU": 0
+            },
+            "rock": {
+              "native": 0,
+              "CPU": 0
+            },
+            "roof": {
+              "native": 0,
+              "CPU": 0
+            },
+            "wood": {
+              "native": 1127,
+              "CPU": 0
+            },
+            "facade": {
+              "native": 91389,
+              "CPU": 0
+            },
+            "stone": {
+              "native": 0,
+              "CPU": 0
+            },
+            "concrete": {
+              "native": 0,
+              "CPU": 0
+            }
+          },
+          "raw": "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=0 reflectorInstances=6 completedDispatches=3206 bounceRays=92432 hits=45769 eligibleHits=40164 rejectedMaterials=5605 sunRays=35718 sunBlocked=6925 eligibleReceivers=92516 dynamicHits=0 sunVisible=28793 terrain(eligible/sunlit)=32025/28790 stockPBR(eligible/sunlit)=8139/3 catalog(eligible/sunlit)=0/0 backfacing=4446 missingColor=5604 secondarySky(rays/blocked/visible/rejectedHemisphere)=35475/10187/25288/4689 primarySky(rays/blocked/visible/belowHorizon)=38597/1462/37135/8066 receiverPixels(native/CPU)=catalog:0/0,rock:0/0,roof:0/0,wood:1127/0,facade:91389/0,stone:0/0,concrete:0/0, skyEpi(dome/weather/vertical/reference)=[0.221114,0.342987,0.619988][0.424726,0.507746,0.722586][0.21233,0.256811,0.361233][0.176345,0.212659,0.399316] skyCalibration=0.64797 transportMean(incoming/replacement/capturedAmbient/reflectanceFog)=[0.12385,0.150759,0.202346][0.0283173,0.0286245,0.0365726][0.0389372,0.0382565,0.0679829][0.220837,0.179947,0.170429] transportSamples=185 GPUms(trace/filter/temporal/BLAS/TLAS)=0.28672/0.057504/0.050912/6.4e-05/6.4e-05 CPUrecordMs=0.0862 temporal=on history(accepted/rejected/clamped/dynamic)=90698/1818/399/0 historyResets=7 phase=15 historyBytes=9830400 historyAllocations=8; last completed frame; one bounce, half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain"
+        }
+      },
+      "coveragePercentOfHalfResolutionGrid": 17.844521604938272,
+      "existingCatalogWall": {
+        "before": {
+          "counters": {
+            "bounceRays": 113236,
+            "hits": 53213,
+            "eligibleHits": 53186,
+            "rejectedMaterials": 27,
+            "sunRays": 51038,
+            "sunBlocked": 21449,
+            "eligibleReceivers": 113416,
+            "sunVisible": 29589
+          },
+          "receiverFamilies": null,
+          "raw": "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=33 reflectorInstances=49 completedDispatches=4149 bounceRays=113236 hits=53213 eligibleHits=53186 rejectedMaterials=27 sunRays=51038 sunBlocked=21449 eligibleReceivers=113416 dynamicHits=0 sunVisible=29589 terrain(eligible/sunlit)=50713/29560 stockPBR(eligible/sunlit)=0/0 catalog(eligible/sunlit)=2473/29 backfacing=2148 missingColor=15 secondarySky(rays/blocked/visible/rejectedHemisphere)=51964/11850/40114/1222 primarySky(rays/blocked/visible/belowHorizon)=55588/2301/53287/4435 skyEpi(dome/weather/vertical/reference)=[0.268212,0.461311,0.858996][0.432288,0.606549,0.957907][0.268738,0.347577,0.503841][0.748414,0.911408,1.28] skyCalibration=2.01209 transportMean(incoming/replacement/capturedAmbient/reflectanceFog)=[0.524839,0.689623,0.969162][0.0416951,0.038976,0.0328745][0.0566794,0.049643,0.0421384][0.0756276,0.0545538,0.0328935] transportSamples=214 GPUms(trace/filter/temporal/BLAS/TLAS)=0.219136/0.065792/0.063584/6.4e-05/9.6e-05 CPUrecordMs=0.1185 temporal=on history(accepted/rejected/clamped/dynamic)=111355/2061/349/0 historyResets=6 phase=23 historyBytes=9830400 historyAllocations=2; last completed frame; one bounce, half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain"
+        },
+        "after": {
+          "counters": {
+            "bounceRays": 119948,
+            "hits": 56227,
+            "eligibleHits": 56160,
+            "rejectedMaterials": 67,
+            "sunRays": 53835,
+            "sunBlocked": 22321,
+            "eligibleReceivers": 120144,
+            "sunVisible": 31514
+          },
+          "receiverFamilies": {
+            "catalog": {
+              "native": 0,
+              "CPU": 113408
+            },
+            "rock": {
+              "native": 0,
+              "CPU": 0
+            },
+            "roof": {
+              "native": 0,
+              "CPU": 0
+            },
+            "wood": {
+              "native": 0,
+              "CPU": 0
+            },
+            "facade": {
+              "native": 0,
+              "CPU": 0
+            },
+            "stone": {
+              "native": 0,
+              "CPU": 0
+            },
+            "concrete": {
+              "native": 0,
+              "CPU": 6736
+            }
+          },
+          "raw": "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=33 reflectorInstances=49 completedDispatches=4146 bounceRays=119948 hits=56227 eligibleHits=56160 rejectedMaterials=67 sunRays=53835 sunBlocked=22321 eligibleReceivers=120144 dynamicHits=0 sunVisible=31514 terrain(eligible/sunlit)=53369/31353 stockPBR(eligible/sunlit)=0/0 catalog(eligible/sunlit)=2791/161 backfacing=2325 missingColor=57 secondarySky(rays/blocked/visible/rejectedHemisphere)=54739/12055/42684/1421 primarySky(rays/blocked/visible/belowHorizon)=58952/2616/56336/4769 receiverPixels(native/CPU)=catalog:0/113408,rock:0/0,roof:0/0,wood:0/0,facade:0/0,stone:0/0,concrete:0/6736, skyEpi(dome/weather/vertical/reference)=[0.268212,0.461311,0.858996][0.433142,0.607331,0.958512][0.268845,0.347673,0.503914][0.748414,0.911408,1.28] skyCalibration=2.01209 transportMean(incoming/replacement/capturedAmbient/reflectanceFog)=[0.533398,0.704422,1.00042][0.0395695,0.0374158,0.0302504][0.0562957,0.048616,0.0405742][0.0752607,0.0534001,0.0315561] transportSamples=235 GPUms(trace/filter/temporal/BLAS/TLAS)=0.269312/0.067584/0.065376/6.4e-05/9.6e-05 CPUrecordMs=0.1076 temporal=on history(accepted/rejected/clamped/dynamic)=115166/4978/424/0 historyResets=10 phase=9 historyBytes=9830400 historyAllocations=10; last completed frame; one bounce, half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain"
+        }
+      },
+      "performance": {
+        "1080": {
+          "world": "1920x1080",
+          "AA": "TAA",
+          "order": "off/on/on/off",
+          "settleSeconds": 3,
+          "sampleSecondsPerInterval": 4,
+          "intervalMedianMeansMs": {
+            "off": {
+              "frame": 2.0272
+            },
+            "on": {
+              "frame": 2.2648,
+              "trace": 0.29235,
+              "filter": 0.057550000000000004,
+              "temporal": 0.05015
+            }
+          },
+          "totalGIFrameCostMs": 0.23760000000000003,
+          "note": "Full GI vs GI-Off, including existing calibrated sky, capture, filtering and diagnostics; not isolated receiver-policy overhead. Short intervals include clock/cache variation. No heavy build concurrent with timing."
+        },
+        "1440": {
+          "world": "2560x1440",
+          "AA": "TAA",
+          "order": "off/on/on/off",
+          "settleSeconds": 3,
+          "sampleSecondsPerInterval": 4,
+          "intervalMedianMeansMs": {
+            "off": {
+              "frame": 2.750575
+            },
+            "on": {
+              "frame": 3.7661999999999995,
+              "trace": 0.46465,
+              "filter": 0.0974,
+              "temporal": 0.08425
+            }
+          },
+          "totalGIFrameCostMs": 1.0156249999999996,
+          "note": "Full GI vs GI-Off, including existing calibrated sky, capture, filtering and diagnostics; not isolated receiver-policy overhead. Short intervals include clock/cache variation. No heavy build concurrent with timing."
+        }
+      },
+      "validation": {
+        "1080": {
+          "presented": 34226,
+          "errors": 0,
+          "warnings": 0,
+          "validation": "on",
+          "synchronizationValidation": "on",
+          "loaderDiagnostics": {
+            "ERROR": 1,
+            "WARNING": 6
+          }
+        },
+        "1440": {
+          "presented": 36333,
+          "errors": 0,
+          "warnings": 0,
+          "validation": "on",
+          "synchronizationValidation": "on",
+          "loaderDiagnostics": {
+            "ERROR": 1,
+            "WARNING": 6
+          }
+        }
+      },
+      "baselineValidation": {
+        "presented": 9274,
+        "errors": 0,
+        "warnings": 0,
+        "validation": "on",
+        "synchronizationValidation": "on",
+        "loaderDiagnostics": {
+          "ERROR": 1,
+          "WARNING": 6
+        }
+      },
+      "pixelMeasurements": {
+        "note": "Linearized SDR means after AA/output, not raw HDR radiometry. Original captures unamplified. Six interleaved samples per bounce mode. On minus sky-only isolates combined sun/sky surface bounce, not direct sun alone.",
+        "weather": {
+          "morning": {
+            "facade": {
+              "v3": {
+                "RGB": [
+                  0.2012729744667793,
+                  0.1917658730431064,
+                  0.2341448384973122
+                ],
+                "Y": 0.1968468441115729
+              },
+              "enhanced": {
+                "RGB": [
+                  0.20122731119387605,
+                  0.19173847805310518,
+                  0.23409560105719712
+                ],
+                "Y": 0.1968139882597285
+              },
+              "gi": {
+                "RGB": [
+                  0.13332127452803372,
+                  0.13785143397396493,
+                  0.1692723156513277
+                ],
+                "Y": 0.13915690973286554
+              },
+              "GIchangePercent": -29.29521373794577
+            },
+            "gable": {
+              "v3": {
+                "RGB": [
+                  0.17740814562950466,
+                  0.1969338979668732,
+                  0.2621166057601105
+                ],
+                "Y": 0.19748891452262035
+              },
+              "enhanced": {
+                "RGB": [
+                  0.1776269464115873,
+                  0.19716890971246642,
+                  0.26235816713886007
+                ],
+                "Y": 0.19772095270088513
+              },
+              "gi": {
+                "RGB": [
+                  0.1354495217322107,
+                  0.1628781283776536,
+                  0.21858443298845281
+                ],
+                "Y": 0.16106880179773214
+              },
+              "GIchangePercent": -18.537312511638994
+            },
+            "ground": {
+              "v3": {
+                "RGB": [
+                  0.10424128883899036,
+                  0.12443193154835344,
+                  0.0701605634492018
+                ],
+                "Y": 0.11622100813158409
+              },
+              "enhanced": {
+                "RGB": [
+                  0.10382215267550385,
+                  0.12413116361424355,
+                  0.06958209116426298
+                ],
+                "Y": 0.11587502485777888
+              },
+              "gi": {
+                "RGB": [
+                  0.1039198170150731,
+                  0.12418792253850237,
+                  0.06976515560146285
+                ],
+                "Y": 0.11594959953136705
+              },
+              "GIchangePercent": 0.06435784905305386
+            }
+          },
+          "noon": {
+            "facade": {
+              "v3": {
+                "RGB": [
+                  0.2885772798017252,
+                  0.2532405918821139,
+                  0.2500815513870571
+                ],
+                "Y": 0.26052508901008015
+              },
+              "enhanced": {
+                "RGB": [
+                  0.2884843508896597,
+                  0.25319281398720955,
+                  0.25011376594842105
+                ],
+                "Y": 0.2604734874642699
+              },
+              "gi": {
+                "RGB": [
+                  0.22469686245436,
+                  0.2046769108217141,
+                  0.1896149456412023
+                ],
+                "Y": 0.20784567865278164
+              },
+              "GIchangePercent": -20.204670089007582
+            },
+            "gable": {
+              "v3": {
+                "RGB": [
+                  0.2721856400441896,
+                  0.2739764312320033,
+                  0.2837675196994678
+                ],
+                "Y": 0.27430262561282504
+              },
+              "enhanced": {
+                "RGB": [
+                  0.2719466496435011,
+                  0.27373096007035824,
+                  0.28360227722536746
+                ],
+                "Y": 0.27406432477220005
+              },
+              "gi": {
+                "RGB": [
+                  0.23343815638935925,
+                  0.2445558460420886,
+                  0.24488428948895966
+                ],
+                "Y": 0.24221593883878242
+              },
+              "GIchangePercent": -11.620770401215019
+            },
+            "ground": {
+              "v3": {
+                "RGB": [
+                  0.11947231133492225,
+                  0.14074006478397574,
+                  0.07503381939854534
+                ],
+                "Y": 0.13147454948387888
+              },
+              "enhanced": {
+                "RGB": [
+                  0.11983974665702858,
+                  0.14098993882680433,
+                  0.07548652293835101
+                ],
+                "Y": 0.13176406134436366
+              },
+              "gi": {
+                "RGB": [
+                  0.11982459174059007,
+                  0.14099912215050958,
+                  0.07546476516314768
+                ],
+                "Y": 0.13176583641087314
+              },
+              "GIchangePercent": 0.0013471552799515507
+            }
+          },
+          "overcast": {
+            "facade": {
+              "v3": {
+                "RGB": [
+                  0.20407225414456343,
+                  0.1934666397871984,
+                  0.23463981261737943
+                ],
+                "Y": 0.19869409647791325
+              },
+              "enhanced": {
+                "RGB": [
+                  0.2040997446650178,
+                  0.19348306233798723,
+                  0.2346619034416525
+                ],
+                "Y": 0.19871328132839855
+              },
+              "gi": {
+                "RGB": [
+                  0.15776834804664774,
+                  0.13340885058873586,
+                  0.12951137086018208
+                ],
+                "Y": 0.13830628171188633
+              },
+              "GIchangePercent": -30.399075095882544
+            },
+            "gable": {
+              "v3": {
+                "RGB": [
+                  0.1820124377971705,
+                  0.20027108340541896,
+                  0.26314416530783735
+                ],
+                "Y": 0.20092873186245996
+              },
+              "enhanced": {
+                "RGB": [
+                  0.18193988278577067,
+                  0.20018997944313818,
+                  0.2630736667121803
+                ],
+                "Y": 0.20085021111460669
+              },
+              "gi": {
+                "RGB": [
+                  0.1623726827251769,
+                  0.15823113264911648,
+                  0.16470215797731744
+                ],
+                "Y": 0.15957883422398303
+              },
+              "GIchangePercent": -20.548336325658077
+            },
+            "ground": {
+              "v3": {
+                "RGB": [
+                  0.06476533623961915,
+                  0.08217433855359618,
+                  0.05663829348540342
+                ],
+                "Y": 0.07662948220772114
+              },
+              "enhanced": {
+                "RGB": [
+                  0.06486207221860343,
+                  0.08225409415628035,
+                  0.05680722893840107
+                ],
+                "Y": 0.07671928662359935
+              },
+              "gi": {
+                "RGB": [
+                  0.06484887355986299,
+                  0.0822495624840866,
+                  0.05679578331547755
+                ],
+                "Y": 0.07671241316282308
+              },
+              "GIchangePercent": -0.008959234475147682
+            }
+          },
+          "dusk": {
+            "facade": {
+              "v3": {
+                "RGB": [
+                  0.04700393537349848,
+                  0.04446362158549837,
+                  0.07292275255646356
+                ],
+                "Y": 0.047058441552930874
+              },
+              "enhanced": {
+                "RGB": [
+                  0.04701241646927006,
+                  0.04446899292485075,
+                  0.07292689587352384
+                ],
+                "Y": 0.04706438536328849
+              },
+              "gi": {
+                "RGB": [
+                  0.03537408462139839,
+                  0.03382614959140017,
+                  0.040515437319309
+                ],
+                "Y": 0.03463820715273281
+              },
+              "GIchangePercent": -26.402508212182962
+            },
+            "gable": {
+              "v3": {
+                "RGB": [
+                  0.041777364447152264,
+                  0.0459248237571091,
+                  0.08179163383872369
+                ],
+                "Y": 0.04763265759570485
+              },
+              "enhanced": {
+                "RGB": [
+                  0.0417674456356414,
+                  0.04592489053886255,
+                  0.08178554057205854
+                ],
+                "Y": 0.04763015668483448
+              },
+              "gi": {
+                "RGB": [
+                  0.036123844279350996,
+                  0.040035938941702404,
+                  0.05206623141671778
+                ],
+                "Y": 0.0400728147331826
+              },
+              "GIchangePercent": -15.86671654611237
+            },
+            "ground": {
+              "v3": {
+                "RGB": [
+                  0.04601170340106369,
+                  0.04905748864088151,
+                  0.029008008603205817
+                ],
+                "Y": 0.04696238224017606
+              },
+              "enhanced": {
+                "RGB": [
+                  0.04601989493670846,
+                  0.04906036126718475,
+                  0.029024850895739467
+                ],
+                "Y": 0.04696739427650714
+              },
+              "gi": {
+                "RGB": [
+                  0.04615711399122601,
+                  0.049151465585547345,
+                  0.029200726157200114
+                ],
+                "Y": 0.047074423049867954
+              },
+              "GIchangePercent": 0.22787888280688673
+            }
+          }
+        },
+        "bounce": {
+          "facade": {
+            "on": {
+              "RGB": [
+                0.13333859974227863,
+                0.13788479278045884,
+                0.1693106663344462
+              ],
+              "Y": 0.1391872202111396,
+              "minY": 0.13906720479773935,
+              "maxY": 0.13930696485481,
+              "samples": 6
+            },
+            "sky-only": {
+              "RGB": [
+                0.12461872819905254,
+                0.12883668238135879,
+                0.16559932522424056
+              ],
+              "Y": 0.13059420813545652,
+              "minY": 0.1304871977619757,
+              "maxY": 0.13067724387857432,
+              "samples": 6
+            },
+            "surfaceBounceRGB": [
+              0.008719871543226093,
+              0.009048110399100057,
+              0.0037113411102056293
+            ],
+            "surfaceBounceY": 0.008593012075683073,
+            "percent": 6.579933519540257
+          },
+          "gable": {
+            "on": {
+              "RGB": [
+                0.13548942460505572,
+                0.16294890762384856,
+                0.21872136460619795
+              ],
+              "Y": 0.1611377929281788,
+              "minY": 0.16098095355852968,
+              "maxY": 0.1613524605627899,
+              "samples": 6
+            },
+            "sky-only": {
+              "RGB": [
+                0.130359238550428,
+                0.15633461716338487,
+                0.21586322984948103
+              ],
+              "Y": 0.15511021750620638,
+              "minY": 0.15497298159892425,
+              "maxY": 0.15531513279277182,
+              "samples": 6
+            },
+            "surfaceBounceRGB": [
+              0.005130186054627728,
+              0.00661429046046369,
+              0.0028581347567169235
+            ],
+            "surfaceBounceY": 0.006027575421972448,
+            "percent": 3.885995080711732
+          },
+          "ground": {
+            "on": {
+              "RGB": [
+                0.10399328690369161,
+                0.12424835819342397,
+                0.06983587668235137
+              ],
+              "Y": 0.11601354887212742,
+              "minY": 0.11585899348264479,
+              "maxY": 0.11622470614517463,
+              "samples": 6
+            },
+            "sky-only": {
+              "RGB": [
+                0.10402065150495408,
+                0.12426908986713829,
+                0.0698729381173351
+              ],
+              "Y": 0.11603686971500213,
+              "minY": 0.11585889643470465,
+              "maxY": 0.11622469396670995,
+              "samples": 6
+            },
+            "surfaceBounceRGB": [
+              -2.736460126247231e-05,
+              -2.07316737143165e-05,
+              -3.706143498372061e-05
+            ],
+            "surfaceBounceY": -2.3320842874705402e-05,
+            "percent": -0.02009778696373288
+          }
+        }
+      },
+      "motion": [
+        {
+          "aa": "taa",
+          "missionTimeBefore": 3.538,
+          "missionTimeAfter": 9.08,
+          "BLASbuildsBefore": 75,
+          "BLASbuildsAfter": 75,
+          "image": {
+            "file": "everon-motion-taa.png",
+            "sha256": "ecd60b95f1b928b18a3c6d07e03524f5aa3ef5b6b1911353e1ca03803d6315e5"
+          }
+        },
+        {
+          "aa": "fsr-quality",
+          "missionTimeBefore": 11.089,
+          "missionTimeAfter": 16.582,
+          "BLASbuildsBefore": 75,
+          "BLASbuildsAfter": 75,
+          "image": {
+            "file": "everon-motion-fsr-quality.png",
+            "sha256": "9fc35e04ede009d0a85520761ed2f73cc430da0d92894e546103e995f385e827"
+          }
+        }
+      ],
+      "distanceSweep": [
+        {
+          "counters": {
+            "bounceRays": 92398,
+            "hits": 45559,
+            "eligibleHits": 40022,
+            "rejectedMaterials": 5537,
+            "sunRays": 35584,
+            "sunBlocked": 7085,
+            "eligibleReceivers": 92499,
+            "sunVisible": 28499
+          },
+          "receiverFamilies": {
+            "catalog": {
+              "native": 0,
+              "CPU": 0
+            },
+            "rock": {
+              "native": 0,
+              "CPU": 0
+            },
+            "roof": {
+              "native": 0,
+              "CPU": 0
+            },
+            "wood": {
+              "native": 1142,
+              "CPU": 0
+            },
+            "facade": {
+              "native": 91357,
+              "CPU": 0
+            },
+            "stone": {
+              "native": 0,
+              "CPU": 0
+            },
+            "concrete": {
+              "native": 0,
+              "CPU": 0
+            }
+          },
+          "raw": "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=0 reflectorInstances=6 completedDispatches=7002 bounceRays=92398 hits=45559 eligibleHits=40022 rejectedMaterials=5537 sunRays=35584 sunBlocked=7085 eligibleReceivers=92499 dynamicHits=0 sunVisible=28499 terrain(eligible/sunlit)=32058/28034 stockPBR(eligible/sunlit)=7964/465 catalog(eligible/sunlit)=0/0 backfacing=4438 missingColor=5537 secondarySky(rays/blocked/visible/rejectedHemisphere)=35418/10525/24893/4604 primarySky(rays/blocked/visible/belowHorizon)=39002/1480/37522/7837 receiverPixels(native/CPU)=catalog:0/0,rock:0/0,roof:0/0,wood:1142/0,facade:91357/0,stone:0/0,concrete:0/0, skyEpi(dome/weather/vertical/reference)=[0.268212,0.461311,0.858996][0.521687,0.688302,1.02241][0.266009,0.349013,0.507577][0.748414,0.911408,1.28] skyCalibration=2.01209 transportMean(incoming/replacement/capturedAmbient/reflectanceFog)=[0.480464,0.627101,0.880352][0.106519,0.116109,0.153179][0.166208,0.16481,0.217925][0.222173,0.18088,0.170217] transportSamples=185 GPUms(trace/filter/temporal/BLAS/TLAS)=0.293888/0.05648/0.050336/3.2e-05/6.4e-05 CPUrecordMs=0.1025 temporal=on history(accepted/rejected/clamped/dynamic)=90378/2121/305/0 historyResets=25 phase=17 historyBytes=9830400 historyAllocations=10; last completed frame; one bounce, half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain"
+        },
+        {
+          "counters": {
+            "bounceRays": 14504,
+            "hits": 6597,
+            "eligibleHits": 5810,
+            "rejectedMaterials": 787,
+            "sunRays": 4942,
+            "sunBlocked": 1042,
+            "eligibleReceivers": 14539,
+            "sunVisible": 3900
+          },
+          "receiverFamilies": {
+            "catalog": {
+              "native": 0,
+              "CPU": 0
+            },
+            "rock": {
+              "native": 0,
+              "CPU": 0
+            },
+            "roof": {
+              "native": 15,
+              "CPU": 0
+            },
+            "wood": {
+              "native": 189,
+              "CPU": 0
+            },
+            "facade": {
+              "native": 14335,
+              "CPU": 0
+            },
+            "stone": {
+              "native": 0,
+              "CPU": 0
+            },
+            "concrete": {
+              "native": 0,
+              "CPU": 0
+            }
+          },
+          "raw": "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=0 reflectorInstances=6 completedDispatches=4972 bounceRays=14504 hits=6597 eligibleHits=5810 rejectedMaterials=787 sunRays=4942 sunBlocked=1042 eligibleReceivers=14539 dynamicHits=0 sunVisible=3900 terrain(eligible/sunlit)=4492/3858 stockPBR(eligible/sunlit)=1318/42 catalog(eligible/sunlit)=0/0 backfacing=868 missingColor=787 secondarySky(rays/blocked/visible/rejectedHemisphere)=4975/1228/3747/835 primarySky(rays/blocked/visible/belowHorizon)=6174/153/6021/1733 receiverPixels(native/CPU)=catalog:0/0,rock:0/0,roof:15/0,wood:189/0,facade:14335/0,stone:0/0,concrete:0/0, skyEpi(dome/weather/vertical/reference)=[0.268212,0.461311,0.858996][0.5216,0.688223,1.02235][0.265771,0.348795,0.507411][0.748414,0.911408,1.28] skyCalibration=2.01209 transportMean(incoming/replacement/capturedAmbient/reflectanceFog)=[0.594046,0.766409,1.07654][0.144355,0.16716,0.229411][0.19105,0.20322,0.271772][0.255028,0.223276,0.212271] transportSamples=31 GPUms(trace/filter/temporal/BLAS/TLAS)=0.206848/0.03424/0.028128/3.2e-05/6.4e-05 CPUrecordMs=0.1071 temporal=on history(accepted/rejected/clamped/dynamic)=12999/1540/236/0 historyResets=15 phase=3 historyBytes=9830400 historyAllocations=10; last completed frame; one bounce, half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain"
+        },
+        {
+          "counters": {
+            "bounceRays": 911,
+            "hits": 384,
+            "eligibleHits": 330,
+            "rejectedMaterials": 54,
+            "sunRays": 250,
+            "sunBlocked": 47,
+            "eligibleReceivers": 918,
+            "sunVisible": 203
+          },
+          "receiverFamilies": {
+            "catalog": {
+              "native": 0,
+              "CPU": 0
+            },
+            "rock": {
+              "native": 0,
+              "CPU": 0
+            },
+            "roof": {
+              "native": 10,
+              "CPU": 0
+            },
+            "wood": {
+              "native": 23,
+              "CPU": 0
+            },
+            "facade": {
+              "native": 885,
+              "CPU": 0
+            },
+            "stone": {
+              "native": 0,
+              "CPU": 0
+            },
+            "concrete": {
+              "native": 0,
+              "CPU": 0
+            }
+          },
+          "raw": "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=0 reflectorInstances=8 completedDispatches=5379 bounceRays=911 hits=384 eligibleHits=330 rejectedMaterials=54 sunRays=250 sunBlocked=47 eligibleReceivers=918 dynamicHits=0 sunVisible=203 terrain(eligible/sunlit)=239/203 stockPBR(eligible/sunlit)=91/0 catalog(eligible/sunlit)=0/0 backfacing=80 missingColor=54 secondarySky(rays/blocked/visible/rejectedHemisphere)=258/54/204/72 primarySky(rays/blocked/visible/belowHorizon)=381/6/375/146 receiverPixels(native/CPU)=catalog:0/0,rock:0/0,roof:10/0,wood:23/0,facade:885/0,stone:0/0,concrete:0/0, skyEpi(dome/weather/vertical/reference)=[0.268212,0.461311,0.858996][0.521476,0.688108,1.02226][0.265447,0.348497,0.507184][0.748414,0.911408,1.28] skyCalibration=2.01209 transportMean(incoming/replacement/capturedAmbient/reflectanceFog)=[1.2503,1.64209,2.12687][0.230447,0.283341,0.392011][0.136963,0.156616,0.234253][0.184314,0.172549,0.184314] transportSamples=1 GPUms(trace/filter/temporal/BLAS/TLAS)=0.205824/0.02512/0.024512/6.4e-05/6.4e-05 CPUrecordMs=0.1043 temporal=on history(accepted/rejected/clamped/dynamic)=673/245/27/0 historyResets=17 phase=26 historyBytes=9830400 historyAllocations=10; last completed frame; one bounce, half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain"
+        },
+        {
+          "counters": {
+            "bounceRays": 0,
+            "hits": 0,
+            "eligibleHits": 0,
+            "rejectedMaterials": 0,
+            "sunRays": 0,
+            "sunBlocked": 0,
+            "eligibleReceivers": 0,
+            "sunVisible": 0
+          },
+          "receiverFamilies": {
+            "catalog": {
+              "native": 0,
+              "CPU": 0
+            },
+            "rock": {
+              "native": 0,
+              "CPU": 0
+            },
+            "roof": {
+              "native": 0,
+              "CPU": 0
+            },
+            "wood": {
+              "native": 0,
+              "CPU": 0
+            },
+            "facade": {
+              "native": 0,
+              "CPU": 0
+            },
+            "stone": {
+              "native": 0,
+              "CPU": 0
+            },
+            "concrete": {
+              "native": 0,
+              "CPU": 0
+            }
+          },
+          "raw": "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=0 reflectorInstances=8 completedDispatches=5785 bounceRays=0 hits=0 eligibleHits=0 rejectedMaterials=0 sunRays=0 sunBlocked=0 eligibleReceivers=0 dynamicHits=0 sunVisible=0 terrain(eligible/sunlit)=0/0 stockPBR(eligible/sunlit)=0/0 catalog(eligible/sunlit)=0/0 backfacing=0 missingColor=0 secondarySky(rays/blocked/visible/rejectedHemisphere)=0/0/0/0 primarySky(rays/blocked/visible/belowHorizon)=0/0/0/0 receiverPixels(native/CPU)=catalog:0/0,rock:0/0,roof:0/0,wood:0/0,facade:0/0,stone:0/0,concrete:0/0, skyEpi(dome/weather/vertical/reference)=[0.268212,0.461311,0.858996][0.521343,0.687986,1.02217][0.265148,0.348222,0.506973][0.748414,0.911408,1.28] skyCalibration=2.01209 transportMean(incoming/replacement/capturedAmbient/reflectanceFog)=[0,0,0][0,0,0][0,0,0][0,0,0] transportSamples=0 GPUms(trace/filter/temporal/BLAS/TLAS)=0.185344/0.0256/0.024512/6.4e-05/9.6e-05 CPUrecordMs=0.0887 temporal=on history(accepted/rejected/clamped/dynamic)=0/0/0/0 historyResets=19 phase=16 historyBytes=9830400 historyAllocations=10; last completed frame; one bounce, half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain"
+        },
+        {
+          "counters": {
+            "bounceRays": 0,
+            "hits": 0,
+            "eligibleHits": 0,
+            "rejectedMaterials": 0,
+            "sunRays": 0,
+            "sunBlocked": 0,
+            "eligibleReceivers": 0,
+            "sunVisible": 0
+          },
+          "receiverFamilies": {
+            "catalog": {
+              "native": 0,
+              "CPU": 0
+            },
+            "rock": {
+              "native": 0,
+              "CPU": 0
+            },
+            "roof": {
+              "native": 0,
+              "CPU": 0
+            },
+            "wood": {
+              "native": 0,
+              "CPU": 0
+            },
+            "facade": {
+              "native": 0,
+              "CPU": 0
+            },
+            "stone": {
+              "native": 0,
+              "CPU": 0
+            },
+            "concrete": {
+              "native": 0,
+              "CPU": 0
+            }
+          },
+          "raw": "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=0 reflectorInstances=8 completedDispatches=6189 bounceRays=0 hits=0 eligibleHits=0 rejectedMaterials=0 sunRays=0 sunBlocked=0 eligibleReceivers=0 dynamicHits=0 sunVisible=0 terrain(eligible/sunlit)=0/0 stockPBR(eligible/sunlit)=0/0 catalog(eligible/sunlit)=0/0 backfacing=0 missingColor=0 secondarySky(rays/blocked/visible/rejectedHemisphere)=0/0/0/0 primarySky(rays/blocked/visible/belowHorizon)=0/0/0/0 receiverPixels(native/CPU)=catalog:0/0,rock:0/0,roof:0/0,wood:0/0,facade:0/0,stone:0/0,concrete:0/0, skyEpi(dome/weather/vertical/reference)=[0.268212,0.461311,0.858996][0.521269,0.687915,1.02211][0.264712,0.34782,0.506663][0.748414,0.911408,1.28] skyCalibration=2.01209 transportMean(incoming/replacement/capturedAmbient/reflectanceFog)=[0,0,0][0,0,0][0,0,0][0,0,0] transportSamples=0 GPUms(trace/filter/temporal/BLAS/TLAS)=0.185344/0.025248/0.024416/6.4e-05/6.4e-05 CPUrecordMs=0.1056 temporal=on history(accepted/rejected/clamped/dynamic)=0/0/0/0 historyResets=21 phase=4 historyBytes=9830400 historyAllocations=10; last completed frame; one bounce, half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain"
+        },
+        {
+          "counters": {
+            "bounceRays": 0,
+            "hits": 0,
+            "eligibleHits": 0,
+            "rejectedMaterials": 0,
+            "sunRays": 0,
+            "sunBlocked": 0,
+            "eligibleReceivers": 0,
+            "sunVisible": 0
+          },
+          "receiverFamilies": {
+            "catalog": {
+              "native": 0,
+              "CPU": 0
+            },
+            "rock": {
+              "native": 0,
+              "CPU": 0
+            },
+            "roof": {
+              "native": 0,
+              "CPU": 0
+            },
+            "wood": {
+              "native": 0,
+              "CPU": 0
+            },
+            "facade": {
+              "native": 0,
+              "CPU": 0
+            },
+            "stone": {
+              "native": 0,
+              "CPU": 0
+            },
+            "concrete": {
+              "native": 0,
+              "CPU": 0
+            }
+          },
+          "raw": "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=0 reflectorInstances=8 completedDispatches=6597 bounceRays=0 hits=0 eligibleHits=0 rejectedMaterials=0 sunRays=0 sunBlocked=0 eligibleReceivers=0 dynamicHits=0 sunVisible=0 terrain(eligible/sunlit)=0/0 stockPBR(eligible/sunlit)=0/0 catalog(eligible/sunlit)=0/0 backfacing=0 missingColor=0 secondarySky(rays/blocked/visible/rejectedHemisphere)=0/0/0/0 primarySky(rays/blocked/visible/belowHorizon)=0/0/0/0 receiverPixels(native/CPU)=catalog:0/0,rock:0/0,roof:0/0,wood:0/0,facade:0/0,stone:0/0,concrete:0/0, skyEpi(dome/weather/vertical/reference)=[0.268212,0.461311,0.858996][0.521256,0.687898,1.02208][0.264127,0.347278,0.506242][0.748414,0.911408,1.28] skyCalibration=2.01209 transportMean(incoming/replacement/capturedAmbient/reflectanceFog)=[0,0,0][0,0,0][0,0,0][0,0,0] transportSamples=0 GPUms(trace/filter/temporal/BLAS/TLAS)=0.18432/0.02416/0.024224/6.4e-05/6.4e-05 CPUrecordMs=0.0937 temporal=on history(accepted/rejected/clamped/dynamic)=0/0/0/0 historyResets=23 phase=28 historyBytes=9830400 historyAllocations=10; last completed frame; one bounce, half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain"
+        },
+        {
+          "counters": {
+            "bounceRays": 92398,
+            "hits": 45559,
+            "eligibleHits": 40022,
+            "rejectedMaterials": 5537,
+            "sunRays": 35584,
+            "sunBlocked": 7085,
+            "eligibleReceivers": 92499,
+            "sunVisible": 28499
+          },
+          "receiverFamilies": {
+            "catalog": {
+              "native": 0,
+              "CPU": 0
+            },
+            "rock": {
+              "native": 0,
+              "CPU": 0
+            },
+            "roof": {
+              "native": 0,
+              "CPU": 0
+            },
+            "wood": {
+              "native": 1142,
+              "CPU": 0
+            },
+            "facade": {
+              "native": 91357,
+              "CPU": 0
+            },
+            "stone": {
+              "native": 0,
+              "CPU": 0
+            },
+            "concrete": {
+              "native": 0,
+              "CPU": 0
+            }
+          },
+          "raw": "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=0 reflectorInstances=6 completedDispatches=7002 bounceRays=92398 hits=45559 eligibleHits=40022 rejectedMaterials=5537 sunRays=35584 sunBlocked=7085 eligibleReceivers=92499 dynamicHits=0 sunVisible=28499 terrain(eligible/sunlit)=32058/28034 stockPBR(eligible/sunlit)=7964/465 catalog(eligible/sunlit)=0/0 backfacing=4438 missingColor=5537 secondarySky(rays/blocked/visible/rejectedHemisphere)=35418/10525/24893/4604 primarySky(rays/blocked/visible/belowHorizon)=39002/1480/37522/7837 receiverPixels(native/CPU)=catalog:0/0,rock:0/0,roof:0/0,wood:1142/0,facade:91357/0,stone:0/0,concrete:0/0, skyEpi(dome/weather/vertical/reference)=[0.268212,0.461311,0.858996][0.521687,0.688302,1.02241][0.266009,0.349013,0.507577][0.748414,0.911408,1.28] skyCalibration=2.01209 transportMean(incoming/replacement/capturedAmbient/reflectanceFog)=[0.480464,0.627101,0.880352][0.106519,0.116109,0.153179][0.166208,0.16481,0.217925][0.222173,0.18088,0.170217] transportSamples=185 GPUms(trace/filter/temporal/BLAS/TLAS)=0.293888/0.05648/0.050336/3.2e-05/6.4e-05 CPUrecordMs=0.1025 temporal=on history(accepted/rejected/clamped/dynamic)=90378/2121/305/0 historyResets=25 phase=17 historyBytes=9830400 historyAllocations=10; last completed frame; one bounce, half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain"
+        }
+      ],
+      "screenshots": {
+        "morning": {
+          "v3": {
+            "file": "everon-morning-v3.png",
+            "sha256": "93c009c2d050c11d1e8890292017459bf1820d9cc5c802328ba3a30921b5c1bb"
+          },
+          "enhanced": {
+            "file": "everon-morning-enhanced.png",
+            "sha256": "aded146681547fe112a1b85cb1dad20a7fcbf919a2447d2ec75a8e1da0890493"
+          },
+          "gi": {
+            "file": "everon-morning-gi.png",
+            "sha256": "b457c3236d5b6fe8bc4a9dc8a3aca10f3feb85fe5bb10b2c6411c85507536ddb"
+          }
+        },
+        "noon": {
+          "v3": {
+            "file": "everon-noon-v3.png",
+            "sha256": "15b1dbcfe038f936d44cfa3c1da3bd0cc1cdf4f63fbce459edc57ff1d1bc9f8c"
+          },
+          "enhanced": {
+            "file": "everon-noon-enhanced.png",
+            "sha256": "b28add8e1655f4ab94198c51fe06b531e0b27137cb4b5aa5ec92c6a0ff7b29d2"
+          },
+          "gi": {
+            "file": "everon-noon-gi.png",
+            "sha256": "86924e02a2d9fbf174f8213c3645d069a0e7dbf5ee0ea5f8498381e44088888f"
+          }
+        },
+        "overcast": {
+          "v3": {
+            "file": "everon-overcast-v3.png",
+            "sha256": "187a67a1a49807ea0ac801eebac54ab781616fc2b549455fcef5494114a6762b"
+          },
+          "enhanced": {
+            "file": "everon-overcast-enhanced.png",
+            "sha256": "8711547b0ef7ff3908b99d38cacbe61310124be94220beb189f192d8263a05b9"
+          },
+          "gi": {
+            "file": "everon-overcast-gi.png",
+            "sha256": "207044673a2807c74cbe7d3ee1c00bf2cc65bd91e6a9e9808c7cc20fa434b939"
+          }
+        },
+        "dusk": {
+          "v3": {
+            "file": "everon-dusk-v3.png",
+            "sha256": "2d89e6d4d85d1e9431e2780bd4b6192b0dcce8f793314457036fde6f933bf141"
+          },
+          "enhanced": {
+            "file": "everon-dusk-enhanced.png",
+            "sha256": "8b06564e3ae66b367076db19ed13965ff20d9d8cc89421e0979a5f9fd84b5ef8"
+          },
+          "gi": {
+            "file": "everon-dusk-gi.png",
+            "sha256": "cd9a42045e41b316498fc3f74dc981febe25d3e4e758d8f2276d6820acd9024d"
+          }
+        }
+      }
+    }
+  },
+  "baselineMotionControl": {
+    "executableSHA256": "345AD3268023B348C4D4A41FA6D8F18FFA2DDE87CCDC85DCEA58334B64E93976",
+    "validation": {
+      "presented": 8084,
+      "errors": 0,
+      "warnings": 0,
+      "validation": "on",
+      "synchronizationValidation": "on",
+      "loaderDiagnostics": {
+        "ERROR": 1,
+        "WARNING": 6
+      }
+    },
+    "result": [
+      {
+        "aa": "taa",
+        "BLASbuildsBefore": 78,
+        "BLASbuildsAfter": 80,
+        "delta": 2
+      },
+      {
+        "aa": "fsr-quality",
+        "BLASbuildsBefore": 80,
+        "BLASbuildsAfter": 82,
+        "delta": 2
+      }
+    ],
+    "note": "The small two-BLAS-build increment per new Malden roof sweep also occurs on unchanged 78e39d9; not fixed or claimed stable by this milestone."
+  },
+  "coast": {
+    "start": {
+      "result": "[\"RTShadows=on capability=available terrainPatches=9 foliageInstances=52 lastCompletedRays=1172259 lastCompletedHits=4177 totalRays=24917912234 rayQueriesExecuted=yes lastWorldDispatch=yes lastTerrainHits=0 lastAlphaHits=0 lastGPUms(rays/compose)=0.333728/0.039712; shared RTAO=off capability=available BLAS=27 cachedBLAS=27 TLAS=2 instances=76 instancedTriangles=10667 completedPasses=27648 lastCompletedRays=0 lastCompletedHits=0 totalRays=592513480 rayQueriesExecuted=yes lastWorldDispatch=no BLASbuilds=663 TLASbuilds=85 lastGPUms(BLAS/TLAS/rays/filter/frame)=6.4e-05/6.4e-05/0/0/3.52115; shared static LOD0 scene radius=160m; dynamic=off; AO radius=4m includes bounded terrain, excludes foliage cards; ambient-only composition; static collection excludes animation/damage; blended effects/proxies excluded; sunlight-only native opaque/cutout and terrain receivers, CSM fallback retained\",\"RTReflections=on capability=available waterRays=1115755 hits=61400 shadedHits=61400 shadedTerrain=51928 shadedAlpha=21 totalWaterRays=212135530 totalShadedHits=11459804 rayQueriesExecuted=yes hitShadingExecuted=yes lastWorldDispatch=yes hitSurface=unavailable (diagnostics disabled) lastGPUms(traceShade/filter)=0.475136/0.165664; shared RTAO=off capability=available BLAS=27 cachedBLAS=27 TLAS=2 instances=76 instancedTriangles=10667 completedPasses=27648 lastCompletedRays=0 lastCompletedHits=0 totalRays=592513480 rayQueriesExecuted=yes lastWorldDispatch=no BLASbuilds=663 TLASbuilds=85 lastGPUms(BLAS/TLAS/rays/filter/frame)=6.4e-05/6.4e-05/0/0/3.52115; shared static LOD0 scene radius=160m; dynamic=off; AO radius=4m includes bounded terrain, excludes foliage cards; ambient-only composition; static collection excludes animation/damage; blended effects/proxies excluded; actual water only, 80m receivers/70m rays, textured hits and weather sky fallback\",\"WaterRefraction requested=on active=on captured=yes composited=yes captures=329 composites=329 lastGPUms(capture/optics)=0.045056/0.122880 fallback=none; raster-only coastal terrain, missing bottom/underwater retains original water\",5.645]",
+      "ok": true
+    },
+    "end": {
+      "result": "[\"RTShadows=on capability=available terrainPatches=9 foliageInstances=52 lastCompletedRays=1179671 lastCompletedHits=2910 totalRays=25194027419 rayQueriesExecuted=yes lastWorldDispatch=yes lastTerrainHits=0 lastAlphaHits=0 lastGPUms(rays/compose)=0.340832/0.039008; shared RTAO=off capability=available BLAS=18 cachedBLAS=18 TLAS=2 instances=76 instancedTriangles=10667 completedPasses=27883 lastCompletedRays=0 lastCompletedHits=0 totalRays=592513480 rayQueriesExecuted=yes lastWorldDispatch=no BLASbuilds=663 TLASbuilds=85 lastGPUms(BLAS/TLAS/rays/filter/frame)=6.4e-05/6.4e-05/0/0/3.54682; shared static LOD0 scene radius=160m; dynamic=off; AO radius=4m includes bounded terrain, excludes foliage cards; ambient-only composition; static collection excludes animation/damage; blended effects/proxies excluded; sunlight-only native opaque/cutout and terrain receivers, CSM fallback retained\",\"RTReflections=on capability=available waterRays=1132842 hits=54421 shadedHits=54421 shadedTerrain=45965 shadedAlpha=52 totalWaterRays=475872603 totalShadedHits=25227855 rayQueriesExecuted=yes hitShadingExecuted=yes lastWorldDispatch=yes hitSurface=unavailable (diagnostics disabled) lastGPUms(traceShade/filter)=0.483328/0.163616; shared RTAO=off capability=available BLAS=18 cachedBLAS=18 TLAS=2 instances=76 instancedTriangles=10667 completedPasses=27883 lastCompletedRays=0 lastCompletedHits=0 totalRays=592513480 rayQueriesExecuted=yes lastWorldDispatch=no BLASbuilds=663 TLASbuilds=85 lastGPUms(BLAS/TLAS/rays/filter/frame)=6.4e-05/6.4e-05/0/0/3.54682; shared static LOD0 scene radius=160m; dynamic=off; AO radius=4m includes bounded terrain, excludes foliage cards; ambient-only composition; static collection excludes animation/damage; blended effects/proxies excluded; actual water only, 80m receivers/70m rays, textured hits and weather sky fallback\",\"WaterRefraction requested=on active=on captured=yes composited=yes captures=564 composites=564 lastGPUms(capture/optics)=0.045056/0.125952 fallback=none; raster-only coastal terrain, missing bottom/underwater retains original water\",11.196]",
+      "ok": true
+    }
+  },
+  "localLights": {
+    "result": "\"requested=on active=2 max=2 resolution=1024 range=160m filter=3x3-PCF RT=not-required depthGPUms=0.108832 vertices=19962,19794 light0=3115.806152,226.014282,6336.313965 dir=0.990344,-0.138311,0.009334 light1=3115.806152,226.015747,6335.571777 dir=0.992500,-0.121675,-0.011805\"",
+    "ok": true
+  },
+  "combinationSmoke": [
+    "RT sunlight",
+    "RT water/refraction and live waves",
+    "RTAO/SSAO",
+    "clouds",
+    "weather/fog/rain",
+    "night-eye fallback",
+    "real Jeep headlights/local shadows",
+    "TAA/MSAA4/FSR Quality",
+    "restored stock PBR v3"
+  ],
+  "gl33": {
+    "executableSHA256": "E8C1263C97DD1CBA43B5891983ECAD38B99C49A3C0508CB9B3481BD76EC4F07A",
+    "result": {
+      "commands": [
+        {
+          "mode": "off",
+          "result": {
+            "result": "\"UNSUPPORTED: PBR prototype requires Vulkan\"",
+            "ok": true
+          }
+        },
+        {
+          "mode": "on",
+          "result": {
+            "result": "\"UNSUPPORTED: PBR prototype requires Vulkan\"",
+            "ok": true
+          }
+        },
+        {
+          "mode": "enhanced",
+          "result": {
+            "result": "\"UNSUPPORTED: PBR prototype requires Vulkan\"",
+            "ok": true
+          }
+        },
+        {
+          "mode": "off",
+          "result": {
+            "result": "\"UNSUPPORTED: PBR prototype requires Vulkan\"",
+            "ok": true
+          }
+        }
+      ],
+      "worldROI": [
+        300,
+        600,
+        1000,
+        850
+      ],
+      "changedPixels": 0
+    }
+  },
+  "farAO": {
+    "ssao": {
+      "GIOnVersusAOModeOnlyChangedPixels": 0,
+      "aoEffectMeanRGBCodeValueDifference": [
+        0.1549752393714581,
+        0.1773281166949895,
+        0.16726431549869367
+      ],
+      "note": "AA Off, cloud shadows Off, same grounded distant camera; AO has a nonzero effect, but GI does not suppress it beyond the shared receiver bound."
+    },
+    "rtao": {
+      "GIOnVersusAOModeOnlyChangedPixels": 0,
+      "aoEffectMeanRGBCodeValueDifference": [
+        0.1294875130072841,
+        0.17390738813735693,
+        0.19814632165235554
+      ],
+      "note": "AA Off, cloud shadows Off, same grounded distant camera; AO has a nonzero effect, but GI does not suppress it beyond the shared receiver bound."
+    }
+  },
+  "loaderNote": "Startup also reports pre-existing external overlay-manifest and intentionally disabled implicit-layer diagnostics. These are distinct from Vulkan validation; all gameplay qualification requires validation and synchronization validation actually enabled.",
+  "tests": {
+    "vulkanCases": 50,
+    "vulkanAssertions": 14488,
+    "gl33Cases": 49,
+    "gl33Assertions": 14448,
+    "driverFreeChecks": 684
+  },
+  "originalSources": [
+    {
+      "file": "DTA\\Data.pbo",
+      "sha256": "1587f9c052ff38967463d851ca85a03efd2db09d063da183046a9b16181d5e2f",
+      "unchanged": true
+    },
+    {
+      "file": "DTA\\Data3D.pbo",
+      "sha256": "10528ef9b5112896898ad8667e83601ff47f95231652c73409d57b7227a8a00f",
+      "unchanged": true
+    },
+    {
+      "file": "Worlds\\abel.wrp",
+      "sha256": "1c13aca4d3300db3546583c82ffa132c1149831e42227f2b47019c74040462a5",
+      "unchanged": true
+    },
+    {
+      "file": "Worlds\\eden.wrp",
+      "sha256": "5a2550b27612fc4c8ccdec55ce2555c1ed23114d46f8b687ce5fb8b273515a79",
+      "unchanged": true
+    }
+  ],
+  "limitations": [
+    "22 exact identities can receive only with reliable PBR/captured lighting and opaque coverage; no broad texture heuristics or terrain receivers.",
+    "Rock and additional wall identities are policy-enabled; this live milestone specifically demonstrates roof tiles, barn facade/door and wood, plus existing stone/concrete catalog walls.",
+    "Some original wood/plaster sections use unsupported lighting/coverage modes and intentionally remain legacy.",
+    "Unmeasured bounded stock reflectance retains baked shading; sky calibration is engine-relative.",
+    "One surface bounce, finite scene/25m transport/45m receivers/80m visibility, no indirect specular or reflected local-light illumination.",
+    "Thin/depth-discontinuous receivers can retain legacy ambient when reconstruction fails.",
+    "Existing foliage-card artifacts, texture blur, temporal/spatial noise and legacy/PBR lighting boundaries remain.",
+    "Motion checks are real render-camera mission sweeps, not player-input responsiveness or mission completion.",
+    "Screenshot ROI means are after AA/output, not raw HDR calibration. Bounce isolation is On minus sky-only, combining sunlight and reflected skylight.",
+    "Driver-free tests deliberately inject validation errors; actual gameplay logs determine zero-error Vulkan qualification."
+  ]
+}

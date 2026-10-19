@@ -1,11 +1,32 @@
 #pragma once
 #include <PoseidonVK/ShapeTransformVK.hpp>
 #include <PoseidonVK/ShapeLightingData.hpp>
+#include <PoseidonVK/PBRMaterialVK.hpp>
+#include <PoseidonVK/EnhancedMaterialVK.hpp>
 #include <Poseidon/Graphics/Core/TLVertex.hpp>
 #include <Poseidon/Graphics/Rendering/Lighting/Lights.hpp>
 
 namespace Poseidon::vk
 {
+// Call only after stock/catalog material setup. The caller's opaque-world gate
+// and captured PBR material remain prerequisites, not consequences of identity.
+inline void QualifyGIReceiver(ShapeLighting& lighting, bool software)
+{
+    if (!(lighting.pbrDiffuse[3] >= 1 && lighting.pbrDiffuse[3] <= 7) ||
+        !(lighting.pbr[3] >= 1 && lighting.pbr[3] < 64 + std::size(StockPBRMaterials))) return;
+    const int family = int(lighting.pbrDiffuse[3]);
+    const unsigned id = unsigned(lighting.pbr[3]);
+    if (float(family) != lighting.pbrDiffuse[3] || float(id) != lighting.pbr[3]) return;
+    const bool stock = id >= 64 && id < 64 + std::size(StockPBRMaterials) &&
+        family == int(StockPBRMaterials[id - 64].receiverFamily) && family > 0;
+    const bool catalog = family == 1 && std::any_of(EnhancedCatalog.begin(), EnhancedCatalog.end(),
+        [&](const auto* material) { return material->id == id; });
+    if (lighting.rtWater[3] == 1 && lighting.pbr[0] > 0 && (stock || catalog))
+    {
+        lighting.rtWater[3] = 2;
+        lighting.pbrDiffuse[3] = float(family + (software ? 8 : 0));
+    }
+}
 inline Vector3 SoftwarePBRNormal(const Matrix4& worldToModel, Vector3Par n)
 {
     return Vector3(

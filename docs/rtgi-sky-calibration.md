@@ -1,5 +1,7 @@
 # RTGI sky irradiance convention
 
+Subsequent stock receiver adoption is documented in [stock RTGI receivers](rtgi-receivers.md).
+
 Public base: `ef9c3d9`. Developer-only, default-Off RTGI still replaces captured
 ambient on qualified receivers. No artwork, receiver/material classification,
 exposure, player profiles, presets or private DLSS code changes.

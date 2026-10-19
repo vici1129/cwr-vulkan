@@ -17,7 +17,7 @@
 layout(local_size_x=8,local_size_y=8) in;
 layout(set=0,binding=1) uniform accelerationStructureEXT scene;
 layout(set=0,binding=2,rgba32f) uniform image2D resultGI;
-layout(set=0,binding=3,std430) buffer Counters { uint count[80]; } counters;
+layout(set=0,binding=3,std430) buffer Counters { uint count[96]; } counters;
 #ifdef MULTISAMPLE_DEPTH
 layout(set=0,binding=6) uniform sampler2DMS replacedAmbient;
 vec4 capturedAmbient(ivec2 p) { return texelFetch(replacedAmbient,p,0); }
@@ -25,7 +25,7 @@ vec4 capturedAmbient(ivec2 p) { return texelFetch(replacedAmbient,p,0); }
 layout(set=0,binding=6) uniform sampler2D replacedAmbient;
 vec4 capturedAmbient(ivec2 p) { return texelFetch(replacedAmbient,p,0); }
 #endif
-shared uint counts[24];
+shared uint counts[40];
 shared vec3 skyDomeIntegral[64],skyWeatherIntegral[64],skyWallIntegral[64];
 shared vec4 reflectanceIntegral[64];
 vec3 calibratedSky(vec3 world,vec3 direction) {
@@ -125,6 +125,7 @@ vec4 traceGI(ivec2 pixel) {
     float distance=length(p);
     if(distance>=ao.settings.w || dot(n,n)<.5) return vec4(0);
     atomicAdd(counts[6],1);
+    atomicAdd(counts[24+materialReceiverClass(giSurface(full).g)],1);
     vec3 worldNormal=normalize(mat3(ao.camera)*n);
     vec4 result=vec4(0,0,0,giSampleData(p.z,worldNormal));
     // Transport uses the original (or explicitly mapped) shading normal; spatial/history rejection and
@@ -246,13 +247,13 @@ vec4 traceGI(ivec2 pixel) {
 void main() {
     if(ao.jitter.w==-1) { measureSkyIrradiance();return; }
     if(ao.jitter.w==-2) { measureTransport();return; }
-    if(gl_LocalInvocationIndex<24) counts[gl_LocalInvocationIndex]=0;
+    if(gl_LocalInvocationIndex<40) counts[gl_LocalInvocationIndex]=0;
     barrier();
     ivec2 p=ivec2(gl_GlobalInvocationID.xy);
     if(all(lessThan(p,imageSize(resultGI)))) imageStore(resultGI,p,traceGI(p));
     barrier();
-    if(gl_LocalInvocationIndex<24) {
+    if(gl_LocalInvocationIndex<40) {
         uint i=gl_LocalInvocationIndex;
-        atomicAdd(counters.count[i<8?20+i:24+i],counts[i]);
+        atomicAdd(counters.count[i<8?20+i:i<24?24+i:56+i],counts[i]);
     }
 }
