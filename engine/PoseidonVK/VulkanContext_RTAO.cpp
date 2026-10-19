@@ -213,6 +213,7 @@ struct VulkanContext::RTAOState
     bool waterDispatched = false;
     double waterRayMs = 0, waterFilterMs = 0;
     std::array<uint32_t, 8> giCounts{};
+    std::array<uint32_t, 8> giSources{};
     std::array<uint32_t, 4> giHistoryCounts{};
     uint64_t giFrames = 0;
     bool giDispatched = false, giCompleted = false, giTemporal = false;
@@ -251,11 +252,18 @@ std::string VulkanContext::SetRTGI(std::string_view mode)
             const auto c = RTGIEnabled() && rt.giDispatched && rt.giCompleted ? rt.giCounts : std::array<uint32_t, 8>{};
             out << " lastWorldDispatch=" << (RTGIEnabled() && rt.giDispatched ? "yes" : "no")
                 << " enhancedInstances=" << std::count_if(rt.scene.begin(),rt.scene.end(),[](const auto& instance) {
+                    return std::any_of(instance.ranges.begin(),instance.ranges.end(),[](const auto& range) { return range.enhanced[3]>.5f && range.enhanced[3]<64; }); })
+                << " reflectorInstances=" << std::count_if(rt.scene.begin(),rt.scene.end(),[](const auto& instance) {
                     return std::any_of(instance.ranges.begin(),instance.ranges.end(),[](const auto& range) { return range.enhanced[3]>.5f; }); })
                 << " completedDispatches=" << rt.giFrames << " bounceRays=" << c[0] << " hits=" << c[1]
                 << " eligibleHits=" << c[2] << " rejectedMaterials=" << c[3]
                 << " sunRays=" << c[4] << " sunBlocked=" << c[5] << " eligibleReceivers=" << c[6]
                 << " dynamicHits=" << c[7];
+            const auto s=RTGIEnabled() && rt.giDispatched && rt.giCompleted ? rt.giSources : std::array<uint32_t,8>{};
+            out << " sunVisible=" << c[4]-c[5] << " terrain(eligible/sunlit)=" << s[0] << '/' << s[1]
+                << " stockPBR(eligible/sunlit)=" << s[2] << '/' << s[3]
+                << " catalog(eligible/sunlit)=" << s[4] << '/' << s[5]
+                << " backfacing=" << s[6] << " missingColor=" << s[7];
             if (RTGIEnabled() && rt.giCompleted && rt.timingSamples)
                 out << " GPUms(trace/filter/temporal/BLAS/TLAS)=" << rt.giRayMs << '/' << rt.giFilterMs << '/'
                     << rt.giTemporalMs << '/'
@@ -792,6 +800,7 @@ void VulkanContext::RetireRTAO()
         std::copy_n(counts + 15, 5, rt.surface.begin());
         rt.surfaceMeasured = slot.surfaceMeasured;
         std::copy_n(counts + 20, 8, rt.giCounts.begin());
+        std::copy_n(counts + 32, 8, rt.giSources.begin());
         rt.giCompleted = slot.giDispatched;
         rt.giTemporal = slot.giTemporal;
         std::copy_n(counts + 28, 4, rt.giHistoryCounts.begin());
@@ -1139,13 +1148,13 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection, bool& ssaoH
         return result;
     };
     if (!slot.counters)
-        slot.counters = buffer(128, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, true);
+        slot.counters = buffer(160, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, true);
     if (!slot.materials)
         slot.materials = buffer(1024 * sizeof(uint64_t), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, true);
     if (!slot.reflectionLight)
         slot.reflectionLight = buffer(sizeof(_reflectionLighting), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, true);
     UploadMappedBuffer(slot.reflectionLight->buffer, _reflectionLighting.data(), sizeof(_reflectionLighting));
-    std::memset(slot.counters->buffer.mapped, 0, 128);
+    std::memset(slot.counters->buffer.mapped, 0, 160);
     if (!slot.queries && _timestampBits && _profile.enabled)
     {
         VkQueryPoolCreateInfo info{VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO};
@@ -1425,7 +1434,7 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection, bool& ssaoH
                                     _rtWaterTargets ? _aaTargets[_image].water.view : _aaTargets[_image].color.view,
                                     VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
         VkDescriptorBufferInfo reflectionLight{slot.reflectionLight->buffer.buffer, 0, VK_WHOLE_SIZE};
-        VkDescriptorBufferInfo counter{slot.counters->buffer.buffer, 0, 128};
+        VkDescriptorBufferInfo counter{slot.counters->buffer.buffer, 0, slot.counters->buffer.size};
         VkDescriptorBufferInfo materialBuffer{slot.materials->buffer.buffer, 0, VK_WHOLE_SIZE};
         VkWriteDescriptorSetAccelerationStructureKHR as{
             VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR};

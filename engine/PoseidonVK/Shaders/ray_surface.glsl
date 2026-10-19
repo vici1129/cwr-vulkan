@@ -118,7 +118,8 @@ HitSurface hitSurface(rayQueryEXT query) {
     vec3 face=hitFaceNormal(a,b,c,rayQueryGetWorldRayDirectionEXT(query));
     if(dot(face,face)>0) {
         s.geometricNormal=face; s.normal=face; s.available|=HitNormal;
-        // Terrain's (0,1,0) values are placeholders, not sampled terrain normals.
+        // Only use validated original shape normals or the original terrain
+        // stencil. Missing/unusable data retains the actual triangle normal.
         if((m.samplerFlags&RayVertexNormals)!=0u) {
             vec3 na=vertexNormal(m,first), nb=vertexNormal(m,first+1), nc=vertexNormal(m,first+2);
             vec4 normal=rayShadingNormal(face,na,nb,nc,weights,

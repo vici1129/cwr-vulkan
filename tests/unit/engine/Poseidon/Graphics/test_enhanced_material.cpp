@@ -2,8 +2,41 @@
 #include <catch2/catch_approx.hpp>
 #include <PoseidonVK/EnhancedMaterialVK.hpp>
 #include <PoseidonVK/EnhancedMaterialMapsVK.hpp>
+#include <PoseidonVK/TerrainRayVK.hpp>
+#include <PoseidonVK/PBRMaterialVK.hpp>
 #include <cmath>
 #include <algorithm>
+
+TEST_CASE("Terrain ray UVs preserve clamped cell seams and original bilinear jitter", "[Graphics][enhanced-material]")
+{
+    using Poseidon::vk::TerrainRayUV;
+    const std::array<float, 4> u{0, .1f, .2f, .3f}, v{.1f, .2f, .3f, .4f};
+    const auto a = TerrainRayUV(10.25f, 20.5f, 10, 20, true, u, v);
+    REQUIRE(a[0] == Catch::Approx(.375f));
+    REQUIRE(a[1] == Catch::Approx(.725f));
+    const auto b = TerrainRayUV(10.25f, 20.5f, 10, 20, false, u, v);
+    REQUIRE(b[0] - a[0] == Catch::Approx(10));
+    REQUIRE(b[1] - a[1] == Catch::Approx(20));
+    // Same physical boundary has U=1 on the left tile and U=0 on the right.
+    const std::array<float, 4> zero{};
+    REQUIRE(TerrainRayUV(11, 20, 10, 20, true, zero, zero)[0] == 1);
+    REQUIRE(TerrainRayUV(11, 20, 11, 20, true, zero, zero)[0] == 0);
+}
+
+TEST_CASE("Terrain ray normals match the outward original raster stencil", "[Graphics][enhanced-material]")
+{
+    using Poseidon::vk::TerrainRayNormal;
+    const auto flat = TerrainRayNormal(10, 10, 10, 10, 12.5f);
+    REQUIRE(flat == std::array<float, 3>{0, 1, 0});
+    const auto slope = TerrainRayNormal(8, 12, 9, 11, 12.5f);
+    const float length = std::sqrt(16 + 4 + 12.5f * 12.5f);
+    REQUIRE(slope[0] == Catch::Approx(-4 / length));
+    REQUIRE(slope[1] == Catch::Approx(12.5f / length));
+    REQUIRE(slope[2] == Catch::Approx(-2 / length));
+    for (unsigned i = 0; i < std::size(Poseidon::vk::StockPBRMaterials); ++i)
+        REQUIRE(Poseidon::vk::StockPBRIdentity(Poseidon::vk::StockPBRMaterials[i].texture) == 64 + i);
+    REQUIRE(Poseidon::vk::StockPBRIdentity("data\\domek1_side.pac") == 0);
+}
 
 TEST_CASE("Stock enhancements do not require replacement artwork or data maps", "[Graphics][enhanced-material]")
 {

@@ -15,8 +15,8 @@
 layout(local_size_x=8,local_size_y=8) in;
 layout(set=0,binding=1) uniform accelerationStructureEXT scene;
 layout(set=0,binding=2,rgba32f) uniform writeonly image2D resultGI;
-layout(set=0,binding=3,std430) buffer Counters { uint count[32]; } counters;
-shared uint counts[8];
+layout(set=0,binding=3,std430) buffer Counters { uint count[40]; } counters;
+shared uint counts[16];
 vec4 traceGI(ivec2 pixel) {
     ivec2 full=min(pixel*2+1,depthSize()-1);
     vec4 receiver=giReceiver(full);
@@ -70,19 +70,23 @@ vec4 traceGI(ivec2 pixel) {
     if(hit.kind==3u) result.a=-result.a;
     if(!hit.diffuseEligible || hit.materialIdentity==0u) {
         atomicAdd(counts[3],1);
+        if((hit.available&HitColor)==0u) atomicAdd(counts[15],1);
         // Incremental material adoption: an unconverted endpoint has unknown
         // outgoing radiance. Retain its legacy ambient share rather than making
-        // all unconverted ground/buildings perfectly absorbing or using RGB as
-        // albedo. Known enhanced endpoints replace this share with real transport.
+        // unsupported endpoints perfectly absorbing or inferring calibrated
+        // albedo. Qualified stock endpoints replace this share with transport.
         result.rgb=rayAmbientLinear();
         return result;
     }
     atomicAdd(counts[2],1);
+    uint sourceCounter=hit.kind==2u?8u:hit.materialIdentity>=64u?10u:12u;
+    atomicAdd(counts[sourceCounter],1);
     if(hit.kind==3u) atomicAdd(counts[7],1);
     vec3 sun=normalize(ao.sun.xyz);
     float cosine=max(dot(hit.normal,sun),0);
     // Never illuminate the reverse geometric side, even with a smoothed normal.
     if(dot(hit.geometricNormal,sun)<=0) cosine=0;
+    if(cosine<=0) atomicAdd(counts[14],1);
     float visibility=0;
     if(cosine>0 && max(max(raySunlightLinear().r,raySunlightLinear().g),raySunlightLinear().b)>.00001) {
         rayQueryEXT shadow;
@@ -100,6 +104,7 @@ vec4 traceGI(ivec2 pixel) {
                 result.a=-abs(result.a);
         }
         visibility=blocked?0:cloudSunlight(hit.position);
+        if(visibility>0) atomicAdd(counts[sourceCounter+1],1);
     }
     vec3 incident=raySunlightLinear()*cosine*visibility;
     vec3 reflected=hit.albedo*incident;
@@ -110,10 +115,13 @@ vec4 traceGI(ivec2 pixel) {
     return result;
 }
 void main() {
-    if(gl_LocalInvocationIndex<8) counts[gl_LocalInvocationIndex]=0;
+    if(gl_LocalInvocationIndex<16) counts[gl_LocalInvocationIndex]=0;
     barrier();
     ivec2 p=ivec2(gl_GlobalInvocationID.xy);
     if(all(lessThan(p,imageSize(resultGI)))) imageStore(resultGI,p,traceGI(p));
     barrier();
-    if(gl_LocalInvocationIndex<8) atomicAdd(counters.count[20+gl_LocalInvocationIndex],counts[gl_LocalInvocationIndex]);
+    if(gl_LocalInvocationIndex<16) {
+        uint i=gl_LocalInvocationIndex;
+        atomicAdd(counters.count[i<8?20+i:24+i],counts[i]);
+    }
 }

@@ -1,0 +1,4 @@
+{"mode": "off", "samples": {"frame": [3.4168, 3.6256], "trace": [], "filter": [], "temporal": []}, "medians": {"frame": 3.5212, "trace": null, "filter": null, "temporal": null}}
+{"mode": "on", "samples": {"frame": [4.0963, 4.099], "trace": [0.1188, 0.1178, 0.1188], "filter": [0.1244, 0.1223, 0.1232], "temporal": [0.1175, 0.1147, 0.1144]}, "medians": {"frame": 4.09765, "trace": 0.1188, "filter": 0.1232, "temporal": 0.1147}}
+{"mode": "on", "samples": {"frame": [4.0463, 4.0885], "trace": [0.1188, 0.1178, 0.1147], "filter": [0.1234, 0.1227, 0.1255], "temporal": [0.1154, 0.1148, 0.1157]}, "medians": {"frame": 4.067399999999999, "trace": 0.1178, "filter": 0.1234, "temporal": 0.1154}}
+{"mode": "off", "samples": {"frame": [3.5299, 3.7627], "trace": [], "filter": [], "temporal": []}, "medians": {"frame": 3.6463, "trace": null, "filter": null, "temporal": null}}

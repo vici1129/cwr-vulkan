@@ -1,0 +1,981 @@
+{
+  "publicBase": "86a5f09d66b1dcd1c731bf50df5a6bdbcbed29a2",
+  "route": "Existing direct developer harness; original missions; copied profiles; muted audio. Real mission render-camera qualification, not mission completion or player-input testing.",
+  "adapter": "NVIDIA GeForce RTX 4060 Ti",
+  "initialPublicWorktree": "clean; no pre-existing dirty public files were present",
+  "visibilityMetres": 1400,
+  "brightness": "ordinary copied profile, no exposure override",
+  "measurement": "Frame counters are last-completed stochastic samples, not phase-locked exact ray-count comparisons. Bounce is nine unamplified linear-light screenshot ROI means per mode, ordered sky/on/on/sky/sky/on; net-vs-raster is separate.",
+  "transport": "Unchanged one cosine-weighted sample, one bounce, unit transport gain, half-resolution estimator, temporal filtering, 25m rays, 45m receivers, 80m secondary sun. Source eligibility expanded, receiver eligibility unchanged.",
+  "scenes": {
+    "malden": {
+      "mission": "01TakeTheCar.ABEL",
+      "camera": [
+        3128,
+        228.1,
+        6338,
+        -1,
+        -0.15,
+        -1
+      ],
+      "dates": [
+        [
+          1985,
+          7,
+          5,
+          9,
+          0
+        ],
+        [
+          1985,
+          7,
+          5,
+          12,
+          0
+        ]
+      ],
+      "rawRuns": {
+        "baseline": "rtgi-coverage-before-malden",
+        "1080": "rtgi-coverage-final-malden-1080",
+        "1440": "rtgi-coverage-after-malden-1440"
+      },
+      "baselineExecutableSHA256": "77BA01B714BF9EA10F7B98E87C4B978F1A11737B72745B91EE3DDDBD2D5A22A6",
+      "executableSHA256": "81E1C46E173F6B940FF5E0C1A81862BBEDA3C79DB0588A574D1C0DF661F4D0C0",
+      "baselineValidation": {
+        "submitted": 4601,
+        "presented": 4601,
+        "errors": 0,
+        "warnings": 0
+      },
+      "validation": {
+        "1080": {
+          "submitted": 13184,
+          "presented": 13184,
+          "errors": 0,
+          "warnings": 0
+        },
+        "1440": {
+          "submitted": 8147,
+          "presented": 8147,
+          "errors": 0,
+          "warnings": 0
+        }
+      },
+      "before": {
+        "morning": {
+          "name": "malden-morning-gi",
+          "counters": {
+            "enhancedInstances": 15,
+            "bounceRays": 214779,
+            "hits": 155362,
+            "eligibleHits": 42396,
+            "rejectedMaterials": 112966,
+            "sunRays": 40779,
+            "sunBlocked": 7501,
+            "eligibleReceivers": 214901,
+            "sunVisible": 33278
+          },
+          "raw": "RTGI=on capability=available transport=one-bounce lastWorldDispatch=yes enhancedInstances=15 completedDispatches=152 bounceRays=214779 hits=155362 eligibleHits=42396 rejectedMaterials=112966 sunRays=40779 sunBlocked=7501 eligibleReceivers=214901 dynamicHits=0 GPUms(trace/filter/temporal/BLAS/TLAS)=0.210944/0.105344/0.109984/6.4e-05/6.4e-05 CPUrecordMs=0.0919 temporal=on history(accepted/rejected/clamped/dynamic)=206892/8009/9189/0 historyResets=1 phase=26 historyBytes=9830400 historyAllocations=2; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain"
+        },
+        "noon": {
+          "name": "malden-noon-gi",
+          "counters": {
+            "enhancedInstances": 15,
+            "bounceRays": 214798,
+            "hits": 155700,
+            "eligibleHits": 42334,
+            "rejectedMaterials": 113366,
+            "sunRays": 19079,
+            "sunBlocked": 3783,
+            "eligibleReceivers": 214931,
+            "sunVisible": 15296
+          },
+          "raw": "RTGI=on capability=available transport=one-bounce lastWorldDispatch=yes enhancedInstances=15 completedDispatches=541 bounceRays=214798 hits=155700 eligibleHits=42334 rejectedMaterials=113366 sunRays=19079 sunBlocked=3783 eligibleReceivers=214931 dynamicHits=0 GPUms(trace/filter/temporal/BLAS/TLAS)=0.195584/0.110592/0.107712/6.4e-05/9.6e-05 CPUrecordMs=0.0897 temporal=on history(accepted/rejected/clamped/dynamic)=208861/6070/11136/0 historyResets=4 phase=29 historyBytes=9830400 historyAllocations=4; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain"
+        }
+      },
+      "after": {
+        "morning": {
+          "name": "malden-morning-gi",
+          "counters": {
+            "enhancedInstances": 15,
+            "reflectorInstances": 39,
+            "bounceRays": 214917,
+            "hits": 155674,
+            "eligibleHits": 108586,
+            "rejectedMaterials": 47088,
+            "sunRays": 106801,
+            "sunBlocked": 42478,
+            "eligibleReceivers": 215051,
+            "sunVisible": 64323,
+            "backfacing": 1785,
+            "missingColor": 47050,
+            "terrain": {
+              "eligible": 65673,
+              "sunlit": 30754
+            },
+            "stockPBR": {
+              "eligible": 610,
+              "sunlit": 470
+            },
+            "catalog": {
+              "eligible": 42303,
+              "sunlit": 33099
+            }
+          },
+          "raw": "RTGI=on capability=available transport=one-bounce lastWorldDispatch=yes enhancedInstances=15 reflectorInstances=39 completedDispatches=154 bounceRays=214917 hits=155674 eligibleHits=108586 rejectedMaterials=47088 sunRays=106801 sunBlocked=42478 eligibleReceivers=215051 dynamicHits=0 sunVisible=64323 terrain(eligible/sunlit)=65673/30754 stockPBR(eligible/sunlit)=610/470 catalog(eligible/sunlit)=42303/33099 backfacing=1785 missingColor=47050 GPUms(trace/filter/temporal/BLAS/TLAS)=0.26624/0.10784/0.110528/6.4e-05/6.4e-05 CPUrecordMs=0.1235 temporal=on history(accepted/rejected/clamped/dynamic)=207037/8014/3041/0 historyResets=1 phase=28 historyBytes=9830400 historyAllocations=2; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain"
+        },
+        "noon": {
+          "name": "malden-noon-gi",
+          "counters": {
+            "enhancedInstances": 15,
+            "reflectorInstances": 39,
+            "bounceRays": 214798,
+            "hits": 155700,
+            "eligibleHits": 107934,
+            "rejectedMaterials": 47766,
+            "sunRays": 84471,
+            "sunBlocked": 20913,
+            "eligibleReceivers": 214931,
+            "sunVisible": 63558,
+            "backfacing": 23463,
+            "missingColor": 47726,
+            "terrain": {
+              "eligible": 64999,
+              "sunlit": 47869
+            },
+            "stockPBR": {
+              "eligible": 601,
+              "sunlit": 393
+            },
+            "catalog": {
+              "eligible": 42334,
+              "sunlit": 15296
+            }
+          },
+          "raw": "RTGI=on capability=available transport=one-bounce lastWorldDispatch=yes enhancedInstances=15 reflectorInstances=39 completedDispatches=543 bounceRays=214798 hits=155700 eligibleHits=107934 rejectedMaterials=47766 sunRays=84471 sunBlocked=20913 eligibleReceivers=214931 dynamicHits=0 sunVisible=63558 terrain(eligible/sunlit)=64999/47869 stockPBR(eligible/sunlit)=601/393 catalog(eligible/sunlit)=42334/15296 backfacing=23463 missingColor=47726 GPUms(trace/filter/temporal/BLAS/TLAS)=0.239616/0.108/0.1088/6.4e-05/6.4e-05 CPUrecordMs=0.1078 temporal=on history(accepted/rejected/clamped/dynamic)=208861/6070/3830/0 historyResets=4 phase=29 historyBytes=9830400 historyAllocations=4; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain"
+        }
+      },
+      "performance": {
+        "1080": {
+          "aa": "TAA",
+          "world": "1920x1080",
+          "order": "off/on/on/off",
+          "settleSeconds": 3,
+          "sampleSecondsPerInterval": 4,
+          "offFrameMedianMeanMs": 5.0596499999999995,
+          "onFrameMedianMeanMs": 5.7283,
+          "differenceMs": 0.6686500000000004,
+          "stagesMs": {
+            "trace": 0.4987,
+            "filter": 0.20584999999999998,
+            "temporal": 0.212775
+          },
+          "note": "Short stationary profiler intervals; whole-frame deltas include normal GPU clock/cache variation. Scope times need not add exactly."
+        },
+        "1440": {
+          "aa": "TAA",
+          "world": "2560x1440",
+          "order": "off/on/on/off",
+          "settleSeconds": 3,
+          "sampleSecondsPerInterval": 4,
+          "offFrameMedianMeanMs": 5.221125,
+          "onFrameMedianMeanMs": 5.72215,
+          "differenceMs": 0.5010250000000003,
+          "stagesMs": {
+            "trace": 0.511225,
+            "filter": 0.235775,
+            "temporal": 0.21352500000000002
+          },
+          "note": "Short stationary profiler intervals; whole-frame deltas include normal GPU clock/cache variation. Scope times need not add exactly."
+        }
+      },
+      "bounce": [
+        {
+          "region": "shade",
+          "box": [
+            330,
+            635,
+            960,
+            735
+          ],
+          "modes": {
+            "sky-only": {
+              "meanRGB": [
+                0.051498524248706004,
+                0.055801099577538676,
+                0.0765987496687395
+              ],
+              "meanY": 0.056387962399213544,
+              "minY": 0.05631992453050093,
+              "maxY": 0.056448561964420295,
+              "samples": 9
+            },
+            "on": {
+              "meanRGB": [
+                0.055414341639983176,
+                0.058573593863180444,
+                0.07721594483996323
+              ],
+              "meanY": 0.05924791458105242,
+              "minY": 0.059188148622358175,
+              "maxY": 0.059311778351122224,
+              "samples": 9
+            }
+          },
+          "bounceY": 0.0028599521818388762,
+          "bouncePercent": 5.071919715046769,
+          "giOffY": 0.11042145774347094,
+          "netVsRasterPercent": -46.34383951107034,
+          "bounceRGB": [
+            0.003915817391277172,
+            0.0027724942856417675,
+            0.0006171951712237306
+          ]
+        },
+        {
+          "region": "sun",
+          "box": [
+            1250,
+            770,
+            1770,
+            870
+          ],
+          "modes": {
+            "sky-only": {
+              "meanRGB": [
+                0.12533674987592647,
+                0.11208070328925566,
+                0.07615043331470192
+              ],
+              "meanY": 0.1123047733014191,
+              "minY": 0.11221999564236736,
+              "maxY": 0.11241520921013055,
+              "samples": 9
+            },
+            "on": {
+              "meanRGB": [
+                0.12679088299403568,
+                0.11315955390271747,
+                0.07632088085970025
+              ],
+              "meanY": 0.11339782227382587,
+              "minY": 0.11328476350898461,
+              "maxY": 0.1135182444109039,
+              "samples": 9
+            }
+          },
+          "bounceY": 0.0010930489724067793,
+          "bouncePercent": 0.9732880805280564,
+          "giOffY": 0.1486368798649169,
+          "netVsRasterPercent": -23.70815212423506,
+          "bounceRGB": [
+            0.0014541331181092132,
+            0.0010788506134618014,
+            0.00017044754499832837
+          ]
+        },
+        {
+          "region": "control",
+          "box": [
+            800,
+            465,
+            1010,
+            510
+          ],
+          "modes": {
+            "sky-only": {
+              "meanRGB": [
+                0.13307685192939683,
+                0.14091339563071434,
+                0.15408776761449652
+              ],
+              "meanY": 0.1401985360970433,
+              "minY": 0.13873393738562595,
+              "maxY": 0.14189350597204903,
+              "samples": 9
+            },
+            "on": {
+              "meanRGB": [
+                0.13339567303478594,
+                0.14122887706944554,
+                0.1543499523329226
+              ],
+              "meanY": 0.14051087952569993,
+              "minY": 0.13900898903957198,
+              "maxY": 0.14189389952988934,
+              "samples": 9
+            }
+          },
+          "bounceY": 0.00031234342865663067,
+          "bouncePercent": 0.22278651215048573,
+          "giOffY": 0.14042776188584496,
+          "netVsRasterPercent": 0.05918889451683729,
+          "bounceRGB": [
+            0.000318821105389111,
+            0.0003154814387311966,
+            0.0002621847184260673
+          ]
+        }
+      ],
+      "motion": [
+        {
+          "aa": "taa",
+          "startMissionTime": 3.899,
+          "endMissionTime": 9.489,
+          "BLASbuildsBefore": 207,
+          "BLASbuildsAfter": 207,
+          "image": {
+            "file": "malden-motion-taa.png",
+            "sha256": "e4cc243b8b2a62079ae16e1b29b5275dfe2bc58f37bf34eb7292d46430365a97"
+          }
+        },
+        {
+          "aa": "fsr-quality",
+          "startMissionTime": 11.611,
+          "endMissionTime": 17.148,
+          "BLASbuildsBefore": 207,
+          "BLASbuildsAfter": 207,
+          "image": {
+            "file": "malden-motion-fsr-quality.png",
+            "sha256": "00b91dce9c7f3d699d09394e2c1250ceed3fcdfac87c97a4b398e6974110e539"
+          }
+        }
+      ],
+      "screenshots": {
+        "legacy": {
+          "file": "malden-legacy.png",
+          "sha256": "6441bda9e612547bc21c3991f7810a1e58659dad5098dd209394e453fc56689c"
+        },
+        "v3": {
+          "file": "malden-v3.png",
+          "sha256": "4cd780dbf7f92772f85f6fb52a2acec4cc3ddb35e6b3f5653e612119fe29c224"
+        },
+        "enhanced": {
+          "file": "malden-enhanced.png",
+          "sha256": "09de4d0fedc5e138a94de48b58dafe566cade494574090afba03817a8eaf7511"
+        },
+        "sky": {
+          "file": "malden-sky.png",
+          "sha256": "8c26716b6c5fc87d7255e0b412d13c2456df0a613eaab306c6394a051e926831"
+        },
+        "gi": {
+          "file": "malden-gi.png",
+          "sha256": "98f526f817d5c4a812e107fdc54daa86dc53d9ee739004ce55c2a2ceecc1dd3e"
+        },
+        "baselineGI": {
+          "file": "malden-baseline-gi.png",
+          "sha256": "2e05b571301bdf1625bee19cf182cc90726fff6983c9ac4be08b3575deeaf6bc"
+        }
+      },
+      "terrainTextures": [
+        "abel\\btbtttbt.pac",
+        "abel\\btttbttt.pac",
+        "abel\\bttttttt.pac",
+        "abel\\p4p4p4tt.pac",
+        "abel\\p4p4tttt.pac",
+        "abel\\p4ttp4tt.pac",
+        "abel\\p4tttttt.pac",
+        "abel\\pb.paa",
+        "abel\\pbpbtttt.pac",
+        "abel\\pipitttt.pac",
+        "abel\\pittpitt.pac",
+        "abel\\pitttttt.pac",
+        "abel\\pitttttv.pac",
+        "abel\\s3s3tttt.pac",
+        "abel\\s3tttttt.pac",
+        "abel\\tt.paa",
+        "abel\\ttbtttbt.pac",
+        "abel\\ttbttttt.pac",
+        "abel\\ttp4p4p4.pac",
+        "abel\\ttpbttpb.pac",
+        "abel\\ttpbtttt.pac",
+        "abel\\tts3tttt.pac",
+        "abel\\ttttbttt.pac",
+        "abel\\tttts3s3.pac",
+        "abel\\tttts3tt.pac",
+        "abel\\ttttttbt.pac",
+        "abel\\ttttttp4.pac",
+        "abel\\tttttts3.pac",
+        "abel\\tttvttbt.pac",
+        "abel\\tttvtttv.pac",
+        "abel\\tttvtvbt.pac",
+        "abel\\tv.paa",
+        "abel\\tvbtbtbt.pac",
+        "abel\\tvtvbttt.pac"
+      ]
+    },
+    "everon": {
+      "mission": "05HeavyMetal.Eden",
+      "camera": [
+        5091,
+        33.6,
+        10494,
+        1,
+        -0.08,
+        0.5
+      ],
+      "dates": [
+        [
+          1985,
+          7,
+          5,
+          9,
+          0
+        ],
+        [
+          1985,
+          7,
+          5,
+          12,
+          0
+        ]
+      ],
+      "rawRuns": {
+        "baseline": "rtgi-coverage-before-everon",
+        "1080": "rtgi-coverage-final-everon-1080",
+        "1440": "rtgi-coverage-after-everon-1440"
+      },
+      "baselineExecutableSHA256": "77BA01B714BF9EA10F7B98E87C4B978F1A11737B72745B91EE3DDDBD2D5A22A6",
+      "executableSHA256": "81E1C46E173F6B940FF5E0C1A81862BBEDA3C79DB0588A574D1C0DF661F4D0C0",
+      "baselineValidation": {
+        "submitted": 7306,
+        "presented": 7306,
+        "errors": 0,
+        "warnings": 0
+      },
+      "validation": {
+        "1080": {
+          "submitted": 19149,
+          "presented": 19149,
+          "errors": 0,
+          "warnings": 0
+        },
+        "1440": {
+          "submitted": 28566,
+          "presented": 28566,
+          "errors": 0,
+          "warnings": 0
+        }
+      },
+      "before": {
+        "morning": {
+          "name": "everon-morning-gi",
+          "counters": {
+            "enhancedInstances": 33,
+            "bounceRays": 113225,
+            "hits": 53555,
+            "eligibleHits": 2557,
+            "rejectedMaterials": 50998,
+            "sunRays": 348,
+            "sunBlocked": 303,
+            "eligibleReceivers": 113408,
+            "sunVisible": 45
+          },
+          "raw": "RTGI=on capability=available transport=one-bounce lastWorldDispatch=yes enhancedInstances=33 completedDispatches=209 bounceRays=113225 hits=53555 eligibleHits=2557 rejectedMaterials=50998 sunRays=348 sunBlocked=303 eligibleReceivers=113408 dynamicHits=0 GPUms(trace/filter/temporal/BLAS/TLAS)=0.055296/0.065408/0.062656/6.4e-05/6.4e-05 CPUrecordMs=0.1027 temporal=on history(accepted/rejected/clamped/dynamic)=111267/2141/96671/0 historyResets=1 phase=19 historyBytes=9830400 historyAllocations=2; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain"
+        },
+        "noon": {
+          "name": "everon-noon-gi",
+          "counters": {
+            "enhancedInstances": 33,
+            "bounceRays": 113213,
+            "hits": 53311,
+            "eligibleHits": 2541,
+            "rejectedMaterials": 50770,
+            "sunRays": 1311,
+            "sunBlocked": 334,
+            "eligibleReceivers": 113374,
+            "sunVisible": 977
+          },
+          "raw": "RTGI=on capability=available transport=one-bounce lastWorldDispatch=yes enhancedInstances=33 completedDispatches=734 bounceRays=113213 hits=53311 eligibleHits=2541 rejectedMaterials=50770 sunRays=1311 sunBlocked=334 eligibleReceivers=113374 dynamicHits=0 GPUms(trace/filter/temporal/BLAS/TLAS)=0.054272/0.064224/0.062944/6.4e-05/9.6e-05 CPUrecordMs=0.0987 temporal=on history(accepted/rejected/clamped/dynamic)=111135/2239/96730/0 historyResets=4 phase=20 historyBytes=9830400 historyAllocations=4; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain"
+        }
+      },
+      "after": {
+        "morning": {
+          "name": "everon-morning-gi",
+          "counters": {
+            "enhancedInstances": 33,
+            "reflectorInstances": 49,
+            "bounceRays": 113235,
+            "hits": 53049,
+            "eligibleHits": 53015,
+            "rejectedMaterials": 34,
+            "sunRays": 50853,
+            "sunBlocked": 21070,
+            "eligibleReceivers": 113402,
+            "sunVisible": 29783,
+            "backfacing": 2162,
+            "missingColor": 23,
+            "terrain": {
+              "eligible": 50530,
+              "sunlit": 29741
+            },
+            "stockPBR": {
+              "eligible": 0,
+              "sunlit": 0
+            },
+            "catalog": {
+              "eligible": 2485,
+              "sunlit": 42
+            }
+          },
+          "raw": "RTGI=on capability=available transport=one-bounce lastWorldDispatch=yes enhancedInstances=33 reflectorInstances=49 completedDispatches=208 bounceRays=113235 hits=53049 eligibleHits=53015 rejectedMaterials=34 sunRays=50853 sunBlocked=21070 eligibleReceivers=113402 dynamicHits=0 sunVisible=29783 terrain(eligible/sunlit)=50530/29741 stockPBR(eligible/sunlit)=0/0 catalog(eligible/sunlit)=2485/42 backfacing=2162 missingColor=23 GPUms(trace/filter/temporal/BLAS/TLAS)=0.082944/0.065216/0.063712/6.4e-05/6.4e-05 CPUrecordMs=0.1326 temporal=on history(accepted/rejected/clamped/dynamic)=110959/2443/231/0 historyResets=1 phase=18 historyBytes=9830400 historyAllocations=2; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain"
+        },
+        "noon": {
+          "name": "everon-noon-gi",
+          "counters": {
+            "enhancedInstances": 33,
+            "reflectorInstances": 49,
+            "bounceRays": 113235,
+            "hits": 53049,
+            "eligibleHits": 53015,
+            "rejectedMaterials": 34,
+            "sunRays": 51780,
+            "sunBlocked": 456,
+            "eligibleReceivers": 113402,
+            "sunVisible": 51324,
+            "backfacing": 1235,
+            "missingColor": 23,
+            "terrain": {
+              "eligible": 50530,
+              "sunlit": 50374
+            },
+            "stockPBR": {
+              "eligible": 0,
+              "sunlit": 0
+            },
+            "catalog": {
+              "eligible": 2485,
+              "sunlit": 950
+            }
+          },
+          "raw": "RTGI=on capability=available transport=one-bounce lastWorldDispatch=yes enhancedInstances=33 reflectorInstances=49 completedDispatches=735 bounceRays=113235 hits=53049 eligibleHits=53015 rejectedMaterials=34 sunRays=51780 sunBlocked=456 eligibleReceivers=113402 dynamicHits=0 sunVisible=51324 terrain(eligible/sunlit)=50530/50374 stockPBR(eligible/sunlit)=0/0 catalog(eligible/sunlit)=2485/950 backfacing=1235 missingColor=23 GPUms(trace/filter/temporal/BLAS/TLAS)=0.079872/0.064768/0.063392/6.4e-05/6.4e-05 CPUrecordMs=0.0813 temporal=on history(accepted/rejected/clamped/dynamic)=110959/2443/235/0 historyResets=4 phase=18 historyBytes=9830400 historyAllocations=4; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain"
+        }
+      },
+      "performance": {
+        "1080": {
+          "aa": "TAA",
+          "world": "1920x1080",
+          "order": "off/on/on/off",
+          "settleSeconds": 3,
+          "sampleSecondsPerInterval": 4,
+          "offFrameMedianMeanMs": 3.58375,
+          "onFrameMedianMeanMs": 4.0825249999999995,
+          "differenceMs": 0.4987749999999993,
+          "stagesMs": {
+            "trace": 0.1183,
+            "filter": 0.12329999999999999,
+            "temporal": 0.11505
+          },
+          "note": "Short stationary profiler intervals; whole-frame deltas include normal GPU clock/cache variation. Scope times need not add exactly."
+        },
+        "1440": {
+          "aa": "TAA",
+          "world": "2560x1440",
+          "order": "off/on/on/off",
+          "settleSeconds": 3,
+          "sampleSecondsPerInterval": 4,
+          "offFrameMedianMeanMs": 3.645,
+          "onFrameMedianMeanMs": 4.199725,
+          "differenceMs": 0.5547249999999999,
+          "stagesMs": {
+            "trace": 0.148,
+            "filter": 0.13090000000000002,
+            "temporal": 0.11335
+          },
+          "note": "Short stationary profiler intervals; whole-frame deltas include normal GPU clock/cache variation. Scope times need not add exactly."
+        }
+      },
+      "bounce": [
+        {
+          "region": "panel",
+          "box": [
+            1100,
+            550,
+            1650,
+            700
+          ],
+          "modes": {
+            "sky-only": {
+              "meanRGB": [
+                0.02889516389363818,
+                0.026279476894075542,
+                0.02219402642800614
+              ],
+              "meanY": 0.026540602426532344,
+              "minY": 0.026514983931179566,
+              "maxY": 0.026568583606883942,
+              "samples": 9
+            },
+            "on": {
+              "meanRGB": [
+                0.02984742124256585,
+                0.027024480672371638,
+                0.02224736269772719
+              ],
+              "meanY": 0.027279729919825597,
+              "minY": 0.027243540081933873,
+              "maxY": 0.02731733901881233,
+              "samples": 9
+            }
+          },
+          "bounceY": 0.0007391274932932526,
+          "bouncePercent": 2.7848934301293538,
+          "giOffY": 0.04966715979808736,
+          "netVsRasterPercent": -45.074914630258135,
+          "bounceRGB": [
+            0.0009522573489276695,
+            0.0007450037782960953,
+            5.33362697210521e-05
+          ]
+        },
+        {
+          "region": "lower-panel",
+          "box": [
+            1100,
+            700,
+            1500,
+            760
+          ],
+          "modes": {
+            "sky-only": {
+              "meanRGB": [
+                0.01656758976666055,
+                0.016709248881799216,
+                0.013431326285083997
+              ],
+              "meanY": 0.016442466142437898,
+              "minY": 0.016371726690836263,
+              "maxY": 0.01648435977330225,
+              "samples": 9
+            },
+            "on": {
+              "meanRGB": [
+                0.016900287014887723,
+                0.016994703252438587,
+                0.013444109930793622
+              ],
+              "meanY": 0.016718277522512506,
+              "minY": 0.01666918254539528,
+              "maxY": 0.01677394773675456,
+              "samples": 9
+            }
+          },
+          "bounceY": 0.000275811380074608,
+          "bouncePercent": 1.6774331641330908,
+          "giOffY": 0.03228742843531021,
+          "netVsRasterPercent": -48.22047362487052,
+          "bounceRGB": [
+            0.0003326972482271713,
+            0.00028545437063937085,
+            1.2783645709625244e-05
+          ]
+        },
+        {
+          "region": "upper-panel",
+          "box": [
+            1100,
+            480,
+            1500,
+            530
+          ],
+          "modes": {
+            "sky-only": {
+              "meanRGB": [
+                0.028538156072944416,
+                0.023879914119591318,
+                0.01812259581076958
+              ],
+              "meanY": 0.024454577976977258,
+              "minY": 0.024406279187339244,
+              "maxY": 0.024520059384674373,
+              "samples": 9
+            },
+            "on": {
+              "meanRGB": [
+                0.029622618685345093,
+                0.024680018229856854,
+                0.018172971288284722
+              ],
+              "meanY": 0.025261006297512146,
+              "minY": 0.025213234983910343,
+              "maxY": 0.02532707935060566,
+              "samples": 9
+            }
+          },
+          "bounceY": 0.0008064283205348882,
+          "bouncePercent": 3.297657891680239,
+          "giOffY": 0.04453466718228475,
+          "netVsRasterPercent": -43.277882387407594,
+          "bounceRGB": [
+            0.0010844626124006766,
+            0.0008001041102655357,
+            5.037547751514035e-05
+          ]
+        },
+        {
+          "region": "pillar",
+          "box": [
+            930,
+            530,
+            1030,
+            760
+          ],
+          "modes": {
+            "sky-only": {
+              "meanRGB": [
+                0.06410028519440202,
+                0.058693775547499744,
+                0.0605197993955376
+              ],
+              "meanY": 0.059975038420259495,
+              "minY": 0.05987414062113483,
+              "maxY": 0.06009905952077075,
+              "samples": 9
+            },
+            "on": {
+              "meanRGB": [
+                0.06618071401498296,
+                0.060425906204542155,
+                0.06065874079732136
+              ],
+              "meanY": 0.06166618900264053,
+              "minY": 0.061536903414096476,
+              "maxY": 0.061820264507845765,
+              "samples": 9
+            }
+          },
+          "bounceY": 0.0016911505823810347,
+          "bouncePercent": 2.8197573972870815,
+          "giOffY": 0.11166077639446895,
+          "netVsRasterPercent": -44.7736340424594,
+          "bounceRGB": [
+            0.0020804288205809457,
+            0.001732130657042412,
+            0.00013894140178375564
+          ]
+        },
+        {
+          "region": "control",
+          "box": [
+            80,
+            780,
+            380,
+            900
+          ],
+          "modes": {
+            "sky-only": {
+              "meanRGB": [
+                0.07400537065805474,
+                0.09149816913056816,
+                0.04159765934256549
+              ],
+              "meanY": 0.084176383368618,
+              "minY": 0.08414512525610383,
+              "maxY": 0.08421974246826333,
+              "samples": 9
+            },
+            "on": {
+              "meanRGB": [
+                0.07399859330131259,
+                0.09148935141178514,
+                0.041596357534626587
+              ],
+              "meanY": 0.08416854207956782,
+              "minY": 0.08414512525610383,
+              "maxY": 0.08421758822942527,
+              "samples": 9
+            }
+          },
+          "bounceY": -7.84128905018111e-06,
+          "bouncePercent": -0.00931530761525412,
+          "giOffY": 0.08416997982937706,
+          "netVsRasterPercent": -0.0017081503549731814,
+          "bounceRGB": [
+            -6.777356742149188e-06,
+            -8.817718783013517e-06,
+            -1.3018079389054416e-06
+          ]
+        }
+      ],
+      "motion": [
+        {
+          "aa": "taa",
+          "startMissionTime": 3.483,
+          "endMissionTime": 9.098,
+          "BLASbuildsBefore": 252,
+          "BLASbuildsAfter": 252,
+          "image": {
+            "file": "everon-motion-taa.png",
+            "sha256": "772fc663d07b73d338396f7071675169df92225e454d1b46f8a28afd9c43df5d"
+          }
+        },
+        {
+          "aa": "fsr-quality",
+          "startMissionTime": 11.215,
+          "endMissionTime": 16.897,
+          "BLASbuildsBefore": 252,
+          "BLASbuildsAfter": 252,
+          "image": {
+            "file": "everon-motion-fsr-quality.png",
+            "sha256": "d31f7fef10f788b4f94dfeff0ff273a788bb0a1f33d29f24e32e8035e91a46c5"
+          }
+        }
+      ],
+      "screenshots": {
+        "legacy": {
+          "file": "everon-legacy.png",
+          "sha256": "6eac78de87714e8c2a4f56830d3f16dee5e9cc3c28aa35aa0145ec5c709d5802"
+        },
+        "v3": {
+          "file": "everon-v3.png",
+          "sha256": "87836e59a4654735dc8c4b6fc67c4d6f5853aa073119a651cd83876f9d6064de"
+        },
+        "enhanced": {
+          "file": "everon-enhanced.png",
+          "sha256": "402881d8f05b93b25e06efcfcfc63e094b78b5ebef5a8df1dc3b450be72c86cb"
+        },
+        "sky": {
+          "file": "everon-sky.png",
+          "sha256": "895439eb12a73b14ce6544072a9bf4fe83f1f706970aa43d251dbcb50ae9a0bb"
+        },
+        "gi": {
+          "file": "everon-gi.png",
+          "sha256": "1ba1d45da1eb0a373fd3c4ce42e69f49f96c43be3dddccd92d86b1137a0c6e48"
+        },
+        "baselineGI": {
+          "file": "everon-baseline-gi.png",
+          "sha256": "bbe7eaad8d329a19432896ee4529f786bda28a48099c5a54ac0a1815eb35441a"
+        }
+      },
+      "terrainTextures": [
+        "eden\\pl.paa",
+        "eden\\plpltnpl.paa",
+        "eden\\plpltntn.paa",
+        "eden\\pltnplpl.paa",
+        "eden\\pltnpltn.paa",
+        "eden\\pol.paa",
+        "eden\\tn.paa",
+        "eden\\tnplplpl.paa",
+        "eden\\tnplpltn.paa",
+        "eden\\tnpltnpl.paa",
+        "eden\\tnpltntn.paa",
+        "eden\\tntnplpl.paa",
+        "eden\\tntnpltn.paa",
+        "eden\\tntntnpl.paa",
+        "eden\\tntntvtn.paa",
+        "eden\\tntntvtv.paa",
+        "eden\\tv.paa",
+        "eden\\tvtntntn.paa",
+        "eden\\tvtntvtn.paa",
+        "eden\\tvtvtvtn.paa",
+        "eden\\zbh.paa"
+      ]
+    }
+  },
+  "coastLiveRegression": {
+    "start": {
+      "result": "[\"RTShadows=on capability=available terrainPatches=9 foliageInstances=52 lastCompletedRays=1170141 lastCompletedHits=4529 totalRays=11968876858 rayQueriesExecuted=yes lastWorldDispatch=yes lastTerrainHits=0 lastAlphaHits=0 lastGPUms(rays/compose)=0.344064/0.056928; shared RTAO=off capability=available BLAS=27 cachedBLAS=27 TLAS=2 instances=76 instancedTriangles=10667 completedPasses=12729 lastCompletedRays=0 lastCompletedHits=0 totalRays=72668924 rayQueriesExecuted=yes lastWorldDispatch=no BLASbuilds=374 TLASbuilds=29 lastGPUms(BLAS/TLAS/rays/filter/frame)=9.6e-05/6.4e-05/0/0/4.14301; shared static LOD0 scene radius=160m; dynamic=off; AO radius=4m includes bounded terrain, excludes foliage cards; ambient-only composition; static collection excludes animation/damage; blended effects/proxies excluded; sunlight-only native opaque/cutout and terrain receivers, CSM fallback retained\",\"RTReflections=on capability=available waterRays=1110751 hits=63230 shadedHits=63230 shadedTerrain=53472 shadedAlpha=12 totalWaterRays=514659064 totalShadedHits=28883187 rayQueriesExecuted=yes hitShadingExecuted=yes lastWorldDispatch=yes hitSurface=unavailable (diagnostics disabled) lastGPUms(traceShade/filter)=0.479232/0.194304; shared RTAO=off capability=available BLAS=27 cachedBLAS=27 TLAS=2 instances=76 instancedTriangles=10667 completedPasses=12729 lastCompletedRays=0 lastCompletedHits=0 totalRays=72668924 rayQueriesExecuted=yes lastWorldDispatch=no BLASbuilds=374 TLASbuilds=29 lastGPUms(BLAS/TLAS/rays/filter/frame)=9.6e-05/6.4e-05/0/0/4.14301; shared static LOD0 scene radius=160m; dynamic=off; AO radius=4m includes bounded terrain, excludes foliage cards; ambient-only composition; static collection excludes animation/damage; blended effects/proxies excluded; actual water only, 80m receivers/70m rays, textured hits and weather sky fallback\",\"WaterRefraction requested=on active=on captured=yes composited=yes captures=943 composites=943 lastGPUms(capture/optics)=0.059392/0.134144 fallback=none; raster-only coastal terrain, missing bottom/underwater retains original water\",3.751]",
+      "ok": true
+    },
+    "end": {
+      "result": "[\"RTShadows=on capability=available terrainPatches=9 foliageInstances=52 lastCompletedRays=1181126 lastCompletedHits=2714 totalRays=12250908651 rayQueriesExecuted=yes lastWorldDispatch=yes lastTerrainHits=0 lastAlphaHits=0 lastGPUms(rays/compose)=0.333728/0.039328; shared RTAO=off capability=available BLAS=18 cachedBLAS=18 TLAS=2 instances=76 instancedTriangles=10667 completedPasses=12969 lastCompletedRays=0 lastCompletedHits=0 totalRays=72668924 rayQueriesExecuted=yes lastWorldDispatch=no BLASbuilds=374 TLASbuilds=29 lastGPUms(BLAS/TLAS/rays/filter/frame)=6.4e-05/6.4e-05/0/0/3.44176; shared static LOD0 scene radius=160m; dynamic=off; AO radius=4m includes bounded terrain, excludes foliage cards; ambient-only composition; static collection excludes animation/damage; blended effects/proxies excluded; sunlight-only native opaque/cutout and terrain receivers, CSM fallback retained\",\"RTReflections=on capability=available waterRays=1135711 hits=53278 shadedHits=53278 shadedTerrain=45060 shadedAlpha=47 totalWaterRays=784104512 totalShadedHits=42905485 rayQueriesExecuted=yes hitShadingExecuted=yes lastWorldDispatch=yes hitSurface=unavailable (diagnostics disabled) lastGPUms(traceShade/filter)=0.525312/0.16688; shared RTAO=off capability=available BLAS=18 cachedBLAS=18 TLAS=2 instances=76 instancedTriangles=10667 completedPasses=12969 lastCompletedRays=0 lastCompletedHits=0 totalRays=72668924 rayQueriesExecuted=yes lastWorldDispatch=no BLASbuilds=374 TLASbuilds=29 lastGPUms(BLAS/TLAS/rays/filter/frame)=6.4e-05/6.4e-05/0/0/3.44176; shared static LOD0 scene radius=160m; dynamic=off; AO radius=4m includes bounded terrain, excludes foliage cards; ambient-only composition; static collection excludes animation/damage; blended effects/proxies excluded; actual water only, 80m receivers/70m rays, textured hits and weather sky fallback\",\"WaterRefraction requested=on active=on captured=yes composited=yes captures=1183 composites=1183 lastGPUms(capture/optics)=0.044032/0.125952 fallback=none; raster-only coastal terrain, missing bottom/underwater retains original water\",9.292]",
+      "ok": true
+    }
+  },
+  "combinationSmoke": [
+    "TAA",
+    "MSAA4",
+    "FSR Quality",
+    "RTAO and SSAO",
+    "RT sunlight",
+    "clouds/cloud shadows",
+    "fog/rain",
+    "night-eye",
+    "RT water/refraction",
+    "restored PBR v3"
+  ],
+  "localHeadlightSmoke": "Also exercised with the same transport in rtgi-coverage-after-malden-1080 before the final shoreline/cache-key fix; unchanged local-light source code. Raw status retained in build/shadow-live.",
+  "gl33": {
+    "executableSHA256": "3FD52EB458DA1E85803DAC0722237ED843C3679C047F8AB14A359937BE801B9E",
+    "result": {
+      "commands": [
+        {
+          "mode": "off",
+          "result": {
+            "result": "\"UNSUPPORTED: PBR prototype requires Vulkan\"",
+            "ok": true
+          }
+        },
+        {
+          "mode": "on",
+          "result": {
+            "result": "\"UNSUPPORTED: PBR prototype requires Vulkan\"",
+            "ok": true
+          }
+        },
+        {
+          "mode": "enhanced",
+          "result": {
+            "result": "\"UNSUPPORTED: PBR prototype requires Vulkan\"",
+            "ok": true
+          }
+        },
+        {
+          "mode": "off",
+          "result": {
+            "result": "\"UNSUPPORTED: PBR prototype requires Vulkan\"",
+            "ok": true
+          }
+        }
+      ],
+      "worldROI": [
+        300,
+        600,
+        1000,
+        850
+      ],
+      "changedPixels": 0
+    },
+    "rawRun": "rtgi-coverage-final-gl33"
+  },
+  "tests": {
+    "vulkanCases": 44,
+    "vulkanAssertions": 1665,
+    "gl33Cases": 43,
+    "gl33Assertions": 1625,
+    "driverFreeChecks": 684,
+    "policyNote": "Driver-free guards intentionally inject errors; only real gameplay logs are used for zero-validation-error qualification."
+  },
+  "originalSources": [
+    {
+      "file": "DTA\\Data.pbo",
+      "sha256": "1587f9c052ff38967463d851ca85a03efd2db09d063da183046a9b16181d5e2f",
+      "unchanged": true
+    },
+    {
+      "file": "DTA\\Data3D.pbo",
+      "sha256": "10528ef9b5112896898ad8667e83601ff47f95231652c73409d57b7227a8a00f",
+      "unchanged": true
+    },
+    {
+      "file": "Worlds\\abel.wrp",
+      "sha256": "1c13aca4d3300db3546583c82ffa132c1149831e42227f2b47019c74040462a5",
+      "unchanged": true
+    },
+    {
+      "file": "Worlds\\eden.wrp",
+      "sha256": "5a2550b27612fc4c8ccdec55ce2555c1ed23114d46f8b687ce5fb8b273515a79",
+      "unchanged": true
+    }
+  ],
+  "limitations": [
+    "Bounded unmeasured stock RGB, artistic shading retained, scalar optical defaults; no generated/replacement artwork.",
+    "Terrain texture pixels/UVs/normals are original, but palette modulation is not reconstructed from already-lit vertex colors.",
+    "Coastal cells below maximum tide/wave bound stay conservative legacy hit fallback, including dry low-lying coastal terrain.",
+    "Only existing catalog-qualified raster receivers replace independently separated ambient; additional v3 and terrain sources are not new receivers.",
+    "Known hits currently reflect direct sunlight, not their full skylight or multi-bounce response; GI is substantially darker overall than legacy ambient in these regions. Positive bounce isolation is not total-GI brightening or radiometric ground truth.",
+    "Partial static stock coverage; cutouts, impostors, unsupported lighting modes, mixed atlases, arbitrary deformation and damaged geometry remain fallback.",
+    "Original base-mip hit sampling, finite range, one diffuse bounce, no indirect specular; foliage aliasing and estimator noise remain.",
+    "Existing mission camera sweeps, not player-input responsiveness or exhaustive weather/night qualification."
+  ]
+}

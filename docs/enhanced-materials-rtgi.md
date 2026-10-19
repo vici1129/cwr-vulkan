@@ -1,5 +1,9 @@
 # Stock-faithful enhanced PBR and one-bounce RTGI
 
+This page records the `86a5f09` catalog/material foundation and its qualification.
+For the subsequent terrain and PBR v3 reflector expansion and current evidence,
+see [Stock RTGI reflector coverage](rtgi-stock-coverage.md).
+
 Public base: `9f74c7f` (origin/main verified before work). `triPBR 'enhanced'`
 uses the original stock color textures by default. `triPBR 'on'` retains stock
 PBR v3 and its complete existing allowlist; `off` retains legacy rendering.

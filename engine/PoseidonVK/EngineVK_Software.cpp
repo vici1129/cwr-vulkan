@@ -264,8 +264,11 @@ void EngineVK::SubmitSoftwareLit(const std::vector<uint32_t>& indices, const vk:
     std::shared_ptr<vk::TextureImage> waterBump;
     if (material && _softwareSourceShape)
         if (const auto* texture = dynamic_cast<TextureVK*>(_softwareMip._texture))
+        {
+            ApplyStockPBR(*texture, receiver);
             if (ApplyEnhancedMaterial(*_softwareSourceShape, *texture, receiver, image, waterBump))
                 receiver.rtWater[3] = _vk.RTGIEnabled() ? 2.f : 0.f;
+        }
     receiver.rainRipples = _waterSurface ? RainRippleParameters() : std::array<float, 4>{};
     if (_waterSurface && (_vk.WaterSurfaceEnabled() || receiver.rainRipples[0] > 0))
     {

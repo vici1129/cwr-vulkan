@@ -1,6 +1,7 @@
 #include <PoseidonVK/EngineVK.hpp>
 #include <PoseidonVK/EnhancedMaterialVK.hpp>
 #include <PoseidonVK/EnhancedMaterialMapsVK.hpp>
+#include <PoseidonVK/PBRMaterialVK.hpp>
 #include <Poseidon/World/Scene/Scene.hpp>
 #include <Poseidon/Graphics/Rendering/Shape/Shape.hpp>
 #include <filesystem>
@@ -9,6 +10,20 @@
 
 namespace Poseidon
 {
+void EngineVK::ApplyStockPBR(const TextureVK& texture, vk::ShapeLighting& lighting)
+{
+    if (!_vk.EnhancedMaterialsEnabled() || lighting.pbr[0] <= 0)
+        return;
+    const auto id = vk::StockPBRIdentity(texture.MaterialKey());
+    if (!id)
+        return;
+    lighting.pbr[3] = float(id);
+    auto rgba = [](ColorVal c) { return std::array<float, 4>{c.R(), c.G(), c.B(), 0}; };
+    lighting.materialAmbient = rgba(GScene->MainLight()->Ambient() * GetAccomodateEye());
+    lighting.materialSun = rgba(GScene->MainLight()->Diffuse() * GetAccomodateEye());
+    // This is reflector material semantics only. The caller still requires a
+    // validated catalog receiver before reserving any legacy ambient for GI.
+}
 bool EngineVK::ApplyEnhancedMaterial(const Shape& shape, const TextureVK& texture, vk::ShapeLighting& lighting,
                                      std::shared_ptr<vk::TextureImage>& albedo,
                                      std::shared_ptr<vk::TextureImage>& normal)

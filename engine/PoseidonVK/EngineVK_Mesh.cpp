@@ -269,6 +269,8 @@ void EngineVK::DrawSectionTL(const Shape& shape, int begin, int end)
         return; // Minimized drawable: no acquired image, but unsupported states above still fail.
     if (_lighting.pbr[0] > 0 && _sectionTexture)
         if (const auto* texture = dynamic_cast<TextureVK*>(shape.GetSection(begin).properties.GetTexture()))
+        {
+            ApplyStockPBR(*texture, _lighting);
             if (ApplyEnhancedMaterial(shape, *texture, _lighting, _sectionTexture, _sectionDetail))
             {
                 GfxMatrix matrix{};
@@ -276,6 +278,7 @@ void EngineVK::DrawSectionTL(const Shape& shape, int begin, int end)
                 std::copy_n(&matrix._11, 16, _lighting.materialToWorld.begin());
                 _lighting.rtWater[3] = _vk.RTGIEnabled() ? 2.f : 0.f;
             }
+        }
     if (_lighting.pbr[0] > 0) _vk.RecordPBRDraw();
     _vk.DrawMesh(buffer->Buffers(), range.begin, range.end - range.begin, sizeof(VertexIndex) == 2, _shapeMVP, color,
                  _sectionTexture, _sectionSampler, _sectionAlphaCutoff, _sectionBlend, false, _sectionDepthTest, nullptr,

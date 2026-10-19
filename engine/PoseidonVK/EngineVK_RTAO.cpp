@@ -2,9 +2,12 @@
 #include <PoseidonVK/VertexBufferVK.hpp>
 #include <PoseidonVK/RayTransformVK.hpp>
 #include <PoseidonVK/RaySurfaceVK.hpp>
+#include <PoseidonVK/PBRMaterialVK.hpp>
+#include <PoseidonVK/TerrainRayVK.hpp>
 #include <Poseidon/World/Scene/Scene.hpp>
 #include <Poseidon/World/Scene/Camera/Camera.hpp>
 #include <Poseidon/World/Terrain/Landscape.hpp>
+#include <Poseidon/World/Terrain/LandscapeShared.hpp>
 #include <Poseidon/Graphics/Core/MatrixConversion.hpp>
 #include <set>
 #include <Poseidon/World/World.hpp>
@@ -348,8 +351,8 @@ void EngineVK::CollectRTAOScene()
                     if (hitData)
                         if (auto* tex = dynamic_cast<TextureVK*>(texture); tex && !tex->IsDynamic())
                         {
-                            // Ordinary hit color belongs to RT water. GI only
-                            // uploads validated catalog inputs, including stock RGB.
+                            // RT water keeps its color contract. GI also uploads
+                            // qualified v3 stock RGB, independently of receiver adoption.
                             if(_vk.RTReflectionsEnabled())
                             {
                                 candidate.color = tex->Image(_vk);
@@ -357,6 +360,23 @@ void EngineVK::CollectRTAOScene()
                                 _vk.PrepareRTAOAlpha(candidate.color, pixels.width, pixels.height, pixels.rgba.data());
                             }
                             vk::ShapeLighting enhanced;
+                            bool materialVertices=shape->NNorm()==shape->NVertex();
+                            if (_vk.RTGIEnabled() && vk::StockPBRIdentity(tex->MaterialKey()))
+                                for(Offset at=section.beg; at<section.end && materialVertices; shape->NextFace(at))
+                                {
+                                    const auto& face=shape->Face(at);
+                                    for(int v=0;v<face.N();++v)
+                                        if(shape->Clip(face.GetVertex(v))&ClipUserMask) { materialVertices=false; break; }
+                                }
+                            if (_vk.RTGIEnabled() && alpha == AlphaStats::Opaque &&
+                                materialVertices && (candidate.sampler & vk::RayDiffuse) && vk::StockPBRIdentity(tex->MaterialKey()))
+                            {
+                                candidate.color=tex->Image(_vk);
+                                const auto& pixels=tex->Pixels();
+                                _vk.PrepareRTAOAlpha(candidate.color,pixels.width,pixels.height,pixels.rgba.data());
+                                candidate.enhanced={vk::PBRMaterial(tex->MaterialKey(),0),0,.04f,
+                                    float(vk::StockPBRIdentity(tex->MaterialKey()))};
+                            }
                             if (!((flags | object->GetObjSpecial()) & (DisableSun | IsColored | IsLight | IsAlphaFog)) &&
                                 ApplyEnhancedMaterial(*shape, *tex, enhanced, candidate.color, candidate.normalRoughness))
                             {
@@ -449,7 +469,7 @@ void EngineVK::CollectRTAOScene()
             _rtLandscape = land;
             _rtTerrainGrid = grid;
         }
-        constexpr int cells = 16, stride = cells + 1;
+        constexpr int cells = 16;
         const float patchSize = cells * grid;
         std::set<std::pair<int, int>> used;
         for (int z = int(std::floor((position.Z() - radius) / patchSize));
@@ -463,59 +483,74 @@ void EngineVK::CollectRTAOScene()
                 const auto key = std::make_pair(x, z);
                 used.insert(key);
                 std::vector<float> heights;
-                for (int j = 0; j <= cells; ++j)
-                    for (int i = 0; i <= cells; ++i)
+                // Include the normal stencil in the cache key as well as positions.
+                for (int j = -1; j <= cells+1; ++j)
+                    for (int i = -1; i <= cells+1; ++i)
                         heights.push_back(land->SurfaceY((x * cells + i) * grid, (z * cells + j) * grid));
+                std::vector<int> textureIds;
+                for (int j=0; j<cells; ++j) for(int i=0; i<cells; ++i)
+                    textureIds.push_back(land->GetTexture(int((z*cells+j)*grid/land->GetLandGrid()),
+                                                        int((x*cells+i)*grid/land->GetLandGrid())));
                 auto& patch = _rtTerrainPatches[key];
-                if (!patch.mesh || patch.heights != heights || patch.textured != hitData)
+                if (!patch.mesh || patch.heights != heights || patch.textured != hitData ||
+                    patch.textures != textureIds || patch.gi != _vk.RTGIEnabled())
                 {
-                    // Same immutable position/normal/UV layout as native shapes.
                     std::vector<std::array<float, 8>> vertices;
-                    for (int j = 0; j <= cells; ++j)
-                        for (int i = 0; i <= cells; ++i)
-                        {
-                            float wx = (x * cells + i) * grid / land->GetLandGrid(),
-                                  wz = (z * cells + j) * grid / land->GetLandGrid();
-                            // Same landscape UV jitter at the four actual land-grid corners.
-                            int lx = int(std::floor(wx)), lz = int(std::floor(wz));
-                            float u[4], v[4];
-                            land->GetRandomColor(lx, lz, u[0], v[0]);
-                            land->GetRandomColor(lx + 1, lz, u[1], v[1]);
-                            land->GetRandomColor(lx, lz + 1, u[2], v[2]);
-                            land->GetRandomColor(lx + 1, lz + 1, u[3], v[3]);
-                            auto interp = [&](float* a)
-                            {
-                                return std::lerp(std::lerp(a[0], a[1], wx - lx), std::lerp(a[2], a[3], wx - lx),
-                                                 wz - lz);
-                            };
-                            vertices.push_back({float(i) * grid, heights[j * stride + i], float(j) * grid, 0, 1, 0,
-                                                wx + interp(u), wz + interp(v)});
-                        }
                     std::vector<uint32_t> indices;
-                    std::map<TextureVK*, std::vector<uint32_t>> groups;
+                    std::map<std::pair<int,bool>, std::vector<uint32_t>> groups;
+                    auto height=[&](int i,int j) { return heights[(j+1)*(cells+3)+i+1]; };
                     for (int j = 0; j < cells; ++j)
                         for (int i = 0; i < cells; ++i)
                         {
-                            uint32_t a = j * stride + i;
-                            TextureVK* texture = nullptr;
-                            if (hitData)
-                                texture = dynamic_cast<TextureVK*>(land->GetTexture(
-                                    land->GetTexture(int((z * cells + j) * grid / land->GetLandGrid()),
-                                                     int((x * cells + i) * grid / land->GetLandGrid()))));
-                            auto& group = groups[texture];
-                            group.insert(group.end(), {a, a + 1, a + stride, a + 1, a + stride + 1, a + stride});
+                            const int id=textureIds[j*cells+i];
+                            auto* texture=dynamic_cast<TextureVK*>(land->GetTexture(id));
+                            const float wx=(x*cells+i)*grid/land->GetLandGrid(), wz=(z*cells+j)*grid/land->GetLandGrid();
+                            const int lx=int(std::floor(wx)),lz=int(std::floor(wz));
+                            std::array<float,4> u{},v{};
+                            land->GetRandomColor(lx,lz,u[0],v[0]); land->GetRandomColor(lx+1,lz,u[1],v[1]);
+                            land->GetRandomColor(lx,lz+1,u[2],v[2]); land->GetRandomColor(lx+1,lz+1,u[3],v[3]);
+                            const bool clamp=id>0 && (land->ClampFlags(id)&ClampU);
+                            const uint32_t a=uint32_t(vertices.size());
+                            bool dry=id>0;
+                            for(int dz=0;dz<2;++dz) for(int dx=0;dx<2;++dx)
+                            {
+                                const int vi=i+dx,vj=j+dz;
+                                const auto normal=vk::TerrainRayNormal(height(vi-1,vj),height(vi+1,vj),
+                                    height(vi,vj-1),height(vi,vj+1),grid);
+                                const auto uv=vk::TerrainRayUV(wx+dx*grid/land->GetLandGrid(),
+                                    wz+dz*grid/land->GetLandGrid(),float(lx),float(lz),clamp,u,v);
+                                vertices.push_back({vi*grid,height(vi,vj),vj*grid,normal[0],normal[1],normal[2],
+                                    texture?texture->UToPhysical(uv[0]):0,texture?texture->VToPhysical(uv[1]):0});
+                                // Same potential-water bound as the raster terrain.
+                                // Stable across waves/tides; no per-frame BLAS churn.
+                                dry=dry && height(vi,vj)>maxTide+maxWave;
+                            }
+                            auto& group=groups[{id,dry}];
+                            group.insert(group.end(),{a,a+1,a+2,a+1,a+3,a+2});
                         }
                     patch.ranges.clear();
                     patch.textured = hitData;
-                    for (auto& [texture, group] : groups)
+                    patch.gi = _vk.RTGIEnabled();
+                    patch.textures = std::move(textureIds);
+                    for (auto& [identity, group] : groups)
                     {
                         vk::RTAORange range{uint32_t(indices.size()), uint32_t(group.size())};
-                        range.sampler = vk::RayDiffuse | vk::RayTerrainUV;
-                        if (texture && !texture->IsDynamic())
+                        auto* texture=dynamic_cast<TextureVK*>(land->GetTexture(identity.first));
+                        range.sampler = vk::RayDiffuse | vk::RayVertexNormals;
+                        if(identity.first>0) range.sampler|=vk::ShapeSampler(render::SplitLegacy(land->ClampFlags(identity.first)));
+                        if (hitData && texture && !texture->IsDynamic())
                         {
                             range.color = texture->Image(_vk);
                             const auto& pixels = texture->Pixels();
                             _vk.PrepareRTAOAlpha(range.color, pixels.width, pixels.height, pixels.rgba.data());
+                            // Landscape-owned opaque dry ground, not arbitrary object
+                            // atlases, water, submerged seabed or foliage impostors.
+                            if (_vk.RTGIEnabled() && identity.second && texture->GetAlphaClass()==AlphaStats::Opaque)
+                            {
+                                range.enhanced={1,0,.04f,1000};
+                                LOG_INFO(Graphics,"RTGI terrain source {} {}x{} patch={},{} triangles={} clamp={} dry=yes",
+                                    texture->MaterialKey(),pixels.width,pixels.height,x,z,group.size()/3,range.sampler&3);
+                            }
                         }
                         patch.ranges.push_back(range);
                         indices.insert(indices.end(), group.begin(), group.end());

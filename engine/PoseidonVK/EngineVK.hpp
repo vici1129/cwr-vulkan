@@ -91,9 +91,11 @@ class EngineVK final : public Engine
     struct RTTerrainPatch
     {
         std::vector<float> heights;
+        std::vector<int> textures;
         std::shared_ptr<vk::MeshBuffers> mesh;
         std::vector<vk::RTAORange> ranges;
         bool textured = false;
+        bool gi = false;
     };
     std::map<std::pair<int, int>, RTTerrainPatch> _rtTerrainPatches;
     const void* _rtLandscape = nullptr;
@@ -325,6 +327,7 @@ class EngineVK final : public Engine
     std::map<std::pair<const TextureVK*, float>, uint64_t> _enhancedSourceTextures;
     bool ApplyEnhancedMaterial(const Shape&, const TextureVK&, vk::ShapeLighting&,
                                std::shared_ptr<vk::TextureImage>&, std::shared_ptr<vk::TextureImage>&);
+    void ApplyStockPBR(const TextureVK&, vk::ShapeLighting&);
     std::vector<vk::ScreenVertex> _screenVertices;
     void FlushQueues() override { _vk.FlushScreenBatch(); }
     void SubmitSoftware(const std::vector<uint32_t>& indices);
