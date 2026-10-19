@@ -27,7 +27,7 @@ vec4 traceGI(ivec2 pixel) {
     atomicAdd(counts[6],1);
     vec3 worldNormal=normalize(mat3(ao.camera)*n);
     vec4 result=vec4(0,0,0,giSampleData(p.z,worldNormal));
-    // Transport uses the authored shading normal; spatial/history rejection and
+    // Transport uses the original (or explicitly mapped) shading normal; spatial/history rejection and
     // offsets use the macro surface, so relief does not fragment the denoiser.
     n=materialDecodeNormal(giSurface(full).g);
     vec3 world=(ao.camera*vec4(p,1)).xyz;

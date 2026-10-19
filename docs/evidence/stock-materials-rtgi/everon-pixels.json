@@ -1,0 +1,135 @@
+{
+  "island": "everon",
+  "surfaceBounceIsolation": [
+    {
+      "region": "panel",
+      "box": [
+        1100,
+        550,
+        1650,
+        700
+      ],
+      "modes": {
+        "sky-only": {
+          "mean": 0.049397465237682785,
+          "min": 0.049375630640321126,
+          "max": 0.04944509453744218,
+          "samples": 9
+        },
+        "on": {
+          "mean": 0.049386937508621526,
+          "min": 0.04937390762963593,
+          "max": 0.049410215571087726,
+          "samples": 9
+        }
+      },
+      "delta": -1.0527729061259039e-05,
+      "percent": -0.021312285985941593
+    },
+    {
+      "region": "pillar",
+      "box": [
+        930,
+        530,
+        1030,
+        760
+      ],
+      "modes": {
+        "sky-only": {
+          "mean": 0.11186061231429177,
+          "min": 0.1117758668926184,
+          "max": 0.11204528978321046,
+          "samples": 9
+        },
+        "on": {
+          "mean": 0.11182229263087978,
+          "min": 0.11177726784748844,
+          "max": 0.1118905498940868,
+          "samples": 9
+        }
+      },
+      "delta": -3.831968341198866e-05,
+      "percent": -0.03425663655793887
+    },
+    {
+      "region": "side",
+      "box": [
+        600,
+        540,
+        650,
+        700
+      ],
+      "modes": {
+        "sky-only": {
+          "mean": 0.03936324559991558,
+          "min": 0.039195202581277885,
+          "max": 0.0394966103137402,
+          "samples": 9
+        },
+        "on": {
+          "mean": 0.03934305794928659,
+          "min": 0.03919574329776229,
+          "max": 0.03949760976103289,
+          "samples": 9
+        }
+      },
+      "delta": -2.0187650628993026e-05,
+      "percent": -0.05128553380526757
+    },
+    {
+      "region": "control",
+      "box": [
+        80,
+        780,
+        380,
+        900
+      ],
+      "modes": {
+        "sky-only": {
+          "mean": 0.08416748402098292,
+          "min": 0.0841450937709873,
+          "max": 0.08421750280372997,
+          "samples": 9
+        },
+        "on": {
+          "mean": 0.0841774063006178,
+          "min": 0.08414510577497188,
+          "max": 0.08421759503091035,
+          "samples": 9
+        }
+      },
+      "delta": 9.922279634880238e-06,
+      "percent": 0.011788732608919439
+    }
+  ],
+  "artworkDetail": {
+    "morning": {
+      "region": [
+        1100,
+        550,
+        1650,
+        700
+      ],
+      "v3ToEnhancedChannelCorrelation": [
+        0.9956598398488747,
+        0.9939062430277558,
+        0.9960328310472094
+      ],
+      "note": "Registered same-view original texture detail; lighting can differ. This is not albedo calibration."
+    },
+    "noon": {
+      "region": [
+        1100,
+        550,
+        1650,
+        700
+      ],
+      "v3ToEnhancedChannelCorrelation": [
+        0.9955370193622689,
+        0.9938226545428116,
+        0.9959535707882761
+      ],
+      "note": "Registered same-view original texture detail; lighting can differ. This is not albedo calibration."
+    }
+  }
+}

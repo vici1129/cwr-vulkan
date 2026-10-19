@@ -1,36 +1,35 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/catch_approx.hpp>
 #include <PoseidonVK/EnhancedMaterialVK.hpp>
+#include <PoseidonVK/EnhancedMaterialMapsVK.hpp>
 #include <cmath>
 #include <algorithm>
-#include <filesystem>
-#include <Poseidon/Graphics/Textures/PAADecoder.hpp>
 
-TEST_CASE("Authored supplemental maps decode as bounded albedo and linear unit normals",
-          "[Graphics][enhanced-material]")
+TEST_CASE("Stock enhancements do not require replacement artwork or data maps", "[Graphics][enhanced-material]")
 {
-    const auto root = std::filesystem::path(TESTS_ROOT_DIR).parent_path();
-    const auto color = Poseidon::DecodePAAFile((root / Poseidon::vk::StoneWall.albedo).string());
-    const auto normal = Poseidon::DecodePAAFile((root / Poseidon::vk::StoneWall.normalRoughness).string());
-    REQUIRE(color.width == 1024);
-    REQUIRE(normal.width == color.width);
-    REQUIRE(normal.height == color.height);
-    REQUIRE(color.rgba.size() == normal.rgba.size());
-    float error = 0, minZ = 1, minRoughness = 1;
-    bool opaque = true;
-    for (size_t i = 0; i < normal.rgba.size(); i += 4)
+    for (const auto* entry : Poseidon::vk::EnhancedCatalog)
     {
-        const float x = normal.rgba[i] * (2.f / 255) - 1, y = normal.rgba[i + 1] * (2.f / 255) - 1,
-                    z = normal.rgba[i + 2] * (2.f / 255) - 1;
-        error = std::max(error, std::abs(x * x + y * y + z * z - 1));
-        minZ = std::min(minZ, z);
-        minRoughness = std::min(minRoughness, normal.rgba[i + 3] / 255.f * Poseidon::vk::StoneWall.roughness);
-        opaque &= color.rgba[i + 3] == 255;
+        const auto& material = *entry;
+        REQUIRE(std::string_view(material.albedo).empty());
+        REQUIRE(std::string_view(material.normal).empty());
+        REQUIRE(std::string_view(material.roughnessMap).empty());
+        REQUIRE(material.roughness == .9f);
+        REQUIRE(material.metallic == 0);
     }
-    REQUIRE(opaque);
-    REQUIRE(error < .02f);
-    REQUIRE(minZ > .1f);
-    REQUIRE(minRoughness > .8f);
+}
+
+TEST_CASE("Independent material data maps pack without requiring either companion", "[Graphics][enhanced-material]")
+{
+    using namespace Poseidon;
+    using vk::PackEnhancedMaps;
+    const std::array normal{DecodedImage{{128, 200, 230, 0, 100, 128, 250, 0}, 2, 1}};
+    const std::array roughness{DecodedImage{{190, 0, 0, 0}, 1, 1}};
+    REQUIRE(PackEnhancedMaps({}, {}).empty());
+    const auto n = PackEnhancedMaps(normal, {}), r = PackEnhancedMaps({}, roughness),
+               both = PackEnhancedMaps(normal, roughness);
+    REQUIRE(n[0].rgba == std::vector<uint8_t>{128, 200, 230, 255, 100, 128, 250, 255});
+    REQUIRE(r[0].rgba == std::vector<uint8_t>{128, 128, 255, 190});
+    REQUIRE(both[0].rgba == std::vector<uint8_t>{128, 200, 230, 190, 100, 128, 250, 190});
 }
 
 namespace EnhancedHistory
@@ -66,6 +65,7 @@ struct vec3
     vec3 operator+(vec3 b) const { return {x + b.x, y + b.y, z + b.z}; }
     vec3 operator-(vec3 b) const { return {x - b.x, y - b.y, z - b.z}; }
     void operator-=(vec3 b) { *this = *this - b; }
+    void operator*=(float k) { *this = *this * k; }
 };
 float dot(vec3 a, vec3 b)
 {
@@ -80,8 +80,33 @@ vec3 normalize(vec3 a)
     return a / std::sqrt(dot(a, a));
 }
 using std::abs;
+using std::max;
+using std::min;
+vec3 clamp(vec3 c, float lo, float hi)
+{
+    return {std::clamp(c.x, lo, hi), std::clamp(c.y, lo, hi), std::clamp(c.z, lo, hi)};
+}
 #include <PoseidonVK/Shaders/material_normal.glsl>
+#include <PoseidonVK/Shaders/material_diffuse.glsl>
 } // namespace MaterialNormalMath
+
+TEST_CASE("Shared stock diffuse proxy bounds energy without inventing color or removing baked shading",
+          "[Graphics][enhanced-material]")
+{
+    using namespace MaterialNormalMath;
+    for (float v : {0.f, .05f, .2f, .5f, .8f, 1.f})
+    {
+        const vec3 source{v, v * .6f, v * .3f};
+        const auto stock = materialBaseColor(source, 1), v3 = materialBaseColor(source, 0);
+        REQUIRE(stock.x <= .5f);
+        REQUIRE(stock.x <= source.x);
+        REQUIRE(v3.x == v);
+        REQUIRE(stock.y == Catch::Approx(stock.x * .6f));
+        REQUIRE(stock.z == Catch::Approx(stock.x * .3f));
+        REQUIRE(materialDiffuse(source, 1, .04f, 0).x == Catch::Approx(stock.x * .96f));
+        REQUIRE(materialDiffuse(source, 1, .04f, 1).x == 0);
+    }
+}
 
 TEST_CASE("Enhanced materials require an explicit model visual LOD and section", "[Graphics][enhanced-material]")
 {
@@ -93,6 +118,23 @@ TEST_CASE("Enhanced materials require an explicit model visual LOD and section",
     REQUIRE_FALSE(FindEnhancedMaterial(StoneWall.model, .5f, "addon\\wall.pac", 48, 1));
     REQUIRE_FALSE(FindEnhancedMaterial(StoneWall.model, .5f, StoneWall.section, 49, 1));
     REQUIRE_FALSE(FindEnhancedMaterial(StoneWall.model, .5f, StoneWall.section, 48, 2));
+    REQUIRE(FindEnhancedMaterial(ConcretePanel.model, .5f, ConcretePanel.section, 68, 3)->id == ConcretePanel.id);
+    REQUIRE(FindEnhancedMaterial(ConcretePillar.model, 4, ConcretePillar.section, 8, 2)->id == ConcretePillar.id);
+    REQUIRE_FALSE(FindEnhancedMaterial(ConcreteCap.model, 4, ConcreteCap.section, 8, 2));
+    REQUIRE_FALSE(FindEnhancedMaterial(ConcretePanel.model, .5f, "data\\zed_beton_mask_01_si.pac", 68, 3));
+    for (const auto* material : EnhancedCatalog)
+        for (float lod : {.5f, 1.f})
+        {
+            const auto geometry = EnhancedGeometryFingerprint(material->id, lod);
+            REQUIRE(EnhancedSourceCompatible(*material, lod, geometry, material->width, material->height,
+                                             material->textureFingerprint));
+            REQUIRE_FALSE(EnhancedSourceCompatible(*material, lod, geometry ^ 1, material->width, material->height,
+                                                   material->textureFingerprint));
+            REQUIRE_FALSE(EnhancedSourceCompatible(*material, lod, geometry, material->width, material->height,
+                                                   material->textureFingerprint ^ 1));
+            REQUIRE_FALSE(EnhancedSourceCompatible(*material, lod, geometry, material->width + 1, material->height,
+                                                   material->textureFingerprint));
+        }
 }
 
 TEST_CASE("Material frames preserve mirrored UV orientation and degenerate fallback", "[Graphics][enhanced-material]")

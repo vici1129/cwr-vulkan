@@ -2,8 +2,10 @@
 #include "color_space.glsl"
 #include "ray_normal.glsl"
 #include "material_normal.glsl"
+#include "material_diffuse.glsl"
 // High sampler bits are metadata; low three bits retain the existing sampler ABI.
 const uint RayDiffuse = 8u, RayVertexNormals = 16u, RayTerrainUV = 32u;
+const uint RayNormalMap = 64u, RayRoughnessMap = 128u;
 const uint HitPosition = 1u, HitNormal = 2u, HitUV = 4u, HitColor = 8u,
     HitAlbedo = 16u, HitVertexNormal = 32u, HitAlphaTest = 64u, HitApproximateUV = 128u;
 struct HitSurface {
@@ -136,8 +138,11 @@ HitSurface hitSurface(rayQueryEXT query) {
             s.albedo=s.textureColorLinear; s.available|=HitAlbedo;
         }
     }
-    if(m.enhanced.w>.5 && m.normalRoughness!=uint64_t(0) && m.normalWidth>0 && m.normalHeight>0 &&
+    if(m.enhanced.w>.5 &&
        (s.available&(HitUV|HitVertexNormal|HitAlbedo))==(HitUV|HitVertexNormal|HitAlbedo)) {
+        s.materialIdentity=uint(m.enhanced.w); s.roughness=m.enhanced.x; s.metallic=m.enhanced.y;
+        s.albedo=materialDiffuse(s.textureColorLinear,m.enhanced.w,m.enhanced.z,s.metallic);
+        if(m.normalRoughness!=uint64_t(0) && m.normalWidth>0 && m.normalHeight>0) {
         // Same linear data sampling and tangent convention as raster. Preserve
         // the original geometric normal for ray offsets and hemisphere tests.
         Material map=m;
@@ -146,6 +151,7 @@ HitSurface hitSurface(rayQueryEXT query) {
         ivec2 base=ivec2(floor(pixel));vec2 f=fract(pixel);
         vec4 data=mix(mix(colorTexel(map,base),colorTexel(map,base+ivec2(1,0)),f.x),
             mix(colorTexel(map,base+ivec2(0,1)),colorTexel(map,base+ivec2(1,1)),f.x),f.y);
+        if((m.samplerFlags&RayNormalMap)!=0u) {
         mat3 worldToObject=mat3(rayQueryGetIntersectionWorldToObjectEXT(query,true));
         mat3 objectToWorld=mat3(rayQueryGetIntersectionObjectToWorldEXT(query,true));
         vec3 objectNormal=normalize(transpose(objectToWorld)*s.normal);
@@ -153,12 +159,13 @@ HitSurface hitSurface(rayQueryEXT query) {
             vertexPosition(m,first+2)-vertexPosition(m,first),vertexUV(m,first+1)-vertexUV(m,first),
             vertexUV(m,first+2)-vertexUV(m,first),normalize(data.xyz*2-1));
         s.normal=normalize(transpose(worldToObject)*mapped);
-        s.materialIdentity=uint(m.enhanced.w); s.roughness=clamp(data.a*m.enhanced.x,.045,1);
-        s.metallic=m.enhanced.y;
-        s.albedo*= (1-m.enhanced.z)*(1-s.metallic);
+        }
+        if((m.samplerFlags&RayRoughnessMap)!=0u) s.roughness=clamp(data.a*m.enhanced.x,.045,1);
+        }
     }
     // Cutouts retain real traversal/color data, but no inferred leaf transmission
-    // or two-sided diffuse bounce. Unsupported/missing materials contribute zero.
+    // or two-sided diffuse bounce. The GI caller preserves legacy ambient for
+    // unsupported endpoints; water keeps its original reflection contract.
     s.diffuseEligible=(s.available&(HitPosition|HitNormal|HitUV|HitAlbedo|HitAlphaTest))==
         (HitPosition|HitNormal|HitUV|HitAlbedo);
     return s;

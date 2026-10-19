@@ -314,9 +314,15 @@ class EngineVK final : public Engine
     std::vector<vk::ScreenVertex> _softwareVertices;
     std::vector<vk::ShapeLighting> _softwarePBRLighting;
     const Shape* _softwareSourceShape = nullptr;
-    Ref<Texture> _enhancedAlbedo, _enhancedNormal;
-    bool _enhancedLoadAttempted = false;
-    std::map<const TextureVK*, bool> _enhancedSourceTextures;
+    struct EnhancedMaps
+    {
+        Ref<Texture> albedo;
+        std::shared_ptr<vk::TextureImage> data;
+        DecodedImage dataPixels; // Retain base bytes for a later RT enable/toggle.
+        bool normal = false, roughness = false;
+    };
+    std::map<unsigned, EnhancedMaps> _enhancedMaps;
+    std::map<std::pair<const TextureVK*, float>, uint64_t> _enhancedSourceTextures;
     bool ApplyEnhancedMaterial(const Shape&, const TextureVK&, vk::ShapeLighting&,
                                std::shared_ptr<vk::TextureImage>&, std::shared_ptr<vk::TextureImage>&);
     std::vector<vk::ScreenVertex> _screenVertices;

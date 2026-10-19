@@ -269,7 +269,7 @@ std::string VulkanContext::SetRTGI(std::string_view mode)
         }
         else out << " lastWorldDispatch=no completedDispatches=0 bounceRays=0 hits=0 eligibleHits=0"
                     " rejectedMaterials=0 sunRays=0 sunBlocked=0 eligibleReceivers=0 dynamicHits=0 GPUtimings=unavailable";
-        out << "; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; enhanced authored materials only; ambient replacement; unit transport gain";
+        out << "; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain";
         return out.str();
     }
     if (mode != "on" && mode != "off" && mode != "sky-only") return "INVALID: triRTGI on, off, sky-only, status";

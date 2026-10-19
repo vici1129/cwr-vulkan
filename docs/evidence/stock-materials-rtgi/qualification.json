@@ -1,0 +1,502 @@
+{
+  "publicBase": "9f74c7f8705e71a545b473118b46d12b1339a289",
+  "route": "Direct developer harness, original missions, copied profile, muted audio; not Steam or mission-completion qualification",
+  "drawable": [
+    1920,
+    1080
+  ],
+  "brightness": "Ordinary copied profile; no exposure override",
+  "visibilityMetres": 1400,
+  "initialPublicWorktree": "clean; no four pre-existing dirty files were present",
+  "scenes": {
+    "malden": {
+      "mission": "01TakeTheCar.ABEL",
+      "camera": [
+        3128,
+        228.1,
+        6338,
+        -1,
+        -0.15,
+        -1
+      ],
+      "dates": [
+        [
+          1985,
+          7,
+          5,
+          9,
+          0
+        ],
+        [
+          1985,
+          7,
+          5,
+          12,
+          0
+        ]
+      ],
+      "rawRun": "stock-pbr-malden-final-20261019",
+      "executableSHA256": "77BA01B714BF9EA10F7B98E87C4B978F1A11737B72745B91EE3DDDBD2D5A22A6",
+      "screenshots": {
+        "legacy": {
+          "file": "malden-legacy.png",
+          "sha256": "198c37389d60052c6fae8dbd3f8fca15f19ad3b3570b25bce265b45566232912"
+        },
+        "v3": {
+          "file": "malden-v3.png",
+          "sha256": "bca3bcddd1806a11ecde19808cd2fee4fd8b1880c0fc4612000847784bb6d4be"
+        },
+        "enhanced": {
+          "file": "malden-enhanced.png",
+          "sha256": "eaa05b78b51cf23c6168b9597fef79b530ae6d6755b415700cd0e93ff102649e"
+        },
+        "gi": {
+          "file": "malden-gi.png",
+          "sha256": "5341628bbb079d958bcc3b8bbf434675a799b0d07017d85cb921756ef5cdf4b4"
+        }
+      },
+      "validation": {
+        "presented": 14330,
+        "errors": 0,
+        "warnings": 0
+      },
+      "performance": {
+        "aa": "TAA",
+        "order": "off/on/on/off",
+        "offFrameMedianMeanMs": 4.918125,
+        "onFrameMedianMeanMs": 5.58275,
+        "differenceMs": 0.664625,
+        "stagesMs": {
+          "trace": 0.40655,
+          "filter": 0.2046,
+          "temporal": 0.2105
+        },
+        "note": "Short stationary intervals; scope times are not additive or a performance guarantee."
+      },
+      "pixels": {
+        "island": "malden",
+        "surfaceBounceIsolation": [
+          {
+            "region": "shade",
+            "box": [
+              330,
+              635,
+              960,
+              735
+            ],
+            "modes": {
+              "sky-only": {
+                "mean": 0.09046355521431534,
+                "min": 0.09034241601124653,
+                "max": 0.09056091604124605,
+                "samples": 9
+              },
+              "on": {
+                "mean": 0.09174497937867687,
+                "min": 0.0916678513192081,
+                "max": 0.09187733073832878,
+                "samples": 9
+              }
+            },
+            "delta": 0.0012814241643615276,
+            "percent": 1.4165087380500818
+          },
+          {
+            "region": "sun",
+            "box": [
+              1250,
+              770,
+              1770,
+              870
+            ],
+            "modes": {
+              "sky-only": {
+                "mean": 0.13701736149179058,
+                "min": 0.13683962677573996,
+                "max": 0.1371793588763817,
+                "samples": 9
+              },
+              "on": {
+                "mean": 0.13704019436232748,
+                "min": 0.1369063215585144,
+                "max": 0.13717737519857923,
+                "samples": 9
+              }
+            },
+            "delta": 2.283287053689298e-05,
+            "percent": 0.016664217065853748
+          },
+          {
+            "region": "control",
+            "box": [
+              800,
+              465,
+              1010,
+              510
+            ],
+            "modes": {
+              "sky-only": {
+                "mean": 0.13996828649608598,
+                "min": 0.13759306537988858,
+                "max": 0.14189392718959953,
+                "samples": 9
+              },
+              "on": {
+                "mean": 0.13963218900219546,
+                "min": 0.13873475939035032,
+                "max": 0.14063115930680878,
+                "samples": 9
+              }
+            },
+            "delta": -0.00033609749389051924,
+            "percent": -0.24012403259642268
+          }
+        ],
+        "artworkDetail": {
+          "morning": {
+            "region": [
+              330,
+              635,
+              960,
+              735
+            ],
+            "v3ToEnhancedChannelCorrelation": [
+              0.9967251698709573,
+              0.9968626256396413,
+              0.996984715967652
+            ],
+            "note": "Registered same-view original texture detail; lighting can differ. This is not albedo calibration."
+          },
+          "noon": {
+            "region": [
+              330,
+              635,
+              960,
+              735
+            ],
+            "v3ToEnhancedChannelCorrelation": [
+              0.9981276443129925,
+              0.9981622726792112,
+              0.9981936202469127
+            ],
+            "note": "Registered same-view original texture detail; lighting can differ. This is not albedo calibration."
+          }
+        }
+      },
+      "motion": "Developer camera translations and yaw in the original mission, TAA and FSR Quality; original wall remains in frame. Earlier downward-looking infantry captures are excluded.",
+      "lodDistancesMetres": [
+        8,
+        30,
+        60,
+        100
+      ]
+    },
+    "everon": {
+      "mission": "05HeavyMetal.Eden",
+      "camera": [
+        5091,
+        33.6,
+        10494,
+        1,
+        -0.08,
+        0.5
+      ],
+      "dates": [
+        [
+          1985,
+          7,
+          5,
+          9,
+          0
+        ],
+        [
+          1985,
+          7,
+          5,
+          12,
+          0
+        ]
+      ],
+      "rawRun": "stock-pbr-everon-final-20261019",
+      "executableSHA256": "77BA01B714BF9EA10F7B98E87C4B978F1A11737B72745B91EE3DDDBD2D5A22A6",
+      "screenshots": {
+        "legacy": {
+          "file": "everon-legacy.png",
+          "sha256": "3341a55b4a8e4bd38d2794fd75e3e9b02960cca3759dcafecc4cfd8bcb11fe9d"
+        },
+        "v3": {
+          "file": "everon-v3.png",
+          "sha256": "8fd93212fd97997751a74c554ca7937eb44289c637fe8c2198fcbeb959d38a89"
+        },
+        "enhanced": {
+          "file": "everon-enhanced.png",
+          "sha256": "c924173b81bece3021916572ac61c73fe11ce13b81af32b69f78bac347658157"
+        },
+        "gi": {
+          "file": "everon-gi.png",
+          "sha256": "789229b303faeacaf22089be7eb73f9c76e78e080b0d2e62b12388a06b129b32"
+        }
+      },
+      "validation": {
+        "presented": 13253,
+        "errors": 0,
+        "warnings": 0
+      },
+      "performance": {
+        "aa": "TAA",
+        "order": "off/on/on/off",
+        "offFrameMedianMeanMs": 3.6493,
+        "onFrameMedianMeanMs": 4.04995,
+        "differenceMs": 0.40064999999999973,
+        "stagesMs": {
+          "trace": 0.0891,
+          "filter": 0.1243,
+          "temporal": 0.11415
+        },
+        "note": "Short stationary intervals; scope times are not additive or a performance guarantee."
+      },
+      "pixels": {
+        "island": "everon",
+        "surfaceBounceIsolation": [
+          {
+            "region": "panel",
+            "box": [
+              1100,
+              550,
+              1650,
+              700
+            ],
+            "modes": {
+              "sky-only": {
+                "mean": 0.049397465237682785,
+                "min": 0.049375630640321126,
+                "max": 0.04944509453744218,
+                "samples": 9
+              },
+              "on": {
+                "mean": 0.049386937508621526,
+                "min": 0.04937390762963593,
+                "max": 0.049410215571087726,
+                "samples": 9
+              }
+            },
+            "delta": -1.0527729061259039e-05,
+            "percent": -0.021312285985941593
+          },
+          {
+            "region": "pillar",
+            "box": [
+              930,
+              530,
+              1030,
+              760
+            ],
+            "modes": {
+              "sky-only": {
+                "mean": 0.11186061231429177,
+                "min": 0.1117758668926184,
+                "max": 0.11204528978321046,
+                "samples": 9
+              },
+              "on": {
+                "mean": 0.11182229263087978,
+                "min": 0.11177726784748844,
+                "max": 0.1118905498940868,
+                "samples": 9
+              }
+            },
+            "delta": -3.831968341198866e-05,
+            "percent": -0.03425663655793887
+          },
+          {
+            "region": "side",
+            "box": [
+              600,
+              540,
+              650,
+              700
+            ],
+            "modes": {
+              "sky-only": {
+                "mean": 0.03936324559991558,
+                "min": 0.039195202581277885,
+                "max": 0.0394966103137402,
+                "samples": 9
+              },
+              "on": {
+                "mean": 0.03934305794928659,
+                "min": 0.03919574329776229,
+                "max": 0.03949760976103289,
+                "samples": 9
+              }
+            },
+            "delta": -2.0187650628993026e-05,
+            "percent": -0.05128553380526757
+          },
+          {
+            "region": "control",
+            "box": [
+              80,
+              780,
+              380,
+              900
+            ],
+            "modes": {
+              "sky-only": {
+                "mean": 0.08416748402098292,
+                "min": 0.0841450937709873,
+                "max": 0.08421750280372997,
+                "samples": 9
+              },
+              "on": {
+                "mean": 0.0841774063006178,
+                "min": 0.08414510577497188,
+                "max": 0.08421759503091035,
+                "samples": 9
+              }
+            },
+            "delta": 9.922279634880238e-06,
+            "percent": 0.011788732608919439
+          }
+        ],
+        "artworkDetail": {
+          "morning": {
+            "region": [
+              1100,
+              550,
+              1650,
+              700
+            ],
+            "v3ToEnhancedChannelCorrelation": [
+              0.9956598398488747,
+              0.9939062430277558,
+              0.9960328310472094
+            ],
+            "note": "Registered same-view original texture detail; lighting can differ. This is not albedo calibration."
+          },
+          "noon": {
+            "region": [
+              1100,
+              550,
+              1650,
+              700
+            ],
+            "v3ToEnhancedChannelCorrelation": [
+              0.9955370193622689,
+              0.9938226545428116,
+              0.9959535707882761
+            ],
+            "note": "Registered same-view original texture detail; lighting can differ. This is not albedo calibration."
+          }
+        }
+      },
+      "motion": "Developer camera translations and yaw in the original mission, TAA and FSR Quality; original wall remains in frame. Earlier downward-looking infantry captures are excluded.",
+      "lodDistancesMetres": [
+        8,
+        30,
+        60,
+        100
+      ]
+    }
+  },
+  "combinationSmoke": [
+    "TAA",
+    "MSAA4",
+    "FSR Quality",
+    "RT sunlight",
+    "RTAO and SSAO ambient carriers",
+    "volumetric clouds/cloud shadows",
+    "fog/rain",
+    "night-eye fallback",
+    "local headlights/shadows",
+    "RT water/refraction",
+    "restored stock PBR v3"
+  ],
+  "waterStatus": {
+    "result": "[\"RTReflections=on capability=available waterRays=494169 hits=28015 shadedHits=28015 shadedTerrain=23699 shadedAlpha=8 totalWaterRays=67643218 totalShadedHits=3839200 rayQueriesExecuted=yes hitShadingExecuted=yes lastWorldDispatch=yes hitSurface=unavailable (diagnostics disabled) lastGPUms(traceShade/filter)=0.217088/0.056448; shared RTAO=off capability=available BLAS=18 cachedBLAS=18 TLAS=2 instances=76 instancedTriangles=10667 completedPasses=13018 lastCompletedRays=0 lastCompletedHits=0 totalRays=272914176 rayQueriesExecuted=yes lastWorldDispatch=no BLASbuilds=323 TLASbuilds=51 lastGPUms(BLAS/TLAS/rays/filter/frame)=6.4e-05/6.4e-05/0/0/2.48131; shared static LOD0 scene radius=160m; dynamic=off; AO radius=4m includes bounded terrain, excludes foliage cards; ambient-only composition; static collection excludes animation/damage; blended effects/proxies excluded; actual water only, 80m receivers/70m rays, textured hits and weather sky fallback\",\"WaterRefraction requested=on active=on captured=yes composited=yes captures=139 composites=139 lastGPUms(capture/optics)=0.019456/0.033792 fallback=none; raster-only coastal terrain, missing bottom/underwater retains original water\",\"RTGI=on capability=available transport=one-bounce lastWorldDispatch=yes enhancedInstances=0 completedDispatches=9253 bounceRays=0 hits=0 eligibleHits=0 rejectedMaterials=0 sunRays=0 sunBlocked=0 eligibleReceivers=0 dynamicHits=0 GPUms(trace/filter/temporal/BLAS/TLAS)=0.017408/0.01536/0.01312/6.4e-05/6.4e-05 CPUrecordMs=0.0883 temporal=on history(accepted/rejected/clamped/dynamic)=0/0/0/0 historyResets=26 phase=11 historyBytes=3932160 historyAllocations=20; last completed frame; one bounce, half resolution, 25m rays/45m receivers/80m sun; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain\",\"requested=on active=on half=640x360 layers=3 steps=32x3 lightSteps=2 history=world-AA position=1.562150 fallback=\"]",
+    "ok": true
+  },
+  "localLightStatus": {
+    "result": "\"requested=on active=2 max=2 resolution=1024 range=160m filter=3x3-PCF RT=not-required depthGPUms=0.108416 vertices=19962,19794 light0=3115.805420,226.015869,6336.315918 dir=0.990328,-0.138410,0.009345 light1=3115.805420,226.017334,6335.573730 dir=0.992488,-0.121775,-0.011794\"",
+    "ok": true
+  },
+  "gl33": {
+    "executableSHA256": "D2D5E9D7DA91D6C8092CD4F5FA12C2471D2D62A8FEB29078CD8BC24C3984B970",
+    "result": {
+      "commands": [
+        {
+          "mode": "off",
+          "result": {
+            "result": "\"UNSUPPORTED: PBR prototype requires Vulkan\"",
+            "ok": true
+          }
+        },
+        {
+          "mode": "on",
+          "result": {
+            "result": "\"UNSUPPORTED: PBR prototype requires Vulkan\"",
+            "ok": true
+          }
+        },
+        {
+          "mode": "enhanced",
+          "result": {
+            "result": "\"UNSUPPORTED: PBR prototype requires Vulkan\"",
+            "ok": true
+          }
+        },
+        {
+          "mode": "off",
+          "result": {
+            "result": "\"UNSUPPORTED: PBR prototype requires Vulkan\"",
+            "ok": true
+          }
+        }
+      ],
+      "worldROI": [
+        300,
+        600,
+        1000,
+        850
+      ],
+      "changedPixels": 0
+    },
+    "rawRun": "stock-pbr-gl33-final-20261019"
+  },
+  "tests": {
+    "vulkanCases": 42,
+    "vulkanAssertions": 1631,
+    "gl33Cases": 41,
+    "gl33Assertions": 1591,
+    "driverFreeChecks": 684
+  },
+  "originalSources": [
+    {
+      "file": "DTA\\Data.pbo",
+      "sha256": "1587f9c052ff38967463d851ca85a03efd2db09d063da183046a9b16181d5e2f",
+      "unchanged": true
+    },
+    {
+      "file": "DTA\\Data3D.pbo",
+      "sha256": "10528ef9b5112896898ad8667e83601ff47f95231652c73409d57b7227a8a00f",
+      "unchanged": true
+    },
+    {
+      "file": "Worlds\\abel.wrp",
+      "sha256": "1c13aca4d3300db3546583c82ffa132c1149831e42227f2b47019c74040462a5",
+      "unchanged": true
+    },
+    {
+      "file": "Worlds\\eden.wrp",
+      "sha256": "5a2550b27612fc4c8ccdec55ce2555c1ed23114d46f8b687ce5fb8b273515a79",
+      "unchanged": true
+    }
+  ],
+  "limitations": [
+    "Unmeasured bounded stock RGB, baked shading retained; scalar roughness, original geometry normals.",
+    "Partial stock endpoint coverage and legacy ambient boundary; one diffuse bounce, short ranges, no indirect specular or ray mip footprints.",
+    "Selected live walls exercised CPU-lit terrain fitting; native material/normal semantics are covered by the common shaders and focused tests, not a separate native gameplay surface.",
+    "Everon wall-bounce signal did not exceed observed sampling variation; eligible hits prove participation, not a visible GI improvement there.",
+    "The old authored-wall 3.86% result is excluded."
+  ]
+}

@@ -171,6 +171,8 @@ void EngineVK::PrepareTriangleTL(const MipInfo& mip, const render::LegacySpec& s
         !((_shapeFlags | render::MergeLegacy(spec)) &
           (IsColored | IsLight | DisableSun | NoDropdown | IsShadow | IsAlphaFog | SpecularTexture)) ? 1.f : 0.f;
     _lighting.pbr = {};
+    _lighting.materialAmbient = {};
+    _lighting.materialSun = {};
     // Native sections use original normals and separate light/material inputs.
     // CPU-lit sections capture equivalent inputs in EngineVK_Software.cpp.
     if (_vk.PBREnabled() && _shadowWorld && !_waterSurface && !_sectionBlend &&
@@ -265,7 +267,7 @@ void EngineVK::DrawSectionTL(const Shape& shape, int begin, int end)
         color[i] *= _materialColor[i];
     if (!_vk.FrameOpen())
         return; // Minimized drawable: no acquired image, but unsupported states above still fail.
-    if (_lighting.pbr[0] > 0 && _sectionTexture && begin == 0 && end == shape.NSections())
+    if (_lighting.pbr[0] > 0 && _sectionTexture)
         if (const auto* texture = dynamic_cast<TextureVK*>(shape.GetSection(begin).properties.GetTexture()))
             if (ApplyEnhancedMaterial(shape, *texture, _lighting, _sectionTexture, _sectionDetail))
             {

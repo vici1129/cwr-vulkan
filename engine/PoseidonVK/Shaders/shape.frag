@@ -96,14 +96,16 @@ void main() {
     vec4 texel = WORLD_TEXTURE(diffuseTexture, texCoord);
     vec3 materialN=surfaceNormal;
     float materialRoughness=lighting.pbr.x;
-    if(lighting.pbr.w>.5) {
+    if(lighting.pbr.w>.5 && (lighting.materialAmbient.w>.5 || lighting.materialSun.w>.5)) {
         vec4 map=WORLD_TEXTURE(detailTexture,texCoord);
+        if(lighting.materialAmbient.w>.5) {
         mat3 model=mat3(lighting.materialToWorld), worldToModel=inverse(model);
         vec3 objectNormal=normalize(transpose(model)*surfaceNormal);
         vec3 mapped=materialNormal(objectNormal,worldToModel*dFdx(shadowWorld),worldToModel*dFdy(shadowWorld),
             dFdx(texCoord),dFdy(texCoord),normalize(map.xyz*2-1));
         materialN=normalize(transpose(worldToModel)*mapped);
-        materialRoughness=clamp(map.a*materialRoughness,.045,1);
+        }
+        if(lighting.materialSun.w>.5) materialRoughness=clamp(map.a*materialRoughness,.045,1);
     }
     vec3 base, contactBase;
     bool captureSun, separate;
@@ -258,8 +260,8 @@ void main() {
     // base-texture reflectance times fog transmittance, never lit scene color.
     // Detail/baked lighting and material tint are intentionally not inferred.
     if(lighting.rtWater.w>1.5)
-        outWater=materialRecord(clamp(texel.rgb*toLinear(draw.color.rgb),0,1)*
-            (1-lighting.pbr.y)*(1-lighting.pbr.z),materialN,visibility,1.0/gl_FragCoord.w);
+        outWater=materialRecord(materialDiffuse(texel.rgb*toLinear(draw.color.rgb),lighting.pbr.w,
+            lighting.pbr.y,lighting.pbr.z),materialN,visibility,1.0/gl_FragCoord.w);
     // Foam-only rain marker: MIN writes only R; depth, fog and the other normal
     // component survive. Refraction and RT still reject these rain-covered pixels.
     if(draw.reserved<-.5) outWater.x=-2-outColor.a;

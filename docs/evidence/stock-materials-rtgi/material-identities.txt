@@ -1,0 +1,14 @@
+[2026-10-19 20:52:58.950] [app-09b4] [INFO] [GRAPHICS]  Enhanced source data\kamennazed.pac 128x128 fingerprint=3735404598107056867 model=data3d\zed_kamenna.p3d lod=0.5 vertices=48 sections=1 geometry=2195626591502288280
+[2026-10-19 20:52:58.950] [app-09b4] [INFO] [GRAPHICS]  Enhanced stock material 1 ready; override=false normal=false roughness=false
+[2026-10-19 20:55:26.137] [app-09b4] [INFO] [GRAPHICS]  Enhanced source data\kamennazed.pac 128x128 fingerprint=3735404598107056867 model=data3d\zed_kamenna.p3d lod=1 vertices=24 sections=1 geometry=15759270531097937650
+[2026-10-19 20:50:25.625] [app-34e8] [INFO] [GRAPHICS]  Enhanced source data\plot_beton_03_top.pac 256x32 fingerprint=18240797119409424594 model=data3d\zed2.p3d lod=0.5 vertices=68 sections=3 geometry=8442782668387980414
+[2026-10-19 20:50:25.625] [app-34e8] [INFO] [GRAPHICS]  Enhanced stock material 2 ready; override=false normal=false roughness=false
+[2026-10-19 20:50:25.625] [app-34e8] [INFO] [GRAPHICS]  Enhanced source data\plot_beton_0302_side.pac 256x128 fingerprint=16860270304147451178 model=data3d\zed2.p3d lod=0.5 vertices=68 sections=3 geometry=8442782668387980414
+[2026-10-19 20:50:25.625] [app-34e8] [INFO] [GRAPHICS]  Enhanced stock material 3 ready; override=false normal=false roughness=false
+[2026-10-19 20:50:25.626] [app-34e8] [INFO] [GRAPHICS]  Enhanced source data\plot_beton_02_side.pac 256x128 fingerprint=6362336912512726729 model=data3d\zed2.p3d lod=0.5 vertices=68 sections=3 geometry=8442782668387980414
+[2026-10-19 20:50:25.626] [app-34e8] [INFO] [GRAPHICS]  Enhanced stock material 4 ready; override=false normal=false roughness=false
+[2026-10-19 20:52:35.189] [app-34e8] [INFO] [GRAPHICS]  Enhanced source data\plot_beton_03_top.pac 256x32 fingerprint=18240797119409424594 model=data3d\zed2.p3d lod=1 vertices=20 sections=3 geometry=12645244065637725224
+[2026-10-19 20:52:35.189] [app-34e8] [INFO] [GRAPHICS]  Enhanced source data\plot_beton_0302_side.pac 256x128 fingerprint=16860270304147451178 model=data3d\zed2.p3d lod=1 vertices=20 sections=3 geometry=12645244065637725224
+[2026-10-19 20:52:35.189] [app-34e8] [INFO] [GRAPHICS]  Enhanced source data\plot_beton_02_side.pac 256x128 fingerprint=6362336912512726729 model=data3d\zed2.p3d lod=1 vertices=20 sections=3 geometry=12645244065637725224
+[2026-10-19 20:52:39.740] [app-34e8] [INFO] [GRAPHICS]  Enhanced source data\plot_beton_0302_side.pac 256x128 fingerprint=16860270304147451178 model=data3d\zed2.p3d lod=4 vertices=8 sections=2 geometry=13954822052462775290
+[2026-10-19 20:52:39.740] [app-34e8] [INFO] [GRAPHICS]  Enhanced source data\plot_beton_02_side.pac 256x128 fingerprint=6362336912512726729 model=data3d\zed2.p3d lod=4 vertices=8 sections=2 geometry=13954822052462775290

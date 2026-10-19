@@ -1,0 +1,110 @@
+{
+  "island": "malden",
+  "surfaceBounceIsolation": [
+    {
+      "region": "shade",
+      "box": [
+        330,
+        635,
+        960,
+        735
+      ],
+      "modes": {
+        "sky-only": {
+          "mean": 0.09046355521431534,
+          "min": 0.09034241601124653,
+          "max": 0.09056091604124605,
+          "samples": 9
+        },
+        "on": {
+          "mean": 0.09174497937867687,
+          "min": 0.0916678513192081,
+          "max": 0.09187733073832878,
+          "samples": 9
+        }
+      },
+      "delta": 0.0012814241643615276,
+      "percent": 1.4165087380500818
+    },
+    {
+      "region": "sun",
+      "box": [
+        1250,
+        770,
+        1770,
+        870
+      ],
+      "modes": {
+        "sky-only": {
+          "mean": 0.13701736149179058,
+          "min": 0.13683962677573996,
+          "max": 0.1371793588763817,
+          "samples": 9
+        },
+        "on": {
+          "mean": 0.13704019436232748,
+          "min": 0.1369063215585144,
+          "max": 0.13717737519857923,
+          "samples": 9
+        }
+      },
+      "delta": 2.283287053689298e-05,
+      "percent": 0.016664217065853748
+    },
+    {
+      "region": "control",
+      "box": [
+        800,
+        465,
+        1010,
+        510
+      ],
+      "modes": {
+        "sky-only": {
+          "mean": 0.13996828649608598,
+          "min": 0.13759306537988858,
+          "max": 0.14189392718959953,
+          "samples": 9
+        },
+        "on": {
+          "mean": 0.13963218900219546,
+          "min": 0.13873475939035032,
+          "max": 0.14063115930680878,
+          "samples": 9
+        }
+      },
+      "delta": -0.00033609749389051924,
+      "percent": -0.24012403259642268
+    }
+  ],
+  "artworkDetail": {
+    "morning": {
+      "region": [
+        330,
+        635,
+        960,
+        735
+      ],
+      "v3ToEnhancedChannelCorrelation": [
+        0.9967251698709573,
+        0.9968626256396413,
+        0.996984715967652
+      ],
+      "note": "Registered same-view original texture detail; lighting can differ. This is not albedo calibration."
+    },
+    "noon": {
+      "region": [
+        330,
+        635,
+        960,
+        735
+      ],
+      "v3ToEnhancedChannelCorrelation": [
+        0.9981276443129925,
+        0.9981622726792112,
+        0.9981936202469127
+      ],
+      "note": "Registered same-view original texture detail; lighting can differ. This is not albedo calibration."
+    }
+  }
+}

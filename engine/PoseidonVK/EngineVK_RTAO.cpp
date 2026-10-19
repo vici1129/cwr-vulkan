@@ -307,17 +307,21 @@ void EngineVK::CollectRTAOScene()
                 if (lod->NLevels() == 0)
                     continue;
                 Shape* shape = lod->LevelOpaque(0);
-                // The selected stock wall is CPU/terrain-fitted. Capture the
+                // Validated stock walls can be CPU/terrain-fitted. Capture the
                 // SAME Animate/Deanimate pose used by raster, including offscreen
                 // walls, instead of substituting its un-fitted source geometry.
                 bool fitted=false;
-                if(shape && (shape->GetOrHints() & ClipLandMask)==ClipLandKeep && shape->NSections()==1)
-                    if(const auto* tex=dynamic_cast<TextureVK*>(shape->GetSection(0).properties.GetTexture()))
+                if(shape && (shape->GetOrHints() & ClipLandMask)==ClipLandKeep && shape->NSections()>0)
+                {
+                    fitted=true;
+                    for(int s=0; s<shape->NSections() && fitted; ++s)
                     {
                         vk::ShapeLighting material;
                         std::shared_ptr<vk::TextureImage> color,normal;
-                        fitted=ApplyEnhancedMaterial(*shape,*tex,material,color,normal);
+                        const auto* tex=dynamic_cast<TextureVK*>(shape->GetSection(s).properties.GetTexture());
+                        fitted=tex && ApplyEnhancedMaterial(*shape,*tex,material,color,normal);
                     }
+                }
                 if(object->IsAnimated(0) && !fitted) continue;
                 if (!shape || shape->IsAnimated() || shape->NVertex() == 0 ||
                     (!fitted && (shape->GetOrHints() & (ClipLandKeep | ClipLandOn))))
@@ -345,7 +349,7 @@ void EngineVK::CollectRTAOScene()
                         if (auto* tex = dynamic_cast<TextureVK*>(texture); tex && !tex->IsDynamic())
                         {
                             // Ordinary hit color belongs to RT water. GI only
-                            // uploads the explicitly authored enhanced inputs.
+                            // uploads validated catalog inputs, including stock RGB.
                             if(_vk.RTReflectionsEnabled())
                             {
                                 candidate.color = tex->Image(_vk);
@@ -358,6 +362,8 @@ void EngineVK::CollectRTAOScene()
                             {
                                 candidate.enhanced = {enhanced.pbr[0], enhanced.pbr[2], enhanced.pbr[1], enhanced.pbr[3]};
                                 candidate.sampler |= vk::RayDiffuse;
+                                if (enhanced.materialAmbient[3] > .5f) candidate.sampler |= vk::RayNormalMap;
+                                if (enhanced.materialSun[3] > .5f) candidate.sampler |= vk::RayRoughnessMap;
                             }
                         }
                     bool extended = false;

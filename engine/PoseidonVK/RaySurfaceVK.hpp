@@ -7,6 +7,7 @@ namespace Poseidon::vk
 // Packed above the three sampler bits in the shared ray material.
 // These describe available inputs, not a physical/PBR material classification.
 constexpr uint32_t RayDiffuse = 8, RayVertexNormals = 16, RayTerrainUV = 32;
+constexpr uint32_t RayNormalMap = 64, RayRoughnessMap = 128;
 inline uint32_t RaySurfaceFlags(int flags)
 {
     const auto spec = render::SplitLegacy(flags);

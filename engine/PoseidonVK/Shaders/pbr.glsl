@@ -1,3 +1,4 @@
+#include "material_diffuse.glsl"
 // Material BRDF: isotropic GGX, separable exact Smith G1,
 // Schlick Fresnel and Lambert diffuse weighted by (1-F). No environment term.
 // Roughness is perceptual; alpha = roughness^2. Inputs/outputs are linear HDR.
@@ -24,15 +25,15 @@ vec3 pbrBRDF(vec3 albedo, vec3 n, vec3 v, vec3 l, float roughness, float f0) {
 }
 vec3 pbrAmbient(vec3 texel,vec3 tint) {
     if(lighting.pbr.w>.5)
-        return clamp(texel*toLinear(tint),0,1)*legacyLightToLinear(lighting.materialAmbient.rgb)*
-            (1-lighting.pbr.y)*(1-lighting.pbr.z);
+        return materialDiffuse(texel*toLinear(tint),lighting.pbr.w,lighting.pbr.y,lighting.pbr.z)*
+            legacyLightToLinear(lighting.materialAmbient.rgb);
     return texel*legacyLightToLinear(tint)*
         legacyLightToLinear(max(lighting.ambient.rgb-lighting.rtSun.yzw,vec3(0)))*(1-lighting.pbr.y);
 }
 void pbrLighting(vec3 texel, vec3 tint, vec3 position, vec3 normal, vec2 localVisibility,
                  float roughness, out vec3 base, out vec3 sun) {
     vec3 n=pbrNormalize(normal), v=pbrNormalize(-position);
-    vec3 albedo=clamp(texel*toLinear(tint),0.0,1.0);
+    vec3 albedo=materialBaseColor(texel*toLinear(tint),lighting.pbr.w);
     float f0=lighting.pbr.y, metallic=lighting.pbr.z;
     // Ambient and emissive keep their authored meaning. Forced diffuse belongs
     // to sunlight, so it is removed from ambient and shadowed with direct sun.
@@ -61,7 +62,8 @@ void pbrLighting(vec3 texel, vec3 tint, vec3 position, vec3 normal, vec2 localVi
         float attenuation=min(1.0,start2/max(size2,1e-8));
         // Preserve existing engine ambient/falloff/cone semantics; direct
         // diffuse AND specular use the matching local shadow map once.
-        base+=texel*legacyLightToLinear(tint*light.ambient.rgb)*(1.0-f0)*(1-metallic)*attenuation*
+        vec3 localColor=lighting.pbr.w>.5?materialBaseColor(texel,lighting.pbr.w):texel;
+        base+=localColor*legacyLightToLinear(tint*light.ambient.rgb)*(1.0-f0)*(1-metallic)*attenuation*
             (dot(n,toLight)>0.0 ? cone : 1.0);
         float shadow=light.diffuse.w==1.0 ? localVisibility.x :
                      light.diffuse.w==2.0 ? localVisibility.y : 1.0;

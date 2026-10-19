@@ -14,7 +14,7 @@ if(NOT Vulkan_GLSLANG_VALIDATOR_EXECUTABLE)
 endif()
 set(VK_SHADER_HEADERS)
 set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
-    Shaders/material_normal.glsl Shaders/material_record.glsl)
+    Shaders/material_normal.glsl Shaders/material_record.glsl Shaders/material_diffuse.glsl)
 foreach(kind triangle shape screen shadow gamma ssao csm)
     foreach(stage vert frag)
         if(kind STREQUAL "screen" AND stage STREQUAL "frag")
@@ -143,7 +143,8 @@ add_custom_target(PoseidonVKShaders DEPENDS ${VK_SHADER_HEADERS})
 foreach(header IN LISTS VK_SHADER_HEADERS)
     add_custom_command(OUTPUT "${header}" APPEND DEPENDS
         "${CMAKE_CURRENT_SOURCE_DIR}/Shaders/material_normal.glsl"
-        "${CMAKE_CURRENT_SOURCE_DIR}/Shaders/material_record.glsl")
+        "${CMAKE_CURRENT_SOURCE_DIR}/Shaders/material_record.glsl"
+        "${CMAKE_CURRENT_SOURCE_DIR}/Shaders/material_diffuse.glsl")
 endforeach()
 
 add_library(PoseidonVK STATIC VulkanContext.cpp VulkanContext_Gamma.cpp VulkanContext_SSAO.cpp VulkanContext_Triangle.cpp VulkanContext_Mesh.cpp VulkanContext_Texture.cpp TextureVK.cpp BufferVK.cpp VertexBufferVK.cpp
