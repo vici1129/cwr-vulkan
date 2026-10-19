@@ -168,21 +168,27 @@ void VideoPage::CaptureDisplay()
 }
 void VideoPage::ObserveWindowSize()
 {
-    // A user resize is live, not a failed display request. Merge dimensions
-    // only when no mode/monitor/size edit is staged; preserve every other row.
+    // OS window moves/resizes are live, not failed display requests. Keep
+    // explicit mode/monitor selections and any separately staged size intact.
     if (!GEngine || GEngine->GetCurrentWindowMode() != WindowMode::Windowed ||
         m_applied.windowMode != DisplayConfig::Windowed || m_pending.windowMode != m_applied.windowMode ||
-        GEngine->GetCurrentMonitor() != m_applied.monitor || m_pending.monitor != m_applied.monitor ||
-        m_pending.resolutionWidth != m_applied.resolutionWidth ||
-        m_pending.resolutionHeight != m_applied.resolutionHeight)
+        m_pending.monitor != m_applied.monitor)
         return;
     int width = 0, height = 0;
     GEngine->GetVideoResolution(width, height);
+    const int monitor = GEngine->GetCurrentMonitor();
+    const bool sizeStaged = m_pending.resolutionWidth != m_applied.resolutionWidth ||
+                            m_pending.resolutionHeight != m_applied.resolutionHeight;
     if (width > 0 && height > 0 &&
-        (width != m_applied.resolutionWidth || height != m_applied.resolutionHeight))
+        (monitor != m_applied.monitor ||
+         (!sizeStaged && (width != m_applied.resolutionWidth || height != m_applied.resolutionHeight))))
     {
-        m_applied.resolutionWidth = m_pending.resolutionWidth = width;
-        m_applied.resolutionHeight = m_pending.resolutionHeight = height;
+        m_applied.monitor = m_pending.monitor = monitor;
+        if (!sizeStaged)
+        {
+            m_applied.resolutionWidth = m_pending.resolutionWidth = width;
+            m_applied.resolutionHeight = m_pending.resolutionHeight = height;
+        }
         RebuildLists();
     }
 }

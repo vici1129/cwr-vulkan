@@ -253,3 +253,26 @@ locally under `build/shadow-live/video-flow-final-*` and
 `build/video-flow-*-tests.txt`.
 Both games close normally. The final Vulkan run submits/presents **5,774 / 5,774**
 frames with **zero validation errors and warnings**.
+
+## Pending and external monitor edge cases (2026-10-19)
+
+Follow-up to `4c9098d`: every actual pending fullscreen monitor change resets
+size/refresh to Native/default, including A -> B -> A before Apply. Re-selecting
+the same pending monitor retains deliberate size/refresh choices. Windowed OS
+monitor moves merge into the live/pending display state while gamma/FPS edits
+remain staged; explicit monitor/mode selections and separately staged sizes
+are preserved. Only the two existing page handlers change; no renderer changes.
+
+Both reproductions fail against the old implementation and pass with the fix.
+Public Vulkan/GL33 builds pass, with **1,080 focused assertions / 113 cases**
+on each build and **520 policy/lifetime checks**. Coverage includes Apply before
+the next page tick, staged sizes (even if an OS resize already matches them)
+and explicit monitor confirmation.
+
+Copied-profile stock Malden checks verify an unapplied portrait resolution
+selection followed by return to the original fullscreen landscape monitor.
+Actual OS-level window moves in both directions retain staged gamma/FPS and save
+the correct monitor on Vulkan and GL33. Both close normally; Vulkan submits and
+presents **5,318 / 5,318** frames with **zero validation errors and warnings**.
+Raw local results: `build/shadow-live/video-monitor-final-*/monitor-results.jsonl`
+and `build/video-monitor-*-tests.txt` (including the pre-fix failing cases).

@@ -14,7 +14,8 @@ explicitly and Apply can retry.
 
 Exclusive-fullscreen monitor changes start at the target output's Native
 resolution/default refresh, rather than reusing a mode owned by the old monitor.
-An ordinary window resize preserves staged gamma/FPS and other non-display edits;
+This also applies when returning to the original monitor before Apply.
+An ordinary window move or resize preserves staged gamma/FPS and other non-display edits;
 it does not replace a deliberately staged mode/monitor/window-size selection.
 If saving fails, subsequent edits, Retry and Cancel compare against the last
 live-applied values, separately from the saved rollback values.

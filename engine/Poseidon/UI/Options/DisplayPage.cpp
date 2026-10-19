@@ -273,12 +273,12 @@ void DisplayPage::DisplayProvider::SetRowValue(int row, int v)
     switch (row)
     {
         case kRowMonitor:
-            if (v >= 0 && v < (int)m_page->m_monitors.size())
+            if (v >= 0 && v < (int)m_page->m_monitors.size() && v != p.monitor)
             {
                 p.monitor = v;
                 // An exclusive mode belongs to its display. Start at Native
                 // on the new output, not an unsupported old size/refresh.
-                if (p.windowMode == DisplayConfig::Fullscreen && p.monitor != m_page->m_applied.monitor)
+                if (p.windowMode == DisplayConfig::Fullscreen)
                 {
                     p.resolutionWidth = p.resolutionHeight = p.refreshRate = 0;
                 }

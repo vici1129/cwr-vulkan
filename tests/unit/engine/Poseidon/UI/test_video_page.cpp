@@ -176,6 +176,7 @@ class Page : public VideoPage
   public:
     auto& Rows() { return ProviderRef(); }
     int At(Row row) const { return FindRow(row); }
+    DisplayConfig PendingDisplay() const { return m_pending; }
     void Set(Row row, int value) { Rows().SetRowValue(At(row), value); }
     int Value(Row row) { return Rows().RowValue(At(row)); }
     void Action(Row row, OptionsShell& shell) { Rows().OnRowAction(At(row), shell); }
@@ -638,12 +639,13 @@ TEST_CASE("Video merges a live resize without discarding staged gamma and FPS", 
 
 TEST_CASE("Video live resize does not replace an explicitly staged window size", "[UI][VideoPage]")
 {
+    const bool osMatchesSelection = GENERATE(false, true);
     Fixture f;
     f.Open();
     auto& p = *f.page;
     p.Set(VideoPage::Resolution, p.Choice(VideoPage::Resolution, "800x600"));
-    f.engine.width = 1100;
-    f.engine.height = 700;
+    f.engine.width = osMatchesSelection ? 800 : 1100;
+    f.engine.height = osMatchesSelection ? 600 : 700;
     p.Tick(*f.shell);
     CHECK(p.Value(VideoPage::Resolution) == p.Choice(VideoPage::Resolution, "800x600"));
     p.Action(VideoPage::Apply, *f.shell);
@@ -655,6 +657,66 @@ TEST_CASE("Video live resize does not replace an explicitly staged window size",
     REQUIRE(cfg.Load(f.display.path));
     CHECK(cfg.resolutionWidth == 800);
     CHECK(cfg.resolutionHeight == 600);
+}
+
+TEST_CASE("Video merges a windowed monitor move while common edits are staged", "[UI][VideoPage]")
+{
+    const bool vulkan = GENERATE(true, false);
+    const bool observeOnTick = GENERATE(true, false);
+    const bool sizeStaged = GENERATE(false, true);
+    Fixture f;
+    f.engine.vulkan = vulkan;
+    f.Open();
+    auto& p = *f.page;
+    p.Set(VideoPage::Gamma, 50);
+    p.Set(VideoPage::Fps, 2);
+    if (sizeStaged)
+        p.Set(VideoPage::Resolution, p.Choice(VideoPage::Resolution, "800x600"));
+    // Simulate the OS moving the window, including a logical-size change.
+    f.engine.monitor = 1;
+    f.engine.width = 1000;
+    f.engine.height = 700;
+    if (observeOnTick)
+    {
+        p.Tick(*f.shell);
+        CHECK(p.PendingDisplay().monitor == 1);
+        CHECK(p.PendingDisplay().resolutionWidth == (sizeStaged ? 800 : 1000));
+    }
+    CHECK(p.Value(VideoPage::Gamma) == 50);
+    p.Action(VideoPage::Apply, *f.shell);
+    CHECK(p.PendingDisplay().monitor == 1);
+    if (sizeStaged) f.shell->OnButtonClicked(9201);
+    p.Tick(*f.shell);
+    CHECK(f.engine.monitor == 1);
+    CHECK(f.engine.gamma == 1.4f);
+    CHECK(gUserFpsCap == 60);
+    CHECK(f.Saved().gamma == 1.4f);
+    DisplayConfig cfg;
+    REQUIRE(cfg.Load(f.display.path));
+    CHECK(cfg.monitor == 1);
+    CHECK(cfg.resolutionWidth == (sizeStaged ? 800 : 1000));
+}
+
+TEST_CASE("Video external monitor move does not overwrite an explicit monitor choice", "[UI][VideoPage]")
+{
+    Fixture f;
+    f.Open();
+    auto& p = *f.page;
+    p.Set(VideoPage::Monitor, 1);
+    // An OS move must not consume the player's explicitly staged selection.
+    f.engine.monitor = 1;
+    p.Tick(*f.shell);
+    CHECK(p.PendingDisplay().monitor == 1);
+    CHECK(f.engine.monitor == 1);
+    p.Action(VideoPage::Apply, *f.shell);
+    CHECK(f.engine.monitor == 1);
+    DisplayConfig cfg;
+    REQUIRE(cfg.Load(f.display.path));
+    CHECK(cfg.monitor == 0); // The explicit selection still requires Keep.
+    f.shell->OnButtonClicked(9201);
+    p.Tick(*f.shell);
+    REQUIRE(cfg.Load(f.display.path));
+    CHECK(cfg.monitor == 1);
 }
 
 TEST_CASE("Video unrelated Apply preserves developer changes outside the failed-save retry", "[UI][VideoPage]")
@@ -766,6 +828,39 @@ TEST_CASE("Video exclusive monitor change starts with the target native mode", "
         CHECK(f.engine.width == 1920);
         CHECK(f.engine.height == 1080);
     }
+}
+
+TEST_CASE("Video fullscreen A to B to A clears the other monitor's pending mode", "[UI][VideoPage]")
+{
+    Fixture f;
+    f.engine.mode = WindowMode::Fullscreen;
+    f.engine.width = 1920;
+    f.engine.height = 1080;
+    f.engine.refresh = 165;
+    f.Open();
+    auto& p = *f.page;
+    p.Set(VideoPage::Monitor, 1);
+    p.Set(VideoPage::Resolution, p.Choice(VideoPage::Resolution, "800x600"));
+    p.Set(VideoPage::Refresh, 2);
+    REQUIRE(p.PendingDisplay().resolutionWidth == 800);
+    REQUIRE(p.PendingDisplay().refreshRate == 120);
+    p.Set(VideoPage::Monitor, 0);
+    CHECK(p.PendingDisplay().resolutionWidth == 0);
+    CHECK(p.PendingDisplay().resolutionHeight == 0);
+    CHECK(p.PendingDisplay().refreshRate == 0);
+    p.Action(VideoPage::Apply, *f.shell);
+    f.shell->OnButtonClicked(9201);
+    p.Tick(*f.shell);
+    CHECK(f.engine.monitor == 0);
+    CHECK(f.engine.width == 1920);
+    CHECK(f.engine.height == 1080);
+    // Re-selecting the same pending monitor must not erase deliberate choices.
+    p.Set(VideoPage::Monitor, 1);
+    p.Set(VideoPage::Resolution, p.Choice(VideoPage::Resolution, "800x600"));
+    p.Set(VideoPage::Refresh, 2);
+    p.Set(VideoPage::Monitor, 1);
+    CHECK(p.PendingDisplay().resolutionWidth == 800);
+    CHECK(p.PendingDisplay().refreshRate == 120);
 }
 
 TEST_CASE("Video applies Vulkan refresh only after entering exclusive mode at the selected size", "[UI][VideoPage]")
