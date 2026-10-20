@@ -14,14 +14,14 @@ void EngineVK::ApplyStockPBR(const TextureVK& texture, vk::ShapeLighting& lighti
 {
     if (!_vk.EnhancedMaterialsEnabled() || lighting.pbr[0] <= 0)
         return;
-    const auto id = vk::StockPBRIdentity(texture.MaterialKey());
+    const auto id = vk::EnhancedPBRIdentity(texture.MaterialKey());
     if (!id)
         return;
     lighting.pbr[3] = float(id);
     auto rgba = [](ColorVal c) { return std::array<float, 4>{c.R(), c.G(), c.B(), 0}; };
     lighting.materialAmbient = rgba(GScene->MainLight()->Ambient() * GetAccomodateEye());
     lighting.materialSun = rgba(GScene->MainLight()->Diffuse() * GetAccomodateEye());
-    lighting.pbrDiffuse[3] = texture.IsDynamic() ? 0.f : float(vk::StockPBRMaterials[id - 64].receiverFamily);
+    lighting.pbrDiffuse[3] = texture.IsDynamic() ? 0.f : float(vk::PBRReceiverFamily(id));
     // Identity alone never reserves ambient: the caller still requires opaque
     // world geometry and the independently captured PBR lighting contract.
 }

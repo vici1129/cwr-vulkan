@@ -52,12 +52,14 @@ TEST_CASE("Native terrain splits only dry triangle eligibility, preserving origi
 TEST_CASE("Stock GI receivers require qualified identity and independent opaque lighting gates",
           "[Graphics][vulkan-shape][enhanced-material]")
 {
-    for (unsigned i=0;i<std::size(vk::StockPBRMaterials);++i)
+    for (unsigned i=0;i<std::size(vk::StockPBRMaterials)+std::size(vk::EnhancedPBRMaterials);++i)
         for (bool software : {false,true})
         {
             vk::ShapeLighting l;
-            l.pbr={.9f,.04f,0,float(64+i)};
-            const auto family=vk::StockPBRMaterials[i].receiverFamily;
+            const bool original=i<std::size(vk::StockPBRMaterials);
+            const auto extra=i-std::size(vk::StockPBRMaterials);
+            l.pbr={.9f,.04f,0,float(original?64+i:128+extra)};
+            const auto family=original?vk::StockPBRMaterials[i].receiverFamily:vk::EnhancedPBRMaterials[extra].receiverFamily;
             l.pbrDiffuse[3]=float(family);
             // No opaque-world prerequisite: identity alone cannot reserve ambient.
             vk::QualifyGIReceiver(l,software);
@@ -70,7 +72,7 @@ TEST_CASE("Stock GI receivers require qualified identity and independent opaque 
             vk::QualifyGIReceiver(l,software);
             REQUIRE(l.rtWater[3]==1);
         }
-    for (float identity : {0.f,1.5f,63.f,87.f,1000.f,-1.f,std::numeric_limits<float>::quiet_NaN()})
+    for (float identity : {0.f,1.5f,63.f,87.f,127.f,128.5f,136.f,1000.f,-1.f,std::numeric_limits<float>::quiet_NaN()})
     {
         vk::ShapeLighting l;l.rtWater[3]=1;l.pbr={.9f,.04f,0,identity};l.pbrDiffuse[3]=1;
         vk::QualifyGIReceiver(l,true);

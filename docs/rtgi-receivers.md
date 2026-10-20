@@ -1,6 +1,8 @@
 # Stock PBR receivers for RTGI
 
 Subsequent terrain reception is documented in [stock terrain RTGI](rtgi-terrain.md).
+Two additional enhanced-only roof/gable materials are documented in
+[stock material participation](rtgi-material-participation.md).
 
 Public base: `78e39d9`. This extends the existing developer-only, default-Off
 PBR/RTGI path. It does not replace artwork, change the BRDF or adjust light gain.

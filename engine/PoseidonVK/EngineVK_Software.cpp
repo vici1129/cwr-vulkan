@@ -43,7 +43,7 @@ void EngineVK::CaptureSoftwareMaterial(TLVertexTable& dst, const TLMaterial& mat
     bool candidate = false;
     for (int s = 0; s < shape->NSections(); ++s)
         if (const auto* texture = dynamic_cast<TextureVK*>(shape->GetSection(s).properties.GetTexture());
-            texture && vk::PBRMaterial(texture->MaterialKey(), mat.specularPower) > 0)
+            texture && vk::PBRMaterial(texture->MaterialKey(), mat.specularPower, _vk.EnhancedMaterialsEnabled()) > 0)
         {
             candidate = true;
             break;
@@ -161,7 +161,7 @@ void EngineVK::SubmitSoftware(const std::vector<uint32_t>& indices)
     if (!_softwareMesh || !_vk.PBREnabled() || !_shadowWorld || _waterSurface || !texture ||
         texture->IsTransparent() || state.blend || !state.depthWrite || !state.depthTest ||
         (_softwareFlags & (DisableSun | IsShadow | IsLight | IsColored | IsAlphaFog | NoDropdown | SpecularTexture)) ||
-        vk::PBRMaterial(texture->MaterialKey(), 0) == 0 || _softwareMesh->pbrNormal.empty())
+        vk::PBRMaterial(texture->MaterialKey(), 0, _vk.EnhancedMaterialsEnabled()) == 0 || _softwareMesh->pbrNormal.empty())
     {
         SubmitSoftwareLit(indices, nullptr);
         return;
@@ -271,7 +271,7 @@ void EngineVK::SubmitSoftwareLit(const std::vector<uint32_t>& indices, const vk:
     if (material)
     {
         const auto* texture = static_cast<TextureVK*>(_softwareMip._texture);
-        receiver.pbr = {vk::PBRMaterial(texture->MaterialKey(), int(receiver.specular[3])), .04f, 0, 0};
+        receiver.pbr = {vk::PBRMaterial(texture->MaterialKey(), int(receiver.specular[3]), _vk.EnhancedMaterialsEnabled()), .04f, 0, 0};
         _vk.RecordPBRDraw(true);
     }
     receiver.aoReceiver[0] = _vk.RTAOEnabled() && _shadowWorld && !_waterSurface &&

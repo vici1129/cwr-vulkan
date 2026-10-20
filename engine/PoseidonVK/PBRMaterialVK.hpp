@@ -35,11 +35,34 @@ inline unsigned StockPBRIdentity(std::string_view texture)
             return 64 + i;
     return 0;
 }
-inline float PBRMaterial(std::string_view texture, int legacyPower)
+// Additional inspected rough dielectric sections are enhanced-mode only. Keep
+// the v3 allowlist/identities unchanged. Reuse the original receiver families;
+// classification alone never bypasses the captured-ambient/opaque-world gates.
+inline constexpr StockPBRMaterial EnhancedPBRMaterials[]{
+    {"data\\tasky_p90.pac", .90f, 3}, {"data\\budova2_stit2.pac", .90f, 5}};
+inline unsigned PBRReceiverFamily(unsigned id)
+{
+    if (id >= 64 && id < 64 + std::size(StockPBRMaterials)) return StockPBRMaterials[id - 64].receiverFamily;
+    if (id >= 128 && id < 128 + std::size(EnhancedPBRMaterials)) return EnhancedPBRMaterials[id - 128].receiverFamily;
+    return 0;
+}
+inline unsigned EnhancedPBRIdentity(std::string_view texture)
+{
+    if (const auto id = StockPBRIdentity(texture)) return id;
+    for (unsigned i = 0; i < std::size(EnhancedPBRMaterials); ++i)
+        if (texture == EnhancedPBRMaterials[i].texture) return 128 + i;
+    return 0;
+}
+inline float PBRMaterial(std::string_view texture, int legacyPower, bool enhanced = false)
 {
     const auto id = StockPBRIdentity(texture);
     if (!id)
+    {
+        if (enhanced)
+            if (const auto extra = EnhancedPBRIdentity(texture); extra >= 128)
+                return EnhancedPBRMaterials[extra - 128].roughness;
         return 0;
+    }
     if (const float roughness = StockPBRMaterials[id - 64].roughness; roughness > 0)
         return roughness;
     // Existing painted-signpost lobe-width hint, not a measured conversion.

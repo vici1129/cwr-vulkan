@@ -51,6 +51,26 @@ TEST_CASE("Stock enhancements do not require replacement artwork or data maps", 
     }
 }
 
+TEST_CASE("Additional stock materials leave v3 unchanged and use explicit GI receiver families", "[Graphics][enhanced-material]")
+{
+    using namespace Poseidon::vk;
+    REQUIRE(std::size(StockPBRMaterials)==23);
+    for (const auto& material : EnhancedPBRMaterials)
+    {
+        REQUIRE(StockPBRIdentity(material.texture)==0);
+        REQUIRE(PBRMaterial(material.texture,128)==0);
+        REQUIRE(PBRMaterial(material.texture,128,true)>0);
+        REQUIRE(EnhancedPBRIdentity(material.texture)>=128);
+        REQUIRE(PBRReceiverFamily(EnhancedPBRIdentity(material.texture))==material.receiverFamily);
+        REQUIRE(material.receiverFamily>=3);
+    }
+    // Alpha-opaque pixels do not make window/door/hardware atlases one material.
+    for (const auto key : {"data\\domek1_side.pac", "data\\domek2_side.pac", "data\\cihldum_back.pac",
+                           "data\\stodola_new_side.pac", "data\\cihldum_side.pac", "data\\k1_stara_prkna.pac",
+                           "data\\vidle.paa", "data\\water.pac"})
+        REQUIRE(EnhancedPBRIdentity(key)==0);
+}
+
 TEST_CASE("Independent material data maps pack without requiring either companion", "[Graphics][enhanced-material]")
 {
     using namespace Poseidon;

@@ -184,7 +184,7 @@ void EngineVK::PrepareTriangleTL(const MipInfo& mip, const render::LegacySpec& s
         _lighting.pbrDiffuse[0] >= .99f && _lighting.pbrDiffuse[1] >= .99f && _lighting.pbrDiffuse[2] >= .99f &&
         !((_shapeFlags | render::MergeLegacy(spec)) & (IsShadow | IsLight | DisableSun | NoDropdown | NoZBuf)))
         if (const auto* texture = dynamic_cast<TextureVK*>(mip._texture); texture && !texture->IsTransparent())
-            _lighting.pbr = {vk::PBRMaterial(texture->MaterialKey(), int(_lighting.specular[3])), .04f, 0, 0};
+            _lighting.pbr = {vk::PBRMaterial(texture->MaterialKey(), int(_lighting.specular[3]), _vk.EnhancedMaterialsEnabled()), .04f, 0, 0};
     _lighting.shadowReceiver[0] = _shadowWorld && _shadowTuning.enabled && _sunEnabled &&
         _lighting.ambient[3] > 0 && !(_shapeFlags & (NoZBuf | IsShadow | DisableSun | NoDropdown)) &&
         !(render::MergeLegacy(spec) & (NoZBuf | IsShadow | DisableSun | NoDropdown)) ? 1.f : 0.f;

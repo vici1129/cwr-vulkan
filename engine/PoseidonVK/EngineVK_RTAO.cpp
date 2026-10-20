@@ -367,7 +367,7 @@ void EngineVK::CollectRTAOScene()
                             }
                             vk::ShapeLighting enhanced;
                             bool materialVertices=shape->NNorm()==shape->NVertex();
-                            if (_vk.RTGIEnabled() && vk::StockPBRIdentity(tex->MaterialKey()))
+                            if (_vk.RTGIEnabled() && vk::EnhancedPBRIdentity(tex->MaterialKey()))
                                 for(Offset at=section.beg; at<section.end && materialVertices; shape->NextFace(at))
                                 {
                                     const auto& face=shape->Face(at);
@@ -375,13 +375,13 @@ void EngineVK::CollectRTAOScene()
                                         if(shape->Clip(face.GetVertex(v))&ClipUserMask) { materialVertices=false; break; }
                                 }
                             if (_vk.RTGIEnabled() && alpha == AlphaStats::Opaque &&
-                                materialVertices && (candidate.sampler & vk::RayDiffuse) && vk::StockPBRIdentity(tex->MaterialKey()))
+                                materialVertices && (candidate.sampler & vk::RayDiffuse) && vk::EnhancedPBRIdentity(tex->MaterialKey()))
                             {
                                 candidate.color=tex->Image(_vk);
                                 const auto& pixels=tex->Pixels();
                                 _vk.PrepareRTAOAlpha(candidate.color,pixels.width,pixels.height,pixels.rgba.data());
-                                candidate.enhanced={vk::PBRMaterial(tex->MaterialKey(),0),0,.04f,
-                                    float(vk::StockPBRIdentity(tex->MaterialKey()))};
+                                candidate.enhanced={vk::PBRMaterial(tex->MaterialKey(),0,true),0,.04f,
+                                    float(vk::EnhancedPBRIdentity(tex->MaterialKey()))};
                             }
                             if (!((flags | object->GetObjSpecial()) & (DisableSun | IsColored | IsLight | IsAlphaFog)) &&
                                 ApplyEnhancedMaterial(*shape, *tex, enhanced, candidate.color, candidate.normalRoughness))
