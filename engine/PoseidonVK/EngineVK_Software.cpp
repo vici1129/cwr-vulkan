@@ -113,7 +113,7 @@ void EngineVK::BeginMesh(TLVertexTable& mesh, const render::LegacySpec&)
         CaptureTemporalTerrain(mesh, false);
     if (_softwareMesh || _activeShape)
         throw std::logic_error("Vulkan software BeginMesh requires an idle open frame");
-    _softwareVertices.assign(mesh.NVertex(), {});
+    _softwareRemap.assign(mesh.NVertex(), UINT32_MAX);
     _softwareMesh = &mesh;
 }
 void EngineVK::PrepareTriangle(const MipInfo& mip, int flags)
@@ -203,10 +203,12 @@ void EngineVK::SubmitSoftwareLit(const std::vector<uint32_t>& indices, const vk:
         return; // A minimized drawable has no acquired frame; retain the engine mesh protocol.
     if (indices.empty())
         return;
-    for (auto index : indices)
+    vk::CompactSoftwareIndices(indices,_softwareRemap,_softwareSources,_softwareIndices);
+    _softwareVertices.resize(_softwareSources.size());
+    size_t packedIndex=0;
+    for (auto index : _softwareSources)
     {
-        if (index >= _softwareVertices.size())
-            throw std::out_of_range("Vulkan software face vertex exceeds the transformed table");
+        auto& packed=_softwareVertices[packedIndex++];
         // Clipping can leave unused original vertices without valid rhw.
         // Convert only the surviving face stream, as GL33's indexed queues do.
         const auto& source = _softwareMesh->GetVertex(index);
@@ -218,37 +220,37 @@ void EngineVK::SubmitSoftwareLit(const std::vector<uint32_t>& indices, const vk:
         vertex.u = source.t0.u;
         vertex.v = source.t0.v;
         vertex.color = source.color;
-        _softwareVertices[index] = vk::ScreenGeometry(vertex, _width, _height);
+        packed = vk::ScreenGeometry(vertex, _width, _height);
         if (index < _softwareMesh->hdrColor.size() && _softwareMesh->hdrColor[index][3] != 0)
-            std::copy_n(_softwareMesh->hdrColor[index].begin(), 3, _softwareVertices[index].color);
+            std::copy_n(_softwareMesh->hdrColor[index].begin(), 3, packed.color);
         if (index < _softwareMesh->previousClip.size())
             std::copy(_softwareMesh->previousClip[index].begin(), _softwareMesh->previousClip[index].end(),
-                      _softwareVertices[index].previousClip);
+                      packed.previousClip);
         if (index < _softwareMesh->directSun.size())
-            std::copy_n(_softwareMesh->directSun[index].begin(), 4, _softwareVertices[index].directSun);
+            std::copy_n(_softwareMesh->directSun[index].begin(), 4, packed.directSun);
         if (index < _softwareMesh->directLocal.size())
-            std::copy_n(_softwareMesh->directLocal[index].begin(), 6, _softwareVertices[index].directLocal);
-        std::fill_n(_softwareVertices[index].aoAmbient, 4, 0.f);
+            std::copy_n(_softwareMesh->directLocal[index].begin(), 6, packed.directLocal);
+        std::fill_n(packed.aoAmbient, 4, 0.f);
         if (index < _softwareMesh->aoAmbient.size())
-            std::copy_n(_softwareMesh->aoAmbient[index].begin(), 4, _softwareVertices[index].aoAmbient);
+            std::copy_n(_softwareMesh->aoAmbient[index].begin(), 4, packed.aoAmbient);
         if (material)
         {
-            std::copy_n(_softwareMesh->pbrNormal[index].begin(), 3, _softwareVertices[index].pbrNormal);
-            _softwareVertices[index].aoAmbient[3] = 1.f;
+            std::copy_n(_softwareMesh->pbrNormal[index].begin(), 3, packed.pbrNormal);
+            packed.aoAmbient[3] = 1.f;
         }
         if (index < _softwareMesh->terrainMaterial.size())
         {
             const auto& terrain=_softwareMesh->terrainMaterial[index];
-            std::copy_n(terrain.begin(),3,_softwareVertices[index].pbrNormal);
-            std::copy_n(terrain.begin()+4,4,_softwareVertices[index].terrainTint);
+            std::copy_n(terrain.begin(),3,packed.pbrNormal);
+            std::copy_n(terrain.begin()+4,4,packed.terrainTint);
         }
         // TL already contains the scene Fog8 visibility in specular.a. Alpha
         // fog is already in color.a; it must not also get an RGB fog mix.
-        _softwareVertices[index].fog =
+        packed.fog =
             (_softwareFlags & (FogDisabled | NoDropdown | IsAlphaFog | IsLight)) ? 1.f : float(source.specular >> 24) / 255;
     }
     auto mesh = _vk.UploadTransientMesh(_softwareVertices.data(), _softwareVertices.size() * sizeof(vk::ScreenVertex),
-                                        indices.data(), indices.size() * sizeof(uint32_t));
+                                        _softwareIndices.data(), _softwareIndices.size() * sizeof(uint32_t));
     std::shared_ptr<vk::TextureImage> image;
     auto alpha = AlphaStats::Opaque;
     if (_softwareMip._texture)

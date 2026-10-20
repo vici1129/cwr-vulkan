@@ -281,7 +281,9 @@ void EngineVK::DrawSectionTL(const Shape& shape, int begin, int end)
             vk::QualifyGIReceiver(_lighting, false);
         }
     if (_lighting.pbr[0] > 0) _vk.RecordPBRDraw();
-    if (_terrainSurface && _vk.EnhancedMaterialsEnabled() && _lighting.rtWater[3]==1 &&
+    if (_terrainSurface && _vk.RTGIEnabled() && _vk.EnhancedMaterialsEnabled() && _lighting.rtWater[3]==1 &&
+        GScene->GetCamera()->Position().Distance2(shape.BSphereCenter()+_shapeModelWorld.Position())<=
+            Square(shape.BSphereRadius()+vk::VulkanContext::GIReceiverDistance+.01f) &&
         _lighting.ambient[3]>0 && _lighting.diffuse[0]+_lighting.diffuse[1]+_lighting.diffuse[2]>0 &&
         _lighting.rtSun[1]==0 && _lighting.rtSun[2]==0 && _lighting.rtSun[3]==0 &&
         _lighting.emissive[0]==0 && _lighting.emissive[1]==0 && _lighting.emissive[2]==0 &&

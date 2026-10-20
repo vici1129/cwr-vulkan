@@ -626,6 +626,8 @@ void VulkanContext::BeginAAWorld()
     }
     if (IsFSR(_aaMode)) JitterFSR();
     _worldActive = _worldPassOpen = true;
+    if (_frames[_frame].frameQueries)
+        vkCmdWriteTimestamp(command,VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,_frames[_frame].frameQueries,18);
     _commands = {};
     VkClearValue clears[6]{};
     std::copy(_clearColor.begin(), _clearColor.end(), clears[0].color.float32);
@@ -692,6 +694,13 @@ void VulkanContext::DrawAAPass(unsigned index, VkFramebuffer framebuffer, VkDesc
 
 void VulkanContext::FinishAAWorld(const std::array<float, 4>& projection)
 {
+    if (_worldActive && _frames[_frame].frameQueries)
+    {
+        FlushScreenBatch();
+        vkCmdWriteTimestamp(_frames[_frame].command,VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+                            _frames[_frame].frameQueries,19);
+        _frames[_frame].worldTimestamped=true;
+    }
     DrawWaterRefraction(); // RT Fresnel reflections are composed over the transmitted bottom.
     bool ssaoHandled = false;
     _contactDrew = false;

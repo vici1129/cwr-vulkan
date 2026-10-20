@@ -243,7 +243,10 @@ void main() {
     // and in-scattered fog are never multiplied by the AO visibility.
     outAmbient=lighting.aoReceiver.x>.5 && aoAmbient.a>.99 ?
         vec4(max(ambientResponse-ambientRemoved,vec3(0))*visibility,1.0/gl_FragCoord.w):vec4(0);
-    if(lighting.pbr.w>.5 && lighting.aoReceiver.x>.5 && aoAmbient.a>.99)
+    // Terrain's separate-sun aoReference is already base. Reuse the exact same
+    // nonlinear response instead of two more sRGB/night-eye round trips.
+    if(lighting.pbr.w>.5 && lighting.aoReceiver.x>.5 && aoAmbient.a>.99 &&
+       (lighting.pbr.x>0.0 || !captureSun || !separate))
         outAmbient=vec4(max(nightResponse(base)-nightResponse(max(base-ambientContribution,vec3(0))),vec3(0))*visibility,
             1.0/gl_FragCoord.w);
     // A negative depth reserves this independently captured ambient difference
@@ -281,10 +284,10 @@ void main() {
     // base-texture reflectance times fog transmittance, never lit scene color.
     // Detail/baked lighting and material tint are intentionally not inferred.
     if(giReceiverReady)
-        outWater=materialRecord(materialDiffuse(texel.rgb*toLinear(draw.color.rgb)*
-            (lighting.pbr.w==1000 ? legacyLightToLinear(terrainTint.rgb)*terrainDetail : vec3(1)),lighting.pbr.w,
-            lighting.pbr.w==1000 ? .04 : lighting.pbr.y,lighting.pbr.z)*
-            (lighting.pbr.w==1000 ? terrainWet : 1),materialN,visibility,1.0/gl_FragCoord.w,int(lighting.pbrDiffuse.w));
+        outWater=materialRecord(lighting.pbr.w==1000 ?
+            terrainDiffuse(texel.rgb*toLinear(draw.color.rgb),legacyLightToLinear(terrainTint.rgb),terrainDetail,terrainWet) :
+            materialDiffuse(texel.rgb*toLinear(draw.color.rgb),lighting.pbr.w,lighting.pbr.y,lighting.pbr.z),
+            materialN,visibility,1.0/gl_FragCoord.w,int(lighting.pbrDiffuse.w));
     // Foam-only rain marker: MIN writes only R; depth, fog and the other normal
     // component survive. Refraction and RT still reject these rain-covered pixels.
     if(draw.reserved<-.5) outWater.x=-2-outColor.a;

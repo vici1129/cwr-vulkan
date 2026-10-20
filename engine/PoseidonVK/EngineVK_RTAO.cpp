@@ -16,9 +16,12 @@
 #include <Poseidon/World/Entities/Vehicles/Transport.hpp>
 #include <chrono>
 #include <cstring>
+#include <Poseidon/Core/Config/EngineConfig.hpp>
+#include <Poseidon/IO/ParamFileExt.hpp>
 
 namespace Poseidon
 {
+extern bool EnableHWTLState;
 namespace
 {
 constexpr size_t DynamicObjects = 32, DynamicPeople = 12, DynamicScan = 2048;
@@ -249,6 +252,8 @@ void EngineVK::CollectRTAOScene()
 {
     if (!_vk.RaySceneEnabled() || !GScene || !GScene->GetCamera() || !GScene->GetLandscape())
         return;
+    const auto preparationStart = _vk.ProfilingEnabled() ? std::chrono::steady_clock::now() :
+        std::chrono::steady_clock::time_point{};
     const auto* camera = GScene->GetCamera();
     auto* land = GScene->GetLandscape();
     const auto position = camera->Position();
@@ -277,7 +282,8 @@ void EngineVK::CollectRTAOScene()
                                    rgba(_fogColor),
                                    _vk.EyeCoef(),
                                    {GScene->GetFogMinRange(),
-                                    1.f / std::max(1.f, GScene->GetFogMaxRange() - GScene->GetFogMinRange()), 0, 0},
+                                    1.f / std::max(1.f, GScene->GetFogMaxRange() - GScene->GetFogMinRange()),
+                                    _vk.WetRain(), land->GetSeaLevel()},
                                    rgba(sun->Ambient()), rgba(sun->Diffuse())});
     }
     uint32_t foliageCount = 0, terrainCount = 0;
@@ -462,6 +468,19 @@ void EngineVK::CollectRTAOScene()
     // Landscape::SurfaceY. Only local patches; height changes invalidate a patch.
     if (shadows || _vk.RTAOEnabled())
     {
+        const bool colorized = !(ENGINE_CONFIG.enableHWTL && EnableHWTLState);
+        // GenerateSegment supplies ClipAll (palette index 0), not the random
+        // color index returned with its UV jitter. Match the actual raster route.
+        const Color palette = colorized ? Color(land->TerrainPaletteColor(0))*2 : Color(1,1,1);
+        std::shared_ptr<vk::TextureImage> detail;
+        if (_vk.RTGIEnabled() && IsMultitexturing())
+            if (auto* texture=dynamic_cast<TextureVK*>(_textures.Load(Remaster >> "CfgDetailTextures" >> "detail").GetRef());
+                texture && !texture->IsDynamic())
+            {
+                detail=texture->Image(_vk);
+                const auto& pixels=texture->Pixels();
+                _vk.PrepareRTAOAlpha(detail,pixels.width,pixels.height,pixels.rgba.data());
+            }
         const float grid = land->GetTerrainGrid();
         if (_rtLandscape != land || _rtTerrainGrid != grid)
         {
@@ -472,6 +491,12 @@ void EngineVK::CollectRTAOScene()
         constexpr int cells = 16;
         const float patchSize = cells * grid;
         std::set<std::pair<int, int>> used;
+        // Reuse scratch capacity across all checked patches in this collection.
+        // Cache comparisons still include every original height/normal/texture input.
+        std::vector<float> heights;
+        std::vector<int> textureIds;
+        heights.reserve((cells+3)*(cells+3));
+        textureIds.reserve(cells*cells);
         for (int z = int(std::floor((position.Z() - radius) / patchSize));
              z <= int(std::floor((position.Z() + radius) / patchSize)); ++z)
             for (int x = int(std::floor((position.X() - radius) / patchSize));
@@ -482,18 +507,19 @@ void EngineVK::CollectRTAOScene()
                     continue;
                 const auto key = std::make_pair(x, z);
                 used.insert(key);
-                std::vector<float> heights;
+                heights.clear();
                 // Include the normal stencil in the cache key as well as positions.
                 for (int j = -1; j <= cells+1; ++j)
                     for (int i = -1; i <= cells+1; ++i)
                         heights.push_back(land->SurfaceY((x * cells + i) * grid, (z * cells + j) * grid));
-                std::vector<int> textureIds;
+                textureIds.clear();
                 for (int j=0; j<cells; ++j) for(int i=0; i<cells; ++i)
                     textureIds.push_back(land->GetTexture(int((z*cells+j)*grid/land->GetLandGrid()),
                                                         int((x*cells+i)*grid/land->GetLandGrid())));
                 auto& patch = _rtTerrainPatches[key];
                 if (!patch.mesh || patch.heights != heights || patch.textured != hitData ||
-                    patch.textures != textureIds || patch.gi != _vk.RTGIEnabled())
+                    patch.textures != textureIds || patch.gi != _vk.RTGIEnabled() ||
+                    patch.colorized != colorized || patch.detail != bool(detail))
                 {
                     std::vector<std::array<float, 8>> vertices;
                     std::vector<uint32_t> indices;
@@ -531,7 +557,9 @@ void EngineVK::CollectRTAOScene()
                     patch.ranges.clear();
                     patch.textured = hitData;
                     patch.gi = _vk.RTGIEnabled();
-                    patch.textures = std::move(textureIds);
+                    patch.colorized = colorized;
+                    patch.detail = bool(detail);
+                    patch.textures = textureIds;
                     for (auto& [identity, group] : groups)
                     {
                         vk::RTAORange range{uint32_t(indices.size()), uint32_t(group.size())};
@@ -548,6 +576,9 @@ void EngineVK::CollectRTAOScene()
                             if (_vk.RTGIEnabled() && identity.second && texture->GetAlphaClass()==AlphaStats::Opaque)
                             {
                                 range.enhanced={1,0,.04f,1000};
+                                range.sampler|=vk::RayTerrainMaterial;
+                                range.normalRoughness=detail; // original scalar alpha, never a normal map
+                                range.terrain={palette.R(),palette.G(),palette.B(),texture->WetResponse()[0]};
                                 LOG_INFO(Graphics,"RTGI terrain source {} {}x{} patch={},{} triangles={} clamp={} dry=yes",
                                     texture->MaterialKey(),pixels.width,pixels.height,x,z,group.size()/3,range.sampler&3);
                             }
@@ -557,7 +588,7 @@ void EngineVK::CollectRTAOScene()
                     }
                     patch.mesh = _vk.UploadMesh(vertices.data(), vertices.size() * sizeof(vertices[0]), indices.data(),
                                                 indices.size() * sizeof(uint32_t));
-                    patch.heights = std::move(heights);
+                    patch.heights = heights;
                 }
                 vk::RTAOInstance instance;
                 instance.mesh = patch.mesh;
@@ -582,5 +613,6 @@ void EngineVK::CollectRTAOScene()
     std::array<float, 16> viewToWorld{};
     std::copy_n(&transform._11, 16, viewToWorld.begin());
     _vk.SetRTAOScene(std::move(instances), viewToWorld);
+    if (_vk.ProfilingEnabled()) _vk.RecordRTPreparation(ElapsedRT(preparationStart));
 }
 } // namespace Poseidon

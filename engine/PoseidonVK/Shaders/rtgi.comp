@@ -17,7 +17,7 @@
 layout(local_size_x=8,local_size_y=8) in;
 layout(set=0,binding=1) uniform accelerationStructureEXT scene;
 layout(set=0,binding=2,rgba32f) uniform image2D resultGI;
-layout(set=0,binding=3,std430) buffer Counters { uint count[96]; } counters;
+layout(set=0,binding=3,std430) buffer Counters { uint count[]; } counters;
 #ifdef MULTISAMPLE_DEPTH
 layout(set=0,binding=6) uniform sampler2DMS replacedAmbient;
 vec4 capturedAmbient(ivec2 p) { return texelFetch(replacedAmbient,p,0); }
@@ -28,6 +28,18 @@ vec4 capturedAmbient(ivec2 p) { return texelFetch(replacedAmbient,p,0); }
 shared uint counts[40];
 shared vec3 skyDomeIntegral[64],skyWeatherIntegral[64],skyWallIntegral[64];
 shared vec4 reflectanceIntegral[64];
+layout(constant_id=0) const bool GIPathProbe=false;
+int pathProbe=-1;
+void probeValue(int row,vec4 value) {
+    if(!GIPathProbe || pathProbe<0) return;
+    for(int i=0;i<4;++i) counters.count[96+pathProbe*48+row*4+i]=floatBitsToUint(value[i]);
+}
+void beginProbe(ivec2 pixel) {
+    if(!GIPathProbe) return;
+    ivec2 size=imageSize(resultGI),cell=clamp(pixel*8/size,ivec2(0),ivec2(7));
+    ivec2 selected=ivec2((vec2(cell)+.5)*vec2(size)/8);
+    if(all(equal(pixel,selected))) pathProbe=cell.y*8+cell.x;
+}
 vec3 calibratedSky(vec3 world,vec3 direction) {
     return raySkyLinear(world,direction)*uintBitsToFloat(counters.count[51]);
 }
@@ -118,6 +130,7 @@ bool skyBlocked(vec3 origin,vec3 direction,float minimum,inout float sampleData)
     return blocked;
 }
 vec4 traceGI(ivec2 pixel) {
+    beginProbe(pixel);
     ivec2 full=min(pixel*2+1,depthSize()-1);
     vec4 receiver=giReceiver(full);
     if(receiver.w>=0) return vec4(0);
@@ -132,6 +145,8 @@ vec4 traceGI(ivec2 pixel) {
     // offsets use the macro surface, so relief does not fragment the denoiser.
     n=materialDecodeNormal(giSurface(full).g);
     vec3 world=(ao.camera*vec4(p,1)).xyz;
+    probeValue(0,vec4(world,ao.jitter.z));
+    probeValue(1,vec4(n,materialReceiverClass(giSurface(full).g)));
     vec3 tangent=normalize(cross(abs(n.y)<.95?vec3(0,1,0):vec3(1,0,0),n));
     vec3 bitangent=cross(n,tangent);
     // Subpixel-scale world seeds: centimetre-sized shared seeds correlate whole
@@ -149,6 +164,7 @@ vec4 traceGI(ivec2 pixel) {
         phi+=giSampleRotation(phase);
     }
     vec3 direction=tangent*cos(phi)*sqrt(u)+bitangent*sin(phi)*sqrt(u)+n*sqrt(1-u);
+    probeValue(2,vec4(direction,0));
     if(dot(direction,worldNormal)<=0) return result;
     rayQueryEXT query;
     rayQueryInitializeEXT(query,scene,0,255,world+worldNormal*ao.settings.y,.005,direction,ao.settings.x);
@@ -158,6 +174,7 @@ vec4 traceGI(ivec2 pixel) {
     }
     atomicAdd(counts[0],1);
     if(rayQueryGetIntersectionTypeEXT(query,true)!=gl_RayQueryCommittedIntersectionTriangleEXT) {
+        probeValue(2,vec4(direction,1));
         // A short transport miss is not necessarily visible sky: test the rest
         // of the bounded visibility interval, without adding a surface bounce.
         if(direction.y>0) {
@@ -173,6 +190,16 @@ vec4 traceGI(ivec2 pixel) {
     }
     atomicAdd(counts[1],1);
     HitSurface hit=hitSurface(query);
+    if(hit.kind==2u && hit.materialIdentity==1000u) {
+        float exposure=smoothstep(.15,.8,hit.geometricNormal.y)*smoothstep(0.0,.35,hit.position.y-light.parameters.w);
+        hit.albedo*=1-hit.terrainWetResponse*light.parameters.z*exposure;
+    }
+    probeValue(2,vec4(direction,2));
+    probeValue(3,vec4(hit.position,hit.kind));
+    probeValue(4,vec4(hit.normal,hit.materialIdentity));
+    probeValue(5,vec4(hit.geometricNormal,rayQueryGetIntersectionTEXT(query,true)));
+    probeValue(6,vec4(hit.textureColorLinear,hit.available));
+    probeValue(7,vec4(hit.albedo,0));
     if(hit.kind==3u) result.a=-result.a;
     if(!hit.diffuseEligible || hit.materialIdentity==0u) {
         atomicAdd(counts[3],1);
@@ -185,6 +212,7 @@ vec4 traceGI(ivec2 pixel) {
         return result;
     }
     atomicAdd(counts[2],1);
+    probeValue(2,vec4(direction,3));
     uint sourceCounter=hit.kind==2u?8u:hit.materialIdentity>=64u?10u:12u;
     atomicAdd(counts[sourceCounter],1);
     if(hit.kind==3u) atomicAdd(counts[7],1);
@@ -242,6 +270,11 @@ vec4 traceGI(ivec2 pixel) {
     // sample. Incident sunlight has the same Lambert-reference calibration as
     // enhanced raster lighting. No arbitrary GI gain or hit-distance falloff.
     result.rgb=reflected; // component masks above are binary diagnostics, never an artistic gain
+    probeValue(7,vec4(hit.albedo,cosine));
+    probeValue(8,vec4(incident,visibility));
+    probeValue(9,vec4(hit.albedo*incident,sun.x));
+    probeValue(10,vec4(hit.albedo*sky,sun.y));
+    probeValue(11,vec4(result.rgb,sun.z));
     return result;
 }
 void main() {

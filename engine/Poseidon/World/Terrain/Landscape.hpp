@@ -606,6 +606,7 @@ class Landscape: public SerializeClass
 	void OnTimeSkipped(); // time skipped, react accordingly
 
 	Texture *GetTexture( int id ) const;
+	PackedColor TerrainPaletteColor(unsigned index) const { return _colorizePalette[index & 255]; }
 
 	// data access
 	GeographyInfo GetGeography( int x, int z ) const;

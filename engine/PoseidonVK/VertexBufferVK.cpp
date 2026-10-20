@@ -20,7 +20,6 @@ VertexBufferVK::VertexBufferVK(vk::VulkanContext& context, const Shape& shape, V
     if (!ImmutableBuffer(shape, type))
         throw std::logic_error("Vulkan Shape: only immutable geometry and cached shadow buffers are supported");
     auto geometry = vk::ExtractShapeGeometry(shape);
-    _terrainReceivers=vk::TerrainReceiverRanges(geometry,maxTide+maxWave);
     _sections = std::move(geometry.sections);
     _buffers = context.UploadMesh(geometry.vertices.data(), geometry.vertices.size() * sizeof(vk::ShapeVertex),
                                   geometry.indices.data(), geometry.indices.size() * sizeof(VertexIndex));
@@ -34,7 +33,6 @@ void VertexBufferVK::Update(const Shape& shape, bool dynamic)
     // overwrite its allocation: raster frames and cached BLAS retain the old
     // shared snapshot until their fences retire it.
     auto geometry = vk::ExtractShapeGeometry(shape);
-    _terrainReceivers=vk::TerrainReceiverRanges(geometry,maxTide+maxWave);
     const auto vertexBytes = geometry.vertices.size() * sizeof(vk::ShapeVertex);
     const auto indexBytes = geometry.indices.size() * sizeof(VertexIndex);
     // Animate/Deanimate may mark a shared shape dirty even when the restored
@@ -53,7 +51,25 @@ void VertexBufferVK::Update(const Shape& shape, bool dynamic)
                                        geometry.indices.data(), geometry.indices.size() * sizeof(VertexIndex));
     _sections = std::move(geometry.sections);
     _buffers = std::move(buffers);
+    _terrainReceivers.clear();
+    _terrainReceiversReady = false;
     bufferDirty = false;
+}
+
+const std::vector<vk::TerrainReceiverRange>& VertexBufferVK::TerrainReceivers()
+{
+    // Only the explicit landscape-ground receiver draw requests these ranges.
+    // Ordinary objects, water and GI-Off never scan triangles or allocate ranges.
+    // Read the retained immutable snapshot; unchanged dirty notifications keep it.
+    if (!_terrainReceiversReady)
+    {
+        _terrainReceivers = vk::TerrainReceiverRanges(
+            {static_cast<const vk::ShapeVertex*>(_buffers->vertices.mapped),
+             size_t(_buffers->vertices.size / sizeof(vk::ShapeVertex))},
+            {static_cast<const VertexIndex*>(_buffers->indices.mapped),size_t(_sections.back().end)},maxTide+maxWave);
+        _terrainReceiversReady = true;
+    }
+    return _terrainReceivers;
 }
 
 VertexBuffer* EngineVK::CreateVertexBuffer(const Shape& shape, VBType type)

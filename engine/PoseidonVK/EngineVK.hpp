@@ -97,6 +97,7 @@ class EngineVK final : public Engine
         std::vector<vk::RTAORange> ranges;
         bool textured = false;
         bool gi = false;
+        bool colorized = false, detail = false;
     };
     std::map<std::pair<int, int>, RTTerrainPatch> _rtTerrainPatches;
     const void* _rtLandscape = nullptr;
@@ -317,6 +318,7 @@ class EngineVK final : public Engine
     MipInfo _softwareMip;
     int _softwareFlags = 0;
     std::vector<vk::ScreenVertex> _softwareVertices;
+    std::vector<uint32_t> _softwareRemap, _softwareSources, _softwareIndices;
     std::vector<vk::ShapeLighting> _softwarePBRLighting;
     const Shape* _softwareSourceShape = nullptr;
     struct EnhancedMaps

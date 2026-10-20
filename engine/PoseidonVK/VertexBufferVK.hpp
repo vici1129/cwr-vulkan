@@ -13,12 +13,13 @@ class VertexBufferVK final : public VertexBuffer
     void Update(const Shape&, bool dynamic) override;
     const std::vector<vk::SectionRange>& Sections() const { return _sections; }
     const std::shared_ptr<vk::MeshBuffers>& Buffers() const { return _buffers; }
-    const auto& TerrainReceivers() const { return _terrainReceivers; }
+    const std::vector<vk::TerrainReceiverRange>& TerrainReceivers();
 
   private:
     vk::VulkanContext& _context;
     std::vector<vk::SectionRange> _sections;
     std::shared_ptr<vk::MeshBuffers> _buffers;
     std::vector<vk::TerrainReceiverRange> _terrainReceivers;
+    bool _terrainReceiversReady = false;
 };
 } // namespace Poseidon

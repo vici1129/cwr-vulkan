@@ -1,19 +1,21 @@
 #pragma once
 #include <array>
 #include <cmath>
+#include <span>
 #include <PoseidonVK/ShapeGeometryVK.hpp>
 namespace Poseidon::vk
 {
 struct TerrainReceiverRange { uint32_t begin, end; bool dry; };
-inline std::vector<TerrainReceiverRange> TerrainReceiverRanges(const ShapeGeometry& geometry, float dryHeight)
+inline std::vector<TerrainReceiverRange> TerrainReceiverRanges(std::span<const ShapeVertex> vertices,
+    std::span<const VertexIndex> indices, float dryHeight)
 {
     std::vector<TerrainReceiverRange> ranges;
-    for (uint32_t i=0;i<geometry.indices.size();i+=3)
+    for (uint32_t i=0;i<indices.size();i+=3)
     {
         bool dry=true;
         for (unsigned k=0;k<3;++k)
         {
-            const auto& v=geometry.vertices[geometry.indices[i+k]];
+            const auto& v=vertices[indices[i+k]];
             dry=dry && std::isfinite(v.position[1]) && v.position[1]>dryHeight &&
                 std::isfinite(v.normal[0]) && std::isfinite(v.normal[1]) && std::isfinite(v.normal[2]) &&
                 v.normal[1]>0;
@@ -22,6 +24,10 @@ inline std::vector<TerrainReceiverRange> TerrainReceiverRanges(const ShapeGeomet
         else ranges.push_back({i,i+3,dry});
     }
     return ranges;
+}
+inline std::vector<TerrainReceiverRange> TerrainReceiverRanges(const ShapeGeometry& geometry, float dryHeight)
+{
+    return TerrainReceiverRanges(geometry.vertices,geometry.indices,dryHeight);
 }
 // Original landscape inputs only. Reject the entire potential coastal band,
 // invalid normals and non-palette values; no light/color inversion or guessing.

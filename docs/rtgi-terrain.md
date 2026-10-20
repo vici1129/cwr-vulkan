@@ -1,5 +1,10 @@
 # Stock terrain RTGI reception
 
+Follow-up: [terrain material accuracy and cost](rtgi-terrain-accuracy.md) matches
+ray-hit reflectance to the actual raster inputs, investigates ground/sun bounce,
+and reduces avoidable range, draw and CPU geometry-upload work. The results below
+describe the original `3200901` receiver milestone.
+
 Public base: `1a2339d`. Developer-only/default-Off PBR and RTGI retain original
 artwork. Terrain's existing ray-reflector path and the calibrated sky/sun,
 one-bounce estimator, visibility rays and temporal reconstruction are unchanged.

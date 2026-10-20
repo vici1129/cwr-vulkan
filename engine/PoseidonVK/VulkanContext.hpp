@@ -111,6 +111,7 @@ struct RTAORange
     std::shared_ptr<TextureImage> color; // existing decoded RGBA, uploaded only for a hit-color consumer
     std::shared_ptr<TextureImage> normalRoughness;
     std::array<float, 4> enhanced{}; // roughness scale, metallic, F0, identity
+    std::array<float, 4> terrain{}; // original unlit tint, stock wet-darkening response
     bool operator==(const RTAORange&) const = default;
 };
 struct RTAOInstance
@@ -221,6 +222,9 @@ class VulkanContext
     std::string SetRTGI(std::string_view mode);
     void FailRTGI(std::string_view reason);
     bool RTGIEnabled() const { return _rtGIEnabled && _rtaoAvailable; }
+    static constexpr float GIReceiverDistance = 45.f;
+    bool ProfilingEnabled() const { return _profile.enabled; }
+    void RecordRTPreparation(double ms) { _profile.rtPreparationMs += ms; }
     std::string SetRTShadows(std::string_view mode);
     bool RTShadowsEnabled() const { return _rtShadowsEnabled && _rtaoAvailable; }
     std::string SetSoftRTShadows(std::string_view mode);
@@ -386,8 +390,8 @@ class VulkanContext
     uint32_t _rtTerrain = 0, _rtFoliage = 0;
     bool _rtaoRequested = false, _rtaoAvailable = false, _rtaoEnabled = false;
     bool _rtGIEnabled = false;
-    static constexpr float GIReceiverDistance = 45.f;
     unsigned _rtGIComponents = 3; // binary diagnostics: bit 0 sun bounce, bit 1 secondary sky
+    bool _rtGIProbe = false; // sparse existing-path readback; no additional rays
     std::string _rtGIFailure;
     bool _rtDynamicEnabled = false;
     std::string _rtaoReason = "Vulkan ray-query device has not been initialized";
@@ -427,6 +431,8 @@ class VulkanContext
         double commandStart = 0, commandMs = 0, submitMs = 0, retentionMs = 0, bindingMs = 0;
         double ssaoMs = 0, ssaoGpuMs = 0;
         double gpuMs = 0;
+        double worldGpuMs = 0, rtPreparationMs = 0;
+        uint64_t worldGpuSamples = 0;
         uint64_t gpuSamples = 0;
         double taaGpuMs = 0;
         double bloomGpuMs = 0;
@@ -481,6 +487,7 @@ class VulkanContext
         VkQueryPool ssaoQueries = VK_NULL_HANDLE;
         VkQueryPool frameQueries = VK_NULL_HANDLE;
         bool frameTimestamped = false;
+        bool worldTimestamped = false;
         bool taaTimestamped = false;
         bool bloomTimestamped = false;
         bool shaftsTimestamped = false;

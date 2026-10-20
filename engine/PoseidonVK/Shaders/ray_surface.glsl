@@ -6,6 +6,7 @@
 // High sampler bits are metadata; low three bits retain the existing sampler ABI.
 const uint RayDiffuse = 8u, RayVertexNormals = 16u, RayTerrainUV = 32u;
 const uint RayNormalMap = 64u, RayRoughnessMap = 128u;
+const uint RayTerrainMaterial = 256u;
 const uint HitPosition = 1u, HitNormal = 2u, HitUV = 4u, HitColor = 8u,
     HitAlbedo = 16u, HitVertexNormal = 32u, HitAlphaTest = 64u, HitApproximateUV = 128u;
 struct HitSurface {
@@ -17,6 +18,7 @@ struct HitSurface {
     bool diffuseEligible;
     uint materialIdentity;
     float roughness, metallic;
+    float terrainWetResponse;
 };
 vec3 vertexPosition(Material m,uint index) {
     uint offset=vertexIndex(m,index)*8;
@@ -101,7 +103,7 @@ HitSurface hitSurface(rayQueryEXT query) {
     s.position=vec3(0); s.geometricNormal=vec3(0); s.normal=vec3(0);
     s.uv=vec2(0); s.textureColorLinear=vec3(0); s.albedo=vec3(0);
     s.available=0u; s.kind=0u; s.diffuseEligible=false;
-    s.materialIdentity=0u; s.roughness=1; s.metallic=0;
+    s.materialIdentity=0u; s.roughness=1; s.metallic=0; s.terrainWetResponse=0;
     if(rayQueryGetIntersectionTypeEXT(query,true)!=gl_RayQueryCommittedIntersectionTriangleEXT) return s;
     uint custom=rayQueryGetIntersectionInstanceCustomIndexEXT(query,true);
     s.kind=custom>>20;
@@ -143,12 +145,20 @@ HitSurface hitSurface(rayQueryEXT query) {
        (s.available&(HitUV|HitVertexNormal|HitAlbedo))==(HitUV|HitVertexNormal|HitAlbedo)) {
         s.materialIdentity=uint(m.enhanced.w); s.roughness=m.enhanced.x; s.metallic=m.enhanced.y;
         s.albedo=materialDiffuse(s.textureColorLinear,m.enhanced.w,m.enhanced.z,s.metallic);
+        bool terrain=(m.samplerFlags&RayTerrainMaterial)!=0u && s.kind==2u && s.materialIdentity==1000u;
+        if(terrain) {
+            s.albedo=terrainDiffuse(s.textureColorLinear,legacyLightToLinear(m.terrain.rgb),vec3(1),1);
+            s.terrainWetResponse=m.terrain.w;
+        }
         if(m.normalRoughness!=uint64_t(0) && m.normalWidth>0 && m.normalHeight>0) {
         // Same linear data sampling and tangent convention as raster. Preserve
         // the original geometric normal for ray offsets and hemisphere tests.
         Material map=m;
         map.color=m.normalRoughness;map.colorWidth=m.normalWidth;map.colorHeight=m.normalHeight;
-        vec2 pixel=s.uv*vec2(map.colorWidth,map.colorHeight)-.5;
+        // Terrain detail repeats independently of the clamped base tile. Only
+        // the original alpha at 32x UV participates, exactly as in raster.
+        if(terrain) map.samplerFlags=0u;
+        vec2 pixel=(terrain?s.uv*32:s.uv)*vec2(map.colorWidth,map.colorHeight)-.5;
         ivec2 base=ivec2(floor(pixel));vec2 f=fract(pixel);
         vec4 data=mix(mix(colorTexel(map,base),colorTexel(map,base+ivec2(1,0)),f.x),
             mix(colorTexel(map,base+ivec2(0,1)),colorTexel(map,base+ivec2(1,1)),f.x),f.y);
@@ -162,6 +172,8 @@ HitSurface hitSurface(rayQueryEXT query) {
         s.normal=normalize(transpose(worldToObject)*mapped);
         }
         if((m.samplerFlags&RayRoughnessMap)!=0u) s.roughness=clamp(data.a*m.enhanced.x,.045,1);
+        if(terrain) s.albedo=terrainDiffuse(s.textureColorLinear,legacyLightToLinear(m.terrain.rgb),
+            legacyLightToLinear(vec3(data.a*2)),1);
         }
     }
     // Cutouts retain real traversal/color data, but no inferred leaf transmission

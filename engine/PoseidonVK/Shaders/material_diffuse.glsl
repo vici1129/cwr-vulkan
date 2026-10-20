@@ -12,4 +12,7 @@ vec3 materialBaseColor(vec3 artistic, float identity) {
 vec3 materialDiffuse(vec3 artistic,float identity,float f0,float metallic) {
     return materialBaseColor(artistic,identity)*(1-f0)*(1-metallic);
 }
+vec3 terrainDiffuse(vec3 textureColor,vec3 tintLinear,vec3 detailLinear,float wet) {
+    return materialDiffuse(textureColor*tintLinear*detailLinear,1000,.04,0)*wet;
+}
 #endif

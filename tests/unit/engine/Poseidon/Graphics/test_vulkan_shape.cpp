@@ -735,6 +735,24 @@ TEST_CASE("Vulkan screen packing preserves pixels UV depth reciprocal W and ARGB
     REQUIRE_THROWS_AS(vk::ScreenGeometry(vertex, 0, 600), std::invalid_argument);
 }
 
+TEST_CASE("Software clipped faces upload only referenced vertices without changing triangles", "[Graphics][vulkan-shape]")
+{
+    std::vector<uint32_t> remap(10000,UINT32_MAX),sources,draw;
+    const std::vector<uint32_t> original{8192,9999,17,8192,17,9000};
+    vk::CompactSoftwareIndices(original,remap,sources,draw);
+    REQUIRE(sources==std::vector<uint32_t>{8192,9999,17,9000});
+    REQUIRE(draw==std::vector<uint32_t>{0,1,2,0,2,3});
+    for(size_t i=0;i<draw.size();++i) REQUIRE(sources[draw[i]]==original[i]);
+    REQUIRE(std::all_of(remap.begin(),remap.end(),[](uint32_t i){return i==UINT32_MAX;}));
+    const std::vector<uint32_t> next{17,8192,17};
+    vk::CompactSoftwareIndices(next,remap,sources,draw);
+    REQUIRE(sources==std::vector<uint32_t>{17,8192});
+    REQUIRE(draw==std::vector<uint32_t>{0,1,0});
+    const std::vector<uint32_t> invalid{17,10000,8192};
+    REQUIRE_THROWS_AS(vk::CompactSoftwareIndices(invalid,remap,sources,draw),std::out_of_range);
+    REQUIRE(std::all_of(remap.begin(),remap.end(),[](uint32_t i){return i==UINT32_MAX;}));
+}
+
 TEST_CASE("Vulkan screen tracers preserve endpoints behind the eye for homogeneous clipping", "[Graphics][vulkan-shape]")
 {
     // Shadow Killer combat crash: a projected tracer crosses the eye plane.

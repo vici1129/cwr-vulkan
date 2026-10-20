@@ -6,6 +6,23 @@
 
 namespace Poseidon::vk
 {
+// Sparse clipped faces can reference a few vertices of a very large TL table.
+// Retain indexed sharing/order but upload only those referenced vertices. The
+// scratch map is initialized once per BeginMesh, then reset only at touched IDs.
+inline void CompactSoftwareIndices(std::span<const uint32_t> indices,std::span<uint32_t> remap,
+    std::vector<uint32_t>& sources,std::vector<uint32_t>& drawIndices)
+{
+    for (auto index : indices)
+        if (index>=remap.size()) throw std::out_of_range("Vulkan software face vertex exceeds the transformed table");
+    sources.clear(); drawIndices.clear();
+    for (auto index : indices)
+    {
+        auto& mapped=remap[index];
+        if (mapped==UINT32_MAX) { mapped=uint32_t(sources.size()); sources.push_back(index); }
+        drawIndices.push_back(mapped);
+    }
+    for (auto index : sources) remap[index]=UINT32_MAX;
+}
 // Preserve engine reciprocal-W, UV and packed ARGB colors. A world-space
 // ribbon (e.g. a tracer passing the camera) can have an endpoint behind the
 // eye. Keep its negative W so homogeneous GPU clipping handles the crossing;

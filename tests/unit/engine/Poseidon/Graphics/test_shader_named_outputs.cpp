@@ -340,6 +340,7 @@ TEST_CASE("Legacy RTAO ambient cannot overlap separately subtracted sunlight", "
     REQUIRE(shape.find("nightResponse(max(aoReference-ambientContribution,vec3(0)))") != std::string::npos);
     REQUIRE(shape.find("max(ambientResponse-ambientRemoved,vec3(0))*visibility") != std::string::npos);
     REQUIRE(shape.find("captureSun = lighting.rtSun.x") < shape.find("vec3 aoBase="));
+    REQUIRE(shape.find("(lighting.pbr.x>0.0 || !captureSun || !separate)") != std::string::npos);
 
     // Pin the shipped conversion used by this scalar, achromatic counterexample.
     const auto conversion = ReadTextFile(root / "color_space.glsl");
@@ -431,6 +432,30 @@ TEST_CASE("RTGI keeps SSAO after shadow subtraction and before bounce addition",
         const float oldZeroBounce = color * ao - shadow;
         REQUIRE(std::abs((oldZeroBounce - off) + shadow * (1.f - ao)) < 1e-6f);
     }
+}
+
+TEST_CASE("Terrain material provenance and lazy range scans follow actual landscape draws",
+          "[Graphics][Shaders][ray-surface]")
+{
+    const auto root=std::filesystem::path(TESTS_ROOT_DIR).parent_path()/"engine";
+    const auto buffer=ReadTextFile(root/"PoseidonVK/VertexBufferVK.cpp");
+    const auto lazy=buffer.find("VertexBufferVK::TerrainReceivers()");
+    REQUIRE(lazy!=std::string::npos);
+    REQUIRE(buffer.substr(0,lazy).find("vk::TerrainReceiverRanges(")==std::string::npos);
+    REQUIRE(buffer.substr(lazy).find("if (!_terrainReceiversReady)")!=std::string::npos);
+    REQUIRE(buffer.find("_terrainReceiversReady = false;")>buffer.find("_buffers = std::move(buffers);"));
+    const auto mesh=ReadTextFile(root/"PoseidonVK/EngineVK_Mesh.cpp");
+    REQUIRE(mesh.find("_terrainSurface && _vk.RTGIEnabled() && _vk.EnhancedMaterialsEnabled()")!=std::string::npos);
+    REQUIRE(mesh.find("shape.BSphereCenter()+_shapeModelWorld.Position()")!=std::string::npos);
+    REQUIRE(mesh.find("shape.BSphereRadius()+vk::VulkanContext::GIReceiverDistance+.01f")!=std::string::npos);
+    const auto source=ReadTextFile(root/"PoseidonVK/EngineVK_RTAO.cpp");
+    REQUIRE(source.find("land->TerrainPaletteColor(0)")!=std::string::npos);
+    REQUIRE(source.find("patch.colorized != colorized || patch.detail != bool(detail)")!=std::string::npos);
+    const auto ray=ReadTextFile(root/"PoseidonVK/Shaders/ray_surface.glsl");
+    REQUIRE(ray.find("if(terrain) map.samplerFlags=0u;")!=std::string::npos);
+    REQUIRE(ray.find("terrain?s.uv*32:s.uv")!=std::string::npos);
+    REQUIRE(ray.find("legacyLightToLinear(vec3(data.a*2))")!=std::string::npos);
+    REQUIRE(ray.find("terrainDiffuse(s.textureColorLinear,legacyLightToLinear(m.terrain.rgb)")!=std::string::npos);
 }
 
 TEST_CASE("RTGI filters incident radiance before receiver reflectance with bounded history", "[Graphics][Shaders][rtgi-history]")

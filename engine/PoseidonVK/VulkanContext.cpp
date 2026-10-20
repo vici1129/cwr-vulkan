@@ -544,7 +544,7 @@ void VulkanContext::CreateFrameResources()
             queries.queryType = VK_QUERY_TYPE_TIMESTAMP;
             queries.queryCount = 2;
             Check(vkCreateQueryPool(_device, &queries, nullptr, &frame.ssaoQueries), "create AO timestamps");
-            queries.queryCount = 18;
+            queries.queryCount = 20;
             Check(vkCreateQueryPool(_device, &queries, nullptr, &frame.frameQueries), "create frame GPU timestamps");
             queries.queryCount = 2;
             Check(vkCreateQueryPool(_device, &queries, nullptr, &frame.csmQueries), "create CSM timestamps");
@@ -904,6 +904,18 @@ bool VulkanContext::BeginFrame(uint32_t width, uint32_t height)
         }
         frame.frameTimestamped = false;
     }
+    if (frame.worldTimestamped)
+    {
+        uint64_t stamps[2]{};
+        if (vkGetQueryPoolResults(_device,frame.frameQueries,18,2,sizeof(stamps),stamps,sizeof(uint64_t),
+                                 VK_QUERY_RESULT_64_BIT)==VK_SUCCESS)
+        {
+            const uint64_t mask=_timestampBits==64?UINT64_MAX:(uint64_t(1)<<_timestampBits)-1;
+            _profile.worldGpuMs+=double((stamps[1]-stamps[0])&mask)*_timestampPeriod/1e6;
+            ++_profile.worldGpuSamples;
+        }
+        frame.worldTimestamped=false;
+    }
     if (frame.taaTimestamped)
     {
         uint64_t stamps[2]{};
@@ -1069,7 +1081,7 @@ bool VulkanContext::BeginFrame(uint32_t width, uint32_t height)
     Check(vkBeginCommandBuffer(frame.command, &commands), "begin frame command buffer");
     if (frame.frameQueries)
     {
-        vkCmdResetQueryPool(frame.command, frame.frameQueries, 0, 18);
+        vkCmdResetQueryPool(frame.command, frame.frameQueries, 0, 20);
         vkCmdWriteTimestamp(frame.command, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, frame.frameQueries, 0);
     }
     VkClearValue clears[2]{};
@@ -1275,6 +1287,9 @@ void VulkanContext::ReportProfile()
     std::fprintf(stderr, "Vulkan GPU: aa=%s scale=%d frame_ms=%.4f samples=%llu\n", AAName(_aaMode), _renderScale,
         _profile.gpuSamples ? _profile.gpuMs/_profile.gpuSamples : -1.,
         static_cast<unsigned long long>(_profile.gpuSamples));
+    std::fprintf(stderr,"Vulkan world: raster_gpu_ms=%.4f RTscene_cpu_ms/frame=%.4f samples=%llu\n",
+        _profile.worldGpuSamples?_profile.worldGpuMs/_profile.worldGpuSamples:-1.,
+        _profile.rtPreparationMs/frames,static_cast<unsigned long long>(_profile.worldGpuSamples));
     std::fprintf(stderr, "Vulkan CSM: passes/frame=%.2f vertices/frame=%.0f depth_gpu_ms/pass=%.4f gpu_samples=%llu\n",
         _profile.csmPasses / frames, _profile.csmVertices / frames,
         _profile.csmGpuSamples ? _profile.csmGpuMs / _profile.csmGpuSamples : -1.0,
