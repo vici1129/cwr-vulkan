@@ -687,6 +687,14 @@ int main()
         Check(context.SetSSAO(true, 0.7f, 1.2f, 0.03f, 80), "valid SSAO controls are accepted");
         Check(!context.RTAOEnabled(), "RTAO defaults off");
         Check(!context.RTGIEnabled(), "RTGI defaults off");
+        Check(context.SetRTGI("status").find("transport=one-bounce") != std::string::npos,
+              "GI defaults to the original single surface bounce");
+        Check(context.SetRTGI("bounces-2").starts_with("OK:") && !context.RaySceneEnabled() &&
+              context.SetRTGI("status").find("transport=two-bounce") != std::string::npos,
+              "selecting a developer bounce count does not enable ray tracing");
+        Check(context.SetRTGI("bounces-1").starts_with("OK:") &&
+              context.SetRTGI("status").find("transport=one-bounce") != std::string::npos,
+              "the one-bounce baseline can be restored independently");
         Check(context.SetRTGI("on").starts_with("UNSUPPORTED:"), "GI requires initialized ray-query capabilities");
         Check(context.SetRTGI("invalid").starts_with("INVALID:"), "GI rejects invalid controls");
         Check(context.SetRTGI("status").find("lastWorldDispatch=no") != std::string::npos,

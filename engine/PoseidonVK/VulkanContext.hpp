@@ -390,6 +390,7 @@ class VulkanContext
     uint32_t _rtTerrain = 0, _rtFoliage = 0;
     bool _rtaoRequested = false, _rtaoAvailable = false, _rtaoEnabled = false;
     bool _rtGIEnabled = false;
+    bool _rtGISecondBounce = false; // optional developer transport; one bounce remains the baseline
     unsigned _rtGIComponents = 3; // binary diagnostics: bit 0 sun bounce, bit 1 secondary sky
     bool _rtGIProbe = false; // sparse existing-path readback; no additional rays
     std::string _rtGIFailure;

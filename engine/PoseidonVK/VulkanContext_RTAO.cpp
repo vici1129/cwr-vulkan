@@ -31,7 +31,7 @@ namespace Poseidon::vk
 {
 namespace
 {
-constexpr size_t GIProbeWords = 64 * 48, GICounterWords = 96;
+constexpr size_t GIProbeWords = 64 * 96, GICounterWords = 104;
 void Require(VkResult result, const char* operation)
 {
     if (result != VK_SUCCESS)
@@ -150,7 +150,7 @@ struct VulkanContext::RTAOState
     uint32_t alignment = 256;
     VkDescriptorSetLayout setLayout = VK_NULL_HANDLE;
     VkPipelineLayout layout = VK_NULL_HANDLE;
-    std::array<VkPipeline, 10> compute{}; // last two specialize the optional sparse GI probe
+    std::array<VkPipeline, 14> compute{}; // GI: baseline, probe, second bounce, second bounce + probe
     std::array<VkPipeline, 8> filter{};
     VkPipeline giResolve = VK_NULL_HANDLE;
     std::array<DepthAttachment, 2> giHistory{};
@@ -221,6 +221,7 @@ struct VulkanContext::RTAOState
     std::array<uint32_t, 8> giCounts{};
     std::array<uint32_t, 8> giSources{};
     std::array<uint32_t, 8> giSkyCounts{};
+    std::array<uint32_t, 8> giSecondCounts{};
     std::array<float, 32> giSkyIrradiance{};
     std::array<uint32_t, 16> giReceiverFamilies{};
     std::array<float, GIProbeWords> giProbe{};
@@ -251,6 +252,17 @@ void VulkanContext::FailRTGI(std::string_view reason)
 
 std::string VulkanContext::SetRTGI(std::string_view mode)
 {
+    if (mode == "bounces-1" || mode == "bounces-2")
+    {
+        const bool second = mode == "bounces-2";
+        if (_rtGISecondBounce != second)
+        {
+            _rtGISecondBounce = second;
+            ResetTemporalHistory();
+            if (_rtao) { _rtao->giCompleted = false; _rtao->giProbeValid = false; }
+        }
+        return second ? "OK: two diffuse surface bounces selected" : "OK: one diffuse surface bounce selected";
+    }
     if (mode == "probe-on" || mode == "probe-off")
     {
         _rtGIProbe = mode == "probe-on";
@@ -266,7 +278,7 @@ std::string VulkanContext::SetRTGI(std::string_view mode)
         {
             if (row) out << ',';
             out << '[';
-            for (size_t i=0;i<48;++i) { if(i) out << ','; out << _rtao->giProbe[row*48+i]; }
+            for (size_t i=0;i<96;++i) { if(i) out << ','; out << _rtao->giProbe[row*96+i]; }
             out << ']';
         }
         out << ']';
@@ -276,7 +288,7 @@ std::string VulkanContext::SetRTGI(std::string_view mode)
     {
         std::ostringstream out;
         out << "RTGI=" << (RTGIEnabled() ? "on" : "off") << " capability=" << _rtaoReason
-            << " transport=one-bounce components=" << (_rtGIComponents==0?"primary-sky":
+            << " transport=" << (_rtGISecondBounce?"two-bounce":"one-bounce") << " components=" << (_rtGIComponents==0?"primary-sky":
                 _rtGIComponents==1?"primary-sky+sun-bounce":_rtGIComponents==2?"primary+secondary-sky":"sun+sky")
             << " skySource=" << (_weatherLighting.options[1]>.5f?"stock-dome+clouds":"stock-gradient");
         if (!_rtGIFailure.empty()) out << " fallback=" << _rtGIFailure;
@@ -301,6 +313,9 @@ std::string VulkanContext::SetRTGI(std::string_view mode)
             const auto sky=RTGIEnabled() && rt.giDispatched && rt.giCompleted ? rt.giSkyCounts : std::array<uint32_t,8>{};
             out << " secondarySky(rays/blocked/visible/rejectedHemisphere)=" << sky[0] << '/' << sky[1] << '/' << sky[2] << '/' << sky[3]
                 << " primarySky(rays/blocked/visible/belowHorizon)=" << sky[4] << '/' << sky[5] << '/' << sky[6] << '/' << sky[7];
+            const auto b=RTGIEnabled() && rt.giDispatched && rt.giCompleted ? rt.giSecondCounts : std::array<uint32_t,8>{};
+            out << " secondBounce(rays/hits/eligible/rejected/sunRays/sunBlocked/skyRays/skyBlocked)=";
+            for (size_t i=0;i<b.size();++i) out << (i?"/":"") << b[i];
             if (RTGIEnabled() && rt.giCompleted) {
                 out << " receiverPixels(native/CPU)=";
                 constexpr const char* families[]{"catalog","rock","roof","wood","facade","stone","concrete"};
@@ -330,11 +345,11 @@ std::string VulkanContext::SetRTGI(std::string_view mode)
         }
         else out << " lastWorldDispatch=no completedDispatches=0 bounceRays=0 hits=0 eligibleHits=0"
                     " rejectedMaterials=0 sunRays=0 sunBlocked=0 eligibleReceivers=0 dynamicHits=0 GPUtimings=unavailable";
-        out << "; last completed frame; one bounce, half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain";
+        out << "; last completed frame; half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain";
         return out.str();
     }
     if (mode != "on" && mode != "off" && mode != "sky-only" && mode != "sun-only" && mode != "no-sun")
-        return "INVALID: triRTGI on, off, sky-only, sun-only, no-sun, status";
+        return "INVALID: triRTGI on, off, bounces-1, bounces-2, sky-only, sun-only, no-sun, status";
     const unsigned components=mode=="sky-only"?0:mode=="sun-only"?1:mode=="no-sun"?2:3;
     if(mode!="off") mode="on";
     if (mode == "on" && !_rtaoAvailable) return "UNSUPPORTED: " + _rtaoReason;
@@ -362,7 +377,8 @@ std::string VulkanContext::SetRTGI(std::string_view mode)
     }
     if(_rtGIComponents!=components) ResetTemporalHistory();
     _rtGIComponents=components;
-    return _rtGIEnabled ? "OK: one-bounce diffuse RTGI enabled (next frame)" : "OK: RTGI off";
+    return _rtGIEnabled ? (_rtGISecondBounce ? "OK: two-bounce diffuse RTGI enabled (next frame)" :
+        "OK: one-bounce diffuse RTGI enabled (next frame)") : "OK: RTGI off";
 }
 
 std::string VulkanContext::SetRTDynamic(std::string_view mode)
@@ -856,6 +872,7 @@ void VulkanContext::RetireRTAO()
         std::copy_n(counts + 20, 8, rt.giCounts.begin());
         std::copy_n(counts + 32, 8, rt.giSources.begin());
         std::copy_n(counts + 40, 8, rt.giSkyCounts.begin());
+        std::copy_n(counts + 96, 8, rt.giSecondCounts.begin());
         std::memcpy(rt.giSkyIrradiance.data(),counts+48,sizeof(rt.giSkyIrradiance));
         std::copy_n(counts+80,16,rt.giReceiverFamilies.begin());
         rt.giProbeValid = slot.giDispatched && slot.giProbed;
@@ -990,7 +1007,9 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection, bool& ssaoH
         layout.pPushConstantRanges = &push;
         Require(vkCreatePipelineLayout(_device, &layout, nullptr, &rt.layout), "create layout");
     }
-    if (std::any_of(rt.compute.begin(), rt.compute.begin() + (RTGIEnabled() ? (_rtGIProbe ? 10 : 8) : _rtWaterTargets ? 6 : 4), [](auto p) { return !p; }) ||
+    const int giPipeline=6+(_rtGISecondBounce?4:0)+(_rtGIProbe?2:0);
+    if (std::any_of(rt.compute.begin(), rt.compute.begin() + (_rtWaterTargets ? 6 : 4), [](auto p) { return !p; }) ||
+        (RTGIEnabled() && (!rt.compute[giPipeline] || !rt.compute[giPipeline+1])) ||
         (giTemporal && !rt.giResolve))
     {
         auto shader = [&](const uint32_t* code, size_t size)
@@ -1002,9 +1021,9 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection, bool& ssaoH
             Require(vkCreateShaderModule(_device, &info, nullptr, &module), "create shader");
             return module;
         };
-        for (int i = 0; i < 10; ++i)
+        for (int i = 0; i < 14; ++i)
         {
-            if (rt.compute[i] || (i >= 6 ? !RTGIEnabled() : i >= 4 && !_rtWaterTargets) || (i>=8 && !_rtGIProbe))
+            if (rt.compute[i] || (i >= 6 ? (!RTGIEnabled() || i<giPipeline || i>giPipeline+1) : i >= 4 && !_rtWaterTargets))
                 continue;
             const uint32_t* codes[]{Cwrrtao_comp,        Cwrrtao_ms_comp, Cwrrtshadow_comp,
                                     Cwrrtshadow_ms_comp, Cwrrtwater_comp, Cwrrtwater_ms_comp, Cwrrtgi_comp, Cwrrtgi_ms_comp};
@@ -1018,9 +1037,10 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection, bool& ssaoH
             info.stage.stage = VK_SHADER_STAGE_COMPUTE_BIT;
             info.stage.module = module;
             info.stage.pName = "main";
-            const VkBool32 diagnostics = (i>=6 ? i>=8 : rt.hitDiagnostics) ? VK_TRUE : VK_FALSE;
-            const VkSpecializationMapEntry diagnosticEntry{0, 0, sizeof(diagnostics)};
-            const VkSpecializationInfo specialization{1, &diagnosticEntry, sizeof(diagnostics), &diagnostics};
+            const VkBool32 options[]{(i>=6 ? (i==8 || i==9 || i>=12) : rt.hitDiagnostics) ? VK_TRUE : VK_FALSE,
+                i>=10 ? VK_TRUE : VK_FALSE};
+            const VkSpecializationMapEntry entries[]{{0, 0, sizeof(VkBool32)}, {1, sizeof(VkBool32), sizeof(VkBool32)}};
+            const VkSpecializationInfo specialization{i>=6?2u:1u, entries, sizeof(options), options};
             if (i >= 4)
                 info.stage.pSpecializationInfo = &specialization;
             auto result = vkCreateComputePipelines(_device, VK_NULL_HANDLE, 1, &info, nullptr, &rt.compute[i]);
@@ -1615,7 +1635,7 @@ void VulkanContext::DrawRTAO(const std::array<float, 4>& projection, bool& ssaoH
             push.jitter[0] = _taaJitter[0];
             push.jitter[1] = _taaJitter[1];
         }
-        vkCmdBindPipeline(command, VK_PIPELINE_BIND_POINT_COMPUTE, rt.compute[effect==3 && _rtGIProbe?8+(ms&1):ms]);
+        vkCmdBindPipeline(command, VK_PIPELINE_BIND_POINT_COMPUTE, rt.compute[effect==3 ? giPipeline+(ms&1) : ms]);
         vkCmdBindDescriptorSets(command, VK_PIPELINE_BIND_POINT_COMPUTE, rt.layout, 0, 1, &set, 0, nullptr);
         const auto weather = PrepareWeather();
         vkCmdBindDescriptorSets(command, VK_PIPELINE_BIND_POINT_COMPUTE, rt.layout, 1, 1, &weather, 0, nullptr);

@@ -3,6 +3,8 @@
 This page records the `86a5f09` catalog/material foundation and its qualification.
 For the subsequent terrain and PBR v3 reflector expansion and current evidence,
 see [Stock RTGI reflector coverage](rtgi-stock-coverage.md).
+For the optional second diffuse surface bounce, controls, cost and limitations,
+see [Second diffuse bounce](rtgi-second-bounce.md). One bounce remains the default.
 
 Public base: `9f74c7f` (origin/main verified before work). `triPBR 'enhanced'`
 uses the original stock color textures by default. `triPBR 'on'` retains stock

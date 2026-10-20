@@ -490,7 +490,11 @@ TEST_CASE("RTGI filters incident radiance before receiver reflectance with bound
     REQUIRE(resolve.find("supported && !unsafe") != std::string::npos);
     REQUIRE(resolve.find("giReceiver") == std::string::npos);
     REQUIRE(trace.find("if(ao.jitter.z>0)") != std::string::npos);
-    REQUIRE(trace.find("if(hit.kind==3u) result.a=-result.a;") < trace.find("if(!hit.diffuseEligible)"));
+    const auto dynamicHit=trace.find("if(hit.kind==3u) result.a=-abs(result.a);");
+    const auto eligibility=trace.find("if(!hit.diffuseEligible || hit.materialIdentity==0u)");
+    REQUIRE(dynamicHit!=std::string::npos);
+    REQUIRE(eligibility!=std::string::npos);
+    REQUIRE(dynamicHit<eligibility); // a later dynamic hit must never flip an unsafe sample back to safe
     REQUIRE(host.find("RTGIEnabled() && IsTemporal(_aaMode)") != std::string::npos);
     REQUIRE(host.find("_taaFrame != rt.giLastFrame + 1") != std::string::npos);
     REQUIRE(host.find("if (!_taaValid || lightingChanged") != std::string::npos);
