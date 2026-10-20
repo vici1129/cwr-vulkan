@@ -6,9 +6,26 @@
 #include <Poseidon/World/Scene/Camera/Camera.hpp>
 #include <Poseidon/IO/ParamFileExt.hpp>
 #include <PoseidonVK/PBRMaterialVK.hpp>
+#include <PoseidonVK/TerrainRayVK.hpp>
+#include <Poseidon/World/Terrain/LandscapeShared.hpp>
 
 namespace Poseidon
 {
+void EngineVK::CaptureTerrainMaterial(TLVertexTable& table, const VertexTable& mesh,
+                                      const PackedColor* palette, bool water)
+{
+    table.terrainMaterial.clear();
+    if (!_vk.RTGIEnabled() || !_vk.EnhancedMaterialsEnabled() || !_shadowWorld || water || !palette ||
+        mesh.NNorm()!=mesh.NVertex()) return;
+    table.terrainMaterial.resize(table.NVertex());
+    for (int i=0;i<table.NVertex();++i)
+    {
+        const auto& n=mesh.Norm(i);
+        const Color tint=Color(palette[(table.Clip(i)&ClipUserMask)/ClipUserStep])*2;
+        table.terrainMaterial[i]=vk::TerrainReceiverMaterial(mesh.Pos(i).Y(),maxTide+maxWave,
+            {-n.X(),-n.Y(),-n.Z()},{tint.R(),tint.G(),tint.B()});
+    }
+}
 void EngineVK::PrepareMesh(const render::LegacySpec&)
 {
     _softwarePBRLighting.clear();
@@ -101,7 +118,8 @@ void EngineVK::BeginMesh(TLVertexTable& mesh, const render::LegacySpec&)
 }
 void EngineVK::PrepareTriangle(const MipInfo& mip, int flags)
 {
-    const int allowed = NoZBuf | NoZWrite | IsAlpha | IsTransparent | ClampU | ClampV | NoClamp | PointSampling |
+    const int allowed = (_terrainSurface ? DetailTexture : 0) | (_waterSurface ? DetailTexture | SpecularTexture : 0) |
+                        NoZBuf | NoZWrite | IsAlpha | IsTransparent | ClampU | ClampV | NoClamp | PointSampling |
                         BestMipmap | FogDisabled | DisableSun | IsColored | NoShadow | IsAlphaOrdered | NoDropdown |
                         IsAlphaFog | OnSurface | IsOnSurface | ShadowDisabled | NoTexMerger | IsAnimated | ZBiasMask |
                         SpecLighting | IsLight | IsShadow; // Lighting/fades are already done by TLVertexTable.
@@ -218,6 +236,12 @@ void EngineVK::SubmitSoftwareLit(const std::vector<uint32_t>& indices, const vk:
             std::copy_n(_softwareMesh->pbrNormal[index].begin(), 3, _softwareVertices[index].pbrNormal);
             _softwareVertices[index].aoAmbient[3] = 1.f;
         }
+        if (index < _softwareMesh->terrainMaterial.size())
+        {
+            const auto& terrain=_softwareMesh->terrainMaterial[index];
+            std::copy_n(terrain.begin(),3,_softwareVertices[index].pbrNormal);
+            std::copy_n(terrain.begin()+4,4,_softwareVertices[index].terrainTint);
+        }
         // TL already contains the scene Fog8 visibility in specular.a. Alpha
         // fog is already in color.a; it must not also get an RGB fog mix.
         _softwareVertices[index].fog =
@@ -262,6 +286,32 @@ void EngineVK::SubmitSoftwareLit(const std::vector<uint32_t>& indices, const vk:
         receiver.sunDirection = {direction.X(), direction.Y(), direction.Z(), 0};
     }
     std::shared_ptr<vk::TextureImage> waterBump;
+    float secondaryMode=0;
+    if (_terrainSurface && (_softwareFlags&DetailTexture))
+    {
+        if (auto* detail=dynamic_cast<TextureVK*>(_textures.Load(Remaster >> "CfgDetailTextures" >> "detail").GetRef()))
+            waterBump=detail->Image(_vk);
+        secondaryMode=waterBump ? 1.f : 0.f;
+    }
+    // This path retains colorized CPU raster lighting, not the object PBR BRDF.
+    // Every corner must have original dry-ground inputs and both captured terms.
+    const bool terrain = _vk.EnhancedMaterialsEnabled() && receiver.rtWater[3]==1 && !material &&
+        !_softwareMesh->terrainMaterial.empty() &&
+        std::all_of(indices.begin(),indices.end(),[&](uint32_t i) {
+            return i<_softwareMesh->terrainMaterial.size() && _softwareMesh->terrainMaterial[i][3]>.99f &&
+                i<_softwareMesh->aoAmbient.size() && _softwareMesh->aoAmbient[i][3]>.99f &&
+                i<_softwareMesh->directSun.size() && _softwareMesh->directSun[i][3]>.99f;
+        });
+    if (terrain)
+    {
+        const auto* texture=static_cast<TextureVK*>(_softwareMip._texture);
+        if (!texture->IsDynamic())
+        {
+            receiver.rtWater[3]=2;
+            receiver.pbr[3]=1000; // shared stock terrain identity; roughness 0 keeps legacy raster
+            receiver.pbrDiffuse[3]=8; // spare diagnostic family: original CPU terrain
+        }
+    }
     if (material && _softwareSourceShape)
         if (const auto* texture = dynamic_cast<TextureVK*>(_softwareMip._texture))
         {
@@ -278,6 +328,7 @@ void EngineVK::SubmitSoftwareLit(const std::vector<uint32_t>& indices, const vk:
             if (auto* bump = dynamic_cast<TextureVK*>(texture.GetRef()))
                 waterBump = bump->Image(_vk);
             receiver.rtWater = {waterBump ? (_vk.RTReflectionsEnabled() ? 2.f : 1.f) : 0.f, 0, 0, 0}; // shoreline UVs already animate in Landscape::DrawMesh
+            secondaryMode=waterBump ? 1.f : 0.f; // original scalar specular_dx alpha at 32x UV, not XYZ normals
             receiver.temporal[3] = 2;                            // reactive water, never stationary terrain history
         }
         catch (const std::exception& error)
@@ -293,7 +344,7 @@ void EngineVK::SubmitSoftwareLit(const std::vector<uint32_t>& indices, const vk:
     const bool atmosphere = _shadowWorld && _vk.AtmosphereEnabled();
     const bool localShadows = _vk.LocalShadowsEnabled() && !_softwareMesh->directLocal.empty();
     if (_shadowWorld &&
-        (_shadowTuning.enabled || atmosphere || _vk.SeparateSunlight() || receiver.rtWater[0] || localShadows || receiver.wetSurface[0] || material) &&
+        (_shadowTuning.enabled || atmosphere || _vk.SeparateSunlight() || receiver.rtWater[0] || localShadows || receiver.wetSurface[0] || material || terrain) &&
         !(_softwareFlags & (DisableSun | NoZBuf | NoDropdown | IsLight | IsShadow | IsAlphaFog)) && GScene &&
         GScene->GetCamera())
     {
@@ -313,7 +364,7 @@ void EngineVK::SubmitSoftwareLit(const std::vector<uint32_t>& indices, const vk:
         receiver.rtWater = {}; // unsupported software projection retains ordinary water
     _vk.DrawMesh(mesh.buffers, 0, indices.size(), false, {}, {1, 1, 1, 1}, image,
                  vk::ShapeSampler(render::SplitLegacy(_softwareFlags)), cutoff, blend, true,
-                 (_softwareFlags & NoZBuf) == 0, nullptr, waterBump, 0, {0, -1, 0}, mesh.vertexOffset, mesh.indexOffset,
+                 (_softwareFlags & NoZBuf) == 0, nullptr, waterBump, secondaryMode, {0, -1, 0}, mesh.vertexOffset, mesh.indexOffset,
                  (_softwareFlags & NoZWrite) == 0,
                  receiver.shadowReceiver[0] || receiver.atmosphereSun[3] || receiver.rtSun[0] || receiver.rtWater[0] ||
                          _temporalTerrain || localShadows || receiver.wetSurface[0] || receiver.rtWater[3] || receiver.aoReceiver[0] || material

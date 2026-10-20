@@ -1,0 +1,4 @@
+Filters: [enhanced-material],[vulkan-shape],[vulkan-aa],[ray-surface],[rtgi-order]
+Randomness seeded to: 1144366594
+===============================================================================
+All tests passed (14540 assertions in 52 test cases)

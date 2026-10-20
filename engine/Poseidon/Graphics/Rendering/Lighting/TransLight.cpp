@@ -85,6 +85,7 @@ TLVertexTable::TLVertexTable(const IAnimator* anim, const Shape& src, const Matr
 
 void TLVertexTable::ReleaseTables()
 {
+    terrainMaterial.clear();
     pbrNormal.clear();
     hdrColor.clear();
     directSun.clear();
@@ -126,6 +127,7 @@ int TLVertexTable::AddPos()
 
 void TLVertexTable::DoTransformPoints(const VertexTable& src, const Matrix4& posView, int beg, int end)
 {
+    terrainMaterial.clear();
     pbrNormal.clear();
     hdrColor.clear();
     directSun.clear();
@@ -155,6 +157,7 @@ void TLVertexTable::DoTransformPoints(const VertexTable& src, const Matrix4& pos
 
 void TLVertexTable::DoTransformPoints(const IAnimator* anim, const Shape& src, const Matrix4& posView)
 {
+    terrainMaterial.clear();
     pbrNormal.clear();
     hdrColor.clear();
     directSun.clear();
@@ -985,7 +988,7 @@ void TLVertexTable::DoLightLighting(const VertexTable& mesh, int spec)
 
 void TLVertexTable::DoLightingColorized(const LightList& lights,
                                         const PackedColor* colors, // color array
-                                        const VertexTable& mesh, int spec)
+                                        const VertexTable& mesh, int spec, Vector3Par offset)
 {
     const int size = NVertex();
 
@@ -1035,7 +1038,7 @@ void TLVertexTable::DoLightingColorized(const LightList& lights,
         if (someLights)
         {
             // note: Colorized lighting models are always in world space
-            Vector3Val pos = mesh.Pos(i);
+            Vector3 pos = mesh.Pos(i)+offset;
             for (int index = 0; index < lights.Size(); index++)
             {
                 colorI += lights[index]->Apply(pos, normal);
@@ -1062,7 +1065,7 @@ void TLVertexTable::DoLightingColorized(const LightList& lights,
                 for (int li = 0; li < lights.Size(); ++li)
                     if (lights[li] == GEngine->LocalShadowLight(slot))
                     {
-                        const Color direct = lights[li]->ApplyDirect(mesh.Pos(i), normal) * colorize * 2;
+                        const Color direct = lights[li]->ApplyDirect(mesh.Pos(i)+offset, normal) * colorize * 2;
                         directLocal[i][slot * 3] = direct.R();
                         directLocal[i][slot * 3 + 1] = direct.G();
                         directLocal[i][slot * 3 + 2] = direct.B();

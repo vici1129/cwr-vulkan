@@ -16,6 +16,7 @@ struct ScreenVertex
     float directLocal[6]{};
     float aoAmbient[4]{};
     float pbrNormal[3]{};
+    float terrainTint[4]{};
 };
 struct ScreenState
 {

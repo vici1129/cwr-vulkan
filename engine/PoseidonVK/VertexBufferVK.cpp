@@ -1,6 +1,7 @@
 #include <PoseidonVK/VertexBufferVK.hpp>
 #include <PoseidonVK/EngineVK.hpp>
 #include <cstring>
+#include <Poseidon/World/Terrain/LandscapeShared.hpp>
 
 namespace Poseidon
 {
@@ -19,6 +20,7 @@ VertexBufferVK::VertexBufferVK(vk::VulkanContext& context, const Shape& shape, V
     if (!ImmutableBuffer(shape, type))
         throw std::logic_error("Vulkan Shape: only immutable geometry and cached shadow buffers are supported");
     auto geometry = vk::ExtractShapeGeometry(shape);
+    _terrainReceivers=vk::TerrainReceiverRanges(geometry,maxTide+maxWave);
     _sections = std::move(geometry.sections);
     _buffers = context.UploadMesh(geometry.vertices.data(), geometry.vertices.size() * sizeof(vk::ShapeVertex),
                                   geometry.indices.data(), geometry.indices.size() * sizeof(VertexIndex));
@@ -32,6 +34,7 @@ void VertexBufferVK::Update(const Shape& shape, bool dynamic)
     // overwrite its allocation: raster frames and cached BLAS retain the old
     // shared snapshot until their fences retire it.
     auto geometry = vk::ExtractShapeGeometry(shape);
+    _terrainReceivers=vk::TerrainReceiverRanges(geometry,maxTide+maxWave);
     const auto vertexBytes = geometry.vertices.size() * sizeof(vk::ShapeVertex);
     const auto indexBytes = geometry.indices.size() * sizeof(VertexIndex);
     // Animate/Deanimate may mark a shared shape dirty even when the restored

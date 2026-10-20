@@ -278,6 +278,7 @@ std::string VulkanContext::SetRTGI(std::string_view mode)
                 constexpr const char* families[]{"catalog","rock","roof","wood","facade","stone","concrete"};
                 for (int i=1;i<=7;++i)
                     out << families[i-1] << ':' << rt.giReceiverFamilies[i] << '/' << rt.giReceiverFamilies[i+8] << ',';
+                out << "terrain:" << rt.giReceiverFamilies[0] << '/' << rt.giReceiverFamilies[8] << ',';
             }
             if(RTGIEnabled() && rt.giCompleted) {
                 const auto& e=rt.giSkyIrradiance;

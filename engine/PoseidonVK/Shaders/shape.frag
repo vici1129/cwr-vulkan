@@ -20,6 +20,7 @@ layout(location = 7) in vec3 localDirect0;
 layout(location = 8) in vec3 localDirect1;
 layout(location = 9) in vec3 surfaceNormal;
 layout(location = 10) in vec4 aoAmbient;
+layout(location = 11) in vec4 terrainTint;
 #ifdef RT_AO
 layout(location = 4) out vec4 outAmbient;
 #endif
@@ -73,6 +74,8 @@ vec3 nightResponse(vec3 color) {
 }
 void main() {
     bool giReceiverReady=false;
+    vec3 terrainDetail=vec3(1);
+    float terrainWet=1;
     vec3 ambientContribution=vec3(0);
     vec3 waterNormal=vec3(0,1,0), originalWaterNormal=waterNormal;
     if(lighting.rtWater.x>.5) {
@@ -108,6 +111,14 @@ void main() {
         }
         if(lighting.materialSun.w>.5) materialRoughness=clamp(map.a*materialRoughness,.045,1);
     }
+    bool terrainGeometry=false;
+    if(lighting.pbr.w==1000) {
+        // LOD skirts reuse terrain shading normals but are vertical artificial
+        // curtains, not the height field. Keep their ambient on the legacy path.
+        vec3 geometric=cross(dFdx(shadowWorld),dFdy(shadowWorld));
+        geometric*=inversesqrt(max(dot(geometric,geometric),1e-12));
+        terrainGeometry=abs(geometric.y)>.01 && abs(dot(geometric,materialN))>.5;
+    }
     vec3 base, contactBase;
     bool captureSun, separate;
     float csm;
@@ -141,7 +152,10 @@ void main() {
         // Explicit Water shader family, not SpecularTexture alone.
         vec3 bumpNormal = -(WORLD_TEXTURE(detailTexture, texCoord).xyz * 2.0 - 1.0);
         outColor.rgb += toLinear(vec3(max(dot(draw.lightDirection.xyz, bumpNormal), 0.0)));
-    } else if (draw.detailEnabled > 0.5) outColor.rgb *= legacyLightToLinear(vec3(WORLD_TEXTURE(detailTexture, texCoord * 32.0).a * 2.0));
+    } else if (draw.detailEnabled > 0.5) {
+        terrainDetail=legacyLightToLinear(vec3(WORLD_TEXTURE(detailTexture,texCoord*32.0).a*2.0));
+        outColor.rgb*=terrainDetail;
+    }
     // PSNormal/PSDetail add specular after diffuse/detail, before night-eye and fog.
     if (draw.detailEnabled < 1.5) outColor.rgb += legacyLightToLinear(specularColor);
     if (draw.reserved > 0.5) {
@@ -166,6 +180,7 @@ void main() {
         outColor.rgb = outColor.rgb*wetDiffuse+wetHighlight;
     }
     base = outColor.rgb;
+    terrainWet=wetDiffuse;
     captureSun = lighting.rtSun.x > .5 && directSun.a > .99 && draw.detailEnabled < 1.5;
 #ifdef RT_AO
     // Extract AO from the same sun-independent base used by shadow subtraction.
@@ -233,8 +248,10 @@ void main() {
             1.0/gl_FragCoord.w);
     // A negative depth reserves this independently captured ambient difference
     // for RTGI replacement. RTAO rejects it; direct/local/emission remain intact.
+    bool terrainReceiver=lighting.pbr.w==1000 && lighting.pbr.x==0 && terrainTint.a>.99 &&
+        terrainGeometry && captureSun && separate && directSun.a>.99;
     giReceiverReady=lighting.rtWater.w>1.5 && outAmbient.a>0 &&
-        lighting.pbr.x>0 && lighting.pbr.w>.5 && dot(materialN,materialN)>.5 &&
+        ((lighting.pbr.x>0 && lighting.pbr.w>.5) || terrainReceiver) && dot(materialN,materialN)>.5 &&
         length(shadowWorld)<lighting.aoReceiver.y;
     if(giReceiverReady) outAmbient.a=-outAmbient.a;
 #endif
@@ -264,8 +281,10 @@ void main() {
     // base-texture reflectance times fog transmittance, never lit scene color.
     // Detail/baked lighting and material tint are intentionally not inferred.
     if(giReceiverReady)
-        outWater=materialRecord(materialDiffuse(texel.rgb*toLinear(draw.color.rgb),lighting.pbr.w,
-            lighting.pbr.y,lighting.pbr.z),materialN,visibility,1.0/gl_FragCoord.w,int(lighting.pbrDiffuse.w));
+        outWater=materialRecord(materialDiffuse(texel.rgb*toLinear(draw.color.rgb)*
+            (lighting.pbr.w==1000 ? legacyLightToLinear(terrainTint.rgb)*terrainDetail : vec3(1)),lighting.pbr.w,
+            lighting.pbr.w==1000 ? .04 : lighting.pbr.y,lighting.pbr.z)*
+            (lighting.pbr.w==1000 ? terrainWet : 1),materialN,visibility,1.0/gl_FragCoord.w,int(lighting.pbrDiffuse.w));
     // Foam-only rain marker: MIN writes only R; depth, fog and the other normal
     // component survive. Refraction and RT still reject these rain-covered pixels.
     if(draw.reserved<-.5) outWater.x=-2-outColor.a;

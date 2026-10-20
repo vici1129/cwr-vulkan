@@ -97,9 +97,20 @@ class TLVertexTable
     // Original outward world normal + captured material slot (0 = unsupported).
     // Vulkan only; independent of the already lit color and legacy TL layout.
     std::vector<std::array<float, 4>> pbrNormal;
+    // Original terrain outward normal + validity, unlit palette multiplier + validity.
+    // Empty outside qualified Vulkan terrain capture; GL33 ignores this sidecar.
+    std::vector<std::array<float, 8>> terrainMaterial;
     void PreserveHDRColor(int vertex, ColorVal color);
     void InterpolateHDR(int dst, int a, int b, float t)
     {
+        if (!terrainMaterial.empty())
+        {
+            terrainMaterial.resize(NVertex());
+            if (terrainMaterial[a][3] > .99f && terrainMaterial[b][3] > .99f)
+                for (int k = 0; k < 8; ++k)
+                    terrainMaterial[dst][k] = terrainMaterial[a][k]*(1-t)+terrainMaterial[b][k]*t;
+            else terrainMaterial[dst] = {};
+        }
         if (!pbrNormal.empty())
         {
             pbrNormal.resize(NVertex());
@@ -235,7 +246,7 @@ class TLVertexTable
                     int spec);
     void DoLightingColorized(const LightList& lights,
                              const PackedColor* colors, // color array
-                             const VertexTable& mesh, int spec);
+                             const VertexTable& mesh, int spec, Vector3Par offset = VZero);
 
     void DoMaterialLightingP(const TLMaterial& mat, const Matrix4& worldToModel, const LightList& lights,
                              const VertexTable& mesh, int beg, int end);

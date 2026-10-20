@@ -4,6 +4,7 @@
 #include <PoseidonVK/RayTransformVK.hpp>
 #endif
 #include <PoseidonVK/ShapeGeometryVK.hpp>
+#include <PoseidonVK/TerrainRayVK.hpp>
 #include <PoseidonVK/ShapeTransformVK.hpp>
 #include <PoseidonVK/ScreenGeometryVK.hpp>
 #include <PoseidonVK/ScreenPipelineVK.hpp>
@@ -18,6 +19,35 @@
 #include <Poseidon/Graphics/Core/TLVertex.hpp>
 
 using namespace Poseidon;
+
+TEST_CASE("Terrain receivers use independent original normals and palette, rejecting potential water", "[Graphics][vulkan-shape][ray-surface]")
+{
+    const auto valid=vk::TerrainReceiverMaterial(20,5.25f,{0,2,0},{1.1f,.9f,1});
+    REQUIRE(valid[1]==1); REQUIRE(valid[3]==1); REQUIRE(valid[4]==1.1f); REQUIRE(valid[5]==.9f);
+    for(float height : {5.25f,0.f,-10.f,std::numeric_limits<float>::quiet_NaN()})
+        REQUIRE(vk::TerrainReceiverMaterial(height,5.25f,{0,1,0},{1,1,1})[3]==0);
+    for (const auto& normal : {std::array<float,3>{0,0,0},{0,-1,0},
+                             {std::numeric_limits<float>::quiet_NaN(),1,0}})
+        REQUIRE(vk::TerrainReceiverMaterial(20,5.25f,normal,{1,1,1})[3]==0);
+    REQUIRE(vk::TerrainReceiverMaterial(20,5.25f,{0,1,0},{-1,1,1})[3]==0);
+    REQUIRE(vk::TerrainReceiverMaterial(20,5.25f,{0,1,0},{3,1,1})[3]==0);
+}
+
+TEST_CASE("Native terrain splits only dry triangle eligibility, preserving original index order", "[Graphics][vulkan-shape][ray-surface]")
+{
+    vk::ShapeGeometry geometry;
+    geometry.vertices={{{0,20,0},{0,1,0},{0,0}},{{1,20,0},{0,1,0},{1,0}},
+                       {{0,20,1},{0,1,0},{0,1}},{{1,5.25f,1},{0,1,0},{1,1}}};
+    geometry.indices={0,1,2,1,3,2,0,1,2,0,1,2};
+    const auto ranges=vk::TerrainReceiverRanges(geometry,5.25f);
+    REQUIRE(ranges.size()==3);
+    REQUIRE(ranges[0].dry); REQUIRE(ranges[0].begin==0); REQUIRE(ranges[0].end==3);
+    REQUIRE_FALSE(ranges[1].dry); REQUIRE(ranges[1].begin==3); REQUIRE(ranges[1].end==6);
+    REQUIRE(ranges[2].dry); REQUIRE(ranges[2].begin==6); REQUIRE(ranges[2].end==12);
+    geometry.vertices[0].normal[1]=0;
+    const auto invalid=vk::TerrainReceiverRanges(geometry,5.25f);
+    REQUIRE(invalid.size()==1); REQUIRE_FALSE(invalid[0].dry); REQUIRE(invalid[0].end==12);
+}
 
 TEST_CASE("Stock GI receivers require qualified identity and independent opaque lighting gates",
           "[Graphics][vulkan-shape][enhanced-material]")
@@ -62,7 +92,7 @@ namespace ReceiverRecordMath {
 TEST_CASE("GI family records preserve every original normal bit in exact float integers",
           "[Graphics][vulkan-shape][enhanced-material]")
 {
-    for(int family=1;family<=15;++family)
+    for(int family=0;family<=15;++family)
         for(unsigned normal : {0u,1u,511u,1023u,524287u,1048575u})
         {
             const float code=ReceiverRecordMath::materialReceiverCode(float(normal),family);
@@ -225,13 +255,20 @@ TEST_CASE("RTAO terrain ambient survives clipping and releases with the TL table
     TLVertexTable table;
     for (int i = 0; i < 3; ++i) table.AddPos();
     table.aoAmbient = {{{.2f, .4f, .6f, 1}}, {{.6f, .8f, 1.f, 1}}};
+    table.terrainMaterial={{{0,1,0,1,1,.8f,.6f,1}},{{0,1,0,1,.6f,1,.8f,1}}};
     table.InterpolateHDR(2, 0, 1, .25f);
     REQUIRE(table.aoAmbient[2][0] == Catch::Approx(.3f));
     REQUIRE(table.aoAmbient[2][1] == Catch::Approx(.5f));
     REQUIRE(table.aoAmbient[2][2] == Catch::Approx(.7f));
     REQUIRE(table.aoAmbient[2][3] == 1);
+    REQUIRE(table.terrainMaterial[2][4] == Catch::Approx(.9f));
+    REQUIRE(table.terrainMaterial[2][3] == 1);
+    table.terrainMaterial[0][3]=0;
+    table.InterpolateHDR(2,0,1,.25f);
+    REQUIRE(table.terrainMaterial[2][3] == 0);
     table.ReleaseTables();
     REQUIRE(table.aoAmbient.empty());
+    REQUIRE(table.terrainMaterial.empty());
 }
 
 #if CWR_HAS_VULKAN

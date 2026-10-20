@@ -1,5 +1,7 @@
 # Stock PBR receivers for RTGI
 
+Subsequent terrain reception is documented in [stock terrain RTGI](rtgi-terrain.md).
+
 Public base: `78e39d9`. This extends the existing developer-only, default-Off
 PBR/RTGI path. It does not replace artwork, change the BRDF or adjust light gain.
 

@@ -81,7 +81,8 @@ void Landscape::DrawMesh(Scene& scene, TLVertexTable& table, const Shape& vMesh,
     LightList work(true);
     const LightList& lights = scene.SelectLights(bCenter, bRadius, work);
 
-    table.DoLightingColorized(lights, _colorizePalette, vMesh, 0);
+    table.DoLightingColorized(lights, _colorizePalette, vMesh, 0, offset);
+    _engine->CaptureTerrainMaterial(table, vMesh, _colorizePalette, isWater);
 
     // there will be many vertices clipped
     // we want vertex mesh and table to grow fast to avoid many allocations
@@ -222,6 +223,7 @@ void Landscape::DrawMesh(Scene& scene, TLVertexTable& table, const Shape& vMesh,
 
     // note: BeginMesh may change pos field (may be used for fog etc)
     _engine->CaptureTemporalTerrain(table, isWater);
+    _engine->SetTerrainSurface(!isWater);
     _engine->BeginMesh(table, render::LegacySpec{});
     float z = scene.GetCamera()->Position().Distance(bCenter) - bRadius;
     float z2 = Square(floatMax(z, 0));
@@ -245,6 +247,7 @@ void Landscape::DrawMesh(Scene& scene, TLVertexTable& table, const Shape& vMesh,
         GEngine->DrawPolygon(face.GetVertexList(), face.N());
     }
     _engine->EndMesh(table);
+    _engine->SetTerrainSurface(false);
     int idleMs = _engine->HowLongIdle();
     if (idleMs >= 0 && GWorld)
     {
@@ -1208,7 +1211,7 @@ void Landscape::DrawWater(const LandBegEnd& bigRect, Scene& scene)
 #endif
 
                     TLVertexTable tlTable;
-                    Matrix4Val pointView = scene.ScaledInvTransform();
+                    Matrix4 pointView = scene.ScaledInvTransform()*Matrix4(MTranslation,seg->Offset());
                     tlTable.DoTransformPoints(&GAnimatorWater, seg->_wTable, pointView);
                     DrawMesh(scene, tlTable, *shape, seg->Offset(), seg->_rect, true);
 #if TL_LANDSCAPE
@@ -1342,7 +1345,9 @@ void Landscape::DrawGround(const LandBegEnd& bigRect, Scene& scene, const Ground
                         }
 #if 1
                         GEngine->SetTemporalTerrain(true);
+                        GEngine->SetTerrainSurface(true);
                         shape->Draw(anim, lights, ClipAll, 0, trans, iTrans);
+                        GEngine->SetTerrainSurface(false);
                         GEngine->SetTemporalTerrain(false);
 #endif
                         if (layer.isAlpha)
@@ -1356,7 +1361,7 @@ void Landscape::DrawGround(const LandBegEnd& bigRect, Scene& scene, const Ground
 #endif
                     TLVertexTable tlTable;
 
-                    Matrix4Val pointView = scene.ScaledInvTransform();
+                    Matrix4 pointView = scene.ScaledInvTransform()*Matrix4(MTranslation,seg->Offset());
                     tlTable.DoTransformPoints(&GAnimatorDefault, seg->_table, pointView);
                     // landscape always uses world space coordinates
 

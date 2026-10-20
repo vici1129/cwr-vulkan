@@ -381,7 +381,11 @@ TEST_CASE("Night-eye keeps raster ambient and ordinary AO instead of GI replacem
     REQUIRE(gate < mesh.find("if (RTGIEnabled() && receiver.rtWater[3]>1.5f"));
     const auto shape = ReadTextFile(root / "Shaders/shape.frag");
     REQUIRE(shape.find("giReceiverReady=lighting.rtWater.w>1.5 && outAmbient.a>0 &&") != std::string::npos);
-    REQUIRE(shape.find("lighting.pbr.x>0 && lighting.pbr.w>.5 && dot(materialN,materialN)>.5") != std::string::npos);
+    REQUIRE(shape.find("((lighting.pbr.x>0 && lighting.pbr.w>.5) || terrainReceiver) && dot(materialN,materialN)>.5") != std::string::npos);
+    REQUIRE(shape.find("lighting.pbr.w==1000 && lighting.pbr.x==0 && terrainTint.a>.99") != std::string::npos);
+    REQUIRE(shape.find("captureSun && separate && directSun.a>.99") != std::string::npos);
+    REQUIRE(shape.find("abs(geometric.y)>.01 && abs(dot(geometric,materialN))>.5") != std::string::npos);
+    REQUIRE(shape.find("legacyLightToLinear(terrainTint.rgb)") != std::string::npos);
     REQUIRE(shape.find("length(shadowWorld)<lighting.aoReceiver.y;") != std::string::npos);
     REQUIRE(mesh.find("receiver.aoReceiver[1] = GIReceiverDistance;") != std::string::npos);
     REQUIRE(ReadTextFile(root / "VulkanContext_RTAO.cpp").find("float(_rtGIComponents), GIReceiverDistance}") != std::string::npos);

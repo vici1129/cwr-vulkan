@@ -242,11 +242,12 @@ void VulkanContext::CreateShapePipeline(bool translucent, bool screen, bool dept
             {6, 0, VK_FORMAT_R32G32B32_SFLOAT, 19 * sizeof(float)},
             {7, 0, VK_FORMAT_R32G32B32_SFLOAT, 22 * sizeof(float)},
             {8, 0, VK_FORMAT_R32G32B32A32_SFLOAT, 25 * sizeof(float)},
-            {9, 0, VK_FORMAT_R32G32B32_SFLOAT, 29 * sizeof(float)}};
+            {9, 0, VK_FORMAT_R32G32B32_SFLOAT, 29 * sizeof(float)},
+            {10, 0, VK_FORMAT_R32G32B32A32_SFLOAT, 32 * sizeof(float)}};
         VkPipelineVertexInputStateCreateInfo input{VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO};
         input.vertexBindingDescriptionCount = 1;
         input.pVertexBindingDescriptions = screen ? &screenBinding : &binding;
-        input.vertexAttributeDescriptionCount = screen ? 10 : 3;
+        input.vertexAttributeDescriptionCount = screen ? 11 : 3;
         input.pVertexAttributeDescriptions = screen ? screenAttributes : attributes;
         VkPipelineInputAssemblyStateCreateInfo assembly{VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO};
         assembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
@@ -516,7 +517,7 @@ void VulkanContext::DrawMesh(const std::shared_ptr<MeshBuffers>& mesh, uint32_t 
     }
     // Immutable descriptor handles identify both image version and sampler.
     const std::array<VkDescriptorSet, 2> descriptors{sampled->descriptors[sampler],
-        sampledDetail->dataDescriptors[lighting && lighting->pbr[3]>.5f ? sampler : 0]};
+        sampledDetail->dataDescriptors[lighting && lighting->pbr[3]>.5f && lighting->pbr[3]!=1000 ? sampler : 0]};
     if (_commands.textures != descriptors)
     {
         vkCmdBindDescriptorSets(frame.command, VK_PIPELINE_BIND_POINT_GRAPHICS, _shapeLayout, 0, 2,

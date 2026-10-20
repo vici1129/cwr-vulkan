@@ -7,6 +7,7 @@
 #include <Poseidon/World/Scene/Scene.hpp>
 #include <Poseidon/World/Scene/Camera/Camera.hpp>
 #include <Poseidon/World/Terrain/Landscape.hpp>
+#include <Poseidon/World/Terrain/LandscapeShared.hpp>
 #include <Poseidon/Graphics/Core/TLVertex.hpp>
 #include <Poseidon/IO/ParamFile/ParamFile.hpp>
 #include <Poseidon/IO/ParamFileExt.hpp>
@@ -280,6 +281,34 @@ void EngineVK::DrawSectionTL(const Shape& shape, int begin, int end)
             vk::QualifyGIReceiver(_lighting, false);
         }
     if (_lighting.pbr[0] > 0) _vk.RecordPBRDraw();
+    if (_terrainSurface && _vk.EnhancedMaterialsEnabled() && _lighting.rtWater[3]==1 &&
+        _lighting.ambient[3]>0 && _lighting.diffuse[0]+_lighting.diffuse[1]+_lighting.diffuse[2]>0 &&
+        _lighting.rtSun[1]==0 && _lighting.rtSun[2]==0 && _lighting.rtSun[3]==0 &&
+        _lighting.emissive[0]==0 && _lighting.emissive[1]==0 && _lighting.emissive[2]==0 &&
+        _lighting.rtSun[0]==1 && _secondaryMode<1.5f &&
+        _shapeModelWorld.Position().Y()==0)
+        if (const auto* texture=dynamic_cast<TextureVK*>(shape.GetSection(begin).properties.GetTexture());
+            texture && !texture->IsDynamic())
+        {
+            // Preserve triangle order and reject whole potential-water triangles,
+            // not all inland ground merely sharing a large coastal segment.
+            for (const auto& terrain : buffer->TerrainReceivers())
+            {
+                const auto first=std::max(range.begin,terrain.begin),last=std::min(range.end,terrain.end);
+                if (first>=last) continue;
+                auto lighting=_lighting;
+                if (terrain.dry)
+                {
+                    lighting.rtWater[3]=2;
+                    lighting.pbr={0,.04f,0,1000}; // retain the original native raster lighting
+                    lighting.pbrDiffuse[3]=0; // class 0 native terrain, 8 CPU terrain
+                }
+                _vk.DrawMesh(buffer->Buffers(),first,last-first,sizeof(VertexIndex)==2,_shapeMVP,color,
+                    _sectionTexture,_sectionSampler,_sectionAlphaCutoff,_sectionBlend,false,_sectionDepthTest,nullptr,
+                    _sectionDetail,_secondaryMode,_bumpLight,0,0,_sectionDepthWrite,&lighting,_sectionShadow);
+            }
+            return;
+        }
     _vk.DrawMesh(buffer->Buffers(), range.begin, range.end - range.begin, sizeof(VertexIndex) == 2, _shapeMVP, color,
                  _sectionTexture, _sectionSampler, _sectionAlphaCutoff, _sectionBlend, false, _sectionDepthTest, nullptr,
                  _sectionDetail, _secondaryMode, _bumpLight, 0, 0, _sectionDepthWrite, &_lighting, _sectionShadow);

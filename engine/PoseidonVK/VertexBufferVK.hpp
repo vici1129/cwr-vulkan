@@ -2,6 +2,7 @@
 
 #include <PoseidonVK/ShapeGeometryVK.hpp>
 #include <PoseidonVK/VulkanContext.hpp>
+#include <PoseidonVK/TerrainRayVK.hpp>
 
 namespace Poseidon
 {
@@ -12,10 +13,12 @@ class VertexBufferVK final : public VertexBuffer
     void Update(const Shape&, bool dynamic) override;
     const std::vector<vk::SectionRange>& Sections() const { return _sections; }
     const std::shared_ptr<vk::MeshBuffers>& Buffers() const { return _buffers; }
+    const auto& TerrainReceivers() const { return _terrainReceivers; }
 
   private:
     vk::VulkanContext& _context;
     std::vector<vk::SectionRange> _sections;
     std::shared_ptr<vk::MeshBuffers> _buffers;
+    std::vector<vk::TerrainReceiverRange> _terrainReceivers;
 };
 } // namespace Poseidon

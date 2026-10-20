@@ -15,6 +15,7 @@ layout(location = 7) out vec3 localDirect0;
 layout(location = 8) out vec3 localDirect1;
 layout(location = 9) out vec3 surfaceNormal;
 layout(location = 10) out vec4 aoAmbient;
+layout(location = 11) out vec4 terrainTint;
 layout(push_constant) uniform ShapeDraw { mat4 mvp; vec4 color; float alphaCutoff; float reserved; float detailEnabled; float shadow; } draw;
 void main() {
     gl_Position = draw.mvp * vec4(position, 1.0);
@@ -25,6 +26,9 @@ void main() {
     directSun = vec4(0);
     localDirect0 = localDirect1 = vec3(0);
     surfaceNormal = vec3(0);
+    // Native terrain's existing material has neutral tint; the colorized CPU
+    // route provides its actual unlit per-vertex palette through screen.vert.
+    terrainTint = lighting.pbr.w==1000 ? vec4(1) : vec4(0);
     aoAmbient = vec4(max(lighting.ambient.rgb-lighting.rtSun.yzw,vec3(0))*lighting.ambient.w,1);
     vec3 relativeWorld = (lighting.world * vec4(position, 1.0)).xyz;
     shadowWorld = relativeWorld;

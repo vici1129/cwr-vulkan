@@ -37,6 +37,7 @@ class EngineVK final : public Engine
     void CaptureTemporalMesh(const Shape&, TLVertexTable&, int) override;
     void CaptureTemporalTerrain(TLVertexTable&, bool) override;
     void SetTemporalTerrain(bool terrain) override { _temporalTerrain = terrain; }
+    void SetTerrainSurface(bool terrain) override { _terrainSurface = terrain; }
     void SetWaterSurface(bool water) override { _waterSurface = water; }
     void ResetTemporalHistory() override;
     RString SetAntiAliasing(RString mode) override { return _vk.SetAntiAliasing(static_cast<const char*>(mode)).c_str(); }
@@ -116,7 +117,8 @@ class EngineVK final : public Engine
     RString SetContactShadows(RString mode) override { return _vk.SetContactShadows(static_cast<const char*>(mode)).c_str(); }
     RString SetSoftShadows(RString mode) override { return _vk.SetSoftShadows(static_cast<const char*>(mode)).c_str(); }
     bool SeparateSunlight() const override { return _vk.SeparateSunlight() || _vk.WetRain() > 0; }
-    bool SeparateAmbient() const override { return _vk.RTAOEnabled(); }
+    bool SeparateAmbient() const override { return _vk.RTAOEnabled() || _vk.RTGIEnabled(); }
+    void CaptureTerrainMaterial(TLVertexTable&, const VertexTable&, const PackedColor*, bool) override;
     RString SetLocalShadows(RString mode) override;
     int PrepareLocalShadows() override;
     Light* LocalShadowLight(int slot) const override;
@@ -272,6 +274,7 @@ class EngineVK final : public Engine
     bool _temporalWorldDrawn = false;
     bool _previousNightVision = false;
     bool _temporalTerrain = false;
+    bool _terrainSurface = false;
     Matrix4 _shapeModelWorld{MIdentity};
     int _temporalCameraType = -1;
     std::array<float, 2> _previousJitter{};
