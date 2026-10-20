@@ -5,6 +5,7 @@
 #include <Poseidon/Asset/Probes/AssetPreview.hpp>
 #include <Poseidon/Asset/Formats/Common/FormatDetector.hpp>
 #include <Poseidon/Graphics/Textures/PAADecoder.hpp>
+#include <Poseidon/Graphics/Textures/TextureBank.hpp>
 #include <iostream>
 #include <iomanip>
 #include <fstream>
@@ -13,6 +14,8 @@
 #include <algorithm>
 #include <cmath>
 #include <set>
+#include <array>
+#include <memory>
 #include <stdint.h>
 #include <CLI/App.hpp>
 #include <CLI/Error.hpp>
@@ -78,6 +81,7 @@ static void setupModelInspect(CLI::App& model)
     static bool showSections = false;
     static bool showAll = false;
     static bool classify = false;
+    static bool showLighting = false;
     static std::string texRoot;
 
     cmd->add_option("input", inputPath, "Input P3D file path")->required()->check(CLI::ExistingFile);
@@ -86,6 +90,8 @@ static void setupModelInspect(CLI::App& model)
     cmd->add_flag("--sections", showSections, "Show section details with render hints");
     cmd->add_flag("-a,--all", showAll, "Show all details");
     cmd->add_flag("--classify", classify, "Classify each texture's alpha (opaque/cutout/blend) + render route");
+    cmd->add_flag("--lighting", showLighting,
+                  "Inspect native ODOL vertex normals and authored lighting hints (read-only)");
     cmd->add_option("--texroot", texRoot,
                     "Directory to resolve texture paths from (recursive basename match; defaults to model dir)");
 
@@ -149,6 +155,72 @@ static void setupModelInspect(CLI::App& model)
                     }
                 }
                 std::cout << std::endl;
+            }
+
+            if (showLighting)
+            {
+                // Use the same native loader as gameplay, not reconstructed or
+                // generated normals from a preview mesh. This does not qualify
+                // any section for PBR/GI or alter the source asset.
+                auto shape = std::make_unique<LODShapeWithShadow>();
+                if (!shape->LoadOptimized(inputPath.c_str()))
+                {
+                    std::cerr << "Native lighting inspection requires a loadable optimized ODOL model" << std::endl;
+                    throw CLI::RuntimeError(1);
+                }
+                std::cout << "Native lighting (source hints; not PBR/GI eligibility)" << std::endl;
+                for (int i = 0; i < shape->NLevels(); ++i)
+                {
+                    const auto* lod = shape->Level(i);
+                    if (!lod) continue;
+                    unsigned user = 0, fitted = 0, invalidNormals = 0;
+                    std::array<unsigned, 16> modes{};
+                    for (int v = 0; v < lod->NVertex(); ++v)
+                    {
+                        const auto hints = lod->Clip(v);
+                        user += (hints & ClipUserMask) != 0;
+                        fitted += (hints & ClipLandMask) != 0;
+                        ++modes[(hints & ClipLightMask) / ClipLightStep];
+                    }
+                    for (int n = 0; n < lod->NNorm(); ++n)
+                        invalidNormals +=
+                            !(std::isfinite(lod->Norm(n).SquareSize()) && lod->Norm(n).SquareSize() > 1e-12f);
+                    std::cout << "  LOD " << i << " res=" << shape->Resolution(i)
+                              << " vertices=" << lod->NVertex() << " normals=" << lod->NNorm()
+                              << " invalidNormals=" << invalidNormals << " userMaterialVertices=" << user
+                              << " landHintVertices=" << fitted << " lightModes=";
+                    for (unsigned m = 0; m < modes.size(); ++m)
+                        if (modes[m]) std::cout << m << ":" << modes[m] << " ";
+                    std::cout << std::endl;
+                    if (showSections && shape->Resolution(i) < 10000)
+                        for (int s = 0; s < lod->NSections(); ++s)
+                        {
+                            const auto& section = lod->GetSection(s);
+                            std::set<int> vertices;
+                            for (Offset at = section.beg; at < section.end; lod->NextFace(at))
+                            {
+                                const auto& face = lod->Face(at);
+                                for (int v = 0; v < face.N(); ++v) vertices.insert(face.GetVertex(v));
+                            }
+                            std::array<unsigned, 256> materials{};
+                            unsigned invalid = 0;
+                            for (int v : vertices)
+                            {
+                                ++materials[(lod->Clip(v) & ClipUserMask) / ClipUserStep];
+                                invalid += v >= lod->NNorm() ||
+                                    !(std::isfinite(lod->Norm(v).SquareSize()) && lod->Norm(v).SquareSize() > 1e-12f);
+                            }
+                            const auto* texture = section.properties.GetTexture();
+                            std::cout << "    native section " << s << " tex="
+                                      << (texture ? texture->Name() : "<none>")
+                                      << " flags=0x" << std::hex << section.properties.Special() << std::dec
+                                      << " vertices=" << vertices.size() << " invalidVertexNormals=" << invalid
+                                      << " materialIndices=";
+                            for (unsigned m = 0; m < materials.size(); ++m)
+                                if (materials[m]) std::cout << m << ":" << materials[m] << " ";
+                            std::cout << std::endl;
+                        }
+                }
             }
 
             if (classify)

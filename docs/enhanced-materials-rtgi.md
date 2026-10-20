@@ -7,6 +7,8 @@ For the optional second diffuse surface bounce, controls, cost and limitations,
 see [Second diffuse bounce](rtgi-second-bounce.md). One bounce remains the default.
 For the subsequent enhanced-only original roof/gable coverage and comparisons,
 see [stock material participation](rtgi-material-participation.md).
+For an eleven-location, four-island coverage survey and ranked next targets,
+see [original-world reconnaissance](rtgi-world-survey.md).
 
 Public base: `9f74c7f` (origin/main verified before work). `triPBR 'enhanced'`
 uses the original stock color textures by default. `triPBR 'on'` retains stock

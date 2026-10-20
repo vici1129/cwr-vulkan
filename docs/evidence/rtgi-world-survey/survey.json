@@ -1,0 +1,6287 @@
+{
+  "base": "e38ca724985b90358c96660d0cd5fd9ec36b8707",
+  "method": {
+    "scope": "11 purposively selected standing views, four islands, five original missions; no global coverage estimate",
+    "worldResolution": [
+      1920,
+      1080
+    ],
+    "receiverGrid": [
+      960,
+      540
+    ],
+    "receiverBoundMetres": 45,
+    "transportMetres": 25,
+    "bounceMode": 1,
+    "samplesPerEligiblePixel": 1,
+    "probeGrid": [
+      8,
+      8
+    ],
+    "receiverCounts": "Current completed half-resolution GI eligibility samples, not full-resolution object pixels or benefit percentages",
+    "PBRCounts": "Submission deltas divided by triFrameCount interval, not projected area or fraction of geometry",
+    "hitCounts": "Separate stochastic first-hit outcomes, not screen coverage",
+    "runtime": "Retained e38ca72 implementation; later game rebuild only refreshes existing build/version metadata; renderer unchanged"
+  },
+  "locations": [
+    {
+      "id": "petrovice",
+      "description": "Petrovice apartment square",
+      "run": "world-survey-noe",
+      "weather": "morning",
+      "standingCameraXYZDirection": [
+        3954.0,
+        25.29,
+        5092.0,
+        -1.0,
+        0.03,
+        0.0
+      ],
+      "eligibleReceiverSamples": 113067,
+      "receiverFamiliesNativeCPU": {
+        "catalog": [
+          0,
+          0
+        ],
+        "rock": [
+          0,
+          0
+        ],
+        "roof": [
+          0,
+          0
+        ],
+        "wood": [
+          0,
+          0
+        ],
+        "facade": [
+          0,
+          0
+        ],
+        "stone": [
+          0,
+          0
+        ],
+        "concrete": [
+          0,
+          0
+        ],
+        "terrain": [
+          113067,
+          0
+        ]
+      },
+      "qualifiedBuildingRoofFacadeSamples": 0,
+      "firstHits": {
+        "bounceRays": 113060,
+        "hits": 19956,
+        "eligibleHits": 2,
+        "rejectedMaterials": 19954
+      },
+      "PBRSubmissionsPerFrame": {
+        "all": 0.0,
+        "native": 0.0,
+        "capturedCPU": 0.0,
+        "intervalFrames": 220
+      },
+      "probeSummary": {
+        "uniqueGridPhasePaths": 304,
+        "eligible": 0,
+        "rejected": 40,
+        "rejectedAlphaTested": 11,
+        "eligibleIdentities": {},
+        "rejectedKindAvailable": [
+          [
+            0,
+            39,
+            29
+          ],
+          [
+            1,
+            103,
+            6
+          ],
+          [
+            0,
+            103,
+            4
+          ],
+          [
+            1,
+            71,
+            1
+          ]
+        ],
+        "eligibleExamples": [],
+        "rejectedExamples": [
+          [
+            3943.23,
+            23.4899,
+            5083.27,
+            14,
+            0,
+            1,
+            -0.000978472,
+            0,
+            -0.874701,
+            0.358765,
+            0.325862,
+            2,
+            3937.39,
+            25.9049,
+            5085.44,
+            0,
+            0.999958,
+            0,
+            -0.00920335,
+            0,
+            0.999958,
+            3.89217e-07,
+            -0.00920347,
+            6.67565,
+            0,
+            0,
+            0,
+            39,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            3943.23,
+            23.4899,
+            5088.27,
+            14,
+            0,
+            1,
+            -0.000978472,
+            0,
+            -0.694028,
+            0.653512,
+            -0.302069,
+            2,
+            3940.98,
+            25.6287,
+            5087.29,
+            1,
+            0.640625,
+            -0.667329,
+            -0.379832,
+            0,
+            0.672669,
+            -0.650954,
+            -0.351818,
+            3.24214,
+            0,
+            0,
+            0,
+            103,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            3943.23,
+            23.4899,
+            5090.77,
+            14,
+            0,
+            1,
+            -0.000978472,
+            0,
+            -0.825621,
+            0.49046,
+            -0.278925,
+            2,
+            3936.23,
+            27.669,
+            5088.4,
+            0,
+            0.301286,
+            -0.904931,
+            -0.300543,
+            0,
+            0,
+            -1,
+            0,
+            8.48008,
+            0,
+            0,
+            0,
+            39,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "status": [
+        "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=0 reflectorInstances=15 completedDispatches=7273 bounceRays=113060 hits=19956 eligibleHits=2 rejectedMaterials=19954 sunRays=0 sunBlocked=0 eligibleReceivers=113067 dynamicHits=0 sunVisible=0 terrain(eligible/sunlit)=2/0 stockPBR(eligible/sunlit)=0/0 catalog(eligible/sunlit)=0/0 backfacing=2 missingColor=19954 secondarySky(rays/blocked/visible/rejectedHemisphere)=0/0/0/2 primarySky(rays/blocked/visible/belowHorizon)=93104/1041/92063/0 secondBounce(rays/hits/eligible/rejected/sunRays/sunBlocked/skyRays/skyBlocked)=0/0/0/0/0/0/0/0 receiverPixels(native/CPU)=catalog:0/0,rock:0/0,roof:0/0,wood:0/0,facade:0/0,stone:0/0,concrete:0/0,terrain:113067/0, skyEpi(dome/weather/vertical/reference)=[0.268212,0.461311,0.858996][0.482549,0.651833,0.992726][0.303954,0.398085,0.553061][0.748414,0.911408,1.28] skyCalibration=2.01209 transportMean(incoming/replacement/capturedAmbient/reflectanceFog)=[0.887221,1.18583,1.79826][0.0209489,0.0385785,0.0260607][0.0186871,0.0312748,0.0194024][0.0239037,0.0328342,0.0145811] transportSamples=220 GPUms(trace/filter/temporal/BLAS/TLAS)=0.205824/0.071616/0.061248/9.6e-05/6.4e-05 CPUrecordMs=0.0955 temporal=on history(accepted/rejected/clamped/dynamic)=43200/69867/6/0 historyResets=7 phase=20 historyBytes=9830400 historyAllocations=4; last completed frame; half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain",
+        "PBR prototype=stock-dielectric-v3 requested=on; enhanced=on; native + captured CPU-lit opaque geometry: data/skala_piskovec2.pac (matte rock), data/sloupek_bily_orezly_.pac (painted signposts), data/strecha_tasky_vln.pac + data/strecha_tasky_vln90.pac (roof tiles r=0.90), data/prkna_dark.pac (weathered wood r=0.85); inspected stone/mortar, concrete, plaster/brick and wood sections; enhanced-only tasky_p90 roof and budova2_stit2 plaster gable (captured ambient required for GI); F0=0.04, metallic=0; unsupported lighting/atlases legacy; no RT requirement; draws since toggle=0; software=0",
+        "active=taa requested=taa scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=0 fsrResets=0",
+        "RTShadows=on capability=available terrainPatches=9 foliageInstances=82 lastCompletedRays=491789 lastCompletedHits=13810 totalRays=7415257274 rayQueriesExecuted=yes lastWorldDispatch=yes lastTerrainHits=0 lastAlphaHits=10922 lastGPUms(rays/compose)=0.434176/0.043968; shared RTAO=off capability=available BLAS=30 cachedBLAS=30 TLAS=2 instances=185 instancedTriangles=111301 completedPasses=8332 lastCompletedRays=0 lastCompletedHits=0 totalRays=0 rayQueriesExecuted=no lastWorldDispatch=no BLASbuilds=174 TLASbuilds=13 lastGPUms(BLAS/TLAS/rays/filter/frame)=9.6e-05/6.4e-05/0/0/2.48925; shared static LOD0 scene radius=160m; dynamic=off; AO radius=4m includes bounded terrain, excludes foliage cards; ambient-only composition; static collection excludes animation/damage; blended effects/proxies excluded; sunlight-only native opaque/cutout and terrain receivers, CSM fallback retained"
+      ],
+      "rawLocalCaptures": {
+        "v3": "build\\shadow-live\\world-survey-noe\\petrovice-v3.png",
+        "enhanced-off": "build\\shadow-live\\world-survey-noe\\petrovice-enhanced-off.png",
+        "gi-on": "build\\shadow-live\\world-survey-noe\\petrovice-gi-on.png"
+      },
+      "unamplifiedScreenshot": "petrovice-gi-on.png"
+    },
+    {
+      "id": "lipany",
+      "description": "Lipany townhouse street",
+      "run": "world-survey-noe",
+      "weather": "overcast",
+      "standingCameraXYZDirection": [
+        10760.0,
+        129.78,
+        3075.0,
+        -1.0,
+        0.02,
+        0.0
+      ],
+      "eligibleReceiverSamples": 134099,
+      "receiverFamiliesNativeCPU": {
+        "catalog": [
+          0,
+          0
+        ],
+        "rock": [
+          0,
+          0
+        ],
+        "roof": [
+          0,
+          0
+        ],
+        "wood": [
+          0,
+          0
+        ],
+        "facade": [
+          0,
+          0
+        ],
+        "stone": [
+          0,
+          0
+        ],
+        "concrete": [
+          0,
+          0
+        ],
+        "terrain": [
+          134099,
+          0
+        ]
+      },
+      "qualifiedBuildingRoofFacadeSamples": 0,
+      "firstHits": {
+        "bounceRays": 133572,
+        "hits": 20113,
+        "eligibleHits": 15,
+        "rejectedMaterials": 20098
+      },
+      "PBRSubmissionsPerFrame": {
+        "all": 2.0,
+        "native": 1.0,
+        "capturedCPU": 1.0,
+        "intervalFrames": 132
+      },
+      "probeSummary": {
+        "uniqueGridPhasePaths": 324,
+        "eligible": 0,
+        "rejected": 35,
+        "rejectedAlphaTested": 3,
+        "eligibleIdentities": {},
+        "rejectedKindAvailable": [
+          [
+            0,
+            39,
+            32
+          ],
+          [
+            1,
+            103,
+            3
+          ]
+        ],
+        "eligibleExamples": [],
+        "rejectedExamples": [
+          [
+            10749.8,
+            127.98,
+            3080.93,
+            5,
+            0,
+            1,
+            -0.000978472,
+            0,
+            0.141284,
+            0.344715,
+            -0.928014,
+            2,
+            10752.9,
+            135.506,
+            3060.72,
+            1,
+            -0.0152918,
+            -0.61013,
+            0.792154,
+            0,
+            -0.0152922,
+            -0.61013,
+            0.792154,
+            21.775,
+            0,
+            0,
+            0,
+            103,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            10755.9,
+            127.98,
+            3071.66,
+            5,
+            0,
+            1,
+            -0.000978472,
+            0,
+            -0.285577,
+            0.925626,
+            -0.248319,
+            2,
+            10755.5,
+            129.195,
+            3071.34,
+            0,
+            0.999845,
+            1.31391e-08,
+            0.01761,
+            0,
+            0.999845,
+            1.36001e-08,
+            0.01761,
+            1.29099,
+            0,
+            0,
+            0,
+            39,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            10755.9,
+            127.98,
+            3074.53,
+            5,
+            0,
+            1,
+            -0.000978472,
+            0,
+            -0.849312,
+            0.298982,
+            0.435061,
+            2,
+            10755.4,
+            128.162,
+            3074.76,
+            0,
+            0.999232,
+            0,
+            0.0391935,
+            0,
+            0.999232,
+            -1.97969e-08,
+            0.0391935,
+            0.540738,
+            0,
+            0,
+            0,
+            39,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "status": [
+        "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=0 reflectorInstances=48 completedDispatches=7794 bounceRays=133572 hits=20113 eligibleHits=15 rejectedMaterials=20098 sunRays=4 sunBlocked=0 eligibleReceivers=134099 dynamicHits=0 sunVisible=4 terrain(eligible/sunlit)=11/0 stockPBR(eligible/sunlit)=4/4 catalog(eligible/sunlit)=0/0 backfacing=11 missingColor=20098 secondarySky(rays/blocked/visible/rejectedHemisphere)=4/1/3/11 primarySky(rays/blocked/visible/belowHorizon)=113459/3182/110277/0 secondBounce(rays/hits/eligible/rejected/sunRays/sunBlocked/skyRays/skyBlocked)=0/0/0/0/0/0/0/0 receiverPixels(native/CPU)=catalog:0/0,rock:0/0,roof:0/0,wood:0/0,facade:0/0,stone:0/0,concrete:0/0,terrain:134099/0, skyEpi(dome/weather/vertical/reference)=[0.429139,0.420054,0.340269][0.447645,0.463903,0.478156][0.230502,0.240319,0.251923][0.748414,0.911408,1.28] skyCalibration=2.17038 transportMean(incoming/replacement/capturedAmbient/reflectanceFog)=[0.927744,0.984022,1.07337][0.024963,0.0346057,0.0172773][0.0210874,0.0335919,0.0217063][0.0270838,0.0353676,0.0162591] transportSamples=267 GPUms(trace/filter/temporal/BLAS/TLAS)=0.253952/0.123904/0.095872/6.4e-05/9.6e-05 CPUrecordMs=0.0936999 temporal=on history(accepted/rejected/clamped/dynamic)=116608/17491/519/0 historyResets=11 phase=22 historyBytes=9830400 historyAllocations=6; last completed frame; half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain",
+        "PBR prototype=stock-dielectric-v3 requested=on; enhanced=on; native + captured CPU-lit opaque geometry: data/skala_piskovec2.pac (matte rock), data/sloupek_bily_orezly_.pac (painted signposts), data/strecha_tasky_vln.pac + data/strecha_tasky_vln90.pac (roof tiles r=0.90), data/prkna_dark.pac (weathered wood r=0.85); inspected stone/mortar, concrete, plaster/brick and wood sections; enhanced-only tasky_p90 roof and budova2_stit2 plaster gable (captured ambient required for GI); F0=0.04, metallic=0; unsupported lighting/atlases legacy; no RT requirement; draws since toggle=1650; software=825",
+        "active=taa requested=taa scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=0 fsrResets=0",
+        "RTShadows=on capability=available terrainPatches=6 foliageInstances=205 lastCompletedRays=615180 lastCompletedHits=33836 totalRays=8127578337 rayQueriesExecuted=yes lastWorldDispatch=yes lastTerrainHits=0 lastAlphaHits=3 lastGPUms(rays/compose)=0.351232/0.063616; shared RTAO=off capability=available BLAS=96 cachedBLAS=96 TLAS=2 instances=774 instancedTriangles=173915 completedPasses=9491 lastCompletedRays=0 lastCompletedHits=0 totalRays=0 rayQueriesExecuted=no lastWorldDispatch=no BLASbuilds=281 TLASbuilds=19 lastGPUms(BLAS/TLAS/rays/filter/frame)=6.4e-05/9.6e-05/0/0/3.17475; shared static LOD0 scene radius=160m; dynamic=off; AO radius=4m includes bounded terrain, excludes foliage cards; ambient-only composition; static collection excludes animation/damage; blended effects/proxies excluded; sunlight-only native opaque/cutout and terrain receivers, CSM fallback retained"
+      ],
+      "rawLocalCaptures": {
+        "v3": "build\\shadow-live\\world-survey-noe\\lipany-v3.png",
+        "enhanced-off": "build\\shadow-live\\world-survey-noe\\lipany-enhanced-off.png",
+        "gi-on": "build\\shadow-live\\world-survey-noe\\lipany-gi-on.png"
+      }
+    },
+    {
+      "id": "mokra",
+      "description": "Mokra Vrata ruined hamlet",
+      "run": "world-survey-noe",
+      "weather": "dusk",
+      "standingCameraXYZDirection": [
+        1630.0,
+        41.76,
+        11365.0,
+        0.0,
+        0.02,
+        1.0
+      ],
+      "eligibleReceiverSamples": 211667,
+      "receiverFamiliesNativeCPU": {
+        "catalog": [
+          0,
+          0
+        ],
+        "rock": [
+          0,
+          0
+        ],
+        "roof": [
+          0,
+          0
+        ],
+        "wood": [
+          0,
+          0
+        ],
+        "facade": [
+          0,
+          0
+        ],
+        "stone": [
+          0,
+          0
+        ],
+        "concrete": [
+          0,
+          0
+        ],
+        "terrain": [
+          211667,
+          0
+        ]
+      },
+      "qualifiedBuildingRoofFacadeSamples": 0,
+      "firstHits": {
+        "bounceRays": 211155,
+        "hits": 7094,
+        "eligibleHits": 23,
+        "rejectedMaterials": 7071
+      },
+      "PBRSubmissionsPerFrame": {
+        "all": 0.0,
+        "native": 0.0,
+        "capturedCPU": 0.0,
+        "intervalFrames": 221
+      },
+      "probeSummary": {
+        "uniqueGridPhasePaths": 425,
+        "eligible": 0,
+        "rejected": 12,
+        "rejectedAlphaTested": 8,
+        "eligibleIdentities": {},
+        "rejectedKindAvailable": [
+          [
+            1,
+            103,
+            8
+          ],
+          [
+            0,
+            39,
+            4
+          ]
+        ],
+        "eligibleExamples": [],
+        "rejectedExamples": [
+          [
+            1631.2,
+            39.96,
+            11375.2,
+            26,
+            0,
+            1,
+            -0.000978472,
+            0,
+            0.354061,
+            0.495739,
+            0.793022,
+            2,
+            1637.28,
+            48.491,
+            11388.8,
+            1,
+            0.0591948,
+            -0.842546,
+            -0.535362,
+            0,
+            0.444622,
+            -0.606661,
+            -0.658994,
+            17.1683,
+            0,
+            0,
+            0,
+            103,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            1627.62,
+            39.96,
+            11369.1,
+            31,
+            0,
+            1,
+            -0.000978472,
+            0,
+            -0.0964498,
+            0.11209,
+            0.989006,
+            2,
+            1625.78,
+            42.1181,
+            11388,
+            1,
+            0.877303,
+            0.476225,
+            -0.0595721,
+            0,
+            0.740423,
+            0.411261,
+            -0.531638,
+            19.075,
+            0,
+            0,
+            0,
+            103,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            1631.44,
+            39.96,
+            11369.1,
+            31,
+            0,
+            1,
+            -0.000978472,
+            0,
+            -0.978547,
+            0.206009,
+            0.00262475,
+            2,
+            1621.14,
+            42.1465,
+            11369.2,
+            1,
+            0.314934,
+            -0.681116,
+            0.660982,
+            0,
+            0.641008,
+            -0.618637,
+            0.454309,
+            10.5166,
+            0,
+            0,
+            0,
+            103,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "status": [
+        "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=0 reflectorInstances=4 completedDispatches=14965 bounceRays=211155 hits=7094 eligibleHits=23 rejectedMaterials=7071 sunRays=1 sunBlocked=0 eligibleReceivers=211667 dynamicHits=0 sunVisible=1 terrain(eligible/sunlit)=23/1 stockPBR(eligible/sunlit)=0/0 catalog(eligible/sunlit)=0/0 backfacing=22 missingColor=7067 secondarySky(rays/blocked/visible/rejectedHemisphere)=20/0/20/3 primarySky(rays/blocked/visible/belowHorizon)=204061/2425/201636/0 secondBounce(rays/hits/eligible/rejected/sunRays/sunBlocked/skyRays/skyBlocked)=0/0/0/0/0/0/0/0 receiverPixels(native/CPU)=catalog:0/0,rock:0/0,roof:0/0,wood:0/0,facade:0/0,stone:0/0,concrete:0/0,terrain:211667/0, skyEpi(dome/weather/vertical/reference)=[0.221114,0.342987,0.619988][0.256426,0.369938,0.632623][0.184885,0.234664,0.347898][0.176345,0.212659,0.399316] skyCalibration=0.64797 transportMean(incoming/replacement/capturedAmbient/reflectanceFog)=[0.160213,0.232539,0.40148][0.00359322,0.00711084,0.00545185][0.00403924,0.00673119,0.0056366][0.0220153,0.0303945,0.0134857] transportSamples=417 GPUms(trace/filter/temporal/BLAS/TLAS)=0.247808/0.104416/0.077824/6.4e-05/9.6e-05 CPUrecordMs=0.0868 temporal=on history(accepted/rejected/clamped/dynamic)=182446/29221/857/0 historyResets=17 phase=25 historyBytes=9830400 historyAllocations=8; last completed frame; half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain",
+        "PBR prototype=stock-dielectric-v3 requested=on; enhanced=on; native + captured CPU-lit opaque geometry: data/skala_piskovec2.pac (matte rock), data/sloupek_bily_orezly_.pac (painted signposts), data/strecha_tasky_vln.pac + data/strecha_tasky_vln90.pac (roof tiles r=0.90), data/prkna_dark.pac (weathered wood r=0.85); inspected stone/mortar, concrete, plaster/brick and wood sections; enhanced-only tasky_p90 roof and budova2_stit2 plaster gable (captured ambient required for GI); F0=0.04, metallic=0; unsupported lighting/atlases legacy; no RT requirement; draws since toggle=0; software=0",
+        "active=taa requested=taa scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=0 fsrResets=0",
+        "RTShadows=on capability=available terrainPatches=4 foliageInstances=74 lastCompletedRays=950456 lastCompletedHits=77367 totalRays=14017674984 rayQueriesExecuted=yes lastWorldDispatch=yes lastTerrainHits=12796 lastAlphaHits=48838 lastGPUms(rays/compose)=0.483328/0.038912; shared RTAO=off capability=available BLAS=22 cachedBLAS=22 TLAS=2 instances=167 instancedTriangles=43870 completedPasses=17661 lastCompletedRays=0 lastCompletedHits=0 totalRays=0 rayQueriesExecuted=no lastWorldDispatch=no BLASbuilds=306 TLASbuilds=25 lastGPUms(BLAS/TLAS/rays/filter/frame)=6.4e-05/9.6e-05/0/0/2.32413; shared static LOD0 scene radius=160m; dynamic=off; AO radius=4m includes bounded terrain, excludes foliage cards; ambient-only composition; static collection excludes animation/damage; blended effects/proxies excluded; sunlight-only native opaque/cutout and terrain receivers, CSM fallback retained"
+      ],
+      "rawLocalCaptures": {
+        "v3": "build\\shadow-live\\world-survey-noe\\mokra-v3.png",
+        "enhanced-off": "build\\shadow-live\\world-survey-noe\\mokra-enhanced-off.png",
+        "gi-on": "build\\shadow-live\\world-survey-noe\\mokra-gi-on.png"
+      }
+    },
+    {
+      "id": "factory",
+      "description": "Nogova factory northwest of Petrovice",
+      "run": "world-survey-noe-factory",
+      "weather": "morning",
+      "standingCameraXYZDirection": [
+        3050.0,
+        23.76,
+        6050.0,
+        -1.0,
+        0.04,
+        -0.2
+      ],
+      "eligibleReceiverSamples": 209353,
+      "receiverFamiliesNativeCPU": {
+        "catalog": [
+          0,
+          0
+        ],
+        "rock": [
+          0,
+          0
+        ],
+        "roof": [
+          0,
+          0
+        ],
+        "wood": [
+          0,
+          0
+        ],
+        "facade": [
+          0,
+          0
+        ],
+        "stone": [
+          0,
+          0
+        ],
+        "concrete": [
+          0,
+          0
+        ],
+        "terrain": [
+          209353,
+          0
+        ]
+      },
+      "qualifiedBuildingRoofFacadeSamples": 0,
+      "firstHits": {
+        "bounceRays": 208870,
+        "hits": 20556,
+        "eligibleHits": 13,
+        "rejectedMaterials": 20543
+      },
+      "PBRSubmissionsPerFrame": {
+        "all": 0.0,
+        "native": 0.0,
+        "capturedCPU": 0.0,
+        "intervalFrames": 243
+      },
+      "probeSummary": {
+        "uniqueGridPhasePaths": 408,
+        "eligible": 0,
+        "rejected": 31,
+        "rejectedAlphaTested": 0,
+        "eligibleIdentities": {},
+        "rejectedKindAvailable": [
+          [
+            0,
+            39,
+            31
+          ]
+        ],
+        "eligibleExamples": [],
+        "rejectedExamples": [
+          [
+            3039.55,
+            21.96,
+            6043.86,
+            13,
+            0,
+            1,
+            -0.000978472,
+            0,
+            -0.631275,
+            0.715049,
+            -0.300327,
+            2,
+            3030.14,
+            32.636,
+            6039.39,
+            0,
+            0.999933,
+            0,
+            -0.0115927,
+            0,
+            0.999933,
+            1.56891e-10,
+            -0.0115924,
+            14.9025,
+            0,
+            0,
+            0,
+            39,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            3040.1,
+            21.96,
+            6041.29,
+            22,
+            0,
+            1,
+            -0.000978472,
+            0,
+            -0.739478,
+            0.65464,
+            0.156904,
+            2,
+            3030.18,
+            30.7571,
+            6043.4,
+            0,
+            0.999933,
+            0,
+            -0.0115927,
+            0,
+            0.999933,
+            3.56232e-12,
+            -0.0115908,
+            13.4075,
+            0,
+            0,
+            0,
+            39,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            3044.24,
+            21.96,
+            6046.64,
+            22,
+            0,
+            1,
+            -0.000978472,
+            0,
+            -0.854317,
+            0.511772,
+            -0.0907315,
+            2,
+            3030.2,
+            30.3898,
+            6045.14,
+            0,
+            0.999933,
+            0,
+            -0.0115927,
+            0,
+            0.999933,
+            -1.26923e-11,
+            -0.01159,
+            16.4328,
+            0,
+            0,
+            0,
+            39,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "status": [
+        "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=0 reflectorInstances=13 completedDispatches=10741 bounceRays=208870 hits=20556 eligibleHits=13 rejectedMaterials=20543 sunRays=0 sunBlocked=0 eligibleReceivers=209353 dynamicHits=0 sunVisible=0 terrain(eligible/sunlit)=13/0 stockPBR(eligible/sunlit)=0/0 catalog(eligible/sunlit)=0/0 backfacing=13 missingColor=20543 secondarySky(rays/blocked/visible/rejectedHemisphere)=0/0/0/13 primarySky(rays/blocked/visible/belowHorizon)=188314/3947/184367/0 secondBounce(rays/hits/eligible/rejected/sunRays/sunBlocked/skyRays/skyBlocked)=0/0/0/0/0/0/0/0 receiverPixels(native/CPU)=catalog:0/0,rock:0/0,roof:0/0,wood:0/0,facade:0/0,stone:0/0,concrete:0/0,terrain:209353/0, skyEpi(dome/weather/vertical/reference)=[0.268212,0.461311,0.858996][0.472776,0.644053,0.988663][0.28151,0.376645,0.53675][0.748414,0.911408,1.28] skyCalibration=2.01209 transportMean(incoming/replacement/capturedAmbient/reflectanceFog)=[0.904055,1.22124,1.86622][0.114342,0.156275,0.240095][0.0982837,0.120944,0.1708][0.126105,0.127489,0.128105] transportSamples=408 GPUms(trace/filter/temporal/BLAS/TLAS)=0.157696/0.10896/0.08848/9.6e-05/6.4e-05 CPUrecordMs=0.0849 temporal=on history(accepted/rejected/clamped/dynamic)=129296/80057/231/0 historyResets=3 phase=7 historyBytes=9830400 historyAllocations=4; last completed frame; half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain",
+        "PBR prototype=stock-dielectric-v3 requested=on; enhanced=on; native + captured CPU-lit opaque geometry: data/skala_piskovec2.pac (matte rock), data/sloupek_bily_orezly_.pac (painted signposts), data/strecha_tasky_vln.pac + data/strecha_tasky_vln90.pac (roof tiles r=0.90), data/prkna_dark.pac (weathered wood r=0.85); inspected stone/mortar, concrete, plaster/brick and wood sections; enhanced-only tasky_p90 roof and budova2_stit2 plaster gable (captured ambient required for GI); F0=0.04, metallic=0; unsupported lighting/atlases legacy; no RT requirement; draws since toggle=0; software=0",
+        "active=taa requested=taa scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=0 fsrResets=0",
+        "RTShadows=on capability=available terrainPatches=9 foliageInstances=5 lastCompletedRays=842227 lastCompletedHits=3850 totalRays=9990767525 rayQueriesExecuted=yes lastWorldDispatch=yes lastTerrainHits=0 lastAlphaHits=0 lastGPUms(rays/compose)=0.333824/0.044768; shared RTAO=off capability=available BLAS=22 cachedBLAS=22 TLAS=2 instances=119 instancedTriangles=18673 completedPasses=11869 lastCompletedRays=0 lastCompletedHits=0 totalRays=0 rayQueriesExecuted=no lastWorldDispatch=no BLASbuilds=85 TLASbuilds=9 lastGPUms(BLAS/TLAS/rays/filter/frame)=9.6e-05/6.4e-05/0/0/2.2217; shared static LOD0 scene radius=160m; dynamic=off; AO radius=4m includes bounded terrain, excludes foliage cards; ambient-only composition; static collection excludes animation/damage; blended effects/proxies excluded; sunlight-only native opaque/cutout and terrain receivers, CSM fallback retained"
+      ],
+      "rawLocalCaptures": {
+        "v3": "build\\shadow-live\\world-survey-noe-factory\\factory-v3.png",
+        "enhanced-off": "build\\shadow-live\\world-survey-noe-factory\\factory-enhanced-off.png",
+        "gi-on": "build\\shadow-live\\world-survey-noe-factory\\factory-gi-on.png"
+      },
+      "unamplifiedScreenshot": "factory-gi-on.png"
+    },
+    {
+      "id": "base",
+      "description": "Kolgujev southeast military base",
+      "run": "world-survey-cain",
+      "weather": "morning",
+      "standingCameraXYZDirection": [
+        7517.0,
+        22.68,
+        4774.0,
+        1.0,
+        0.02,
+        0.2
+      ],
+      "eligibleReceiverSamples": 89313,
+      "receiverFamiliesNativeCPU": {
+        "catalog": [
+          0,
+          0
+        ],
+        "rock": [
+          0,
+          0
+        ],
+        "roof": [
+          0,
+          0
+        ],
+        "wood": [
+          0,
+          0
+        ],
+        "facade": [
+          0,
+          0
+        ],
+        "stone": [
+          0,
+          0
+        ],
+        "concrete": [
+          0,
+          0
+        ],
+        "terrain": [
+          89313,
+          0
+        ]
+      },
+      "qualifiedBuildingRoofFacadeSamples": 0,
+      "firstHits": {
+        "bounceRays": 89281,
+        "hits": 5131,
+        "eligibleHits": 1,
+        "rejectedMaterials": 5130
+      },
+      "PBRSubmissionsPerFrame": {
+        "all": 20.0,
+        "native": 0.0,
+        "capturedCPU": 20.0,
+        "intervalFrames": 214
+      },
+      "probeSummary": {
+        "uniqueGridPhasePaths": 214,
+        "eligible": 0,
+        "rejected": 12,
+        "rejectedAlphaTested": 2,
+        "eligibleIdentities": {},
+        "rejectedKindAvailable": [
+          [
+            0,
+            39,
+            10
+          ],
+          [
+            1,
+            71,
+            2
+          ]
+        ],
+        "eligibleExamples": [],
+        "rejectedExamples": [
+          [
+            7525.8,
+            20.8801,
+            4781.76,
+            18,
+            0,
+            1,
+            -0.000978472,
+            0,
+            0.576513,
+            0.163181,
+            0.800627,
+            2,
+            7528.31,
+            21.6117,
+            4785.25,
+            0,
+            -1,
+            0,
+            0,
+            0,
+            -1,
+            0,
+            0,
+            4.3605,
+            0,
+            0,
+            0,
+            39,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            7526.26,
+            20.8801,
+            4779.44,
+            18,
+            0,
+            1,
+            -0.000978472,
+            0,
+            -0.00542935,
+            0.185854,
+            0.982562,
+            2,
+            7526.16,
+            24.206,
+            4796.92,
+            1,
+            0.680358,
+            -0.399907,
+            -0.614156,
+            0,
+            0.680358,
+            -0.399907,
+            -0.614156,
+            17.7877,
+            0,
+            0,
+            0,
+            71,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            7525.32,
+            20.8802,
+            4784.06,
+            28,
+            0,
+            1,
+            -0.000978472,
+            0,
+            0.932729,
+            0.26778,
+            -0.241475,
+            2,
+            7528.55,
+            21.8274,
+            4783.22,
+            0,
+            -1,
+            0,
+            0,
+            0,
+            -1,
+            0,
+            0,
+            3.46269,
+            0,
+            0,
+            0,
+            39,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "status": [
+        "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=0 reflectorInstances=7 completedDispatches=8082 bounceRays=89281 hits=5131 eligibleHits=1 rejectedMaterials=5130 sunRays=0 sunBlocked=0 eligibleReceivers=89313 dynamicHits=0 sunVisible=0 terrain(eligible/sunlit)=1/0 stockPBR(eligible/sunlit)=0/0 catalog(eligible/sunlit)=0/0 backfacing=1 missingColor=5130 secondarySky(rays/blocked/visible/rejectedHemisphere)=0/0/0/1 primarySky(rays/blocked/visible/belowHorizon)=84150/236/83914/0 secondBounce(rays/hits/eligible/rejected/sunRays/sunBlocked/skyRays/skyBlocked)=0/0/0/0/0/0/0/0 receiverPixels(native/CPU)=catalog:0/0,rock:0/0,roof:0/0,wood:0/0,facade:0/0,stone:0/0,concrete:0/0,terrain:89313/0, skyEpi(dome/weather/vertical/reference)=[0.268212,0.461311,0.858996][0.378007,0.556197,0.918863][0.222032,0.304377,0.471875][0.748414,0.911408,1.28] skyCalibration=2.01209 transportMean(incoming/replacement/capturedAmbient/reflectanceFog)=[0.728097,1.08303,1.78675][0.0655224,0.0926,0.0794439][0.0708121,0.0815405,0.0591952][0.0908722,0.0858914,0.0444895] transportSamples=174 GPUms(trace/filter/temporal/BLAS/TLAS)=0.156672/0.06992/0.0624/9.6e-05/6.4e-05 CPUrecordMs=0.0908999 temporal=on history(accepted/rejected/clamped/dynamic)=27066/62247/9/0 historyResets=10 phase=26 historyBytes=9830400 historyAllocations=4; last completed frame; half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain",
+        "PBR prototype=stock-dielectric-v3 requested=on; enhanced=on; native + captured CPU-lit opaque geometry: data/skala_piskovec2.pac (matte rock), data/sloupek_bily_orezly_.pac (painted signposts), data/strecha_tasky_vln.pac + data/strecha_tasky_vln90.pac (roof tiles r=0.90), data/prkna_dark.pac (weathered wood r=0.85); inspected stone/mortar, concrete, plaster/brick and wood sections; enhanced-only tasky_p90 roof and budova2_stit2 plaster gable (captured ambient required for GI); F0=0.04, metallic=0; unsupported lighting/atlases legacy; no RT requirement; draws since toggle=31860; software=31860",
+        "active=taa requested=taa scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=0 fsrResets=0",
+        "RTShadows=on capability=available terrainPatches=6 foliageInstances=54 lastCompletedRays=414490 lastCompletedHits=50710 totalRays=11925929350 rayQueriesExecuted=yes lastWorldDispatch=yes lastTerrainHits=0 lastAlphaHits=0 lastGPUms(rays/compose)=0.334848/0.0496; shared RTAO=off capability=available BLAS=28 cachedBLAS=28 TLAS=2 instances=105 instancedTriangles=14352 completedPasses=9155 lastCompletedRays=0 lastCompletedHits=0 totalRays=0 rayQueriesExecuted=no lastWorldDispatch=no BLASbuilds=123 TLASbuilds=15 lastGPUms(BLAS/TLAS/rays/filter/frame)=9.6e-05/6.4e-05/0/0/2.34902; shared static LOD0 scene radius=160m; dynamic=off; AO radius=4m includes bounded terrain, excludes foliage cards; ambient-only composition; static collection excludes animation/damage; blended effects/proxies excluded; sunlight-only native opaque/cutout and terrain receivers, CSM fallback retained"
+      ],
+      "rawLocalCaptures": {
+        "v3": "build\\shadow-live\\world-survey-cain\\base-v3.png",
+        "enhanced-off": "build\\shadow-live\\world-survey-cain\\base-enhanced-off.png",
+        "gi-on": "build\\shadow-live\\world-survey-cain\\base-gi-on.png"
+      },
+      "unamplifiedScreenshot": "base-gi-on.png"
+    },
+    {
+      "id": "ruins",
+      "description": "Kolgujev northern ruined roadside village",
+      "run": "world-survey-cain",
+      "weather": "dusk",
+      "standingCameraXYZDirection": [
+        6195.0,
+        38.07,
+        7985.0,
+        -0.4,
+        0.02,
+        -1.0
+      ],
+      "eligibleReceiverSamples": 109207,
+      "receiverFamiliesNativeCPU": {
+        "catalog": [
+          0,
+          0
+        ],
+        "rock": [
+          0,
+          0
+        ],
+        "roof": [
+          0,
+          0
+        ],
+        "wood": [
+          0,
+          0
+        ],
+        "facade": [
+          0,
+          0
+        ],
+        "stone": [
+          0,
+          0
+        ],
+        "concrete": [
+          0,
+          0
+        ],
+        "terrain": [
+          109207,
+          0
+        ]
+      },
+      "qualifiedBuildingRoofFacadeSamples": 0,
+      "firstHits": {
+        "bounceRays": 109029,
+        "hits": 17644,
+        "eligibleHits": 14,
+        "rejectedMaterials": 17630
+      },
+      "PBRSubmissionsPerFrame": {
+        "all": 3.0,
+        "native": 3.0,
+        "capturedCPU": 0.0,
+        "intervalFrames": 85
+      },
+      "probeSummary": {
+        "uniqueGridPhasePaths": 242,
+        "eligible": 0,
+        "rejected": 42,
+        "rejectedAlphaTested": 36,
+        "eligibleIdentities": {},
+        "rejectedKindAvailable": [
+          [
+            0,
+            103,
+            36
+          ],
+          [
+            0,
+            39,
+            6
+          ]
+        ],
+        "eligibleExamples": [],
+        "rejectedExamples": [
+          [
+            6194.79,
+            36.2698,
+            7980.65,
+            16,
+            0,
+            1,
+            -0.000978472,
+            0,
+            0.922405,
+            0.372643,
+            -0.101522,
+            2,
+            6199.1,
+            38.0322,
+            7980.18,
+            0,
+            -0.782336,
+            0,
+            -0.622857,
+            0,
+            -0.782336,
+            4.75275e-08,
+            -0.622857,
+            4.67569,
+            0,
+            0,
+            0,
+            103,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            6194.5,
+            36.2699,
+            7974.33,
+            18,
+            0,
+            1,
+            -0.000978472,
+            0,
+            0.579757,
+            0.694185,
+            0.426601,
+            2,
+            6200.34,
+            43.2765,
+            7978.63,
+            0,
+            -0.782336,
+            0,
+            -0.622857,
+            0,
+            -0.782336,
+            4.75275e-08,
+            -0.622857,
+            10.0644,
+            0,
+            0,
+            0,
+            103,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            6195.97,
+            36.2698,
+            7978.31,
+            18,
+            0,
+            1,
+            -0.000978472,
+            0,
+            0.294142,
+            0.882406,
+            0.367206,
+            2,
+            6198.29,
+            43.2487,
+            7981.2,
+            0,
+            -0.782336,
+            0,
+            -0.622857,
+            0,
+            -0.782336,
+            4.75275e-08,
+            -0.622857,
+            7.88629,
+            0,
+            0,
+            0,
+            103,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "status": [
+        "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=0 reflectorInstances=10 completedDispatches=8521 bounceRays=109029 hits=17644 eligibleHits=14 rejectedMaterials=17630 sunRays=7 sunBlocked=0 eligibleReceivers=109207 dynamicHits=0 sunVisible=7 terrain(eligible/sunlit)=3/0 stockPBR(eligible/sunlit)=11/7 catalog(eligible/sunlit)=0/0 backfacing=7 missingColor=17629 secondarySky(rays/blocked/visible/rejectedHemisphere)=9/1/8/5 primarySky(rays/blocked/visible/belowHorizon)=91385/1029/90356/0 secondBounce(rays/hits/eligible/rejected/sunRays/sunBlocked/skyRays/skyBlocked)=0/0/0/0/0/0/0/0 receiverPixels(native/CPU)=catalog:0/0,rock:0/0,roof:0/0,wood:0/0,facade:0/0,stone:0/0,concrete:0/0,terrain:109207/0, skyEpi(dome/weather/vertical/reference)=[0.221114,0.342987,0.619988][0.333065,0.431196,0.669139][0.198635,0.246445,0.354878][0.176345,0.212659,0.399316] skyCalibration=0.64797 transportMean(incoming/replacement/capturedAmbient/reflectanceFog)=[0.199228,0.258643,0.417687][0.0164052,0.0195145,0.0151323][0.0149874,0.0166197,0.0150883][0.0816043,0.0749376,0.036221] transportSamples=220 GPUms(trace/filter/temporal/BLAS/TLAS)=0.287744/0.130688/0.115488/6.4e-05/9.6e-05 CPUrecordMs=0.1041 temporal=on history(accepted/rejected/clamped/dynamic)=89503/19704/1107/0 historyResets=14 phase=3 historyBytes=9830400 historyAllocations=6; last completed frame; half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain",
+        "PBR prototype=stock-dielectric-v3 requested=on; enhanced=on; native + captured CPU-lit opaque geometry: data/skala_piskovec2.pac (matte rock), data/sloupek_bily_orezly_.pac (painted signposts), data/strecha_tasky_vln.pac + data/strecha_tasky_vln90.pac (roof tiles r=0.90), data/prkna_dark.pac (weathered wood r=0.85); inspected stone/mortar, concrete, plaster/brick and wood sections; enhanced-only tasky_p90 roof and budova2_stit2 plaster gable (captured ambient required for GI); F0=0.04, metallic=0; unsupported lighting/atlases legacy; no RT requirement; draws since toggle=1875; software=0",
+        "active=taa requested=taa scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=0 fsrResets=0",
+        "RTShadows=on capability=available terrainPatches=4 foliageInstances=95 lastCompletedRays=560820 lastCompletedHits=47149 totalRays=12397029577 rayQueriesExecuted=yes lastWorldDispatch=yes lastTerrainHits=26 lastAlphaHits=10066 lastGPUms(rays/compose)=0.3584/0.083264; shared RTAO=off capability=available BLAS=35 cachedBLAS=35 TLAS=2 instances=134 instancedTriangles=12967 completedPasses=10000 lastCompletedRays=0 lastCompletedHits=0 totalRays=0 rayQueriesExecuted=no lastWorldDispatch=no BLASbuilds=158 TLASbuilds=21 lastGPUms(BLAS/TLAS/rays/filter/frame)=6.4e-05/9.6e-05/0/0/5.548; shared static LOD0 scene radius=160m; dynamic=off; AO radius=4m includes bounded terrain, excludes foliage cards; ambient-only composition; static collection excludes animation/damage; blended effects/proxies excluded; sunlight-only native opaque/cutout and terrain receivers, CSM fallback retained"
+      ],
+      "rawLocalCaptures": {
+        "v3": "build\\shadow-live\\world-survey-cain\\ruins-v3.png",
+        "enhanced-off": "build\\shadow-live\\world-survey-cain\\ruins-enhanced-off.png",
+        "gi-on": "build\\shadow-live\\world-survey-cain\\ruins-gi-on.png"
+      }
+    },
+    {
+      "id": "forest",
+      "description": "Kolgujev conifer hillside",
+      "run": "world-survey-cain",
+      "weather": "overcast",
+      "standingCameraXYZDirection": [
+        6500.0,
+        103.185,
+        8200.0,
+        1.0,
+        -0.1,
+        0.3
+      ],
+      "eligibleReceiverSamples": 372243,
+      "receiverFamiliesNativeCPU": {
+        "catalog": [
+          0,
+          0
+        ],
+        "rock": [
+          0,
+          0
+        ],
+        "roof": [
+          0,
+          0
+        ],
+        "wood": [
+          0,
+          0
+        ],
+        "facade": [
+          0,
+          0
+        ],
+        "stone": [
+          0,
+          0
+        ],
+        "concrete": [
+          0,
+          0
+        ],
+        "terrain": [
+          372243,
+          0
+        ]
+      },
+      "qualifiedBuildingRoofFacadeSamples": 0,
+      "firstHits": {
+        "bounceRays": 367116,
+        "hits": 2771,
+        "eligibleHits": 2,
+        "rejectedMaterials": 2769
+      },
+      "PBRSubmissionsPerFrame": {
+        "all": 9.0,
+        "native": 9.0,
+        "capturedCPU": 0.0,
+        "intervalFrames": 96
+      },
+      "probeSummary": {
+        "uniqueGridPhasePaths": 966,
+        "eligible": 0,
+        "rejected": 9,
+        "rejectedAlphaTested": 3,
+        "eligibleIdentities": {},
+        "rejectedKindAvailable": [
+          [
+            2,
+            31,
+            6
+          ],
+          [
+            1,
+            71,
+            3
+          ]
+        ],
+        "eligibleExamples": [],
+        "rejectedExamples": [
+          [
+            6511.39,
+            104.258,
+            8199.52,
+            32,
+            -0.42153,
+            0.865887,
+            0.269353,
+            0,
+            -0.724049,
+            -0.198278,
+            0.660635,
+            2,
+            6507.62,
+            103.246,
+            8202.95,
+            2,
+            -0.237741,
+            0.971327,
+            0.00150347,
+            0,
+            -0.237741,
+            0.971327,
+            0.00150347,
+            5.19937,
+            0.0685126,
+            0.0704347,
+            0.0424312,
+            31,
+            0.0685126,
+            0.0704347,
+            0.0424312,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            6531.08,
+            106.516,
+            8213.29,
+            12,
+            -0.410149,
+            0.881447,
+            0.234158,
+            0,
+            0.769031,
+            0.498266,
+            0.400402,
+            2,
+            6540.23,
+            112.464,
+            8218.06,
+            1,
+            -0.632089,
+            0.110416,
+            -0.766989,
+            0,
+            -0.632089,
+            0.110416,
+            -0.766989,
+            11.8983,
+            0,
+            0,
+            0,
+            71,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            6504.17,
+            102.585,
+            8198.97,
+            12,
+            -0.415421,
+            0.895526,
+            0.159556,
+            0,
+            -0.258532,
+            -0.0843295,
+            0.962315,
+            2,
+            6501.54,
+            101.747,
+            8208.75,
+            2,
+            -0.237741,
+            0.971327,
+            0.00150347,
+            0,
+            -0.237741,
+            0.971327,
+            0.00150347,
+            10.1584,
+            0.0681296,
+            0.0561021,
+            0.0343842,
+            31,
+            0.0681296,
+            0.0561021,
+            0.0343842,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "status": [
+        "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=0 reflectorInstances=6 completedDispatches=9007 bounceRays=367116 hits=2771 eligibleHits=2 rejectedMaterials=2769 sunRays=2 sunBlocked=0 eligibleReceivers=372243 dynamicHits=0 sunVisible=2 terrain(eligible/sunlit)=2/2 stockPBR(eligible/sunlit)=0/0 catalog(eligible/sunlit)=0/0 backfacing=0 missingColor=1116 secondarySky(rays/blocked/visible/rejectedHemisphere)=1/0/1/1 primarySky(rays/blocked/visible/belowHorizon)=351456/1547/349909/12889 secondBounce(rays/hits/eligible/rejected/sunRays/sunBlocked/skyRays/skyBlocked)=0/0/0/0/0/0/0/0 receiverPixels(native/CPU)=catalog:0/0,rock:0/0,roof:0/0,wood:0/0,facade:0/0,stone:0/0,concrete:0/0,terrain:372243/0, skyEpi(dome/weather/vertical/reference)=[0.429139,0.420054,0.340269][0.499277,0.522877,0.558514][0.27296,0.283444,0.293755][0.748414,0.911408,1.28] skyCalibration=2.17038 transportMean(incoming/replacement/capturedAmbient/reflectanceFog)=[1.03194,1.07996,1.1511][0.0937174,0.0794894,0.0524838][0.0708928,0.0698029,0.0605547][0.0909484,0.0735868,0.0454529] transportSamples=735 GPUms(trace/filter/temporal/BLAS/TLAS)=0.433152/0.358848/0.218432/9.6e-05/6.4e-05 CPUrecordMs=0.0986 temporal=on history(accepted/rejected/clamped/dynamic)=348325/23918/1628/0 historyResets=18 phase=27 historyBytes=9830400 historyAllocations=8; last completed frame; half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain",
+        "PBR prototype=stock-dielectric-v3 requested=on; enhanced=on; native + captured CPU-lit opaque geometry: data/skala_piskovec2.pac (matte rock), data/sloupek_bily_orezly_.pac (painted signposts), data/strecha_tasky_vln.pac + data/strecha_tasky_vln90.pac (roof tiles r=0.90), data/prkna_dark.pac (weathered wood r=0.85); inspected stone/mortar, concrete, plaster/brick and wood sections; enhanced-only tasky_p90 roof and budova2_stit2 plaster gable (captured ambient required for GI); F0=0.04, metallic=0; unsupported lighting/atlases legacy; no RT requirement; draws since toggle=6408; software=0",
+        "active=taa requested=taa scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=0 fsrResets=0",
+        "RTShadows=on capability=available terrainPatches=6 foliageInstances=127 lastCompletedRays=1706102 lastCompletedHits=118772 totalRays=14007049016 rayQueriesExecuted=yes lastWorldDispatch=yes lastTerrainHits=0 lastAlphaHits=118772 lastGPUms(rays/compose)=0.658432/0.096832; shared RTAO=off capability=available BLAS=14 cachedBLAS=14 TLAS=2 instances=151 instancedTriangles=34028 completedPasses=10951 lastCompletedRays=0 lastCompletedHits=0 totalRays=0 rayQueriesExecuted=no lastWorldDispatch=no BLASbuilds=179 TLASbuilds=27 lastGPUms(BLAS/TLAS/rays/filter/frame)=9.6e-05/6.4e-05/0/0/4.99338; shared static LOD0 scene radius=160m; dynamic=off; AO radius=4m includes bounded terrain, excludes foliage cards; ambient-only composition; static collection excludes animation/damage; blended effects/proxies excluded; sunlight-only native opaque/cutout and terrain receivers, CSM fallback retained"
+      ],
+      "rawLocalCaptures": {
+        "v3": "build\\shadow-live\\world-survey-cain\\forest-v3.png",
+        "enhanced-off": "build\\shadow-live\\world-survey-cain\\forest-enhanced-off.png",
+        "gi-on": "build\\shadow-live\\world-survey-cain\\forest-gi-on.png"
+      }
+    },
+    {
+      "id": "leport",
+      "description": "Malden Le Port residential street",
+      "run": "world-survey-abel",
+      "weather": "morning",
+      "standingCameraXYZDirection": [
+        8171.0,
+        24.948,
+        3170.0,
+        -0.3,
+        0.02,
+        -1.0
+      ],
+      "eligibleReceiverSamples": 174815,
+      "receiverFamiliesNativeCPU": {
+        "catalog": [
+          0,
+          49997
+        ],
+        "rock": [
+          0,
+          0
+        ],
+        "roof": [
+          2600,
+          0
+        ],
+        "wood": [
+          0,
+          0
+        ],
+        "facade": [
+          0,
+          0
+        ],
+        "stone": [
+          0,
+          0
+        ],
+        "concrete": [
+          0,
+          0
+        ],
+        "terrain": [
+          122218,
+          0
+        ]
+      },
+      "qualifiedBuildingRoofFacadeSamples": 2600,
+      "firstHits": {
+        "bounceRays": 173949,
+        "hits": 41503,
+        "eligibleHits": 32211,
+        "rejectedMaterials": 9292
+      },
+      "PBRSubmissionsPerFrame": {
+        "all": 14.0,
+        "native": 2.0,
+        "capturedCPU": 12.0,
+        "intervalFrames": 214
+      },
+      "probeSummary": {
+        "uniqueGridPhasePaths": 425,
+        "eligible": 75,
+        "rejected": 34,
+        "rejectedAlphaTested": 6,
+        "eligibleIdentities": {
+          "1000": 68,
+          "1": 7
+        },
+        "rejectedKindAvailable": [
+          [
+            0,
+            39,
+            28
+          ],
+          [
+            1,
+            71,
+            6
+          ]
+        ],
+        "eligibleExamples": [
+          [
+            8165.37,
+            24.2947,
+            3157.01,
+            20,
+            0.507781,
+            0.00133979,
+            0.861485,
+            9,
+            -0.0591388,
+            -0.38363,
+            0.921591,
+            3,
+            8165.07,
+            22.3248,
+            3161.76,
+            2,
+            0,
+            0.981734,
+            -0.19026,
+            1000,
+            0,
+            0.995047,
+            -0.0994053,
+            5.13481,
+            0.124772,
+            0.130137,
+            0.0544803,
+            63,
+            0.129018,
+            0.134565,
+            0.0563343,
+            0.75619,
+            0.986513,
+            0.870453,
+            0.255784,
+            0.992095,
+            0.127278,
+            0.117133,
+            0.0144094,
+            0.65381,
+            0.12973,
+            0.173592,
+            0.109889,
+            0.747442,
+            0.257008,
+            0.290725,
+            0.124299,
+            -0.11774
+          ],
+          [
+            8162.67,
+            24.3274,
+            3158.56,
+            20,
+            0.507781,
+            0.00133979,
+            0.861485,
+            9,
+            0.402474,
+            -0.170514,
+            0.899411,
+            3,
+            8166.26,
+            22.8074,
+            3166.59,
+            2,
+            0,
+            0.982676,
+            -0.185332,
+            1000,
+            0,
+            0.995047,
+            -0.0994051,
+            8.91416,
+            0.124772,
+            0.109462,
+            0.0544803,
+            63,
+            0.12196,
+            0.106995,
+            0.0532524,
+            0.756314,
+            0.98697,
+            0.870855,
+            0.255903,
+            0.992391,
+            0.120371,
+            0.0931769,
+            0.0136274,
+            0.65381,
+            0.0828989,
+            0.127502,
+            0.105938,
+            0.747442,
+            0.203269,
+            0.220679,
+            0.119565,
+            -0.11774
+          ],
+          [
+            8165.35,
+            22.4372,
+            3156.97,
+            20,
+            0.507781,
+            0.00133979,
+            0.861485,
+            9,
+            0.423588,
+            0.00978002,
+            0.905802,
+            3,
+            8168.46,
+            22.5086,
+            3163.6,
+            2,
+            0,
+            0.981182,
+            -0.193083,
+            1000,
+            0,
+            0.995047,
+            -0.0994051,
+            7.29614,
+            0.124772,
+            0.141263,
+            0.0843762,
+            63,
+            0.131579,
+            0.14897,
+            0.0889794,
+            0.75611,
+            0.986566,
+            0.870499,
+            0.255798,
+            0.992252,
+            0.129811,
+            0.129678,
+            0.0227607,
+            0.65381,
+            0.118134,
+            0.191287,
+            0.178828,
+            0.747442,
+            0.247945,
+            0.320965,
+            0.201589,
+            -0.11774
+          ]
+        ],
+        "rejectedExamples": [
+          [
+            8141.31,
+            30.9377,
+            3150.06,
+            20,
+            0.317174,
+            0.751878,
+            0.577996,
+            3,
+            0.339482,
+            0.0409975,
+            0.939718,
+            2,
+            8141.43,
+            30.9654,
+            3150.36,
+            0,
+            0.47387,
+            0.841532,
+            -0.259367,
+            0,
+            0.47387,
+            0.841532,
+            -0.259367,
+            0.306977,
+            0,
+            0,
+            0,
+            39,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            8176.71,
+            21.1502,
+            3146.02,
+            20,
+            0,
+            0.997706,
+            -0.067694,
+            0,
+            0.328627,
+            0.943704,
+            -0.0377777,
+            2,
+            8177.32,
+            22.9198,
+            3145.95,
+            0,
+            -0.852494,
+            -0.0015025,
+            0.522734,
+            0,
+            -0.852525,
+            1.78203e-08,
+            0.522687,
+            1.85398,
+            0,
+            0,
+            0,
+            39,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            8171.23,
+            22.575,
+            3164.27,
+            20,
+            0,
+            0.981496,
+            -0.191483,
+            0,
+            0.641837,
+            0.0893238,
+            -0.761621,
+            2,
+            8181.25,
+            23.9894,
+            3152.37,
+            0,
+            -0.852515,
+            -0.00290715,
+            0.522695,
+            0,
+            -0.852521,
+            -0.00283914,
+            0.522685,
+            15.6109,
+            0,
+            0,
+            0,
+            39,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "status": [
+        "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=18 reflectorInstances=30 completedDispatches=14689 bounceRays=173949 hits=41503 eligibleHits=32211 rejectedMaterials=9292 sunRays=31781 sunBlocked=374 eligibleReceivers=174815 dynamicHits=0 sunVisible=31407 terrain(eligible/sunlit)=25468/25187 stockPBR(eligible/sunlit)=67/12 catalog(eligible/sunlit)=6676/6208 backfacing=430 missingColor=9282 secondarySky(rays/blocked/visible/rejectedHemisphere)=28491/8015/20476/3720 primarySky(rays/blocked/visible/belowHorizon)=131786/2504/129282/660 secondBounce(rays/hits/eligible/rejected/sunRays/sunBlocked/skyRays/skyBlocked)=0/0/0/0/0/0/0/0 receiverPixels(native/CPU)=catalog:0/49997,rock:0/0,roof:2600/0,wood:0/0,facade:0/0,stone:0/0,concrete:0/0,terrain:122218/0, skyEpi(dome/weather/vertical/reference)=[0.268212,0.461311,0.858996][0.37333,0.552491,0.917013][0.236852,0.323412,0.489016][0.748414,0.911408,1.28] skyCalibration=2.01209 transportMean(incoming/replacement/capturedAmbient/reflectanceFog)=[0.620178,0.903925,1.47132][0.0533658,0.079202,0.0764661][0.0673636,0.0827812,0.073297][0.087475,0.0881839,0.0559424] transportSamples=343 GPUms(trace/filter/temporal/BLAS/TLAS)=0.27136/0.095168/0.078656/6.4e-05/6.4e-05 CPUrecordMs=0.0958999 temporal=on history(accepted/rejected/clamped/dynamic)=167031/7784/717/0 historyResets=7 phase=14 historyBytes=9830400 historyAllocations=4; last completed frame; half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain",
+        "PBR prototype=stock-dielectric-v3 requested=on; enhanced=on; native + captured CPU-lit opaque geometry: data/skala_piskovec2.pac (matte rock), data/sloupek_bily_orezly_.pac (painted signposts), data/strecha_tasky_vln.pac + data/strecha_tasky_vln90.pac (roof tiles r=0.90), data/prkna_dark.pac (weathered wood r=0.85); inspected stone/mortar, concrete, plaster/brick and wood sections; enhanced-only tasky_p90 roof and budova2_stit2 plaster gable (captured ambient required for GI); F0=0.04, metallic=0; unsupported lighting/atlases legacy; no RT requirement; draws since toggle=21630; software=18540",
+        "active=taa requested=taa scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=0 fsrResets=0",
+        "RTShadows=on capability=available terrainPatches=4 foliageInstances=153 lastCompletedRays=848058 lastCompletedHits=63546 totalRays=8954633592 rayQueriesExecuted=yes lastWorldDispatch=yes lastTerrainHits=0 lastAlphaHits=11523 lastGPUms(rays/compose)=0.338944/0.043168; shared RTAO=off capability=available BLAS=73 cachedBLAS=73 TLAS=2 instances=288 instancedTriangles=25333 completedPasses=15762 lastCompletedRays=0 lastCompletedHits=0 totalRays=0 rayQueriesExecuted=no lastWorldDispatch=no BLASbuilds=279 TLASbuilds=15 lastGPUms(BLAS/TLAS/rays/filter/frame)=6.4e-05/6.4e-05/0/0/2.54886; shared static LOD0 scene radius=160m; dynamic=off; AO radius=4m includes bounded terrain, excludes foliage cards; ambient-only composition; static collection excludes animation/damage; blended effects/proxies excluded; sunlight-only native opaque/cutout and terrain receivers, CSM fallback retained"
+      ],
+      "rawLocalCaptures": {
+        "v3": "build\\shadow-live\\world-survey-abel\\leport-v3.png",
+        "enhanced-off": "build\\shadow-live\\world-survey-abel\\leport-enhanced-off.png",
+        "gi-on": "build\\shadow-live\\world-survey-abel\\leport-gi-on.png"
+      },
+      "unamplifiedScreenshot": "leport-gi-on.png"
+    },
+    {
+      "id": "rocks",
+      "description": "Malden southwest rocky coast",
+      "run": "world-survey-abel",
+      "weather": "morning",
+      "standingCameraXYZDirection": [
+        2030.0,
+        30.8097,
+        1535.0,
+        0.8,
+        -0.02,
+        -0.4
+      ],
+      "eligibleReceiverSamples": 181749,
+      "receiverFamiliesNativeCPU": {
+        "catalog": [
+          0,
+          0
+        ],
+        "rock": [
+          149291,
+          0
+        ],
+        "roof": [
+          0,
+          0
+        ],
+        "wood": [
+          0,
+          0
+        ],
+        "facade": [
+          0,
+          0
+        ],
+        "stone": [
+          0,
+          0
+        ],
+        "concrete": [
+          0,
+          0
+        ],
+        "terrain": [
+          32458,
+          0
+        ]
+      },
+      "qualifiedBuildingRoofFacadeSamples": 0,
+      "firstHits": {
+        "bounceRays": 166656,
+        "hits": 53410,
+        "eligibleHits": 44944,
+        "rejectedMaterials": 8466
+      },
+      "PBRSubmissionsPerFrame": {
+        "all": 4.0,
+        "native": 4.0,
+        "capturedCPU": 0.0,
+        "intervalFrames": 246
+      },
+      "probeSummary": {
+        "uniqueGridPhasePaths": 456,
+        "eligible": 110,
+        "rejected": 12,
+        "rejectedAlphaTested": 8,
+        "eligibleIdentities": {
+          "1000": 102,
+          "64": 8
+        },
+        "rejectedKindAvailable": [
+          [
+            0,
+            31,
+            4
+          ],
+          [
+            1,
+            71,
+            4
+          ],
+          [
+            1,
+            103,
+            4
+          ]
+        ],
+        "eligibleExamples": [
+          [
+            2036.28,
+            28.9238,
+            1528.49,
+            12,
+            0.493552,
+            0.72288,
+            0.483582,
+            2,
+            0.72652,
+            -0.24708,
+            0.641187,
+            3,
+            2052.59,
+            23.3918,
+            1542.9,
+            2,
+            0.464521,
+            0.835294,
+            -0.294116,
+            1000,
+            0.312789,
+            0.938152,
+            -0.148438,
+            22.4513,
+            0.0558409,
+            0.041124,
+            0.0155255,
+            63,
+            0.0365779,
+            0.0269378,
+            0.0101698,
+            0.962672,
+            1.21224,
+            1.06962,
+            0.314311,
+            0.957617,
+            0.0443413,
+            0.0288133,
+            0.00319649,
+            0.65381,
+            0.0275973,
+            0.0290357,
+            0.0157733,
+            0.747442,
+            0.0719385,
+            0.057849,
+            0.0189698,
+            -0.11774
+          ],
+          [
+            2032.09,
+            29.9298,
+            1530.3,
+            12,
+            -0.739124,
+            0.467946,
+            0.484482,
+            2,
+            -0.821098,
+            -0.2202,
+            -0.526602,
+            3,
+            2026.03,
+            28.3188,
+            1526.42,
+            2,
+            0.518248,
+            0.770521,
+            -0.371102,
+            1000,
+            0.302293,
+            0.923393,
+            -0.236567,
+            7.36719,
+            0.119765,
+            0.111656,
+            0.0436345,
+            63,
+            0.115639,
+            0.10781,
+            0.0421315,
+            0.958449,
+            1.20672,
+            1.06475,
+            0.31288,
+            0.957457,
+            0.139544,
+            0.114792,
+            0.0131821,
+            0.65381,
+            0.082112,
+            0.111873,
+            0.0879447,
+            0.747442,
+            0.221656,
+            0.226664,
+            0.101127,
+            -0.11774
+          ],
+          [
+            2038.57,
+            27.2092,
+            1529.35,
+            12,
+            0.858056,
+            0.0924936,
+            0.505158,
+            2,
+            0.566182,
+            -0.106266,
+            0.817402,
+            3,
+            2052.73,
+            24.5581,
+            1549.8,
+            2,
+            0.487284,
+            0.80823,
+            -0.330634,
+            1000,
+            0.268999,
+            0.943249,
+            -0.194734,
+            24.9918,
+            0.265381,
+            0.222659,
+            0.127987,
+            63,
+            0.212455,
+            0.178253,
+            0.102462,
+            0.961625,
+            1.2109,
+            1.06844,
+            0.313963,
+            0.957597,
+            0.257261,
+            0.190452,
+            0.0321692,
+            0.65381,
+            0.178459,
+            0.240097,
+            0.224561,
+            0.747442,
+            0.43572,
+            0.43055,
+            0.25673,
+            -0.11774
+          ]
+        ],
+        "rejectedExamples": [
+          [
+            2038.61,
+            27.1974,
+            1529.33,
+            21,
+            0.861936,
+            0.0863352,
+            0.499612,
+            2,
+            0.875445,
+            0.136224,
+            -0.463723,
+            2,
+            2046.89,
+            28.4879,
+            1524.97,
+            0,
+            -0.618903,
+            0.555548,
+            0.555271,
+            0,
+            -0.618903,
+            0.555548,
+            0.555271,
+            9.43981,
+            0.401978,
+            0.341914,
+            0.346704,
+            31,
+            0.401978,
+            0.341914,
+            0.346704,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            2032.07,
+            29.4203,
+            1530.34,
+            20,
+            -0.786037,
+            0.369615,
+            0.49551,
+            2,
+            -0.621012,
+            0.469428,
+            0.62768,
+            2,
+            2027,
+            33.2374,
+            1535.46,
+            1,
+            0.608038,
+            -0.168514,
+            -0.775817,
+            0,
+            0.608038,
+            -0.168514,
+            -0.775817,
+            8.13945,
+            0,
+            0,
+            0,
+            71,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            2032.65,
+            30.4414,
+            1530.94,
+            31,
+            -0.688277,
+            0.409649,
+            0.598718,
+            2,
+            -0.750004,
+            0.325105,
+            0.576021,
+            2,
+            2026.98,
+            32.8951,
+            1535.3,
+            1,
+            0.0574825,
+            0.727326,
+            -0.68388,
+            0,
+            -0.232929,
+            0.0354529,
+            -0.971847,
+            7.54242,
+            0,
+            0,
+            0,
+            103,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "status": [
+        "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=0 reflectorInstances=11 completedDispatches=15911 bounceRays=166656 hits=53410 eligibleHits=44944 rejectedMaterials=8466 sunRays=39966 sunBlocked=4707 eligibleReceivers=181749 dynamicHits=0 sunVisible=35259 terrain(eligible/sunlit)=36407/31614 stockPBR(eligible/sunlit)=8537/3645 catalog(eligible/sunlit)=0/0 backfacing=4978 missingColor=5107 secondarySky(rays/blocked/visible/rejectedHemisphere)=37297/7109/30188/7647 primarySky(rays/blocked/visible/belowHorizon)=111552/3108/108444/1694 secondBounce(rays/hits/eligible/rejected/sunRays/sunBlocked/skyRays/skyBlocked)=0/0/0/0/0/0/0/0 receiverPixels(native/CPU)=catalog:0/0,rock:149291/0,roof:0/0,wood:0/0,facade:0/0,stone:0/0,concrete:0/0,terrain:32458/0, skyEpi(dome/weather/vertical/reference)=[0.268212,0.461311,0.858996][0.420121,0.593468,0.943798][0.250478,0.328531,0.487145][0.748414,0.911408,1.28] skyCalibration=2.01209 transportMean(incoming/replacement/capturedAmbient/reflectanceFog)=[0.60513,0.798126,1.17442][0.14631,0.160605,0.197185][0.190582,0.195398,0.235846][0.253783,0.213626,0.183992] transportSamples=354 GPUms(trace/filter/temporal/BLAS/TLAS)=0.299008/0.090528/0.077696/6.4e-05/6.4e-05 CPUrecordMs=0.0843 temporal=on history(accepted/rejected/clamped/dynamic)=151034/30715/824/0 historyResets=10 phase=18 historyBytes=9830400 historyAllocations=6; last completed frame; half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain",
+        "PBR prototype=stock-dielectric-v3 requested=on; enhanced=on; native + captured CPU-lit opaque geometry: data/skala_piskovec2.pac (matte rock), data/sloupek_bily_orezly_.pac (painted signposts), data/strecha_tasky_vln.pac + data/strecha_tasky_vln90.pac (roof tiles r=0.90), data/prkna_dark.pac (weathered wood r=0.85); inspected stone/mortar, concrete, plaster/brick and wood sections; enhanced-only tasky_p90 roof and budova2_stit2 plaster gable (captured ambient required for GI); F0=0.04, metallic=0; unsupported lighting/atlases legacy; no RT requirement; draws since toggle=7092; software=0",
+        "active=taa requested=taa scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=0 fsrResets=0",
+        "RTShadows=on capability=available terrainPatches=6 foliageInstances=33 lastCompletedRays=509502 lastCompletedHits=129699 totalRays=10162132115 rayQueriesExecuted=yes lastWorldDispatch=yes lastTerrainHits=0 lastAlphaHits=30556 lastGPUms(rays/compose)=0.34304/0.040512; shared RTAO=off capability=available BLAS=8 cachedBLAS=8 TLAS=2 instances=44 instancedTriangles=4630 completedPasses=18120 lastCompletedRays=0 lastCompletedHits=0 totalRays=0 rayQueriesExecuted=no lastWorldDispatch=no BLASbuilds=301 TLASbuilds=21 lastGPUms(BLAS/TLAS/rays/filter/frame)=6.4e-05/6.4e-05/0/0/2.26346; shared static LOD0 scene radius=160m; dynamic=off; AO radius=4m includes bounded terrain, excludes foliage cards; ambient-only composition; static collection excludes animation/damage; blended effects/proxies excluded; sunlight-only native opaque/cutout and terrain receivers, CSM fallback retained"
+      ],
+      "rawLocalCaptures": {
+        "v3": "build\\shadow-live\\world-survey-abel\\rocks-v3.png",
+        "enhanced-off": "build\\shadow-live\\world-survey-abel\\rocks-enhanced-off.png",
+        "gi-on": "build\\shadow-live\\world-survey-abel\\rocks-gi-on.png"
+      },
+      "unamplifiedScreenshot": "rocks-gi-on.png"
+    },
+    {
+      "id": "stpierre",
+      "description": "Everon Saint Pierre town edge",
+      "run": "world-survey-eden",
+      "weather": "morning",
+      "standingCameraXYZDirection": [
+        9715.0,
+        15.21,
+        1590.0,
+        0.2,
+        0.02,
+        -1.0
+      ],
+      "eligibleReceiverSamples": 41581,
+      "receiverFamiliesNativeCPU": {
+        "catalog": [
+          0,
+          0
+        ],
+        "rock": [
+          0,
+          0
+        ],
+        "roof": [
+          7661,
+          0
+        ],
+        "wood": [
+          0,
+          0
+        ],
+        "facade": [
+          0,
+          0
+        ],
+        "stone": [
+          0,
+          0
+        ],
+        "concrete": [
+          0,
+          0
+        ],
+        "terrain": [
+          33920,
+          0
+        ]
+      },
+      "qualifiedBuildingRoofFacadeSamples": 7661,
+      "firstHits": {
+        "bounceRays": 41560,
+        "hits": 10495,
+        "eligibleHits": 235,
+        "rejectedMaterials": 10260
+      },
+      "PBRSubmissionsPerFrame": {
+        "all": 2.0,
+        "native": 2.0,
+        "capturedCPU": 0.0,
+        "intervalFrames": 143
+      },
+      "probeSummary": {
+        "uniqueGridPhasePaths": 68,
+        "eligible": 0,
+        "rejected": 11,
+        "rejectedAlphaTested": 0,
+        "eligibleIdentities": {},
+        "rejectedKindAvailable": [
+          [
+            0,
+            39,
+            11
+          ]
+        ],
+        "eligibleExamples": [],
+        "rejectedExamples": [
+          [
+            9710.68,
+            13.1628,
+            1577.39,
+            17,
+            -0.0378389,
+            0.998527,
+            -0.03889,
+            0,
+            -0.325309,
+            0.701227,
+            0.634393,
+            2,
+            9710.51,
+            13.5356,
+            1577.71,
+            0,
+            0.961803,
+            -0.00054843,
+            -0.273742,
+            0,
+            0.96967,
+            0,
+            -0.244419,
+            0.50314,
+            0,
+            0,
+            0,
+            39,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            9713.37,
+            13.2391,
+            1578.38,
+            19,
+            -0.0333646,
+            0.998851,
+            -0.0344071,
+            0,
+            -0.558181,
+            0.272963,
+            -0.783533,
+            2,
+            9708.86,
+            15.4641,
+            1572.05,
+            0,
+            0.25708,
+            0,
+            0.96639,
+            0,
+            0.257081,
+            0,
+            0.96639,
+            8.07794,
+            0,
+            0,
+            0,
+            39,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            9710.69,
+            13.1634,
+            1577.41,
+            19,
+            -0.0378389,
+            0.998527,
+            -0.03889,
+            0,
+            -0.130731,
+            0.98843,
+            0.0769163,
+            2,
+            9710.47,
+            14.7986,
+            1577.53,
+            0,
+            0.964784,
+            -0.00745151,
+            -0.262939,
+            0,
+            0.966561,
+            -0.0117019,
+            -0.25617,
+            1.63408,
+            0,
+            0,
+            0,
+            39,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "status": [
+        "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=7 reflectorInstances=35 completedDispatches=14857 bounceRays=41560 hits=10495 eligibleHits=235 rejectedMaterials=10260 sunRays=229 sunBlocked=7 eligibleReceivers=41581 dynamicHits=0 sunVisible=222 terrain(eligible/sunlit)=81/81 stockPBR(eligible/sunlit)=154/141 catalog(eligible/sunlit)=0/0 backfacing=6 missingColor=10258 secondarySky(rays/blocked/visible/rejectedHemisphere)=207/30/177/28 primarySky(rays/blocked/visible/belowHorizon)=30387/683/29704/678 secondBounce(rays/hits/eligible/rejected/sunRays/sunBlocked/skyRays/skyBlocked)=0/0/0/0/0/0/0/0 receiverPixels(native/CPU)=catalog:0/0,rock:0/0,roof:7661/0,wood:0/0,facade:0/0,stone:0/0,concrete:0/0,terrain:33920/0, skyEpi(dome/weather/vertical/reference)=[0.268212,0.461311,0.858996][0.414892,0.589752,0.944951][0.216322,0.298812,0.467214][0.748414,0.911408,1.28] skyCalibration=2.01209 transportMean(incoming/replacement/capturedAmbient/reflectanceFog)=[0.717446,0.995492,1.55758][0.0328684,0.0519239,0.0382327][0.035875,0.0488112,0.0330886][0.0465328,0.0518412,0.0251554] transportSamples=82 GPUms(trace/filter/temporal/BLAS/TLAS)=0.188416/0.082688/0.064032/9.6e-05/6.4e-05 CPUrecordMs=0.0973001 temporal=on history(accepted/rejected/clamped/dynamic)=16305/25276/434/0 historyResets=10 phase=19 historyBytes=9830400 historyAllocations=4; last completed frame; half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain",
+        "PBR prototype=stock-dielectric-v3 requested=on; enhanced=on; native + captured CPU-lit opaque geometry: data/skala_piskovec2.pac (matte rock), data/sloupek_bily_orezly_.pac (painted signposts), data/strecha_tasky_vln.pac + data/strecha_tasky_vln90.pac (roof tiles r=0.90), data/prkna_dark.pac (weathered wood r=0.85); inspected stone/mortar, concrete, plaster/brick and wood sections; enhanced-only tasky_p90 roof and budova2_stit2 plaster gable (captured ambient required for GI); F0=0.04, metallic=0; unsupported lighting/atlases legacy; no RT requirement; draws since toggle=2088; software=0",
+        "active=taa requested=taa scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=0 fsrResets=0",
+        "RTShadows=on capability=available terrainPatches=6 foliageInstances=85 lastCompletedRays=220774 lastCompletedHits=54866 totalRays=27069485065 rayQueriesExecuted=yes lastWorldDispatch=yes lastTerrainHits=0 lastAlphaHits=40704 lastGPUms(rays/compose)=0.350208/0.069472; shared RTAO=off capability=available BLAS=55 cachedBLAS=55 TLAS=2 instances=152 instancedTriangles=15788 completedPasses=15564 lastCompletedRays=0 lastCompletedHits=0 totalRays=0 rayQueriesExecuted=no lastWorldDispatch=no BLASbuilds=245 TLASbuilds=17 lastGPUms(BLAS/TLAS/rays/filter/frame)=9.6e-05/6.4e-05/0/0/3.49024; shared static LOD0 scene radius=160m; dynamic=off; AO radius=4m includes bounded terrain, excludes foliage cards; ambient-only composition; static collection excludes animation/damage; blended effects/proxies excluded; sunlight-only native opaque/cutout and terrain receivers, CSM fallback retained"
+      ],
+      "rawLocalCaptures": {
+        "v3": "build\\shadow-live\\world-survey-eden\\stpierre-v3.png",
+        "enhanced-off": "build\\shadow-live\\world-survey-eden\\stpierre-enhanced-off.png",
+        "gi-on": "build\\shadow-live\\world-survey-eden\\stpierre-gi-on.png"
+      }
+    },
+    {
+      "id": "farm",
+      "description": "Everon east-central agricultural compound",
+      "run": "world-survey-eden",
+      "weather": "morning",
+      "standingCameraXYZDirection": [
+        7518.0,
+        120.12899999999999,
+        4658.0,
+        0.15,
+        0.02,
+        1.0
+      ],
+      "eligibleReceiverSamples": 346289,
+      "receiverFamiliesNativeCPU": {
+        "catalog": [
+          0,
+          0
+        ],
+        "rock": [
+          0,
+          0
+        ],
+        "roof": [
+          58443,
+          0
+        ],
+        "wood": [
+          1196,
+          0
+        ],
+        "facade": [
+          70438,
+          0
+        ],
+        "stone": [
+          0,
+          0
+        ],
+        "concrete": [
+          0,
+          0
+        ],
+        "terrain": [
+          216212,
+          0
+        ]
+      },
+      "qualifiedBuildingRoofFacadeSamples": 128881,
+      "firstHits": {
+        "bounceRays": 345478,
+        "hits": 43364,
+        "eligibleHits": 40725,
+        "rejectedMaterials": 2639
+      },
+      "PBRSubmissionsPerFrame": {
+        "all": 22.0,
+        "native": 22.0,
+        "capturedCPU": 0.0,
+        "intervalFrames": 183
+      },
+      "probeSummary": {
+        "uniqueGridPhasePaths": 672,
+        "eligible": 91,
+        "rejected": 4,
+        "rejectedAlphaTested": 3,
+        "eligibleIdentities": {
+          "1000": 82,
+          "75": 8,
+          "70": 1
+        },
+        "rejectedKindAvailable": [
+          [
+            1,
+            103,
+            2
+          ],
+          [
+            0,
+            39,
+            1
+          ],
+          [
+            1,
+            71,
+            1
+          ]
+        ],
+        "eligibleExamples": [
+          [
+            7512.06,
+            126.653,
+            4689.21,
+            15,
+            0.0907803,
+            0.673531,
+            -0.733563,
+            3,
+            0.380293,
+            -0.529173,
+            -0.758521,
+            3,
+            7517.9,
+            118.539,
+            4677.55,
+            2,
+            -0.0513811,
+            0.998534,
+            0.0170473,
+            1000,
+            -0.0372929,
+            0.999277,
+            0.00745432,
+            15.359,
+            0.0387025,
+            0.0604158,
+            0.0269003,
+            63,
+            0.0372728,
+            0.058184,
+            0.0259066,
+            0.710745,
+            0.931607,
+            0.822006,
+            0.241548,
+            0.996781,
+            0.0347236,
+            0.0478276,
+            0.0062577,
+            0.65381,
+            0.00998189,
+            0.036342,
+            0.0385361,
+            0.747442,
+            0.0447055,
+            0.0841696,
+            0.0447938,
+            -0.11774
+          ],
+          [
+            7526.4,
+            122.809,
+            4688.78,
+            15,
+            0.140324,
+            -0.00890947,
+            -0.990066,
+            5,
+            -0.257846,
+            -0.492253,
+            -0.831385,
+            3,
+            7524.17,
+            118.553,
+            4681.57,
+            2,
+            -0.0215572,
+            0.998015,
+            0.0591675,
+            1000,
+            -0.00427624,
+            0.999172,
+            0.0404663,
+            8.64566,
+            0.0544803,
+            0.066626,
+            0.0307135,
+            63,
+            0.052039,
+            0.0636404,
+            0.0293372,
+            0.724898,
+            0.950327,
+            0.838523,
+            0.246402,
+            0.996959,
+            0.0494541,
+            0.053364,
+            0.00722873,
+            0.65381,
+            0.0560129,
+            0.0921265,
+            0.0627267,
+            0.747442,
+            0.105467,
+            0.14549,
+            0.0699554,
+            -0.11774
+          ],
+          [
+            7506.76,
+            118.924,
+            4686.32,
+            15,
+            0.124708,
+            0.00218785,
+            -0.992191,
+            5,
+            -0.127115,
+            -0.363578,
+            -0.92285,
+            3,
+            7506.49,
+            118.139,
+            4684.31,
+            2,
+            -0.0542891,
+            0.998513,
+            0.00494181,
+            1000,
+            -0.0245086,
+            0.999672,
+            0.00745727,
+            2.15992,
+            0.0407065,
+            0.0519294,
+            0.0204608,
+            63,
+            0.036483,
+            0.0465415,
+            0.0183379,
+            0.710254,
+            0.93096,
+            0.821435,
+            0.24138,
+            0.996778,
+            0.0339642,
+            0.0382308,
+            0.00442642,
+            0.65381,
+            0,
+            0,
+            0,
+            0.747442,
+            0.0339642,
+            0.0382308,
+            0.00442642,
+            -0.11774
+          ]
+        ],
+        "rejectedExamples": [
+          [
+            7519,
+            122.617,
+            4687.6,
+            23,
+            0.139103,
+            0,
+            -0.990278,
+            5,
+            0.793177,
+            -0.0523178,
+            -0.606739,
+            2,
+            7532.96,
+            121.696,
+            4676.89,
+            1,
+            -0.0720532,
+            -0.922304,
+            0.37969,
+            0,
+            -0.986485,
+            -0.150783,
+            -0.0641299,
+            17.6063,
+            0,
+            0,
+            0,
+            103,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            7526.41,
+            122.799,
+            4688.78,
+            6,
+            0.140324,
+            -0.00890947,
+            -0.990066,
+            5,
+            0.900713,
+            -0.179413,
+            -0.395635,
+            2,
+            7540.23,
+            120.047,
+            4682.69,
+            0,
+            -0.154602,
+            0.0344369,
+            0.987377,
+            0,
+            -0.116732,
+            -0.0010775,
+            0.993163,
+            15.3388,
+            0,
+            0,
+            0,
+            39,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            7534.94,
+            123.017,
+            4689.98,
+            31,
+            0.139103,
+            0,
+            -0.990278,
+            5,
+            0.926239,
+            -0.107024,
+            -0.361423,
+            2,
+            7546.49,
+            121.683,
+            4685.46,
+            1,
+            -0.375389,
+            0.0991686,
+            0.921547,
+            0,
+            -0.375389,
+            0.0991686,
+            0.921547,
+            12.4675,
+            0,
+            0,
+            0,
+            71,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "status": [
+        "RTGI=on capability=available transport=one-bounce components=sun+sky skySource=stock-dome+clouds lastWorldDispatch=yes enhancedInstances=0 reflectorInstances=31 completedDispatches=15752 bounceRays=345478 hits=43364 eligibleHits=40725 rejectedMaterials=2639 sunRays=37881 sunBlocked=1974 eligibleReceivers=346289 dynamicHits=0 sunVisible=35907 terrain(eligible/sunlit)=32671/31988 stockPBR(eligible/sunlit)=8054/3919 catalog(eligible/sunlit)=0/0 backfacing=2844 missingColor=2527 secondarySky(rays/blocked/visible/rejectedHemisphere)=36420/10142/26278/4305 primarySky(rays/blocked/visible/belowHorizon)=291101/6281/284820/11013 secondBounce(rays/hits/eligible/rejected/sunRays/sunBlocked/skyRays/skyBlocked)=0/0/0/0/0/0/0/0 receiverPixels(native/CPU)=catalog:0/0,rock:0/0,roof:58443/0,wood:1196/0,facade:70438/0,stone:0/0,concrete:0/0,terrain:216212/0, skyEpi(dome/weather/vertical/reference)=[0.268212,0.461311,0.858996][0.375984,0.554299,0.91729][0.236222,0.321059,0.485859][0.748414,0.911408,1.28] skyCalibration=2.01209 transportMean(incoming/replacement/capturedAmbient/reflectanceFog)=[0.646934,0.949702,1.54735][0.042259,0.058704,0.0572251][0.0565657,0.0629403,0.0586311][0.0745386,0.0677493,0.0451931] transportSamples=681 GPUms(trace/filter/temporal/BLAS/TLAS)=0.354304/0.197184/0.131456/6.4e-05/6.4e-05 CPUrecordMs=0.0928 temporal=on history(accepted/rejected/clamped/dynamic)=276874/69415/1004/0 historyResets=13 phase=15 historyBytes=9830400 historyAllocations=6; last completed frame; half resolution, 25m transport/45m receivers/80m sun+sky visibility; validated stock materials, bounded unmeasured reflectance; ambient replacement; unit transport gain",
+        "PBR prototype=stock-dielectric-v3 requested=on; enhanced=on; native + captured CPU-lit opaque geometry: data/skala_piskovec2.pac (matte rock), data/sloupek_bily_orezly_.pac (painted signposts), data/strecha_tasky_vln.pac + data/strecha_tasky_vln90.pac (roof tiles r=0.90), data/prkna_dark.pac (weathered wood r=0.85); inspected stone/mortar, concrete, plaster/brick and wood sections; enhanced-only tasky_p90 roof and budova2_stit2 plaster gable (captured ambient required for GI); F0=0.04, metallic=0; unsupported lighting/atlases legacy; no RT requirement; draws since toggle=29150; software=0",
+        "active=taa requested=taa scale=100 requestedScale=100 sampleMask=15 world=1920x1080 output=1920x1080 fsr=available fsrDispatches=0 fsrResets=0",
+        "RTShadows=on capability=available terrainPatches=9 foliageInstances=101 lastCompletedRays=1418779 lastCompletedHits=94689 totalRays=29552191567 rayQueriesExecuted=yes lastWorldDispatch=yes lastTerrainHits=0 lastAlphaHits=14353 lastGPUms(rays/compose)=0.342976/0.051616; shared RTAO=off capability=available BLAS=59 cachedBLAS=59 TLAS=2 instances=166 instancedTriangles=28709 completedPasses=17328 lastCompletedRays=0 lastCompletedHits=0 totalRays=0 rayQueriesExecuted=no lastWorldDispatch=no BLASbuilds=331 TLASbuilds=23 lastGPUms(BLAS/TLAS/rays/filter/frame)=6.4e-05/6.4e-05/0/0/2.88688; shared static LOD0 scene radius=160m; dynamic=off; AO radius=4m includes bounded terrain, excludes foliage cards; ambient-only composition; static collection excludes animation/damage; blended effects/proxies excluded; sunlight-only native opaque/cutout and terrain receivers, CSM fallback retained"
+      ],
+      "rawLocalCaptures": {
+        "v3": "build\\shadow-live\\world-survey-eden\\farm-v3.png",
+        "enhanced-off": "build\\shadow-live\\world-survey-eden\\farm-enhanced-off.png",
+        "gi-on": "build\\shadow-live\\world-survey-eden\\farm-gi-on.png"
+      },
+      "unamplifiedScreenshot": "farm-gi-on.png"
+    }
+  ],
+  "validation": {
+    "world-survey-abel": {
+      "presented": 18287,
+      "errors": 0,
+      "warnings": 0,
+      "runtime": {
+        "arguments": [
+          "-C",
+          "C:/Users/KyouKyou/Downloads/cwr-vulkan/game-local/Remastered",
+          "--nosound",
+          "--window",
+          "--width",
+          "1920",
+          "--height",
+          "1080",
+          "--timeout",
+          "3600",
+          "--lang",
+          "English",
+          "--no-splash",
+          "--render",
+          "vk",
+          "--vk-validation",
+          "--test-mission",
+          "C:/Users/KyouKyou/Downloads/cwr-vulkan/game-local/Remastered/Missions/01TakeTheCar.ABEL",
+          "--harness",
+          "19501"
+        ],
+        "run": "C:\\Users\\KyouKyou\\Downloads\\cwr-vulkan\\build\\shadow-live\\world-survey-abel",
+        "pid": 20844,
+        "exe": "C:\\Users\\KyouKyou\\Downloads\\cwr-vulkan\\dist\\vulkan-local\\PoseidonGame.exe",
+        "sha256": "BBE1E3935904E776EC29D4264BBA68B8C8E18F08D9F2172DC11A3DD0C20602C7"
+      }
+    },
+    "world-survey-cain": {
+      "presented": 11099,
+      "errors": 0,
+      "warnings": 0,
+      "runtime": {
+        "arguments": [
+          "-C",
+          "C:/Users/KyouKyou/Downloads/cwr-vulkan/game-local/Remastered",
+          "--nosound",
+          "--window",
+          "--width",
+          "1920",
+          "--height",
+          "1080",
+          "--timeout",
+          "3600",
+          "--lang",
+          "English",
+          "--no-splash",
+          "--render",
+          "vk",
+          "--vk-validation",
+          "--test-mission",
+          "C:/Users/KyouKyou/Downloads/cwr-vulkan/game-local/Remastered/Missions/09SniperTeam.Cain",
+          "--harness",
+          "19501"
+        ],
+        "run": "C:\\Users\\KyouKyou\\Downloads\\cwr-vulkan\\build\\shadow-live\\world-survey-cain",
+        "pid": 2164,
+        "exe": "C:\\Users\\KyouKyou\\Downloads\\cwr-vulkan\\dist\\vulkan-local\\PoseidonGame.exe",
+        "sha256": "FF566CC6BA3573B70786075DCCF7A8EE41452EF18BD9A80C97F042F946F0D76B"
+      }
+    },
+    "world-survey-eden": {
+      "presented": 17508,
+      "errors": 0,
+      "warnings": 0,
+      "runtime": {
+        "arguments": [
+          "-C",
+          "C:/Users/KyouKyou/Downloads/cwr-vulkan/game-local/Remastered",
+          "--nosound",
+          "--window",
+          "--width",
+          "1920",
+          "--height",
+          "1080",
+          "--timeout",
+          "3600",
+          "--lang",
+          "English",
+          "--no-splash",
+          "--render",
+          "vk",
+          "--vk-validation",
+          "--test-mission",
+          "C:/Users/KyouKyou/Downloads/cwr-vulkan/game-local/Remastered/Missions/05HeavyMetal.Eden",
+          "--harness",
+          "19501"
+        ],
+        "run": "C:\\Users\\KyouKyou\\Downloads\\cwr-vulkan\\build\\shadow-live\\world-survey-eden",
+        "pid": 21700,
+        "exe": "C:\\Users\\KyouKyou\\Downloads\\cwr-vulkan\\dist\\vulkan-local\\PoseidonGame.exe",
+        "sha256": "BBE1E3935904E776EC29D4264BBA68B8C8E18F08D9F2172DC11A3DD0C20602C7"
+      }
+    },
+    "world-survey-noe": {
+      "presented": 38591,
+      "errors": 0,
+      "warnings": 0,
+      "runtime": {
+        "arguments": [
+          "-C",
+          "C:/Users/KyouKyou/Downloads/cwr-vulkan/game-local/Remastered",
+          "--nosound",
+          "--window",
+          "--width",
+          "1920",
+          "--height",
+          "1080",
+          "--timeout",
+          "3600",
+          "--lang",
+          "English",
+          "--no-splash",
+          "--render",
+          "vk",
+          "--vk-validation",
+          "--test-mission",
+          "C:/Users/KyouKyou/Downloads/cwr-vulkan/game-local/Remastered/Missions/Resistance/R01WarCry.Noe",
+          "--harness",
+          "19501"
+        ],
+        "run": "C:\\Users\\KyouKyou\\Downloads\\cwr-vulkan\\build\\shadow-live\\world-survey-noe",
+        "pid": 20664,
+        "exe": "C:\\Users\\KyouKyou\\Downloads\\cwr-vulkan\\dist\\vulkan-local\\PoseidonGame.exe",
+        "sha256": "FF566CC6BA3573B70786075DCCF7A8EE41452EF18BD9A80C97F042F946F0D76B"
+      }
+    },
+    "world-survey-noe-factory": {
+      "presented": 11910,
+      "errors": 0,
+      "warnings": 0,
+      "runtime": {
+        "arguments": [
+          "-C",
+          "C:/Users/KyouKyou/Downloads/cwr-vulkan/game-local/Remastered",
+          "--nosound",
+          "--window",
+          "--width",
+          "1920",
+          "--height",
+          "1080",
+          "--timeout",
+          "3600",
+          "--lang",
+          "English",
+          "--no-splash",
+          "--render",
+          "vk",
+          "--vk-validation",
+          "--test-mission",
+          "C:/Users/KyouKyou/Downloads/cwr-vulkan/game-local/Remastered/Missions/Resistance/R02Laser.Noe",
+          "--harness",
+          "19501"
+        ],
+        "run": "C:\\Users\\KyouKyou\\Downloads\\cwr-vulkan\\build\\shadow-live\\world-survey-noe-factory",
+        "pid": 24308,
+        "exe": "C:\\Users\\KyouKyou\\Downloads\\cwr-vulkan\\dist\\vulkan-local\\PoseidonGame.exe",
+        "sha256": "FF566CC6BA3573B70786075DCCF7A8EE41452EF18BD9A80C97F042F946F0D76B"
+      }
+    }
+  },
+  "preservation": {
+    "settingsChecked": 59,
+    "assetsChecked": 7,
+    "changed": 0,
+    "assetHashes": {
+      "Data.pbo": "1587f9c052ff38967463d851ca85a03efd2db09d063da183046a9b16181d5e2f",
+      "Data3D.pbo": "10528ef9b5112896898ad8667e83601ff47f95231652c73409d57b7227a8a00f",
+      "abel.wrp": "1c13aca4d3300db3546583c82ffa132c1149831e42227f2b47019c74040462a5",
+      "eden.wrp": "5a2550b27612fc4c8ccdec55ce2555c1ed23114d46f8b687ce5fb8b273515a79",
+      "cain.wrp": "774c938eb010ffbe24554584fa53c1384687e4888dda762d588bbd29c01d2e1c",
+      "Noe.pbo": "c98a6c97f21264e20f91e2e7ee024a068a11821361266041ac0c47de4f05cf72",
+      "O.pbo": "e3111e081afed428b67896ce11f374f591417990d2313f437ebce077b9986e23"
+    },
+    "privateDLSSClean": true,
+    "privateDLSSRemoteFree": true,
+    "SDKsPresent": true
+  },
+  "modelEvidence": {
+    "o\\hous\\panelak2.p3d": {
+      "PBO": "O.pbo",
+      "originalExtractedSHA256": "ac03ec3ecd0a76dc997d2eb9888c35909db4f559afbdf7e8e3be64849d809339",
+      "retainedEvidence": "Primary visual LOD only; full command transcripts remain local",
+      "nativeVisualLODs": [
+        {
+          "index": 0,
+          "resolution": 1.5,
+          "vertices": 9016,
+          "normals": 9016,
+          "invalidNormals": 380,
+          "userMaterialVertices": 4600,
+          "landHintVertices": 0,
+          "lightModes": {
+            "0": 9016
+          },
+          "sections": [
+            {
+              "index": 0,
+              "texture": "o\\hous\\panel04.pac",
+              "flags": "0x8000",
+              "vertices": 50,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 50
+              }
+            },
+            {
+              "index": 1,
+              "texture": "o\\hous\\panel_strecha.pac",
+              "flags": "0x2000",
+              "vertices": 8,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 8
+              }
+            },
+            {
+              "index": 2,
+              "texture": "o\\hous\\panel03.pac",
+              "flags": "0x2000",
+              "vertices": 624,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 592,
+                "207": 32
+              }
+            },
+            {
+              "index": 3,
+              "texture": "o\\hous\\panel03.pac",
+              "flags": "0x2000",
+              "vertices": 16,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "207": 16
+              }
+            },
+            {
+              "index": 4,
+              "texture": "o\\hous\\panel02.pac",
+              "flags": "0x2000",
+              "vertices": 600,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 600
+              }
+            },
+            {
+              "index": 5,
+              "texture": "o\\hous\\panel_dver_ba.pac",
+              "flags": "0xc200",
+              "vertices": 354,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 354
+              }
+            },
+            {
+              "index": 6,
+              "texture": "o\\hous\\panel_dvere01.pac",
+              "flags": "0xc000",
+              "vertices": 80,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 48,
+                "205": 32
+              }
+            },
+            {
+              "index": 7,
+              "texture": "o\\hous\\panel_dvere01.pac",
+              "flags": "0xc000",
+              "vertices": 476,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "205": 396,
+                "207": 80
+              }
+            },
+            {
+              "index": 8,
+              "texture": "o\\hous\\panel_dvere01.pac",
+              "flags": "0xc000",
+              "vertices": 384,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "207": 384
+              }
+            },
+            {
+              "index": 9,
+              "texture": "o\\hous\\panel_in_nbln.pac",
+              "flags": "0x2000",
+              "vertices": 28,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "205": 9,
+                "207": 19
+              }
+            },
+            {
+              "index": 10,
+              "texture": "o\\hous\\panel_in_nbln.pac",
+              "flags": "0x2000",
+              "vertices": 333,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "207": 333
+              }
+            },
+            {
+              "index": 11,
+              "texture": "o\\hous\\panel_hnusopak.pac",
+              "flags": "0x2000",
+              "vertices": 27,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 6,
+                "205": 6,
+                "207": 15
+              }
+            },
+            {
+              "index": 12,
+              "texture": "o\\hous\\panel_hnusopak.pac",
+              "flags": "0x2000",
+              "vertices": 12,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "205": 4,
+                "207": 8
+              }
+            },
+            {
+              "index": 13,
+              "texture": "o\\hous\\panel_hnusopak.pac",
+              "flags": "0x2000",
+              "vertices": 148,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "207": 148
+              }
+            },
+            {
+              "index": 14,
+              "texture": "o\\hous\\panel01.pac",
+              "flags": "0x2000",
+              "vertices": 1031,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 980,
+                "205": 16,
+                "207": 35
+              }
+            },
+            {
+              "index": 15,
+              "texture": "o\\hous\\panel01.pac",
+              "flags": "0x2000",
+              "vertices": 6,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "205": 2,
+                "207": 4
+              }
+            },
+            {
+              "index": 16,
+              "texture": "o\\hous\\panel01.pac",
+              "flags": "0x2000",
+              "vertices": 20,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "207": 20
+              }
+            },
+            {
+              "index": 17,
+              "texture": "o\\hous\\stropin01.pac",
+              "flags": "0x2000",
+              "vertices": 18,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 6,
+                "207": 12
+              }
+            },
+            {
+              "index": 18,
+              "texture": "o\\hous\\stropin01.pac",
+              "flags": "0x2000",
+              "vertices": 24,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "205": 18,
+                "207": 6
+              }
+            },
+            {
+              "index": 19,
+              "texture": "o\\hous\\stropin01.pac",
+              "flags": "0x2000",
+              "vertices": 177,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "207": 177
+              }
+            },
+            {
+              "index": 20,
+              "texture": "o\\hous\\panel05.pac",
+              "flags": "0x8000",
+              "vertices": 88,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 84,
+                "205": 2,
+                "207": 2
+              }
+            },
+            {
+              "index": 21,
+              "texture": "o\\hous\\podlkobin01.pac",
+              "flags": "0x2000",
+              "vertices": 4,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 1,
+                "205": 3
+              }
+            },
+            {
+              "index": 22,
+              "texture": "o\\hous\\podlkobin01.pac",
+              "flags": "0x2000",
+              "vertices": 8,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "205": 8
+              }
+            },
+            {
+              "index": 23,
+              "texture": "o\\hous\\podlkobin01.pac",
+              "flags": "0x2000",
+              "vertices": 12,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "207": 12
+              }
+            },
+            {
+              "index": 24,
+              "texture": "o\\hous\\podlkobin02.pac",
+              "flags": "0x2000",
+              "vertices": 8,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 4,
+                "205": 4
+              }
+            },
+            {
+              "index": 25,
+              "texture": "o\\hous\\panel_inter01.pac",
+              "flags": "0x8000",
+              "vertices": 30,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 16,
+                "205": 14
+              }
+            },
+            {
+              "index": 26,
+              "texture": "o\\hous\\panel_inter01.pac",
+              "flags": "0x8000",
+              "vertices": 30,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "205": 30
+              }
+            },
+            {
+              "index": 27,
+              "texture": "o\\hous\\panel_inter01.pac",
+              "flags": "0x8000",
+              "vertices": 90,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "207": 90
+              }
+            },
+            {
+              "index": 28,
+              "texture": "o\\hous\\panel_okna.pac",
+              "flags": "0xc200",
+              "vertices": 428,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 428
+              }
+            },
+            {
+              "index": 29,
+              "texture": "data\\lino1.pac",
+              "flags": "0x2000",
+              "vertices": 38,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 12,
+                "205": 10,
+                "207": 16
+              }
+            },
+            {
+              "index": 30,
+              "texture": "data\\lino1.pac",
+              "flags": "0x2000",
+              "vertices": 6,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "205": 6
+              }
+            },
+            {
+              "index": 31,
+              "texture": "data\\lino1.pac",
+              "flags": "0x2000",
+              "vertices": 133,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "207": 133
+              }
+            },
+            {
+              "index": 32,
+              "texture": "o\\hous\\interier_dlazdicky.pac",
+              "flags": "0x8000",
+              "vertices": 20,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "207": 20
+              }
+            },
+            {
+              "index": 33,
+              "texture": "o\\hous\\podldlzin02.pac",
+              "flags": "0x2000",
+              "vertices": 12,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "207": 12
+              }
+            },
+            {
+              "index": 34,
+              "texture": "o\\hous\\stenain01.pac",
+              "flags": "0x8000",
+              "vertices": 36,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 20,
+                "205": 16
+              }
+            },
+            {
+              "index": 35,
+              "texture": "o\\hous\\stenain01.pac",
+              "flags": "0x8000",
+              "vertices": 30,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "205": 30
+              }
+            },
+            {
+              "index": 36,
+              "texture": "o\\hous\\stenain01.pac",
+              "flags": "0x8000",
+              "vertices": 274,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "207": 274
+              }
+            },
+            {
+              "index": 37,
+              "texture": "o\\hous\\panel_schody.pac",
+              "flags": "0xc000",
+              "vertices": 560,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "207": 560
+              }
+            },
+            {
+              "index": 38,
+              "texture": "o\\hous\\panel_zabradli.pac",
+              "flags": "0x2000",
+              "vertices": 40,
+              "invalidVertexNormals": 12,
+              "materialIndices": {
+                "0": 30,
+                "207": 10
+              }
+            },
+            {
+              "index": 39,
+              "texture": "o\\hous\\panel_zabradli.pac",
+              "flags": "0x2000",
+              "vertices": 1232,
+              "invalidVertexNormals": 368,
+              "materialIndices": {
+                "207": 1232
+              }
+            },
+            {
+              "index": 40,
+              "texture": "o\\hous\\panel_elektro.pac",
+              "flags": "0xc000",
+              "vertices": 160,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "207": 160
+              }
+            },
+            {
+              "index": 41,
+              "texture": "data\\blck_sum.pac",
+              "flags": "0xc000",
+              "vertices": 880,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 880
+              }
+            },
+            {
+              "index": 42,
+              "texture": "o\\hous\\panel_inter02.pac",
+              "flags": "0x8000",
+              "vertices": 24,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "207": 24
+              }
+            },
+            {
+              "index": 43,
+              "texture": "o\\hous\\panel_balkzabr.pac",
+              "flags": "0x2200",
+              "vertices": 44,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 44
+              }
+            },
+            {
+              "index": 44,
+              "texture": "o\\hous\\panel_balkzabr.paa",
+              "flags": "0x22100",
+              "vertices": 4,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 4
+              }
+            },
+            {
+              "index": 45,
+              "texture": "o\\hous\\zaclona01.paa",
+              "flags": "0x2c100",
+              "vertices": 168,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 84,
+                "206": 84
+              }
+            },
+            {
+              "index": 46,
+              "texture": "data\\kiowa_sklo.paa",
+              "flags": "0x2c100",
+              "vertices": 8,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "207": 8
+              }
+            },
+            {
+              "index": 47,
+              "texture": "data\\kiowa_sklo.paa",
+              "flags": "0x2c100",
+              "vertices": 8,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "205": 8
+              }
+            },
+            {
+              "index": 48,
+              "texture": "data\\kiowa_sklo.paa",
+              "flags": "0x2c100",
+              "vertices": 24,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 16,
+                "205": 8
+              }
+            },
+            {
+              "index": 49,
+              "texture": "o\\hous\\zaclona01.paa",
+              "flags": "0x2c100",
+              "vertices": 112,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 56,
+                "206": 56
+              }
+            },
+            {
+              "index": 50,
+              "texture": "o\\hous\\panel_balkzabr.paa",
+              "flags": "0x22100",
+              "vertices": 40,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 40
+              }
+            },
+            {
+              "index": 51,
+              "texture": "o\\hous\\zaclona01.paa",
+              "flags": "0x2c100",
+              "vertices": 112,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 56,
+                "206": 56
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "o\\hous\\panelak.p3d": {
+      "PBO": "O.pbo",
+      "originalExtractedSHA256": "5d66699715eaba21c3a24622bc936e00ee04236c45b8d067a0bd2ff881b8c1f4",
+      "retainedEvidence": "Primary visual LOD only; full command transcripts remain local",
+      "nativeVisualLODs": [
+        {
+          "index": 0,
+          "resolution": 1.5,
+          "vertices": 6854,
+          "normals": 6854,
+          "invalidNormals": 224,
+          "userMaterialVertices": 3528,
+          "landHintVertices": 0,
+          "lightModes": {
+            "0": 6854
+          },
+          "sections": [
+            {
+              "index": 0,
+              "texture": "o\\hous\\panel_strecha.pac",
+              "flags": "0x2000",
+              "vertices": 8,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 8
+              }
+            },
+            {
+              "index": 1,
+              "texture": "o\\hous\\podlkobin01.pac",
+              "flags": "0x2000",
+              "vertices": 4,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 1,
+                "205": 3
+              }
+            },
+            {
+              "index": 2,
+              "texture": "o\\hous\\podlkobin01.pac",
+              "flags": "0x2000",
+              "vertices": 8,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "205": 8
+              }
+            },
+            {
+              "index": 3,
+              "texture": "o\\hous\\podlkobin01.pac",
+              "flags": "0x2000",
+              "vertices": 12,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "207": 12
+              }
+            },
+            {
+              "index": 4,
+              "texture": "o\\hous\\podlkobin02.pac",
+              "flags": "0x2000",
+              "vertices": 8,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 4,
+                "205": 4
+              }
+            },
+            {
+              "index": 5,
+              "texture": "o\\hous\\panel_inter01.pac",
+              "flags": "0x8000",
+              "vertices": 30,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 16,
+                "205": 14
+              }
+            },
+            {
+              "index": 6,
+              "texture": "o\\hous\\panel_inter01.pac",
+              "flags": "0x8000",
+              "vertices": 30,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "205": 30
+              }
+            },
+            {
+              "index": 7,
+              "texture": "o\\hous\\panel_inter01.pac",
+              "flags": "0x8000",
+              "vertices": 56,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "207": 56
+              }
+            },
+            {
+              "index": 8,
+              "texture": "o\\hous\\stropin01.pac",
+              "flags": "0x2000",
+              "vertices": 6,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 2,
+                "207": 4
+              }
+            },
+            {
+              "index": 9,
+              "texture": "o\\hous\\stropin01.pac",
+              "flags": "0x2000",
+              "vertices": 40,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "205": 34,
+                "207": 6
+              }
+            },
+            {
+              "index": 10,
+              "texture": "o\\hous\\stropin01.pac",
+              "flags": "0x2000",
+              "vertices": 83,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "207": 83
+              }
+            },
+            {
+              "index": 11,
+              "texture": "o\\hous\\panel_okna.pac",
+              "flags": "0xc200",
+              "vertices": 664,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 664
+              }
+            },
+            {
+              "index": 12,
+              "texture": "data\\blck_sum.pac",
+              "flags": "0xc000",
+              "vertices": 400,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 400
+              }
+            },
+            {
+              "index": 13,
+              "texture": "data\\lino1.pac",
+              "flags": "0x2000",
+              "vertices": 40,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 12,
+                "205": 20,
+                "207": 8
+              }
+            },
+            {
+              "index": 14,
+              "texture": "data\\lino1.pac",
+              "flags": "0x2000",
+              "vertices": 12,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "205": 12
+              }
+            },
+            {
+              "index": 15,
+              "texture": "data\\lino1.pac",
+              "flags": "0x2000",
+              "vertices": 55,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "207": 55
+              }
+            },
+            {
+              "index": 16,
+              "texture": "o\\hous\\interier_dlazdicky.pac",
+              "flags": "0x8000",
+              "vertices": 40,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "207": 40
+              }
+            },
+            {
+              "index": 17,
+              "texture": "o\\hous\\podldlzin02.pac",
+              "flags": "0x2000",
+              "vertices": 24,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "207": 24
+              }
+            },
+            {
+              "index": 18,
+              "texture": "o\\hous\\panel_dver_ba.pac",
+              "flags": "0xc200",
+              "vertices": 336,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 336
+              }
+            },
+            {
+              "index": 19,
+              "texture": "o\\hous\\panel_dvere01.pac",
+              "flags": "0xc000",
+              "vertices": 160,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 96,
+                "205": 64
+              }
+            },
+            {
+              "index": 20,
+              "texture": "o\\hous\\panel_dvere01.pac",
+              "flags": "0xc000",
+              "vertices": 832,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "205": 720,
+                "207": 112
+              }
+            },
+            {
+              "index": 21,
+              "texture": "o\\hous\\panel_dvere01.pac",
+              "flags": "0xc000",
+              "vertices": 420,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "207": 420
+              }
+            },
+            {
+              "index": 22,
+              "texture": "o\\hous\\panel_inter02.pac",
+              "flags": "0x8000",
+              "vertices": 30,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 16,
+                "205": 14
+              }
+            },
+            {
+              "index": 23,
+              "texture": "o\\hous\\panel_inter02.pac",
+              "flags": "0x8000",
+              "vertices": 30,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "205": 30
+              }
+            },
+            {
+              "index": 24,
+              "texture": "o\\hous\\panel_inter02.pac",
+              "flags": "0x8000",
+              "vertices": 32,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "207": 32
+              }
+            },
+            {
+              "index": 25,
+              "texture": "o\\hous\\panel_kober.pac",
+              "flags": "0x2000",
+              "vertices": 8,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 4,
+                "205": 4
+              }
+            },
+            {
+              "index": 26,
+              "texture": "o\\hous\\panel_parkety.pac",
+              "flags": "0x2000",
+              "vertices": 4,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 1,
+                "205": 3
+              }
+            },
+            {
+              "index": 27,
+              "texture": "o\\hous\\panel_parkety.pac",
+              "flags": "0x2000",
+              "vertices": 8,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "205": 8
+              }
+            },
+            {
+              "index": 28,
+              "texture": "o\\hous\\panel01.pac",
+              "flags": "0x2000",
+              "vertices": 551,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 524,
+                "205": 8,
+                "207": 19
+              }
+            },
+            {
+              "index": 29,
+              "texture": "o\\hous\\panel01.pac",
+              "flags": "0x2000",
+              "vertices": 6,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "205": 2,
+                "207": 4
+              }
+            },
+            {
+              "index": 30,
+              "texture": "o\\hous\\panel01.pac",
+              "flags": "0x2000",
+              "vertices": 20,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "207": 20
+              }
+            },
+            {
+              "index": 31,
+              "texture": "o\\hous\\stenain01.pac",
+              "flags": "0x8000",
+              "vertices": 80,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 48,
+                "205": 32
+              }
+            },
+            {
+              "index": 32,
+              "texture": "o\\hous\\stenain01.pac",
+              "flags": "0x8000",
+              "vertices": 60,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "205": 60
+              }
+            },
+            {
+              "index": 33,
+              "texture": "o\\hous\\stenain01.pac",
+              "flags": "0x8000",
+              "vertices": 116,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "207": 116
+              }
+            },
+            {
+              "index": 34,
+              "texture": "o\\hous\\panel_in_nbln.pac",
+              "flags": "0x2000",
+              "vertices": 28,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "205": 9,
+                "207": 19
+              }
+            },
+            {
+              "index": 35,
+              "texture": "o\\hous\\panel_in_nbln.pac",
+              "flags": "0x2000",
+              "vertices": 137,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "207": 137
+              }
+            },
+            {
+              "index": 36,
+              "texture": "o\\hous\\panel_hnusopak.pac",
+              "flags": "0x2000",
+              "vertices": 10,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 3,
+                "205": 2,
+                "207": 5
+              }
+            },
+            {
+              "index": 37,
+              "texture": "o\\hous\\panel_hnusopak.pac",
+              "flags": "0x2000",
+              "vertices": 6,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "205": 2,
+                "207": 4
+              }
+            },
+            {
+              "index": 38,
+              "texture": "o\\hous\\panel_hnusopak.pac",
+              "flags": "0x2000",
+              "vertices": 65,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "207": 65
+              }
+            },
+            {
+              "index": 39,
+              "texture": "o\\hous\\panel_zabradli.pac",
+              "flags": "0x2000",
+              "vertices": 40,
+              "invalidVertexNormals": 12,
+              "materialIndices": {
+                "0": 30,
+                "207": 10
+              }
+            },
+            {
+              "index": 40,
+              "texture": "o\\hous\\panel_zabradli.pac",
+              "flags": "0x2000",
+              "vertices": 788,
+              "invalidVertexNormals": 212,
+              "materialIndices": {
+                "207": 788
+              }
+            },
+            {
+              "index": 41,
+              "texture": "o\\hous\\panel_schody.pac",
+              "flags": "0xc000",
+              "vertices": 240,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "207": 240
+              }
+            },
+            {
+              "index": 42,
+              "texture": "o\\hous\\panel05.pac",
+              "flags": "0x8000",
+              "vertices": 88,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 84,
+                "205": 2,
+                "207": 2
+              }
+            },
+            {
+              "index": 43,
+              "texture": "o\\hous\\panel03.pac",
+              "flags": "0x2000",
+              "vertices": 452,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 420,
+                "207": 32
+              }
+            },
+            {
+              "index": 44,
+              "texture": "o\\hous\\panel03.pac",
+              "flags": "0x2000",
+              "vertices": 16,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "207": 16
+              }
+            },
+            {
+              "index": 45,
+              "texture": "o\\hous\\panel02.pac",
+              "flags": "0x2000",
+              "vertices": 480,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 480
+              }
+            },
+            {
+              "index": 46,
+              "texture": "o\\hous\\panel04.pac",
+              "flags": "0x8000",
+              "vertices": 50,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 50
+              }
+            },
+            {
+              "index": 47,
+              "texture": "o\\hous\\panel_elektro.pac",
+              "flags": "0xc000",
+              "vertices": 80,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "207": 80
+              }
+            },
+            {
+              "index": 48,
+              "texture": "o\\hous\\panel_balkzabr.pac",
+              "flags": "0x2200",
+              "vertices": 20,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 20
+              }
+            },
+            {
+              "index": 49,
+              "texture": "o\\hous\\panel_balkzabr.paa",
+              "flags": "0x22100",
+              "vertices": 20,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 20
+              }
+            },
+            {
+              "index": 50,
+              "texture": "o\\hous\\zaclona01.paa",
+              "flags": "0x2c100",
+              "vertices": 12,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 6,
+                "206": 6
+              }
+            },
+            {
+              "index": 51,
+              "texture": "data\\kiowa_sklo.paa",
+              "flags": "0x2c100",
+              "vertices": 8,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "207": 8
+              }
+            },
+            {
+              "index": 52,
+              "texture": "data\\kiowa_sklo.paa",
+              "flags": "0x2c100",
+              "vertices": 8,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "205": 8
+              }
+            },
+            {
+              "index": 53,
+              "texture": "data\\kiowa_sklo.paa",
+              "flags": "0x2c100",
+              "vertices": 24,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 16,
+                "205": 8
+              }
+            },
+            {
+              "index": 54,
+              "texture": "data\\kiowa_sklo.paa",
+              "flags": "0x2c100",
+              "vertices": 8,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "207": 8
+              }
+            },
+            {
+              "index": 55,
+              "texture": "data\\kiowa_sklo.paa",
+              "flags": "0x2c100",
+              "vertices": 8,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "205": 8
+              }
+            },
+            {
+              "index": 56,
+              "texture": "data\\kiowa_sklo.paa",
+              "flags": "0x2c100",
+              "vertices": 24,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 16,
+                "205": 8
+              }
+            },
+            {
+              "index": 57,
+              "texture": "o\\hous\\zaclona01.paa",
+              "flags": "0x2c100",
+              "vertices": 100,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 50,
+                "206": 50
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "o\\hous\\dum_patrovy02.p3d": {
+      "PBO": "O.pbo",
+      "originalExtractedSHA256": "72d407926a093e339e8bbb4cbe97de8db2b11cd60b90a46cb9158a18e9b50541",
+      "retainedEvidence": "Primary visual LOD only; full command transcripts remain local",
+      "nativeVisualLODs": [
+        {
+          "index": 0,
+          "resolution": 0.5,
+          "vertices": 2491,
+          "normals": 2491,
+          "invalidNormals": 8,
+          "userMaterialVertices": 310,
+          "landHintVertices": 0,
+          "lightModes": {
+            "0": 2491
+          },
+          "sections": [
+            {
+              "index": 0,
+              "texture": "o\\hous\\orlhot_kom.pac",
+              "flags": "0xc000",
+              "vertices": 100,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 100
+              }
+            },
+            {
+              "index": 1,
+              "texture": "o\\hous\\tasky_tmavsi.pac",
+              "flags": "0x4000",
+              "vertices": 23,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 23
+              }
+            },
+            {
+              "index": 2,
+              "texture": "o\\hous\\orlhot_okap.pac",
+              "flags": "0x8000",
+              "vertices": 264,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 264
+              }
+            },
+            {
+              "index": 3,
+              "texture": "o\\hous\\interier_chodba01.pac",
+              "flags": "0x4000",
+              "vertices": 12,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 5,
+                "205": 7
+              }
+            },
+            {
+              "index": 4,
+              "texture": "o\\hous\\interier_chodba01.pac",
+              "flags": "0x4000",
+              "vertices": 172,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "205": 172
+              }
+            },
+            {
+              "index": 5,
+              "texture": "o\\hous\\zalchat_beton.pac",
+              "flags": "0x2000",
+              "vertices": 84,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 84
+              }
+            },
+            {
+              "index": 6,
+              "texture": "o\\hous\\interier_chodba02.pac",
+              "flags": "0x8000",
+              "vertices": 8,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 8
+              }
+            },
+            {
+              "index": 7,
+              "texture": "o\\hous\\interier_chodba02.pac",
+              "flags": "0x8000",
+              "vertices": 84,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "205": 84
+              }
+            },
+            {
+              "index": 8,
+              "texture": "o\\hous\\dum_patrovy02.pac",
+              "flags": "0x8000",
+              "vertices": 1236,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 1212,
+                "205": 24
+              }
+            },
+            {
+              "index": 9,
+              "texture": "o\\hous\\dum_patrovy01b.pac",
+              "flags": "0xc000",
+              "vertices": 104,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 104
+              }
+            },
+            {
+              "index": 10,
+              "texture": "o\\hous\\dum_patrovy02a.pac",
+              "flags": "0x2000",
+              "vertices": 366,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 361,
+                "205": 5
+              }
+            },
+            {
+              "index": 11,
+              "texture": "data\\blck_sum.pac",
+              "flags": "0xc000",
+              "vertices": 24,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 16,
+                "205": 8
+              }
+            },
+            {
+              "index": 12,
+              "texture": "data\\blck_sum.pac",
+              "flags": "0xc000",
+              "vertices": 8,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "205": 8
+              }
+            },
+            {
+              "index": 13,
+              "texture": "o\\hous\\orlhot_zabr2.paa",
+              "flags": "0x28100",
+              "vertices": 8,
+              "invalidVertexNormals": 8,
+              "materialIndices": {
+                "0": 4,
+                "205": 4
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "o\\hous\\tovarna1.p3d": {
+      "PBO": "O.pbo",
+      "originalExtractedSHA256": "2779d03fb7526c820e7ddce60f6e7ee5aeef863c3e2cad7f0e6703ba3980e005",
+      "retainedEvidence": "Primary visual LOD only; full command transcripts remain local",
+      "nativeVisualLODs": [
+        {
+          "index": 0,
+          "resolution": 0.5,
+          "vertices": 13571,
+          "normals": 13571,
+          "invalidNormals": 0,
+          "userMaterialVertices": 8617,
+          "landHintVertices": 0,
+          "lightModes": {
+            "0": 13571
+          },
+          "sections": [
+            {
+              "index": 0,
+              "texture": "o\\hous\\tovarna1_stenaspod.pac",
+              "flags": "0x2000",
+              "vertices": 261,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 261
+              }
+            },
+            {
+              "index": 1,
+              "texture": "o\\hous\\tovarna1_stenaspod.pac",
+              "flags": "0x2000",
+              "vertices": 34,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "205": 34
+              }
+            },
+            {
+              "index": 2,
+              "texture": "o\\hous\\tovarna1_vrata.pac",
+              "flags": "0x8000",
+              "vertices": 794,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 762,
+                "205": 32
+              }
+            },
+            {
+              "index": 3,
+              "texture": "o\\hous\\tovarna1_vrata.pac",
+              "flags": "0x8000",
+              "vertices": 412,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "205": 412
+              }
+            },
+            {
+              "index": 4,
+              "texture": "o\\hous\\tovarna1_podlaha1.pac",
+              "flags": "0x2000",
+              "vertices": 93,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 89,
+                "205": 4
+              }
+            },
+            {
+              "index": 5,
+              "texture": "o\\hous\\tovarna1_podlaha1.pac",
+              "flags": "0x2000",
+              "vertices": 20,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "205": 20
+              }
+            },
+            {
+              "index": 6,
+              "texture": "o\\hous\\tovarna1_podlaha1.pac",
+              "flags": "0x2000",
+              "vertices": 9,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "207": 9
+              }
+            },
+            {
+              "index": 7,
+              "texture": "o\\hous\\tovarna1_stenalux.pac",
+              "flags": "0x2000",
+              "vertices": 2107,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 1691,
+                "205": 416
+              }
+            },
+            {
+              "index": 8,
+              "texture": "o\\hous\\tovarna1_stenalux.pac",
+              "flags": "0x2000",
+              "vertices": 903,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "205": 903
+              }
+            },
+            {
+              "index": 9,
+              "texture": "o\\hous\\tovarna1_podklad.pac",
+              "flags": "0x2000",
+              "vertices": 143,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 143
+              }
+            },
+            {
+              "index": 10,
+              "texture": "o\\hous\\tovarna1_podklad.pac",
+              "flags": "0x2000",
+              "vertices": 69,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "205": 69
+              }
+            },
+            {
+              "index": 11,
+              "texture": "o\\hous\\tovarna1_stenainter.pac",
+              "flags": "0x2000",
+              "vertices": 222,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 149,
+                "205": 73
+              }
+            },
+            {
+              "index": 12,
+              "texture": "o\\hous\\tovarna1_stenainter.pac",
+              "flags": "0x2000",
+              "vertices": 586,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "205": 586
+              }
+            },
+            {
+              "index": 13,
+              "texture": "o\\hous\\tovarna1_podkladd.pac",
+              "flags": "0x2000",
+              "vertices": 8,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "205": 8
+              }
+            },
+            {
+              "index": 14,
+              "texture": "o\\hous\\tovarna1_strop1.pac",
+              "flags": "0x2000",
+              "vertices": 20,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 20
+              }
+            },
+            {
+              "index": 15,
+              "texture": "o\\hous\\tovarna1_strop1.pac",
+              "flags": "0x2000",
+              "vertices": 64,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "205": 64
+              }
+            },
+            {
+              "index": 16,
+              "texture": "o\\hous\\tovarna1_dopravnik.pac",
+              "flags": "0x8000",
+              "vertices": 1468,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "205": 1468
+              }
+            },
+            {
+              "index": 17,
+              "texture": "o\\hous\\tovarna1_dopravnik.pac",
+              "flags": "0x8000",
+              "vertices": 4,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "207": 4
+              }
+            },
+            {
+              "index": 18,
+              "texture": "o\\hous\\doravnik.pac",
+              "flags": "0x8000",
+              "vertices": 1490,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 1454,
+                "205": 36
+              }
+            },
+            {
+              "index": 19,
+              "texture": "o\\hous\\doravnik.pac",
+              "flags": "0x8000",
+              "vertices": 3798,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "205": 3798
+              }
+            },
+            {
+              "index": 20,
+              "texture": "o\\hous\\tovarna1_el.pac",
+              "flags": "0x8000",
+              "vertices": 90,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "204": 90
+              }
+            },
+            {
+              "index": 21,
+              "texture": "o\\hous\\tovarna1_stenaext.paa",
+              "flags": "0x28100",
+              "vertices": 32,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "205": 32
+              }
+            },
+            {
+              "index": 22,
+              "texture": "o\\hous\\tovarna1_steluxin.paa",
+              "flags": "0x2c100",
+              "vertices": 56,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 28,
+                "205": 28
+              }
+            },
+            {
+              "index": 23,
+              "texture": "o\\hous\\tovarna1_steluxin.paa",
+              "flags": "0x2c100",
+              "vertices": 10,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "205": 10
+              }
+            },
+            {
+              "index": 24,
+              "texture": "o\\hous\\tovarna1_steluxin.paa",
+              "flags": "0x2c100",
+              "vertices": 24,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 12,
+                "205": 12
+              }
+            },
+            {
+              "index": 25,
+              "texture": "o\\hous\\tovarna1_steluxin.paa",
+              "flags": "0x2c100",
+              "vertices": 12,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "205": 12
+              }
+            },
+            {
+              "index": 26,
+              "texture": "o\\hous\\tovarna1_steluxin.paa",
+              "flags": "0x2c100",
+              "vertices": 36,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 18,
+                "205": 18
+              }
+            },
+            {
+              "index": 27,
+              "texture": "o\\hous\\tovarna1_stenaext.paa",
+              "flags": "0x28100",
+              "vertices": 16,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 16
+              }
+            },
+            {
+              "index": 28,
+              "texture": "o\\hous\\tovarna1_steluxin.paa",
+              "flags": "0x2c100",
+              "vertices": 210,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "205": 210
+              }
+            },
+            {
+              "index": 29,
+              "texture": "o\\hous\\tovarna1_podlahax.paa",
+              "flags": "0x2c100",
+              "vertices": 4,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "205": 4
+              }
+            },
+            {
+              "index": 30,
+              "texture": "o\\hous\\tovarna1_podlahax.paa",
+              "flags": "0x2c100",
+              "vertices": 4,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "207": 4
+              }
+            },
+            {
+              "index": 31,
+              "texture": "o\\hous\\tovarna1_podlahax.paa",
+              "flags": "0x2c100",
+              "vertices": 32,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "205": 32
+              }
+            },
+            {
+              "index": 32,
+              "texture": "o\\hous\\tovarna1_stenaext.paa",
+              "flags": "0x28100",
+              "vertices": 8,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "205": 8
+              }
+            },
+            {
+              "index": 33,
+              "texture": "o\\hous\\tovarna1_stenaext.paa",
+              "flags": "0x28100",
+              "vertices": 12,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 12
+              }
+            },
+            {
+              "index": 34,
+              "texture": "o\\hous\\tovarna1_steluxin.paa",
+              "flags": "0x2c100",
+              "vertices": 108,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 54,
+                "205": 54
+              }
+            },
+            {
+              "index": 35,
+              "texture": "o\\hous\\tovarna1_stenaext.paa",
+              "flags": "0x28100",
+              "vertices": 112,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "205": 112
+              }
+            },
+            {
+              "index": 36,
+              "texture": "o\\hous\\tovarna1_steluxin.paa",
+              "flags": "0x2c100",
+              "vertices": 10,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "205": 10
+              }
+            },
+            {
+              "index": 37,
+              "texture": "o\\hous\\tovarna1_stenaext.paa",
+              "flags": "0x28100",
+              "vertices": 256,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 240,
+                "205": 16
+              }
+            },
+            {
+              "index": 38,
+              "texture": "o\\hous\\tovarna1_steluxin.paa",
+              "flags": "0x2c100",
+              "vertices": 16,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 8,
+                "205": 8
+              }
+            },
+            {
+              "index": 39,
+              "texture": "o\\hous\\tovarna1_stenaext.paa",
+              "flags": "0x28100",
+              "vertices": 4,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "205": 4
+              }
+            },
+            {
+              "index": 40,
+              "texture": "o\\hous\\tovarna1_stenaext.paa",
+              "flags": "0x28100",
+              "vertices": 4,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 2,
+                "205": 2
+              }
+            },
+            {
+              "index": 41,
+              "texture": "o\\hous\\tovarna1_stenaext.paa",
+              "flags": "0x28100",
+              "vertices": 4,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "205": 4
+              }
+            },
+            {
+              "index": 42,
+              "texture": "o\\hous\\tovarna1_stenaext.paa",
+              "flags": "0x28100",
+              "vertices": 4,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 2,
+                "205": 2
+              }
+            },
+            {
+              "index": 43,
+              "texture": "o\\hous\\tovarna1_stenaext.paa",
+              "flags": "0x28100",
+              "vertices": 4,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "205": 4
+              }
+            },
+            {
+              "index": 44,
+              "texture": "o\\hous\\tovarna1_stenaext.paa",
+              "flags": "0x28100",
+              "vertices": 4,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 2,
+                "205": 2
+              }
+            },
+            {
+              "index": 45,
+              "texture": "o\\hous\\tovarna1_stenaext.paa",
+              "flags": "0x28100",
+              "vertices": 4,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "205": 4
+              }
+            },
+            {
+              "index": 46,
+              "texture": "o\\hous\\tovarna1_stenaext.paa",
+              "flags": "0x28100",
+              "vertices": 8,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 4,
+                "205": 4
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "o\\hous\\ruiny_obvod_3.p3d": {
+      "PBO": "O.pbo",
+      "originalExtractedSHA256": "0fba3f6b12e630f72a76b38edbda058905c353894f46ef6d178fb781f5f2618f",
+      "retainedEvidence": "Primary visual LOD only; full command transcripts remain local",
+      "nativeVisualLODs": [
+        {
+          "index": 0,
+          "resolution": 1.5,
+          "vertices": 1002,
+          "normals": 1002,
+          "invalidNormals": 0,
+          "userMaterialVertices": 0,
+          "landHintVertices": 0,
+          "lightModes": {
+            "0": 1002
+          },
+          "sections": [
+            {
+              "index": 0,
+              "texture": "o\\hous\\zborenina1a.pac",
+              "flags": "0x2000",
+              "vertices": 582,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 582
+              }
+            },
+            {
+              "index": 1,
+              "texture": "o\\hous\\zborenina1.pac",
+              "flags": "0x8000",
+              "vertices": 420,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 420
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "data3d\\budova1.p3d": {
+      "PBO": "Data3D.pbo",
+      "originalExtractedSHA256": "9a47ef8e9365f8eff6a8053c80940540effe91fc413e639daeba9aa6572a74d9",
+      "retainedEvidence": "Primary visual LOD only; full command transcripts remain local",
+      "nativeVisualLODs": [
+        {
+          "index": 0,
+          "resolution": 1.0,
+          "vertices": 512,
+          "normals": 512,
+          "invalidNormals": 0,
+          "userMaterialVertices": 0,
+          "landHintVertices": 0,
+          "lightModes": {
+            "0": 512
+          },
+          "sections": [
+            {
+              "index": 0,
+              "texture": "data\\blok_a_strecha_02.pac",
+              "flags": "0x4000",
+              "vertices": 16,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 16
+              }
+            },
+            {
+              "index": 1,
+              "texture": "data\\komin_top_01.pac",
+              "flags": "0xc000",
+              "vertices": 4,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 4
+              }
+            },
+            {
+              "index": 2,
+              "texture": "data\\komin_vetsi_side_01.pac",
+              "flags": "0x8000",
+              "vertices": 16,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 16
+              }
+            },
+            {
+              "index": 3,
+              "texture": "data\\blok_a_strecha.pac",
+              "flags": "0x2000",
+              "vertices": 24,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 24
+              }
+            },
+            {
+              "index": 4,
+              "texture": "data\\blok_a_rantl_top.pac",
+              "flags": "0xc000",
+              "vertices": 4,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 4
+              }
+            },
+            {
+              "index": 5,
+              "texture": "data\\blok_a_side_02.pac",
+              "flags": "0x8000",
+              "vertices": 15,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 15
+              }
+            },
+            {
+              "index": 6,
+              "texture": "data\\blok_a_back.pac",
+              "flags": "0xc000",
+              "vertices": 401,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 401
+              }
+            },
+            {
+              "index": 7,
+              "texture": "data\\blok_a_side.pac",
+              "flags": "0x8000",
+              "vertices": 32,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 32
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "data3d\\budova2.p3d": {
+      "PBO": "Data3D.pbo",
+      "originalExtractedSHA256": "ff1f1ea8fa41e5fd97c4fd1975c4f0593dd400404289bb8a19a4a14c5798f20a",
+      "retainedEvidence": "Primary visual LOD only; full command transcripts remain local",
+      "nativeVisualLODs": [
+        {
+          "index": 0,
+          "resolution": 1.0,
+          "vertices": 442,
+          "normals": 442,
+          "invalidNormals": 0,
+          "userMaterialVertices": 0,
+          "landHintVertices": 0,
+          "lightModes": {
+            "0": 442
+          },
+          "sections": [
+            {
+              "index": 0,
+              "texture": "data\\blok_a_strecha.pac",
+              "flags": "0x2000",
+              "vertices": 32,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 32
+              }
+            },
+            {
+              "index": 1,
+              "texture": "data\\univ_black2.pac",
+              "flags": "0x8000",
+              "vertices": 4,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 4
+              }
+            },
+            {
+              "index": 2,
+              "texture": "data\\blok_a_rantl_top.pac",
+              "flags": "0x4000",
+              "vertices": 8,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 8
+              }
+            },
+            {
+              "index": 3,
+              "texture": "data\\blok_a_side_02.pac",
+              "flags": "0x2000",
+              "vertices": 16,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 16
+              }
+            },
+            {
+              "index": 4,
+              "texture": "data\\blok_a_back.pac",
+              "flags": "0x4000",
+              "vertices": 358,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 358
+              }
+            },
+            {
+              "index": 5,
+              "texture": "data\\blok_a_side.pac",
+              "flags": "0x8000",
+              "vertices": 24,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 24
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "data3d\\dum_mesto2.p3d": {
+      "PBO": "Data3D.pbo",
+      "originalExtractedSHA256": "78901c67d316fa9df403590b8295b53b44153b898ffdc4c6f6133bc5b77f7fdd",
+      "retainedEvidence": "Primary visual LOD only; full command transcripts remain local",
+      "nativeVisualLODs": [
+        {
+          "index": 0,
+          "resolution": 0.7,
+          "vertices": 2505,
+          "normals": 2505,
+          "invalidNormals": 0,
+          "userMaterialVertices": 1657,
+          "landHintVertices": 0,
+          "lightModes": {
+            "0": 2505
+          },
+          "sections": [
+            {
+              "index": 0,
+              "texture": "data\\prkno_opak.pac",
+              "flags": "0x2000",
+              "vertices": 82,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "201": 82
+              }
+            },
+            {
+              "index": 1,
+              "texture": "data\\dum2_okno_ram.pac",
+              "flags": "0x2000",
+              "vertices": 384,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 256,
+                "201": 128
+              }
+            },
+            {
+              "index": 2,
+              "texture": "data\\dum2_okno_ram.pac",
+              "flags": "0x2000",
+              "vertices": 128,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "201": 128
+              }
+            },
+            {
+              "index": 3,
+              "texture": "data\\obrazky.pac",
+              "flags": "0xc000",
+              "vertices": 24,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "201": 24
+              }
+            },
+            {
+              "index": 4,
+              "texture": "data\\dum2_patro_okno.pac",
+              "flags": "0xc000",
+              "vertices": 8,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 4,
+                "201": 4
+              }
+            },
+            {
+              "index": 5,
+              "texture": "data\\dum2_patro_okno.pac",
+              "flags": "0xc000",
+              "vertices": 22,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "201": 22
+              }
+            },
+            {
+              "index": 6,
+              "texture": "data\\strop1.pac",
+              "flags": "0x2000",
+              "vertices": 108,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "201": 108
+              }
+            },
+            {
+              "index": 7,
+              "texture": "data\\dum2_m_meziwin.pac",
+              "flags": "0x8000",
+              "vertices": 152,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 76,
+                "201": 76
+              }
+            },
+            {
+              "index": 8,
+              "texture": "data\\stecha__s_vykyrem.pac",
+              "flags": "0x2000",
+              "vertices": 136,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 136
+              }
+            },
+            {
+              "index": 9,
+              "texture": "data\\dvere_bytove.pac",
+              "flags": "0xc000",
+              "vertices": 32,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "201": 32
+              }
+            },
+            {
+              "index": 10,
+              "texture": "data\\schody1_top.pac",
+              "flags": "0xc000",
+              "vertices": 44,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "201": 44
+              }
+            },
+            {
+              "index": 11,
+              "texture": "data\\parkety.pac",
+              "flags": "0x2000",
+              "vertices": 4,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "201": 4
+              }
+            },
+            {
+              "index": 12,
+              "texture": "data\\lino1.pac",
+              "flags": "0x2000",
+              "vertices": 4,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "201": 4
+              }
+            },
+            {
+              "index": 13,
+              "texture": "data\\dlazky2_opak.pac",
+              "flags": "0x2000",
+              "vertices": 57,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "201": 57
+              }
+            },
+            {
+              "index": 14,
+              "texture": "data\\drevo_oblozeni.pac",
+              "flags": "0x2000",
+              "vertices": 160,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "201": 160
+              }
+            },
+            {
+              "index": 15,
+              "texture": "data\\dvere_domovni.pac",
+              "flags": "0xc000",
+              "vertices": 117,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "201": 117
+              }
+            },
+            {
+              "index": 16,
+              "texture": "data\\schody1_front.pac",
+              "flags": "0xc000",
+              "vertices": 48,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "201": 48
+              }
+            },
+            {
+              "index": 17,
+              "texture": "data\\okap_roura_side.pac",
+              "flags": "0x2000",
+              "vertices": 112,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 112
+              }
+            },
+            {
+              "index": 18,
+              "texture": "data\\domek1_fr_kopie.pac",
+              "flags": "0xc000",
+              "vertices": 72,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 68,
+                "201": 4
+              }
+            },
+            {
+              "index": 19,
+              "texture": "data\\dum2_patro_stena.pac",
+              "flags": "0x2000",
+              "vertices": 194,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "201": 194
+              }
+            },
+            {
+              "index": 20,
+              "texture": "data\\dum2_patro_stenad.pac",
+              "flags": "0x8000",
+              "vertices": 50,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "201": 50
+              }
+            },
+            {
+              "index": 21,
+              "texture": "data\\futra.pac",
+              "flags": "0x4000",
+              "vertices": 24,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 12,
+                "201": 12
+              }
+            },
+            {
+              "index": 22,
+              "texture": "data\\futra.pac",
+              "flags": "0x4000",
+              "vertices": 168,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "201": 168
+              }
+            },
+            {
+              "index": 23,
+              "texture": "data\\domek1_side.pac",
+              "flags": "0xc000",
+              "vertices": 174,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 134,
+                "201": 40
+              }
+            },
+            {
+              "index": 24,
+              "texture": "data\\komin_top_01.pac",
+              "flags": "0x8000",
+              "vertices": 8,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 8
+              }
+            },
+            {
+              "index": 25,
+              "texture": "<none>",
+              "flags": "0x3040c000",
+              "vertices": 42,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 42
+              }
+            },
+            {
+              "index": 26,
+              "texture": "<none>",
+              "flags": "0x3040c000",
+              "vertices": 3,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "201": 3
+              }
+            },
+            {
+              "index": 27,
+              "texture": "data\\strop_opad1.paa",
+              "flags": "0x2c100",
+              "vertices": 4,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "201": 4
+              }
+            },
+            {
+              "index": 28,
+              "texture": "data\\sloupek_zabradli.paa",
+              "flags": "0x22100",
+              "vertices": 144,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "201": 144
+              }
+            },
+            {
+              "index": 29,
+              "texture": "data\\dvere_domovni_tga.paa",
+              "flags": "0x2c100",
+              "vertices": 16,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "201": 16
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "data3d\\dum_mesto3.p3d": {
+      "PBO": "Data3D.pbo",
+      "originalExtractedSHA256": "cc2a228593285632969b8f7f5185b8da2d0ad98b93a5f369df9b67cdb1f8b8e3",
+      "retainedEvidence": "Primary visual LOD only; full command transcripts remain local",
+      "nativeVisualLODs": [
+        {
+          "index": 0,
+          "resolution": 0.6,
+          "vertices": 471,
+          "normals": 471,
+          "invalidNormals": 0,
+          "userMaterialVertices": 0,
+          "landHintVertices": 0,
+          "lightModes": {
+            "0": 471
+          },
+          "sections": [
+            {
+              "index": 0,
+              "texture": "data\\ujezd_up.pac",
+              "flags": "0x4000",
+              "vertices": 46,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 46
+              }
+            },
+            {
+              "index": 1,
+              "texture": "data\\komin_top_01.pac",
+              "flags": "0x8000",
+              "vertices": 8,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 8
+              }
+            },
+            {
+              "index": 2,
+              "texture": "data\\domek1_side.pac",
+              "flags": "0xc000",
+              "vertices": 16,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 16
+              }
+            },
+            {
+              "index": 3,
+              "texture": "data\\ujezd.pac",
+              "flags": "0x8000",
+              "vertices": 229,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 229
+              }
+            },
+            {
+              "index": 4,
+              "texture": "data\\tasky_tmavsi.pac",
+              "flags": "0x4000",
+              "vertices": 8,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 8
+              }
+            },
+            {
+              "index": 5,
+              "texture": "data\\okap_roura_side.pac",
+              "flags": "0x2000",
+              "vertices": 112,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 112
+              }
+            },
+            {
+              "index": 6,
+              "texture": "data\\domek1_fr.pac",
+              "flags": "0xc000",
+              "vertices": 52,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 52
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "data3d\\dum_zboreny.p3d": {
+      "PBO": "Data3D.pbo",
+      "originalExtractedSHA256": "4c6626dc9d31483aa9fb24b61d4f976a05e6dbf9fa6620343b99dd910877c691",
+      "retainedEvidence": "Primary visual LOD only; full command transcripts remain local",
+      "nativeVisualLODs": [
+        {
+          "index": 0,
+          "resolution": 1.5,
+          "vertices": 1033,
+          "normals": 1033,
+          "invalidNormals": 0,
+          "userMaterialVertices": 451,
+          "landHintVertices": 0,
+          "lightModes": {
+            "0": 1033
+          },
+          "sections": [
+            {
+              "index": 0,
+              "texture": "data\\zbor_dum_stena2b.pac",
+              "flags": "0xc000",
+              "vertices": 30,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 30
+              }
+            },
+            {
+              "index": 1,
+              "texture": "data\\zbor_dum_strop128.pac",
+              "flags": "0x2000",
+              "vertices": 48,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 34,
+                "201": 14
+              }
+            },
+            {
+              "index": 2,
+              "texture": "data\\zbor_dum_strop128.pac",
+              "flags": "0x2000",
+              "vertices": 32,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "201": 32
+              }
+            },
+            {
+              "index": 3,
+              "texture": "data\\zbor_dum_podlaha.pac",
+              "flags": "0x2000",
+              "vertices": 56,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 44,
+                "201": 12
+              }
+            },
+            {
+              "index": 4,
+              "texture": "data\\zbor_dum_podlaha.pac",
+              "flags": "0x2000",
+              "vertices": 27,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "201": 27
+              }
+            },
+            {
+              "index": 5,
+              "texture": "data\\zbor_dum_stena2.pac",
+              "flags": "0xc000",
+              "vertices": 56,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 56
+              }
+            },
+            {
+              "index": 6,
+              "texture": "data\\zbor_dum_stena1.pac",
+              "flags": "0xc000",
+              "vertices": 46,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 31,
+                "201": 15
+              }
+            },
+            {
+              "index": 7,
+              "texture": "data\\zbor_dum_stena1b.pac",
+              "flags": "0xc000",
+              "vertices": 86,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 68,
+                "201": 18
+              }
+            },
+            {
+              "index": 8,
+              "texture": "data\\zbor_dum_stena1b.pac",
+              "flags": "0xc000",
+              "vertices": 4,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "201": 4
+              }
+            },
+            {
+              "index": 9,
+              "texture": "data\\zbor_dum_zdivo.pac",
+              "flags": "0x4000",
+              "vertices": 8,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 6,
+                "201": 2
+              }
+            },
+            {
+              "index": 10,
+              "texture": "data\\zbor_dum_zdivo.pac",
+              "flags": "0x4000",
+              "vertices": 6,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "201": 6
+              }
+            },
+            {
+              "index": 11,
+              "texture": "data\\zbor_dum_stena_in.pac",
+              "flags": "0xc000",
+              "vertices": 222,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 153,
+                "201": 69
+              }
+            },
+            {
+              "index": 12,
+              "texture": "data\\zbor_dum_stena_in.pac",
+              "flags": "0xc000",
+              "vertices": 174,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "201": 174
+              }
+            },
+            {
+              "index": 13,
+              "texture": "data\\kostel_trosky_zhrouc.pac",
+              "flags": "0x2000",
+              "vertices": 225,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 160,
+                "201": 65
+              }
+            },
+            {
+              "index": 14,
+              "texture": "data\\kostel_trosky_zhrouc.pac",
+              "flags": "0x2000",
+              "vertices": 85,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "201": 85
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "data3d\\skala.p3d": {
+      "PBO": "Data3D.pbo",
+      "originalExtractedSHA256": "e0c482d3c2b3f05bcd9a28bf28e392f3d240ffb83883842f17295655bb177ebc",
+      "retainedEvidence": "Primary visual LOD only; full command transcripts remain local",
+      "nativeVisualLODs": [
+        {
+          "index": 0,
+          "resolution": 0.1,
+          "vertices": 39,
+          "normals": 39,
+          "invalidNormals": 0,
+          "userMaterialVertices": 0,
+          "landHintVertices": 0,
+          "lightModes": {
+            "0": 39
+          },
+          "sections": [
+            {
+              "index": 0,
+              "texture": "data\\skala_piskovec2.pac",
+              "flags": "0x2000",
+              "vertices": 39,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 39
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "data3d\\stodola.p3d": {
+      "PBO": "Data3D.pbo",
+      "originalExtractedSHA256": "e2c2bb2deab624f4e2855d096524979fc469f3b9a44b4f3cd97ba1a8dd46346b",
+      "retainedEvidence": "Primary visual LOD only; full command transcripts remain local",
+      "nativeVisualLODs": [
+        {
+          "index": 0,
+          "resolution": 0.8,
+          "vertices": 619,
+          "normals": 619,
+          "invalidNormals": 0,
+          "userMaterialVertices": 0,
+          "landHintVertices": 0,
+          "lightModes": {
+            "0": 619
+          },
+          "sections": [
+            {
+              "index": 0,
+              "texture": "data\\stodola_f2.pac",
+              "flags": "0x4000",
+              "vertices": 148,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 148
+              }
+            },
+            {
+              "index": 1,
+              "texture": "data\\stodola_s.pac",
+              "flags": "0x4000",
+              "vertices": 322,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 322
+              }
+            },
+            {
+              "index": 2,
+              "texture": "data\\prkna_dark.pac",
+              "flags": "0x2000",
+              "vertices": 22,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 22
+              }
+            },
+            {
+              "index": 3,
+              "texture": "data\\tasky_tmavsi.pac",
+              "flags": "0x4000",
+              "vertices": 8,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 8
+              }
+            },
+            {
+              "index": 4,
+              "texture": "data\\stodola_f.pac",
+              "flags": "0x8000",
+              "vertices": 123,
+              "invalidVertexNormals": 0,
+              "materialIndices": {
+                "0": 123
+              }
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "textureEvidence": {
+    "o\\hous\\dum_patrovy02.pac": {
+      "originalExtractedSHA256": "bcd9adb59115064f70fdbffcb2e23f48ed33a0c7ca4cd57dfec4d45b60399ee3",
+      "inspection": "File: build\\coverage-survey-inspection\\o\\hous\\dum_patrovy02.pac\nType: PAC\nFormat: DXT1 (0xff01)\nDimensions: 512x512\nMipmaps: 8\nTransparency: no\nAlpha: min=255 max=255 mean=255  (clear a=0: 0.0%  opaque a=255: 100.0%  partial 0<a<255: 0.0%)\nClassification: OPAQUE\n  -> route: opaque pass, depth-write (occludes)\n"
+    },
+    "o\\hous\\dum_patrovy02a.pac": {
+      "originalExtractedSHA256": "d9fb0e5b886605c921a586f49012177f94dd6d3bd311dd8eaf556e1ad3b3b1eb",
+      "inspection": "File: build\\coverage-survey-inspection\\o\\hous\\dum_patrovy02a.pac\nType: PAC\nFormat: DXT1 (0xff01)\nDimensions: 512x512\nMipmaps: 8\nTransparency: no\nAlpha: min=255 max=255 mean=255  (clear a=0: 0.0%  opaque a=255: 100.0%  partial 0<a<255: 0.0%)\nClassification: OPAQUE\n  -> route: opaque pass, depth-write (occludes)\n"
+    },
+    "o\\hous\\panel01.pac": {
+      "originalExtractedSHA256": "62379377c51fc9e1f3eab263711bac8a2b26af345ad7fe30b5a1e9c2536bc11d",
+      "inspection": "File: build\\coverage-survey-inspection\\o\\hous\\panel01.pac\nType: PAC\nFormat: DXT1 (0xff01)\nDimensions: 512x512\nMipmaps: 8\nTransparency: no\nAlpha: min=255 max=255 mean=255  (clear a=0: 0.0%  opaque a=255: 100.0%  partial 0<a<255: 0.0%)\nClassification: OPAQUE\n  -> route: opaque pass, depth-write (occludes)\n"
+    },
+    "o\\hous\\panel02.pac": {
+      "originalExtractedSHA256": "27eb820b2013fa6edc70ccfe31135eb09d665e6e069d546c578bc62d4093b4d9",
+      "inspection": "File: build\\coverage-survey-inspection\\o\\hous\\panel02.pac\nType: PAC\nFormat: DXT1 (0xff01)\nDimensions: 512x256\nMipmaps: 7\nTransparency: no\nAlpha: min=255 max=255 mean=255  (clear a=0: 0.0%  opaque a=255: 100.0%  partial 0<a<255: 0.0%)\nClassification: OPAQUE\n  -> route: opaque pass, depth-write (occludes)\n"
+    },
+    "o\\hous\\panel03.pac": {
+      "originalExtractedSHA256": "2350e9d089b9e209864914157b23aabdd71ac73a92c695a15da184db255e4a4c",
+      "inspection": "File: build\\coverage-survey-inspection\\o\\hous\\panel03.pac\nType: PAC\nFormat: DXT1 (0xff01)\nDimensions: 512x512\nMipmaps: 8\nTransparency: no\nAlpha: min=255 max=255 mean=255  (clear a=0: 0.0%  opaque a=255: 100.0%  partial 0<a<255: 0.0%)\nClassification: OPAQUE\n  -> route: opaque pass, depth-write (occludes)\n"
+    },
+    "o\\hous\\panel04.pac": {
+      "originalExtractedSHA256": "38f4a31ca9c28e49eecee5e7567db5a0bd7827115a39f1e647ac39dd9840b757",
+      "inspection": "File: build\\coverage-survey-inspection\\o\\hous\\panel04.pac\nType: PAC\nFormat: DXT1 (0xff01)\nDimensions: 256x256\nMipmaps: 7\nTransparency: no\nAlpha: min=255 max=255 mean=255  (clear a=0: 0.0%  opaque a=255: 100.0%  partial 0<a<255: 0.0%)\nClassification: OPAQUE\n  -> route: opaque pass, depth-write (occludes)\n"
+    },
+    "o\\hous\\tovarna1_stenaext.paa": {
+      "originalExtractedSHA256": "6a971960e4aa8b8bec3cb9c514908a4bf4e28ca096b7893f577d7ee69d6fa706",
+      "inspection": "File: build\\coverage-survey-inspection\\o\\hous\\tovarna1_stenaext.paa\nType: PAA\nFormat: ARGB4444 (0x4444)\nDimensions: 512x512\nMipmaps: 9\nAlpha: min=0 max=255 mean=163  (clear a=0: 27.8%  opaque a=255: 54.5%  partial 0<a<255: 17.7%)\nClassification: BLEND (translucent - partial alpha)\n  -> route: back-to-front alpha pass, NO depth-write (see-through)\n"
+    },
+    "data\\blok_a_back.pac": {
+      "originalExtractedSHA256": "88f67b02dff6dd96e946542d7562f958e614699d28210499fb4d967b3fba70df",
+      "inspection": "File: build\\coverage-survey-inspection\\data\\blok_a_back.pac\nType: PAC\nFormat: DXT1 (0xff01)\nDimensions: 256x128\nMipmaps: 6\nTransparency: yes (1-bit alpha blocks detected)\nAlpha: min=255 max=255 mean=255  (clear a=0: 0.0%  opaque a=255: 100.0%  partial 0<a<255: 0.0%)\nClassification: OPAQUE\n  -> route: opaque pass, depth-write (occludes)\n"
+    },
+    "data\\blok_a_rantl_top.pac": {
+      "originalExtractedSHA256": "e67b9f5bed85cd1386bbb7446f83f351014580b490f7f054f1c50c1df553cbac",
+      "inspection": "File: build\\coverage-survey-inspection\\data\\blok_a_rantl_top.pac\nType: PAC\nFormat: DXT1 (0xff01)\nDimensions: 64x64\nMipmaps: 5\nTransparency: no\nAlpha: min=255 max=255 mean=255  (clear a=0: 0.0%  opaque a=255: 100.0%  partial 0<a<255: 0.0%)\nClassification: OPAQUE\n  -> route: opaque pass, depth-write (occludes)\n"
+    },
+    "data\\blok_a_side.pac": {
+      "originalExtractedSHA256": "710ef3e0211644be7a5af69f6eca485d358046374e36b3693f6be3dbd52dca3b",
+      "inspection": "File: build\\coverage-survey-inspection\\data\\blok_a_side.pac\nType: PAC\nFormat: DXT1 (0xff01)\nDimensions: 256x128\nMipmaps: 6\nTransparency: yes (1-bit alpha blocks detected)\nAlpha: min=255 max=255 mean=255  (clear a=0: 0.0%  opaque a=255: 100.0%  partial 0<a<255: 0.0%)\nClassification: OPAQUE\n  -> route: opaque pass, depth-write (occludes)\n"
+    },
+    "data\\blok_a_side_02.pac": {
+      "originalExtractedSHA256": "6381f2ad139f69e7330596ea9ea06898914ee7e96e96ca7ab6dd85a96ad60b69",
+      "inspection": "File: build\\coverage-survey-inspection\\data\\blok_a_side_02.pac\nType: PAC\nFormat: DXT1 (0xff01)\nDimensions: 256x256\nMipmaps: 7\nTransparency: yes (1-bit alpha blocks detected)\nAlpha: min=255 max=255 mean=255  (clear a=0: 0.0%  opaque a=255: 100.0%  partial 0<a<255: 0.0%)\nClassification: OPAQUE\n  -> route: opaque pass, depth-write (occludes)\n"
+    },
+    "data\\blok_a_strecha.pac": {
+      "originalExtractedSHA256": "81942c30c508fa4eb1d321b88bb23b2900b13f153bdf39e88a7f04368685ebc5",
+      "inspection": "File: build\\coverage-survey-inspection\\data\\blok_a_strecha.pac\nType: PAC\nFormat: DXT1 (0xff01)\nDimensions: 256x256\nMipmaps: 7\nTransparency: no\nAlpha: min=255 max=255 mean=255  (clear a=0: 0.0%  opaque a=255: 100.0%  partial 0<a<255: 0.0%)\nClassification: OPAQUE\n  -> route: opaque pass, depth-write (occludes)\n"
+    },
+    "data\\blok_a_strecha_02.pac": {
+      "originalExtractedSHA256": "0f895b45f9f0e5f87eb9dfbdd5ba0d93ca617bafa3d315404332af596834d6c5",
+      "inspection": "File: build\\coverage-survey-inspection\\data\\blok_a_strecha_02.pac\nType: PAC\nFormat: DXT1 (0xff01)\nDimensions: 128x128\nMipmaps: 6\nTransparency: yes (1-bit alpha blocks detected)\nAlpha: min=255 max=255 mean=255  (clear a=0: 0.0%  opaque a=255: 100.0%  partial 0<a<255: 0.0%)\nClassification: OPAQUE\n  -> route: opaque pass, depth-write (occludes)\n"
+    },
+    "data\\ujezd.pac": {
+      "originalExtractedSHA256": "71d4a3076518db5b18000fd805f55073842b42cb7b42344a2d91cfc528d47363",
+      "inspection": "File: build\\coverage-survey-inspection\\data\\ujezd.pac\nType: PAC\nFormat: DXT1 (0xff01)\nDimensions: 256x128\nMipmaps: 6\nTransparency: no\nAlpha: min=255 max=255 mean=255  (clear a=0: 0.0%  opaque a=255: 100.0%  partial 0<a<255: 0.0%)\nClassification: OPAQUE\n  -> route: opaque pass, depth-write (occludes)\n"
+    },
+    "data\\ujezd_up.pac": {
+      "originalExtractedSHA256": "54a7ab7452ad1506044b566fecebe4893fa2d78bc00d757c4f96283b265edefd",
+      "inspection": "File: build\\coverage-survey-inspection\\data\\ujezd_up.pac\nType: PAC\nFormat: DXT1 (0xff01)\nDimensions: 256x128\nMipmaps: 6\nTransparency: yes (1-bit alpha blocks detected)\nAlpha: min=255 max=255 mean=255  (clear a=0: 0.0%  opaque a=255: 100.0%  partial 0<a<255: 0.0%)\nClassification: OPAQUE\n  -> route: opaque pass, depth-write (occludes)\n"
+    },
+    "data\\dum2_m_meziwin.pac": {
+      "originalExtractedSHA256": "28a00a80cea9ca6473efd01a757bf1d6df5c62844a206e8f014c6da4d79bc0ab",
+      "inspection": "File: build\\coverage-survey-inspection\\data\\dum2_m_meziwin.pac\nType: PAC\nFormat: DXT1 (0xff01)\nDimensions: 32x128\nMipmaps: 4\nTransparency: no\nAlpha: min=255 max=255 mean=255  (clear a=0: 0.0%  opaque a=255: 100.0%  partial 0<a<255: 0.0%)\nClassification: OPAQUE\n  -> route: opaque pass, depth-write (occludes)\n"
+    },
+    "data\\dum2_patro_stena.pac": {
+      "originalExtractedSHA256": "6b78db6b25e0a0a3bfebbcb655f35b79217c86796c49f07392ed7384c0ab1cc8",
+      "inspection": "File: build\\coverage-survey-inspection\\data\\dum2_patro_stena.pac\nType: PAC\nFormat: DXT1 (0xff01)\nDimensions: 256x256\nMipmaps: 7\nTransparency: no\nAlpha: min=255 max=255 mean=255  (clear a=0: 0.0%  opaque a=255: 100.0%  partial 0<a<255: 0.0%)\nClassification: OPAQUE\n  -> route: opaque pass, depth-write (occludes)\n"
+    }
+  },
+  "toolChecks": {
+    "vulkan": {
+      "nativeODOL": "pass",
+      "defaultMLODInspection": "pass",
+      "MLODNativeLightingUnsupportedExit": 1,
+      "toolSHA256": "8f98b565969fac86fc29b7ea09732ce9e90d14eaf9ccdb9c48c79bd8a1172991"
+    },
+    "gl33": {
+      "nativeODOL": "pass",
+      "defaultMLODInspection": "pass",
+      "MLODNativeLightingUnsupportedExit": 1,
+      "toolSHA256": "5bd1b69dca91c7bf4d8e1da67073ba6de1640ef9a9b90d7ed60cf64257e81297"
+    }
+  },
+  "selectedModelPlacementCounts": {
+    "source": "Existing abel/eden object receipts and targeted queries for only four Noe model names; counts are placements, not coverage or gameplay frequency",
+    "abel": {
+      "dum_mesto": 2,
+      "dum_mesto2": 2,
+      "dum_mesto3": 3,
+      "budova1": 6,
+      "budova2": 1,
+      "budova3": 3,
+      "skala": 68
+    },
+    "eden": {
+      "dum_mesto": 5,
+      "dum_mesto2": 16,
+      "dum_mesto3": 26,
+      "budova1": 9,
+      "budova2": 4,
+      "budova3": 3,
+      "stodola": 10
+    },
+    "noe": {
+      "panelak": 26,
+      "panelak2": 7,
+      "dum_patrovy02": 11,
+      "tovarna1": 1
+    }
+  }
+}
