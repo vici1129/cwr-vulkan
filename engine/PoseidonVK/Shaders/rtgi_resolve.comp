@@ -11,18 +11,35 @@ layout(set=0,binding=10) uniform sampler2D historyGI;
 layout(set=0,binding=11,rgba16f) uniform writeonly image2D resultGI;
 layout(set=0,binding=13) uniform sampler2D previousRawGI;
 shared uint counts[4];
+// The unchanged 5x5 filter overlaps heavily across this 8x8 group. Decode its
+// 12x12 footprint once, including the same clamped two-pixel border. This is
+// workgroup scratch only; no new images, history or inter-frame cache.
+shared vec4 tileGI[144];
+shared vec3 tilePosition[144],tileNormal[144];
+void loadNeighborhood() {
+    ivec2 origin=ivec2(gl_WorkGroupID.xy)*8-2,size=textureSize(rawGI,0);
+    for(uint i=gl_LocalInvocationIndex;i<144;i+=64) {
+        ivec2 q=clamp(origin+ivec2(i%12,i/12),ivec2(0),size-1);
+        vec4 v=texelFetch(rawGI,q,0);
+        tileGI[i]=v;
+        tilePosition[i]=giPosition(min(q*2+1,depthSize()-1),giSampleDepth(v.a));
+        tileNormal[i]=giSampleNormal(v.a);
+    }
+}
 vec4 resolveGI(ivec2 pixel) {
-    vec4 raw=texelFetch(rawGI,pixel,0);
+    int center=(int(gl_LocalInvocationID.y)+2)*12+int(gl_LocalInvocationID.x)+2;
+    vec4 raw=tileGI[center];
     if(raw.a==0) return vec4(0);
     ivec2 size=textureSize(rawGI,0),full=min(pixel*2+1,depthSize()-1);
-    vec3 p=giPosition(full,giSampleDepth(raw.a)),worldNormal=giSampleNormal(raw.a);
+    vec3 p=tilePosition[center],worldNormal=tileNormal[center];
     vec3 n=transpose(mat3(ao.camera))*worldNormal;
     vec3 sum=vec3(0),moment=vec3(0),low=vec3(1e6),high=vec3(0);
     float weight=0;bool unsafe=raw.a<0;
     for(int y=-2;y<=2;++y) for(int x=-2;x<=2;++x) {
-        ivec2 q=clamp(pixel+ivec2(x,y),ivec2(0),size-1);
-        vec4 v=texelFetch(rawGI,q,0);
-        float w=giPlaneWeight(p,n,worldNormal,min(q*2+1,depthSize()-1),v.a)*exp(-float(x*x+y*y)*.35);
+        int i=center+y*12+x;
+        vec4 v=tileGI[i];
+        if(v.a==0) continue;
+        float w=giPlaneWeight(p,n,worldNormal,tilePosition[i],tileNormal[i])*exp(-float(x*x+y*y)*.35);
         if(w<=0) continue;
         sum+=v.rgb*w;moment+=v.rgb*v.rgb*w;weight+=w;
         low=min(low,v.rgb);high=max(high,v.rgb);unsafe=unsafe || v.a<0;
@@ -62,6 +79,7 @@ vec4 resolveGI(ivec2 pixel) {
     return vec4(current,supported && !unsafe?length:0);
 }
 void main() {
+    loadNeighborhood();
     if(gl_LocalInvocationIndex<4) counts[gl_LocalInvocationIndex]=0;
     barrier();
     ivec2 p=ivec2(gl_GlobalInvocationID.xy);

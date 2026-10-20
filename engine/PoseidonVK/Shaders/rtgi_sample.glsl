@@ -22,11 +22,13 @@ vec3 giPosition(ivec2 full,float z) {
     vec2 ndc=(vec2(full)+.5)/vec2(depthSize())*2-1-ao.jitter.xy;
     return vec3(ndc*vec2(1,-1)/ao.projection.xy*z,z);
 }
-float giPlaneWeight(vec3 p,vec3 n,vec3 worldNormal,ivec2 other,float data) {
-    if(data==0) return 0;
-    vec3 op=giPosition(other,giSampleDepth(data));
+float giPlaneWeight(vec3 p,vec3 n,vec3 worldNormal,vec3 op,vec3 otherNormal) {
     float plane=abs(dot(op-p,n));
-    if(dot(worldNormal,giSampleNormal(data))<.9 ||
+    if(dot(worldNormal,otherNormal)<.9 ||
        plane>max(.025,p.z*.001) || abs(p.z-op.z)>max(.2,p.z*.02)) return 0;
     return exp(-plane/max(.01,p.z*.0005));
+}
+float giPlaneWeight(vec3 p,vec3 n,vec3 worldNormal,ivec2 other,float data) {
+    if(data==0) return 0;
+    return giPlaneWeight(p,n,worldNormal,giPosition(other,giSampleDepth(data)),giSampleNormal(data));
 }

@@ -5,8 +5,7 @@
 vec3 raySkyDomeLinear(vec3 direction) {
     if(direction.y<=0) return vec3(0);
     float lobe=pow(max(dot(direction,weather.sun.xyz),0),6);
-    vec3 color=giSkyGradient(legacyLightToLinear(light.zenith.rgb),
-        legacyLightToLinear(light.horizon.rgb),direction.y)+legacyLightToLinear(light.sunSky.rgb)*lobe;
+    vec3 color=giSkyGradient(giLighting[2],giLighting[3],direction.y)+giLighting[4]*lobe;
     // Availability is independent of the water/sky-reflection settings.
     if(weather.options.y<.5) return color;
     const float pi=3.14159265359;
@@ -26,7 +25,7 @@ vec3 raySkyWeatherLinear(vec3 world,vec3 direction,vec3 color) {
         if(t<=0 || t>=19000) continue;
         vec4 cloud=cloudAtLOD(i,world.xz+direction.xz*t,3);
         float opacity=cloud.a*weather.cloudColor.a*clamp(exp(2.9957322736*(4000-t)/19000),0,1);
-        color=mix(color,cloud.rgb*legacyLightToLinear(weather.cloudColor.rgb),opacity);
+        color=mix(color,cloud.rgb*giLighting[5],opacity);
     }
     return color;
 }

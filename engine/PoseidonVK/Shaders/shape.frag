@@ -73,6 +73,9 @@ vec3 nightResponse(vec3 color) {
     return toLinear(mix(vec3(luminance),perceptual,clamp(luminance+lighting.eyeCoef.a,0.0,1.0)));
 }
 void main() {
+#ifdef RT_AO
+    bool captureAmbient=lighting.aoReceiver.x>.5 && aoAmbient.a>.99;
+#endif
     bool giReceiverReady=false;
     vec3 terrainDetail=vec3(1);
     float terrainWet=1;
@@ -137,7 +140,7 @@ void main() {
         outColor=vec4(base+sun*csm,texel.a*draw.color.a);
         contactBase=base;
 #ifdef RT_AO
-        ambientContribution=pbrAmbient(texel.rgb,draw.color.rgb);
+        if(captureAmbient) ambientContribution=pbrAmbient(texel.rgb,draw.color.rgb);
 #endif
     } else {
     vec3 litColor = vertexColor.rgb;
@@ -185,11 +188,13 @@ void main() {
 #ifdef RT_AO
     // Extract AO from the same sun-independent base used by shadow subtraction.
     // A difference around sun-lit legacy RGB overlaps the nonlinear sun term.
-    vec3 aoBase=captureSun ? max(litColor-directSun.rgb,vec3(0)) : litColor;
-    ambientContribution=texel.rgb*max(legacyLightToLinear(draw.color.rgb*aoBase)-
-        legacyLightToLinear(draw.color.rgb*max(aoBase-aoAmbient.rgb,vec3(0))),vec3(0));
-    if(draw.detailEnabled>.5 && draw.detailEnabled<1.5)
-        ambientContribution*=legacyLightToLinear(vec3(WORLD_TEXTURE(detailTexture,texCoord*32).a*2));
+    if(captureAmbient) {
+        vec3 aoBase=captureSun ? max(litColor-directSun.rgb,vec3(0)) : litColor;
+        ambientContribution=texel.rgb*max(legacyLightToLinear(draw.color.rgb*aoBase)-
+            legacyLightToLinear(draw.color.rgb*max(aoBase-aoAmbient.rgb,vec3(0))),vec3(0));
+        if(draw.detailEnabled>.5 && draw.detailEnabled<1.5)
+            ambientContribution*=terrainDetail;
+    }
 #endif
     separate = captureSun && lighting.rtSun.x < 1.5;
     csm = sunlightVisibility(shadowWorld, separate ? 1.0 : fogVisibility);
@@ -197,7 +202,7 @@ void main() {
         // Derive the sunlight-only difference in linear HDR, not by multiplying
         // ambient/emissive/local lighting or already-composited fog.
         base = texel.rgb * legacyLightToLinear(draw.color.rgb * max(litColor-directSun.rgb,vec3(0)));
-        if(draw.detailEnabled>.5) base *= legacyLightToLinear(vec3(WORLD_TEXTURE(detailTexture,texCoord*32).a*2));
+        if(draw.detailEnabled>.5) base *= terrainDetail;
         base *= wetDiffuse;
     }
     if (separate) {
@@ -231,24 +236,24 @@ void main() {
     // Keep the night-eye response in its calibrated perceptual domain.
 #ifdef RT_AO
     // Night-eye is nonlinear too: keep the AO difference on that same base.
-    // PBR and draws without sunlight capture retain their original reference.
-    vec3 aoReference=lighting.pbr.x<=0.0 && captureSun ? (separate ? base : contactBase) : outColor.rgb;
-    vec3 ambientRemoved=nightResponse(max(aoReference-ambientContribution,vec3(0)));
-    vec3 ambientResponse=nightResponse(aoReference);
+    // Ordinary PBR/AO and draws without sunlight capture retain their reference.
+    vec3 ambientResponse=vec3(0),ambientRemoved=vec3(0);
+    if(captureAmbient) {
+        vec3 aoReference=lighting.pbr.x<=0.0 && captureSun ? (separate ? base : contactBase) : outColor.rgb;
+        // Enhanced receivers previously overwrote the result below with a second
+        // difference around base. Select that same reference before converting it.
+        if(lighting.pbr.w>.5) aoReference=base;
+        ambientRemoved=nightResponse(max(aoReference-ambientContribution,vec3(0)));
+        ambientResponse=nightResponse(aoReference);
+    }
 #endif
     outColor.rgb = nightResponse(outColor.rgb);
     float visibility = clamp(fogVisibility, 0.0, 1.0);
 #ifdef RT_AO
     // Subtract only the captured ambient difference. Direct/local/emissive light
     // and in-scattered fog are never multiplied by the AO visibility.
-    outAmbient=lighting.aoReceiver.x>.5 && aoAmbient.a>.99 ?
+    outAmbient=captureAmbient ?
         vec4(max(ambientResponse-ambientRemoved,vec3(0))*visibility,1.0/gl_FragCoord.w):vec4(0);
-    // Terrain's separate-sun aoReference is already base. Reuse the exact same
-    // nonlinear response instead of two more sRGB/night-eye round trips.
-    if(lighting.pbr.w>.5 && lighting.aoReceiver.x>.5 && aoAmbient.a>.99 &&
-       (lighting.pbr.x>0.0 || !captureSun || !separate))
-        outAmbient=vec4(max(nightResponse(base)-nightResponse(max(base-ambientContribution,vec3(0))),vec3(0))*visibility,
-            1.0/gl_FragCoord.w);
     // A negative depth reserves this independently captured ambient difference
     // for RTGI replacement. RTAO rejects it; direct/local/emission remain intact.
     bool terrainReceiver=lighting.pbr.w==1000 && lighting.pbr.x==0 && terrainTint.a>.99 &&

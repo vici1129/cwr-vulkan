@@ -340,7 +340,24 @@ TEST_CASE("Legacy RTAO ambient cannot overlap separately subtracted sunlight", "
     REQUIRE(shape.find("nightResponse(max(aoReference-ambientContribution,vec3(0)))") != std::string::npos);
     REQUIRE(shape.find("max(ambientResponse-ambientRemoved,vec3(0))*visibility") != std::string::npos);
     REQUIRE(shape.find("captureSun = lighting.rtSun.x") < shape.find("vec3 aoBase="));
-    REQUIRE(shape.find("(lighting.pbr.x>0.0 || !captureSun || !separate)") != std::string::npos);
+    REQUIRE(shape.find("bool captureAmbient=lighting.aoReceiver.x>.5 && aoAmbient.a>.99;") != std::string::npos);
+    REQUIRE(shape.find("if(captureAmbient) ambientContribution=pbrAmbient") != std::string::npos);
+    REQUIRE(shape.find("if(lighting.pbr.w>.5) aoReference=base;") < shape.find("ambientResponse=nightResponse(aoReference)"));
+    REQUIRE(shape.find("outAmbient=captureAmbient ?") != std::string::npos);
+    REQUIRE(shape.find("if(draw.detailEnabled>.5) base *= terrainDetail;") != std::string::npos);
+
+    // Selecting the final reference first must match the old enhanced overwrite
+    // for every lighting branch, including ordinary PBR/AO and contact-only sun.
+    const float base=1.f, contact=2.f, color=3.f;
+    for(bool pbr : {false,true}) for(bool enhanced : {false,true})
+    for(bool capture : {false,true}) for(bool separate : {false,true})
+    {
+        float oldReference=!pbr && capture ? (separate?base:contact) : color;
+        if(enhanced && (pbr || !capture || !separate)) oldReference=base;
+        float reference=!pbr && capture ? (separate?base:contact) : color;
+        if(enhanced) reference=base;
+        REQUIRE(reference==oldReference);
+    }
 
     // Pin the shipped conversion used by this scalar, achromatic counterexample.
     const auto conversion = ReadTextFile(root / "color_space.glsl");
@@ -477,6 +494,34 @@ TEST_CASE("RTGI filters incident radiance before receiver reflectance with bound
     REQUIRE(host.find("RTGIEnabled() && IsTemporal(_aaMode)") != std::string::npos);
     REQUIRE(host.find("_taaFrame != rt.giLastFrame + 1") != std::string::npos);
     REQUIRE(host.find("if (!_taaValid || lightingChanged") != std::string::npos);
+
+    // The cooperative footprint must address the identical clamped taps, even
+    // in partial groups, tiny images and all four image corners.
+    REQUIRE(resolve.find("shared vec4 tileGI[144];") != std::string::npos);
+    REQUIRE(resolve.find("int i=center+y*12+x;") != std::string::npos);
+    REQUIRE(resolve.find("for(int y=-2;y<=2;++y) for(int x=-2;x<=2;++x)") != std::string::npos);
+    REQUIRE(resolve.find("loadNeighborhood();") < resolve.find("counts[gl_LocalInvocationIndex]=0;"));
+    REQUIRE(resolve.find("counts[gl_LocalInvocationIndex]=0;") < resolve.find("barrier();"));
+    REQUIRE(resolve.find("barrier();") < resolve.find("imageStore(resultGI,p,resolveGI(p))"));
+    for(int size : {1,7,8,9,719,1280})
+    for(int pixel : {0,size/2,size-1})
+    for(int delta=-2;delta<=2;++delta)
+    {
+        const int group=pixel/8, local=pixel%8;
+        const int tile=local+2+delta;
+        REQUIRE(tile>=0);
+        REQUIRE(tile<12);
+        REQUIRE(std::clamp(group*8-2+tile,0,size-1)==std::clamp(pixel+delta,0,size-1));
+    }
+    // Workgroup sharing changes neither decoding nor the nonlinear, directional
+    // sky color. Water continues to use the ordinary lighting helper.
+    const auto lighting=ReadTextFile(root / "Shaders/ray_lighting.glsl");
+    const auto sky=ReadTextFile(root / "Shaders/ray_sky.glsl");
+    REQUIRE(trace.find("#define GI_GROUP_LIGHTING") != std::string::npos);
+    REQUIRE(trace.find("giLighting[lane]=legacyLightToLinear(color);") < trace.find("if(ao.jitter.w==-1)"));
+    REQUIRE(lighting.find("#ifdef GI_GROUP_LIGHTING") != std::string::npos);
+    REQUIRE(lighting.find("#else\nvec3 rayAmbientLinear() { return legacyLightToLinear(light.ambient.rgb); }") != std::string::npos);
+    REQUIRE(sky.find("legacyLightToLinear(weather.skyColor.rgb+weather.sunSky.rgb*lobe)") != std::string::npos);
 }
 
 TEST_CASE("Post-resolve RT corrections reject mixed MSAA coverage", "[Graphics][Shaders][vulkan-aa]")

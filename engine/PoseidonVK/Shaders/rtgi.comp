@@ -9,6 +9,7 @@
 #include "rtgi_history.glsl"
 #include "ray_material.glsl"
 #include "ray_surface.glsl"
+#define GI_GROUP_LIGHTING
 #include "ray_lighting.glsl"
 #define WEATHER_SET 1
 #include "weather.glsl"
@@ -278,15 +279,26 @@ vec4 traceGI(ivec2 pixel) {
     return result;
 }
 void main() {
+    uint lane=gl_LocalInvocationIndex;
+    // These authored coefficients are constant for the dispatch. Decode each
+    // once per group, sharing the existing counter-initialization barrier.
+    if(lane<6) {
+        vec3 color=lane==0?light.ambient.rgb:lane==1?light.diffuse.rgb:
+            lane==2?light.zenith.rgb:lane==3?light.horizon.rgb:
+            lane==4?light.sunSky.rgb:weather.cloudColor.rgb;
+        giLighting[lane]=legacyLightToLinear(color);
+    }
+    if(lane<40) counts[lane]=0;
+    barrier();
     if(ao.jitter.w==-1) { measureSkyIrradiance();return; }
     if(ao.jitter.w==-2) { measureTransport();return; }
-    if(gl_LocalInvocationIndex<40) counts[gl_LocalInvocationIndex]=0;
-    barrier();
     ivec2 p=ivec2(gl_GlobalInvocationID.xy);
     if(all(lessThan(p,imageSize(resultGI)))) imageStore(resultGI,p,traceGI(p));
     barrier();
     if(gl_LocalInvocationIndex<40) {
         uint i=gl_LocalInvocationIndex;
-        atomicAdd(counters.count[i<8?20+i:i<24?24+i:56+i],counts[i]);
+        // Empty groups/categories contribute nothing. In particular, do not
+        // serialize every group on the global diagnostic words for +0.
+        if(counts[i]!=0) atomicAdd(counters.count[i<8?20+i:i<24?24+i:56+i],counts[i]);
     }
 }

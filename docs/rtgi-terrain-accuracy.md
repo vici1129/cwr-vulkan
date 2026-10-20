@@ -1,5 +1,8 @@
 # Terrain GI material accuracy and cost
 
+For the subsequent shader-only GPU optimization and fresh matched measurements,
+see [RTGI GPU performance follow-up](rtgi-gpu-performance.md).
+
 Base: public `3200901046af66b89315a2147d9fe59e0adc7dc1`. PBR/RTGI remain
 developer-only and default Off. Original pixels, sky calibration, occlusion,
 ambient replacement, one-bounce sampling, distances and reconstruction quality

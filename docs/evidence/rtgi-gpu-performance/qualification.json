@@ -1,0 +1,1702 @@
+{
+  "base": "b61d327236b2c9639bd8a458ca60b3d19cc42955",
+  "adapter": "NVIDIA GeForce RTX 4060 Ti",
+  "driver": "617.14",
+  "finalVulkanSHA256": "23090D87436D13EB80C53E487532A5F9E9F2FC304B2CEA96336D4D895F2F1FA6",
+  "scope": "Original Malden/Everon missions, copied profiles, Vulkan synchronization validation, TAA 100 percent world resolution, view distance 1400m. GI Off/On/On/Off after 10s GI warmup, 4s settle and 6s samples. No builds/tests during timing. Probe disabled for timings. GPU scopes are not an additive budget. Dynamic clocks, not locked.",
+  "performance": {
+    "everon-1080": {
+      "before": {
+        "run": "gpu-before-everon-1080",
+        "runtimeSHA256": "1DC03AB64F058C63733EAD568CC48C97C12907A92352ADF3505B9BE961E25CBC",
+        "intervalMedianMeans": {
+          "off": {
+            "frame": 2.1658,
+            "world": 0.9808,
+            "CPUscene": 0.05315,
+            "CPUdraw": 2.2135,
+            "CPUgeometry": 0.006,
+            "draws": 170.0,
+            "lightingBinds": 63.0
+          },
+          "on": {
+            "frame": 2.91925,
+            "trace": 0.5115000000000001,
+            "filter": 0.19877499999999998,
+            "temporal": 0.134,
+            "world": 1.0394999999999999,
+            "CPUscene": 0.11925,
+            "CPUrecord": 0.0832,
+            "CPUdraw": 2.833,
+            "CPUgeometry": 0.006500000000000001,
+            "draws": 227.0,
+            "lightingBinds": 125.0
+          }
+        },
+        "incrementalGIcostMs": 0.75345
+      },
+      "after": {
+        "run": "gpu-final-everon-1080",
+        "runtimeSHA256": "23090D87436D13EB80C53E487532A5F9E9F2FC304B2CEA96336D4D895F2F1FA6",
+        "intervalMedianMeans": {
+          "off": {
+            "frame": 2.126,
+            "world": 0.8947,
+            "CPUscene": 0.0524,
+            "CPUdraw": 2.2125000000000004,
+            "CPUgeometry": 0.006,
+            "draws": 170.0,
+            "lightingBinds": 63.0
+          },
+          "on": {
+            "frame": 2.7831,
+            "trace": 0.47895,
+            "filter": 0.1968,
+            "temporal": 0.1035,
+            "world": 0.97325,
+            "CPUscene": 0.08315,
+            "CPUrecord": 0.08399999999999999,
+            "CPUdraw": 2.6825,
+            "CPUgeometry": 0.006,
+            "draws": 227.0,
+            "lightingBinds": 125.0
+          }
+        },
+        "incrementalGIcostMs": 0.6571000000000002
+      }
+    },
+    "everon-1440": {
+      "before": {
+        "run": "gpu-recheck-everon-1440",
+        "runtimeSHA256": "1DC03AB64F058C63733EAD568CC48C97C12907A92352ADF3505B9BE961E25CBC",
+        "intervalMedianMeans": {
+          "off": {
+            "frame": 3.10385,
+            "world": 1.2093,
+            "CPUscene": 0.053849999999999995,
+            "CPUdraw": 2.2060000000000004,
+            "CPUgeometry": 0.006,
+            "draws": 170.0,
+            "lightingBinds": 63.0
+          },
+          "on": {
+            "frame": 4.95045,
+            "trace": 0.8479,
+            "filter": 0.35102500000000003,
+            "temporal": 0.238625,
+            "world": 1.5756999999999999,
+            "CPUscene": 0.07694999999999999,
+            "CPUrecord": 0.0888,
+            "CPUdraw": 2.8535,
+            "CPUgeometry": 0.007,
+            "draws": 227.0,
+            "lightingBinds": 125.0
+          }
+        },
+        "incrementalGIcostMs": 1.8466
+      },
+      "after": {
+        "run": "gpu-final-everon-1440",
+        "runtimeSHA256": "23090D87436D13EB80C53E487532A5F9E9F2FC304B2CEA96336D4D895F2F1FA6",
+        "intervalMedianMeans": {
+          "off": {
+            "frame": 2.9588,
+            "world": 1.0608,
+            "CPUscene": 0.0533,
+            "CPUdraw": 2.2115,
+            "CPUgeometry": 0.006,
+            "draws": 170.0,
+            "lightingBinds": 63.0
+          },
+          "on": {
+            "frame": 4.762700000000001,
+            "trace": 0.8073999999999999,
+            "filter": 0.35235000000000005,
+            "temporal": 0.185025,
+            "world": 1.4811999999999999,
+            "CPUscene": 0.07575,
+            "CPUrecord": 0.08632499999999999,
+            "CPUdraw": 2.8735,
+            "CPUgeometry": 0.007,
+            "draws": 227.0,
+            "lightingBinds": 125.0
+          }
+        },
+        "incrementalGIcostMs": 1.8039000000000005
+      },
+      "initialBaseline": {
+        "run": "gpu-before-everon-1440",
+        "runtimeSHA256": "1DC03AB64F058C63733EAD568CC48C97C12907A92352ADF3505B9BE961E25CBC",
+        "intervalMedianMeans": {
+          "off": {
+            "frame": 3.1041499999999997,
+            "world": 1.2098,
+            "CPUscene": 0.05455,
+            "CPUdraw": 2.236,
+            "CPUgeometry": 0.006,
+            "draws": 170.0,
+            "lightingBinds": 63.0
+          },
+          "on": {
+            "frame": 4.953049999999999,
+            "trace": 0.8476,
+            "filter": 0.35275,
+            "temporal": 0.23417500000000002,
+            "world": 1.58635,
+            "CPUscene": 0.0774,
+            "CPUrecord": 0.08729999999999999,
+            "CPUdraw": 2.856,
+            "CPUgeometry": 0.007,
+            "draws": 227.0,
+            "lightingBinds": 125.0
+          }
+        },
+        "incrementalGIcostMs": 1.8488999999999995
+      }
+    },
+    "malden-1080": {
+      "before": {
+        "run": "gpu-before-malden-1080",
+        "runtimeSHA256": "1DC03AB64F058C63733EAD568CC48C97C12907A92352ADF3505B9BE961E25CBC",
+        "intervalMedianMeans": {
+          "off": {
+            "frame": 4.28665,
+            "world": 2.1887,
+            "CPUscene": 0.13125,
+            "CPUdraw": 10.2355,
+            "CPUgeometry": 0.0345,
+            "draws": 1028.0,
+            "lightingBinds": 339.0
+          },
+          "on": {
+            "frame": 4.57285,
+            "trace": 0.572425,
+            "filter": 0.18335,
+            "temporal": 0.16415000000000002,
+            "world": 2.1087,
+            "CPUscene": 0.18645,
+            "CPUrecord": 0.09962499999999999,
+            "CPUdraw": 10.6475,
+            "CPUgeometry": 0.035,
+            "draws": 1028.0,
+            "lightingBinds": 339.0
+          }
+        },
+        "incrementalGIcostMs": 0.2862
+      },
+      "after": {
+        "run": "gpu-final-malden-1080",
+        "runtimeSHA256": "23090D87436D13EB80C53E487532A5F9E9F2FC304B2CEA96336D4D895F2F1FA6",
+        "intervalMedianMeans": {
+          "off": {
+            "frame": 4.258,
+            "world": 2.00815,
+            "CPUscene": 0.13,
+            "CPUdraw": 10.215,
+            "CPUgeometry": 0.034,
+            "draws": 1028.0,
+            "lightingBinds": 340.0
+          },
+          "on": {
+            "frame": 4.5267,
+            "trace": 0.5655,
+            "filter": 0.189775,
+            "temporal": 0.12967499999999998,
+            "world": 2.0473999999999997,
+            "CPUscene": 0.18465,
+            "CPUrecord": 0.09485,
+            "CPUdraw": 10.698,
+            "CPUgeometry": 0.0345,
+            "draws": 1028.0,
+            "lightingBinds": 340.0
+          }
+        },
+        "incrementalGIcostMs": 0.26869999999999994
+      }
+    },
+    "malden-1440": {
+      "before": {
+        "run": "gpu-recheck-malden-1440",
+        "runtimeSHA256": "1DC03AB64F058C63733EAD568CC48C97C12907A92352ADF3505B9BE961E25CBC",
+        "intervalMedianMeans": {
+          "off": {
+            "frame": 4.4780999999999995,
+            "world": 2.1283000000000003,
+            "CPUscene": 0.12885,
+            "CPUdraw": 10.368500000000001,
+            "CPUgeometry": 0.036000000000000004,
+            "draws": 1028.0,
+            "lightingBinds": 339.0
+          },
+          "on": {
+            "frame": 5.992900000000001,
+            "trace": 0.726775,
+            "filter": 0.3144,
+            "temporal": 0.21785,
+            "world": 2.4765,
+            "CPUscene": 0.18259999999999998,
+            "CPUrecord": 0.09640000000000001,
+            "CPUdraw": 10.688500000000001,
+            "CPUgeometry": 0.036,
+            "draws": 1028.0,
+            "lightingBinds": 339.0
+          }
+        },
+        "incrementalGIcostMs": 1.514800000000001
+      },
+      "after": {
+        "run": "gpu-final-malden-1440",
+        "runtimeSHA256": "23090D87436D13EB80C53E487532A5F9E9F2FC304B2CEA96336D4D895F2F1FA6",
+        "intervalMedianMeans": {
+          "off": {
+            "frame": 4.41395,
+            "world": 1.9518499999999999,
+            "CPUscene": 0.1339,
+            "CPUdraw": 10.310500000000001,
+            "CPUgeometry": 0.035,
+            "draws": 1028.0,
+            "lightingBinds": 340.0
+          },
+          "on": {
+            "frame": 5.72555,
+            "trace": 0.6740499999999999,
+            "filter": 0.315675,
+            "temporal": 0.17135,
+            "world": 2.31285,
+            "CPUscene": 0.1869,
+            "CPUrecord": 0.095625,
+            "CPUdraw": 10.5735,
+            "CPUgeometry": 0.0345,
+            "draws": 1028.0,
+            "lightingBinds": 340.0
+          }
+        },
+        "incrementalGIcostMs": 1.3116000000000003
+      },
+      "initialBaseline": {
+        "run": "gpu-before-malden-1440",
+        "runtimeSHA256": "1DC03AB64F058C63733EAD568CC48C97C12907A92352ADF3505B9BE961E25CBC",
+        "intervalMedianMeans": {
+          "off": {
+            "frame": 4.4596,
+            "world": 2.1193,
+            "CPUscene": 0.13065,
+            "CPUdraw": 10.2685,
+            "CPUgeometry": 0.0345,
+            "draws": 1028.0,
+            "lightingBinds": 339.0
+          },
+          "on": {
+            "frame": 5.991899999999999,
+            "trace": 0.726,
+            "filter": 0.31655,
+            "temporal": 0.2178,
+            "world": 2.47255,
+            "CPUscene": 0.1839,
+            "CPUrecord": 0.09385,
+            "CPUdraw": 10.6625,
+            "CPUgeometry": 0.0345,
+            "draws": 1028.0,
+            "lightingBinds": 339.0
+          }
+        },
+        "incrementalGIcostMs": 1.5322999999999993
+      }
+    }
+  },
+  "candidateExperiments": {
+    "counter": {
+      "everon-1440": {
+        "run": "gpu-counter-everon-1440",
+        "runtimeSHA256": "9A9506F8EA41DD90F8638E175B4DD4943553D20C538B3A31F9DEEB48CC2051A2",
+        "intervalMedianMeans": {
+          "off": {
+            "frame": 3.10475,
+            "world": 1.2086999999999999,
+            "CPUscene": 0.05425,
+            "CPUdraw": 2.212,
+            "CPUgeometry": 0.006,
+            "draws": 170.0,
+            "lightingBinds": 63.0
+          },
+          "on": {
+            "frame": 4.950200000000001,
+            "trace": 0.8443,
+            "filter": 0.352025,
+            "temporal": 0.2383,
+            "world": 1.5788,
+            "CPUscene": 0.07675,
+            "CPUrecord": 0.088675,
+            "CPUdraw": 2.89,
+            "CPUgeometry": 0.007,
+            "draws": 227.0,
+            "lightingBinds": 125.0
+          }
+        },
+        "incrementalGIcostMs": 1.8454500000000005
+      },
+      "malden-1440": {
+        "run": "gpu-counter-malden-1440",
+        "runtimeSHA256": "9A9506F8EA41DD90F8638E175B4DD4943553D20C538B3A31F9DEEB48CC2051A2",
+        "intervalMedianMeans": {
+          "off": {
+            "frame": 4.4407,
+            "world": 2.1113999999999997,
+            "CPUscene": 0.1298,
+            "CPUdraw": 10.2355,
+            "CPUgeometry": 0.0345,
+            "draws": 1028.0,
+            "lightingBinds": 339.0
+          },
+          "on": {
+            "frame": 5.9393,
+            "trace": 0.675575,
+            "filter": 0.3144,
+            "temporal": 0.218125,
+            "world": 2.47185,
+            "CPUscene": 0.18215,
+            "CPUrecord": 0.09482499999999999,
+            "CPUdraw": 10.548,
+            "CPUgeometry": 0.0345,
+            "draws": 1028.0,
+            "lightingBinds": 339.0
+          }
+        },
+        "incrementalGIcostMs": 1.4986000000000006
+      }
+    },
+    "ambient": {
+      "everon-1440": {
+        "run": "gpu-ambient-everon-1440",
+        "runtimeSHA256": "DA8B37D9F05995C1E20012DCC3EAAA9C73D177AF0380C35F05053FABB8A48FB5",
+        "intervalMedianMeans": {
+          "off": {
+            "frame": 2.96195,
+            "world": 1.06115,
+            "CPUscene": 0.0543,
+            "CPUdraw": 2.2085,
+            "CPUgeometry": 0.006,
+            "draws": 170.0,
+            "lightingBinds": 63.0
+          },
+          "on": {
+            "frame": 4.8525,
+            "trace": 0.84555,
+            "filter": 0.35085,
+            "temporal": 0.23877500000000002,
+            "world": 1.4772,
+            "CPUscene": 0.07655,
+            "CPUrecord": 0.086225,
+            "CPUdraw": 2.878,
+            "CPUgeometry": 0.0075,
+            "draws": 227.0,
+            "lightingBinds": 125.0
+          }
+        },
+        "incrementalGIcostMs": 1.8905500000000002
+      },
+      "malden-1440": {
+        "run": "gpu-ambient-malden-1440",
+        "runtimeSHA256": "DA8B37D9F05995C1E20012DCC3EAAA9C73D177AF0380C35F05053FABB8A48FB5",
+        "intervalMedianMeans": {
+          "off": {
+            "frame": 4.40175,
+            "world": 1.9466999999999999,
+            "CPUscene": 0.13125,
+            "CPUdraw": 10.186499999999999,
+            "CPUgeometry": 0.0345,
+            "draws": 1028.0,
+            "lightingBinds": 339.0
+          },
+          "on": {
+            "frame": 5.783799999999999,
+            "trace": 0.681225,
+            "filter": 0.31455,
+            "temporal": 0.21760000000000002,
+            "world": 2.3145,
+            "CPUscene": 0.185,
+            "CPUrecord": 0.09455000000000001,
+            "CPUdraw": 10.628,
+            "CPUgeometry": 0.035500000000000004,
+            "draws": 1028.0,
+            "lightingBinds": 339.0
+          }
+        },
+        "incrementalGIcostMs": 1.3820499999999996
+      }
+    },
+    "uniform": {
+      "everon-1440": {
+        "run": "gpu-uniform-everon-1440",
+        "runtimeSHA256": "D3A0CD8045F96102C7F0FD0D8C2D8D5FEA2125B039F420E950830579F0CAE921",
+        "intervalMedianMeans": {
+          "off": {
+            "frame": 2.95565,
+            "world": 1.0621,
+            "CPUscene": 0.05355,
+            "CPUdraw": 2.213,
+            "CPUgeometry": 0.006,
+            "draws": 170.0,
+            "lightingBinds": 63.0
+          },
+          "on": {
+            "frame": 4.80145,
+            "trace": 0.803075,
+            "filter": 0.350275,
+            "temporal": 0.2349,
+            "world": 1.4798,
+            "CPUscene": 0.07744999999999999,
+            "CPUrecord": 0.087575,
+            "CPUdraw": 2.8705,
+            "CPUgeometry": 0.007,
+            "draws": 227.0,
+            "lightingBinds": 125.0
+          }
+        },
+        "incrementalGIcostMs": 1.8458
+      },
+      "malden-1440": {
+        "run": "gpu-uniform-malden-1440",
+        "runtimeSHA256": "D3A0CD8045F96102C7F0FD0D8C2D8D5FEA2125B039F420E950830579F0CAE921",
+        "intervalMedianMeans": {
+          "off": {
+            "frame": 4.213900000000001,
+            "world": 1.8510499999999999,
+            "CPUscene": 0.13305,
+            "CPUdraw": 10.054,
+            "CPUgeometry": 0.035,
+            "draws": 1028.0,
+            "lightingBinds": 339.0
+          },
+          "on": {
+            "frame": 5.789899999999999,
+            "trace": 0.677125,
+            "filter": 0.31505000000000005,
+            "temporal": 0.218175,
+            "world": 2.32165,
+            "CPUscene": 0.1815,
+            "CPUrecord": 0.094,
+            "CPUdraw": 10.174499999999998,
+            "CPUgeometry": 0.0335,
+            "draws": 1028.0,
+            "lightingBinds": 339.0
+          }
+        },
+        "incrementalGIcostMs": 1.5759999999999987
+      }
+    },
+    "tile": {
+      "everon-1440": {
+        "run": "gpu-tile-everon-1440",
+        "runtimeSHA256": "28D4116D27914899F1C13F88DE4683F414FF7E83EDBED66C38131DEBC6969D19",
+        "intervalMedianMeans": {
+          "off": {
+            "frame": 2.96145,
+            "world": 1.0613000000000001,
+            "CPUscene": 0.05345,
+            "CPUdraw": 2.205,
+            "CPUgeometry": 0.006,
+            "draws": 170.0,
+            "lightingBinds": 63.0
+          },
+          "on": {
+            "frame": 4.773,
+            "trace": 0.803325,
+            "filter": 0.3538,
+            "temporal": 0.184575,
+            "world": 1.4927000000000001,
+            "CPUscene": 0.07705000000000001,
+            "CPUrecord": 0.08549999999999999,
+            "CPUdraw": 2.8245,
+            "CPUgeometry": 0.007,
+            "draws": 227.0,
+            "lightingBinds": 125.0
+          }
+        },
+        "incrementalGIcostMs": 1.8115499999999995
+      },
+      "malden-1440": {
+        "run": "gpu-tile-malden-1440",
+        "runtimeSHA256": "28D4116D27914899F1C13F88DE4683F414FF7E83EDBED66C38131DEBC6969D19",
+        "intervalMedianMeans": {
+          "off": {
+            "frame": 4.4297,
+            "world": 1.9578,
+            "CPUscene": 0.1297,
+            "CPUdraw": 10.2065,
+            "CPUgeometry": 0.035,
+            "draws": 1028.0,
+            "lightingBinds": 340.0
+          },
+          "on": {
+            "frame": 5.74255,
+            "trace": 0.6753499999999999,
+            "filter": 0.3171,
+            "temporal": 0.17017500000000002,
+            "world": 2.3230500000000003,
+            "CPUscene": 0.18630000000000002,
+            "CPUrecord": 0.09475,
+            "CPUdraw": 10.774999999999999,
+            "CPUgeometry": 0.036500000000000005,
+            "draws": 1028.0,
+            "lightingBinds": 340.0
+          }
+        },
+        "incrementalGIcostMs": 1.3128499999999992
+      }
+    },
+    "range": {
+      "everon-1440": {
+        "run": "gpu-range-everon-1440",
+        "runtimeSHA256": "440722C5A1312EE49B182EA78ACC06F9C9A3C6A593AA2355EF5D9F5CC1D40F62",
+        "intervalMedianMeans": {
+          "off": {
+            "frame": 2.9612,
+            "world": 1.06295,
+            "CPUscene": 0.0534,
+            "CPUdraw": 2.2145,
+            "CPUgeometry": 0.006,
+            "draws": 170.0,
+            "lightingBinds": 63.0
+          },
+          "on": {
+            "frame": 4.775399999999999,
+            "trace": 0.80155,
+            "filter": 0.352425,
+            "temporal": 0.184875,
+            "world": 1.49735,
+            "CPUscene": 0.0764,
+            "CPUrecord": 0.085575,
+            "CPUdraw": 2.8194999999999997,
+            "CPUgeometry": 0.007,
+            "draws": 227.0,
+            "lightingBinds": 125.0
+          }
+        },
+        "incrementalGIcostMs": 1.8141999999999996
+      },
+      "malden-1440": {
+        "run": "gpu-range-malden-1440",
+        "runtimeSHA256": "440722C5A1312EE49B182EA78ACC06F9C9A3C6A593AA2355EF5D9F5CC1D40F62",
+        "intervalMedianMeans": {
+          "off": {
+            "frame": 4.4366,
+            "world": 1.96365,
+            "CPUscene": 0.1288,
+            "CPUdraw": 10.202,
+            "CPUgeometry": 0.0345,
+            "draws": 1028.0,
+            "lightingBinds": 340.0
+          },
+          "on": {
+            "frame": 5.7551000000000005,
+            "trace": 0.67685,
+            "filter": 0.3166,
+            "temporal": 0.166875,
+            "world": 2.3400499999999997,
+            "CPUscene": 0.1804,
+            "CPUrecord": 0.0935,
+            "CPUdraw": 10.597000000000001,
+            "CPUgeometry": 0.0345,
+            "draws": 1028.0,
+            "lightingBinds": 340.0
+          }
+        },
+        "incrementalGIcostMs": 1.3185000000000002
+      },
+      "retained": false,
+      "reason": "No useful world-raster or total-GPU improvement in either scene; source and flag plumbing removed."
+    }
+  },
+  "lighting": {
+    "everon": {
+      "ROIs": {
+        "shade": {
+          "reference1920Box": [
+            750,
+            660,
+            1050,
+            820
+          ],
+          "samples": {
+            "off-GI-off": {
+              "beforeY": 0.049489726587930674,
+              "afterY": 0.04948988730763442,
+              "changePercent": 0.0003247536707773335
+            },
+            "off-GI-on": {
+              "beforeY": 0.0617522488001404,
+              "afterY": 0.06173373978311958,
+              "changePercent": -0.029973025080798354
+            },
+            "taa-GI-off": {
+              "beforeY": 0.04920576698770715,
+              "afterY": 0.0492073288843147,
+              "changePercent": 0.0031742145345292627
+            },
+            "taa-GI-on": {
+              "beforeY": 0.061249547997767655,
+              "afterY": 0.06123078473072339,
+              "changePercent": -0.030634131446893864
+            }
+          }
+        },
+        "open": {
+          "reference1920Box": [
+            80,
+            800,
+            270,
+            970
+          ],
+          "samples": {
+            "off-GI-off": {
+              "beforeY": 0.0752925365005739,
+              "afterY": 0.07529576609934233,
+              "changePercent": 0.00428940094003849
+            },
+            "off-GI-on": {
+              "beforeY": 0.0877131051283976,
+              "afterY": 0.087706436637635,
+              "changePercent": -0.0076026162257436525
+            },
+            "taa-GI-off": {
+              "beforeY": 0.07497952305653313,
+              "afterY": 0.07495895904914704,
+              "changePercent": -0.027426164568411515
+            },
+            "taa-GI-on": {
+              "beforeY": 0.08707267384595657,
+              "afterY": 0.0870442430723125,
+              "changePercent": -0.03265177510727302
+            }
+          }
+        },
+        "facade": {
+          "reference1920Box": [
+            800,
+            250,
+            950,
+            420
+          ],
+          "samples": {
+            "off-GI-off": {
+              "beforeY": 0.20702071958897283,
+              "afterY": 0.20702058450072344,
+              "changePercent": -6.52534923317738e-05
+            },
+            "off-GI-on": {
+              "beforeY": 0.14728393295978975,
+              "afterY": 0.14731129385553085,
+              "changePercent": 0.018576972512374113
+            },
+            "taa-GI-off": {
+              "beforeY": 0.20648321557412896,
+              "afterY": 0.2064190026996402,
+              "changePercent": -0.031098350686864507
+            },
+            "taa-GI-on": {
+              "beforeY": 0.14508703588008437,
+              "afterY": 0.14487645974176658,
+              "changePercent": -0.14513780438097923
+            }
+          }
+        },
+        "wall": {
+          "reference1920Box": [
+            500,
+            350,
+            1000,
+            650
+          ],
+          "samples": {
+            "off-GI-off": {
+              "beforeY": 0.051250967472544935,
+              "afterY": 0.051250967472544935,
+              "changePercent": 0.0
+            },
+            "off-GI-on": {
+              "beforeY": 0.041402636380013076,
+              "afterY": 0.041419186123475955,
+              "changePercent": 0.039972680268429706
+            },
+            "taa-GI-off": {
+              "beforeY": 0.050726990937840825,
+              "afterY": 0.05075050558414182,
+              "changePercent": 0.046355295014066655
+            },
+            "taa-GI-on": {
+              "beforeY": 0.04110734445774418,
+              "afterY": 0.041137426684673906,
+              "changePercent": 0.07317968924178686
+            }
+          }
+        },
+        "barn": {
+          "reference1920Box": [
+            800,
+            750,
+            1000,
+            930
+          ],
+          "samples": {
+            "off-GI-off": {
+              "beforeY": 0.18953237861463,
+              "afterY": 0.18953242680451368,
+              "changePercent": 2.5425673455536923e-05
+            },
+            "off-GI-on": {
+              "beforeY": 0.1322884700087546,
+              "afterY": 0.13231879069075103,
+              "changePercent": 0.022920124478287285
+            },
+            "taa-GI-off": {
+              "beforeY": 0.1892194489910468,
+              "afterY": 0.1892400326898855,
+              "changePercent": 0.010878215187948292
+            },
+            "taa-GI-on": {
+              "beforeY": 0.13111653893225717,
+              "afterY": 0.13114340918231107,
+              "changePercent": 0.02049341011647332
+            }
+          }
+        }
+      },
+      "nonTemporalReceiverCounts": {
+        "yard": {
+          "before": {
+            "eligible": 664894,
+            "families": "catalog:0/0,rock:0/0,roof:0/0,wood:517/0,facade:134596/0,stone:0/0,concrete:0/0,terrain:529781/0,"
+          },
+          "after": {
+            "eligible": 664894,
+            "families": "catalog:0/0,rock:0/0,roof:0/0,wood:517/0,facade:134596/0,stone:0/0,concrete:0/0,terrain:529781/0,"
+          },
+          "exactMatch": true
+        },
+        "wall": {
+          "before": {
+            "eligible": 340832,
+            "families": "catalog:0/209702,rock:0/0,roof:0/0,wood:0/0,facade:0/0,stone:0/0,concrete:0/12617,terrain:118513/0,"
+          },
+          "after": {
+            "eligible": 340832,
+            "families": "catalog:0/209702,rock:0/0,roof:0/0,wood:0/0,facade:0/0,stone:0/0,concrete:0/12617,terrain:118513/0,"
+          },
+          "exactMatch": true
+        },
+        "barn": {
+          "before": {
+            "eligible": 265164,
+            "families": "catalog:0/0,rock:0/0,roof:0/0,wood:2017/0,facade:162556/0,stone:0/0,concrete:0/0,terrain:100591/0,"
+          },
+          "after": {
+            "eligible": 265164,
+            "families": "catalog:0/0,rock:0/0,roof:0/0,wood:2017/0,facade:162556/0,stone:0/0,concrete:0/0,terrain:100591/0,"
+          },
+          "exactMatch": true
+        }
+      },
+      "controls": {
+        "yard-pbr-on.png": {
+          "reference1920Box": [
+            750,
+            660,
+            1050,
+            820
+          ],
+          "box": [
+            1000,
+            870,
+            1400,
+            1083
+          ],
+          "beforeY": 0.04922056001634037,
+          "afterY": 0.04922945789024174,
+          "changePercent": 0.01807755518916654,
+          "meanAbs8bit": [
+            0.5062910798122066,
+            0.5955516431924882,
+            0.464037558685446
+          ],
+          "nonzeroBounds": [
+            0,
+            0,
+            400,
+            213
+          ]
+        },
+        "wall-pbr-on.png": {
+          "reference1920Box": [
+            750,
+            450,
+            1050,
+            650
+          ],
+          "box": [
+            1000,
+            590,
+            1400,
+            856
+          ],
+          "beforeY": 0.04841109108630957,
+          "afterY": 0.04838393136242999,
+          "changePercent": -0.0561022758837626,
+          "meanAbs8bit": [
+            0.5909116541353383,
+            0.5910808270676692,
+            0.5100093984962406
+          ],
+          "nonzeroBounds": [
+            0,
+            0,
+            400,
+            266
+          ]
+        },
+        "yard-pbr-enhanced.png": {
+          "reference1920Box": [
+            750,
+            660,
+            1050,
+            820
+          ],
+          "box": [
+            1000,
+            870,
+            1400,
+            1083
+          ],
+          "beforeY": 0.049229694104600805,
+          "afterY": 0.04922065958049598,
+          "changePercent": -0.01835177786323472,
+          "meanAbs8bit": [
+            0.5066901408450705,
+            0.5952582159624413,
+            0.46433098591549293
+          ],
+          "nonzeroBounds": [
+            0,
+            0,
+            400,
+            213
+          ]
+        },
+        "wall-pbr-enhanced.png": {
+          "reference1920Box": [
+            750,
+            450,
+            1050,
+            650
+          ],
+          "box": [
+            1000,
+            590,
+            1400,
+            856
+          ],
+          "beforeY": 0.04672996707064437,
+          "afterY": 0.046790593342398414,
+          "changePercent": 0.1297374587540201,
+          "meanAbs8bit": [
+            1.0364097744360903,
+            1.0248214285714285,
+            0.8933364661654135
+          ],
+          "nonzeroBounds": [
+            0,
+            0,
+            400,
+            266
+          ]
+        }
+      },
+      "controlsBeforeRun": "gpu-recheck-everon-1440",
+      "yardSkyState": {
+        "before": [
+          "[0.268212,0.461311,0.858996][0.521538,0.688182,1.02235][0.265511,0.348565,0.507254][0.748414,0.911408,1.28]",
+          "2.01209"
+        ],
+        "after": [
+          "[0.268212,0.461311,0.858996][0.521473,0.688118,1.0223][0.265633,0.348676,0.507336][0.748414,0.911408,1.28]",
+          "2.01209"
+        ]
+      },
+      "roofSkyState": {
+        "before": [
+          "[0.268212,0.461311,0.858996][0.469434,0.640234,0.984243][0.293714,0.389841,0.547492][0.748414,0.911408,1.28]",
+          "2.01209"
+        ],
+        "after": [
+          "[0.268212,0.461311,0.858996][0.469474,0.640266,0.984263][0.293861,0.389971,0.547579][0.748414,0.911408,1.28]",
+          "2.01209"
+        ]
+      },
+      "roofCounts": {
+        "before": {
+          "eligible": 114964,
+          "families": "catalog:0/0,rock:0/0,roof:96763/0,wood:0/0,facade:0/0,stone:0/0,concrete:0/0,terrain:18201/0,"
+        },
+        "after": {
+          "eligible": 114977,
+          "families": "catalog:0/0,rock:0/0,roof:96807/0,wood:0/0,facade:0/0,stone:0/0,concrete:0/0,terrain:18170/0,"
+        }
+      }
+    },
+    "malden": {
+      "ROIs": {
+        "shade": {
+          "reference1920Box": [
+            750,
+            450,
+            1000,
+            560
+          ],
+          "samples": {
+            "off-GI-off": {
+              "beforeY": 0.13311585375396692,
+              "afterY": 0.13313401446797335,
+              "changePercent": 0.013642788213630297
+            },
+            "off-GI-on": {
+              "beforeY": 0.12968472111643572,
+              "afterY": 0.12971090466577168,
+              "changePercent": 0.02019015741447916
+            },
+            "taa-GI-off": {
+              "beforeY": 0.13210428096348412,
+              "afterY": 0.1323265882644012,
+              "changePercent": 0.16828167815281514
+            },
+            "taa-GI-on": {
+              "beforeY": 0.12788138463772275,
+              "afterY": 0.1277723696301588,
+              "changePercent": -0.08524697153754479
+            }
+          }
+        },
+        "open": {
+          "reference1920Box": [
+            800,
+            850,
+            1100,
+            1000
+          ],
+          "samples": {
+            "off-GI-off": {
+              "beforeY": 0.561107824532549,
+              "afterY": 0.5620165010513167,
+              "changePercent": 0.16194329842480482
+            },
+            "off-GI-on": {
+              "beforeY": 0.5806847886144361,
+              "afterY": 0.5816334625681668,
+              "changePercent": 0.1633715868456509
+            },
+            "taa-GI-off": {
+              "beforeY": 0.5605453148810955,
+              "afterY": 0.5614580200556364,
+              "changePercent": 0.16282451218676552
+            },
+            "taa-GI-on": {
+              "beforeY": 0.5795326651924936,
+              "afterY": 0.5805068885407045,
+              "changePercent": 0.1681049933375922
+            }
+          }
+        },
+        "stone": {
+          "reference1920Box": [
+            500,
+            330,
+            1000,
+            700
+          ],
+          "samples": {
+            "off-GI-off": {
+              "beforeY": 0.15246329080952242,
+              "afterY": 0.15246855425684078,
+              "changePercent": 0.0034522718815876985
+            },
+            "off-GI-on": {
+              "beforeY": 0.14385531351599784,
+              "afterY": 0.14384885788528057,
+              "changePercent": -0.0044875858663084855
+            },
+            "taa-GI-off": {
+              "beforeY": 0.1527952594396643,
+              "afterY": 0.15301107279754703,
+              "changePercent": 0.1412434905861515
+            },
+            "taa-GI-on": {
+              "beforeY": 0.144126625692663,
+              "afterY": 0.1439830870065263,
+              "changePercent": -0.0995920673552586
+            }
+          }
+        }
+      },
+      "nonTemporalReceiverCounts": {
+        "yard": {
+          "before": {
+            "eligible": 603475,
+            "families": "catalog:0/0,rock:0/0,roof:0/0,wood:0/0,facade:0/0,stone:0/0,concrete:0/0,terrain:603475/0,"
+          },
+          "after": {
+            "eligible": 603475,
+            "families": "catalog:0/0,rock:0/0,roof:0/0,wood:0/0,facade:0/0,stone:0/0,concrete:0/0,terrain:603475/0,"
+          },
+          "exactMatch": true
+        },
+        "wall": {
+          "before": {
+            "eligible": 446466,
+            "families": "catalog:0/159758,rock:0/0,roof:0/0,wood:0/0,facade:0/0,stone:0/0,concrete:0/0,terrain:286708/0,"
+          },
+          "after": {
+            "eligible": 446466,
+            "families": "catalog:0/159758,rock:0/0,roof:0/0,wood:0/0,facade:0/0,stone:0/0,concrete:0/0,terrain:286708/0,"
+          },
+          "exactMatch": true
+        },
+        "stone": {
+          "before": {
+            "eligible": 385617,
+            "families": "catalog:0/382133,rock:0/0,roof:0/0,wood:0/0,facade:0/0,stone:0/0,concrete:0/0,terrain:3484/0,"
+          },
+          "after": {
+            "eligible": 385617,
+            "families": "catalog:0/382133,rock:0/0,roof:0/0,wood:0/0,facade:0/0,stone:0/0,concrete:0/0,terrain:3484/0,"
+          },
+          "exactMatch": true
+        }
+      },
+      "controls": {
+        "yard-pbr-on.png": {
+          "reference1920Box": [
+            750,
+            450,
+            1000,
+            560
+          ],
+          "box": [
+            1000,
+            590,
+            1333,
+            736
+          ],
+          "beforeY": 0.13491377481714564,
+          "afterY": 0.13474255948341657,
+          "changePercent": -0.12690722942200194,
+          "meanAbs8bit": [
+            1.662676375005142,
+            1.6988152536097743,
+            1.4379447941091776
+          ],
+          "nonzeroBounds": [
+            0,
+            0,
+            333,
+            146
+          ]
+        },
+        "wall-pbr-on.png": {
+          "reference1920Box": [
+            750,
+            450,
+            1050,
+            650
+          ],
+          "box": [
+            1000,
+            590,
+            1400,
+            856
+          ],
+          "beforeY": 0.08299180488192694,
+          "afterY": 0.0830030862018072,
+          "changePercent": 0.013593293815361562,
+          "meanAbs8bit": [
+            0.008298872180451129,
+            0.008411654135338346,
+            0.006043233082706767
+          ],
+          "nonzeroBounds": [
+            0,
+            0,
+            400,
+            266
+          ]
+        },
+        "yard-pbr-enhanced.png": {
+          "reference1920Box": [
+            750,
+            450,
+            1000,
+            560
+          ],
+          "box": [
+            1000,
+            590,
+            1333,
+            736
+          ],
+          "beforeY": 0.1349110281022196,
+          "afterY": 0.13495746995193797,
+          "changePercent": 0.0344240573744381,
+          "meanAbs8bit": [
+            1.2108478341355053,
+            1.2437780245999424,
+            1.0389567649841622
+          ],
+          "nonzeroBounds": [
+            0,
+            0,
+            333,
+            146
+          ]
+        },
+        "wall-pbr-enhanced.png": {
+          "reference1920Box": [
+            750,
+            450,
+            1050,
+            650
+          ],
+          "box": [
+            1000,
+            590,
+            1400,
+            856
+          ],
+          "beforeY": 0.08282861106508202,
+          "afterY": 0.08298810272129631,
+          "changePercent": 0.19255623650258347,
+          "meanAbs8bit": [
+            6.622575187969924,
+            6.619125939849624,
+            6.431165413533835
+          ],
+          "nonzeroBounds": [
+            0,
+            0,
+            400,
+            266
+          ]
+        }
+      },
+      "controlsBeforeRun": "gpu-controls-malden-1440",
+      "initialControls": {
+        "yard-pbr-on.png": {
+          "beforeY": 0.1320869418665204,
+          "afterY": 0.13474255948341657,
+          "changePercent": 2.010507306301168
+        },
+        "wall-pbr-on.png": {
+          "beforeY": 0.0829082200701211,
+          "afterY": 0.0830030862018072,
+          "changePercent": 0.1144230712055716
+        },
+        "yard-pbr-enhanced.png": {
+          "beforeY": 0.13238061167546505,
+          "afterY": 0.13495746995193797,
+          "changePercent": 1.9465526287113288
+        },
+        "wall-pbr-enhanced.png": {
+          "beforeY": 0.08286852541042605,
+          "afterY": 0.08298810272129631,
+          "changePercent": 0.1442976211752489
+        }
+      },
+      "controlsNote": "Initial baseline control followed only the yard benchmark, unlike the final control after yard/wall/stone/roof. Retained below; repeating the original executable through the same preceding view sequence reduced the yard difference from about 2 percent to at most 0.13 percent. No shader lighting gain is inferred from the initial control.",
+      "yardSkyState": {
+        "before": [
+          "[0.268212,0.461311,0.858996][0.347017,0.528782,0.900295][0.268791,0.366293,0.528911][0.748414,0.911408,1.28]",
+          "2.01209"
+        ],
+        "after": [
+          "[0.268212,0.461311,0.858996][0.347207,0.528949,0.900416][0.268871,0.366363,0.528956][0.748414,0.911408,1.28]",
+          "2.01209"
+        ]
+      },
+      "roofSkyState": {
+        "before": [
+          "[0.268212,0.461311,0.858996][0.346801,0.528596,0.900172][0.268635,0.366154,0.528811][0.748414,0.911408,1.28]",
+          "2.01209"
+        ],
+        "after": [
+          "[0.268212,0.461311,0.858996][0.346983,0.528756,0.900288][0.268766,0.36627,0.52889][0.748414,0.911408,1.28]",
+          "2.01209"
+        ]
+      },
+      "roofCounts": {
+        "before": {
+          "eligible": 190052,
+          "families": "catalog:0/0,rock:0/0,roof:154791/0,wood:135/0,facade:0/0,stone:0/0,concrete:0/0,terrain:35126/0,"
+        },
+        "after": {
+          "eligible": 190065,
+          "families": "catalog:0/0,rock:0/0,roof:154917/0,wood:125/0,facade:0/0,stone:0/0,concrete:0/0,terrain:35023/0,"
+        }
+      }
+    }
+  },
+  "validation": {
+    "gpu-ambient-everon-1440": {
+      "presented": 8266,
+      "errors": 0,
+      "warnings": 0,
+      "synchronizationValidation": true
+    },
+    "gpu-ambient-malden-1440": {
+      "presented": 4348,
+      "errors": 0,
+      "warnings": 0,
+      "synchronizationValidation": true
+    },
+    "gpu-before-everon-1080": {
+      "presented": 8495,
+      "errors": 0,
+      "warnings": 0,
+      "synchronizationValidation": true
+    },
+    "gpu-before-everon-1440": {
+      "presented": 19002,
+      "errors": 0,
+      "warnings": 0,
+      "synchronizationValidation": true
+    },
+    "gpu-before-malden-1080": {
+      "presented": 4367,
+      "errors": 0,
+      "warnings": 0,
+      "synchronizationValidation": true
+    },
+    "gpu-before-malden-1440": {
+      "presented": 9810,
+      "errors": 0,
+      "warnings": 0,
+      "synchronizationValidation": true
+    },
+    "gpu-controls-malden-1440": {
+      "presented": 6282,
+      "errors": 0,
+      "warnings": 0,
+      "synchronizationValidation": true
+    },
+    "gpu-counter-everon-1440": {
+      "presented": 8312,
+      "errors": 0,
+      "warnings": 0,
+      "synchronizationValidation": true
+    },
+    "gpu-counter-malden-1440": {
+      "presented": 4662,
+      "errors": 0,
+      "warnings": 0,
+      "synchronizationValidation": true
+    },
+    "gpu-final-everon-1080": {
+      "presented": 8540,
+      "errors": 0,
+      "warnings": 0,
+      "synchronizationValidation": true
+    },
+    "gpu-final-everon-1440": {
+      "presented": 25249,
+      "errors": 0,
+      "warnings": 0,
+      "synchronizationValidation": true
+    },
+    "gpu-final-malden-1080": {
+      "presented": 4670,
+      "errors": 0,
+      "warnings": 0,
+      "synchronizationValidation": true
+    },
+    "gpu-final-malden-1440": {
+      "presented": 16222,
+      "errors": 0,
+      "warnings": 0,
+      "synchronizationValidation": true
+    },
+    "gpu-range-everon-1440": {
+      "presented": 8405,
+      "errors": 0,
+      "warnings": 0,
+      "synchronizationValidation": true
+    },
+    "gpu-range-malden-1440": {
+      "presented": 4373,
+      "errors": 0,
+      "warnings": 0,
+      "synchronizationValidation": true
+    },
+    "gpu-recheck-everon-1440": {
+      "presented": 11153,
+      "errors": 0,
+      "warnings": 0,
+      "synchronizationValidation": true
+    },
+    "gpu-recheck-malden-1440": {
+      "presented": 6302,
+      "errors": 0,
+      "warnings": 0,
+      "synchronizationValidation": true
+    },
+    "gpu-tile-everon-1440": {
+      "presented": 8452,
+      "errors": 0,
+      "warnings": 0,
+      "synchronizationValidation": true
+    },
+    "gpu-tile-malden-1440": {
+      "presented": 4643,
+      "errors": 0,
+      "warnings": 0,
+      "synchronizationValidation": true
+    },
+    "gpu-uniform-everon-1440": {
+      "presented": 8358,
+      "errors": 0,
+      "warnings": 0,
+      "synchronizationValidation": true
+    },
+    "gpu-uniform-malden-1440": {
+      "presented": 4762,
+      "errors": 0,
+      "warnings": 0,
+      "synchronizationValidation": true
+    }
+  },
+  "tests": {
+    "gpu-final-tests.txt": [
+      "Randomness seeded to: 2426987611",
+      "===============================================================================",
+      "All tests passed (49161 assertions in 64 test cases)",
+      ""
+    ],
+    "gpu-final-policy.txt": [
+      "Vulkan: shutdown complete; submitted=0, presented=0, validation errors=1, warnings=0",
+      "RTGI unavailable: test GI resources unavailable; preserving ordinary lighting",
+      "RT water unavailable: test resource unavailable; preserving ordinary water",
+      "Vulkan driver-free policy/lifetime guards: 684 checks passed"
+    ],
+    "gpu-gl33-tests.txt": [
+      "Randomness seeded to: 280502790",
+      "===============================================================================",
+      "All tests passed (49121 assertions in 63 test cases)",
+      ""
+    ]
+  },
+  "preservation": {
+    "gpu-player-settings-before.json": {
+      "files": 51,
+      "unchanged": true
+    },
+    "gpu-fixture-profile-before.json": {
+      "files": 8,
+      "unchanged": true
+    },
+    "Data.pbo": "1587F9C052FF38967463D851CA85A03EFD2DB09D063DA183046A9B16181D5E2F",
+    "Data3D.pbo": "10528EF9B5112896898AD8667E83601FF47F95231652C73409D57B7227A8A00F",
+    "abel.wrp": "1C13ACA4D3300DB3546583C82FFA132C1149831E42227F2B47019C74040462A5",
+    "eden.wrp": "5A2550B27612FC4C8CCDEC55CE2555C1ED23114D46F8B687CE5FB8B273515A79"
+  },
+  "screenshots": [
+    {
+      "file": "everon-yard-before.png",
+      "sha256": "6F77D3F8F07232CC68B700773E6498D2DE3E02326E801559CB3B054C528D3481"
+    },
+    {
+      "file": "everon-yard-after.png",
+      "sha256": "3FE9C227796FDDC0365AB1E656A0E7A0D49E7668FB8AF9E31120EF0F483B066E"
+    },
+    {
+      "file": "everon-roof-after.png",
+      "sha256": "D778D927C3C3B7242AF1A4413E1D9B39575B20365AF46493C523C3734011F920"
+    },
+    {
+      "file": "malden-yard-before.png",
+      "sha256": "EB901D3C5037FE7BDC6E75528818E0F8AC9A2E4F0DD39C391FEAF70D9B1B11B9"
+    },
+    {
+      "file": "malden-yard-after.png",
+      "sha256": "B55E2F3557CA9BB7EC1F8CC1F09193587BBDF328B81CD973C778540C6902BBD0"
+    },
+    {
+      "file": "malden-roof-after.png",
+      "sha256": "E32B61468C3BB5BA73BECC95C9FEAAA5FB326AF3D2F8B3C92987C2D0C253DA9B"
+    }
+  ],
+  "nativeCPU": {
+    "groundHitPaths": {
+      "native": 66,
+      "CPU": 84,
+      "native-return": 72
+    },
+    "matchedGroundHits": 53,
+    "medianCPUtoNativeReflectance": [
+      1.0039213995739678,
+      1.003921640055371,
+      1.003921568627451
+    ],
+    "expectedUnboundedTintRatio": 1.003921568627451,
+    "examples": [
+      {
+        "native": [
+          2219.39,
+          28.5268,
+          7399.13,
+          13,
+          -0.141887,
+          0.00221698,
+          -0.98988,
+          5,
+          -0.140009,
+          -0.606281,
+          -0.782829,
+          3,
+          2217.95,
+          22.32,
+          7391.1,
+          2,
+          0,
+          1,
+          0,
+          1000,
+          0,
+          1,
+          0,
+          10.2373,
+          0.0405979,
+          0.0535621,
+          0.0218749,
+          63,
+          0.0382285,
+          0.050436,
+          0.0205982,
+          0.747442,
+          0.941125,
+          0.830404,
+          0.244016,
+          0.957527,
+          0.0359778,
+          0.0418823,
+          0.00502629,
+          0.65381,
+          0.0302573,
+          0.0624825,
+          0.0415542,
+          0.747442,
+          0.0662352,
+          0.104365,
+          0.0465805,
+          -0.11774
+        ],
+        "CPU": [
+          2219.39,
+          28.5268,
+          7399.13,
+          13,
+          -0.141887,
+          0.00221698,
+          -0.98988,
+          13,
+          -0.140009,
+          -0.606281,
+          -0.782829,
+          3,
+          2217.95,
+          22.32,
+          7391.1,
+          2,
+          0,
+          1,
+          0,
+          1000,
+          0,
+          1,
+          0,
+          10.2373,
+          0.0405979,
+          0.0535621,
+          0.0218749,
+          63,
+          0.0383784,
+          0.0506338,
+          0.020679,
+          0.747442,
+          0.941125,
+          0.830404,
+          0.244016,
+          0.957527,
+          0.0361189,
+          0.0420465,
+          0.005046,
+          0.65381,
+          0.030376,
+          0.0627275,
+          0.0417172,
+          0.747442,
+          0.0664949,
+          0.104774,
+          0.0467632,
+          -0.11774
+        ]
+      },
+      {
+        "native": [
+          2219.39,
+          28.5268,
+          7399.13,
+          21,
+          -0.141887,
+          0.00221698,
+          -0.98988,
+          5,
+          -0.331513,
+          -0.5159,
+          -0.789902,
+          3,
+          2215.4,
+          22.32,
+          7389.61,
+          2,
+          0,
+          1,
+          0,
+          1000,
+          0,
+          1,
+          0,
+          12.0308,
+          0.0450518,
+          0.0651468,
+          0.0257079,
+          63,
+          0.0415308,
+          0.0600553,
+          0.0236988,
+          0.747442,
+          0.941119,
+          0.830399,
+          0.244014,
+          0.95752,
+          0.0390854,
+          0.0498699,
+          0.00578284,
+          0.65381,
+          0.034791,
+          0.069145,
+          0.0459189,
+          0.747442,
+          0.0738764,
+          0.119015,
+          0.0517018,
+          -0.11774
+        ],
+        "CPU": [
+          2219.39,
+          28.5268,
+          7399.13,
+          21,
+          -0.141887,
+          0.00221698,
+          -0.98988,
+          13,
+          -0.331513,
+          -0.5159,
+          -0.789902,
+          3,
+          2215.4,
+          22.32,
+          7389.61,
+          2,
+          0,
+          1,
+          0,
+          1000,
+          0,
+          1,
+          0,
+          12.0308,
+          0.0450518,
+          0.0651468,
+          0.0257079,
+          63,
+          0.0416937,
+          0.0602908,
+          0.0237917,
+          0.747442,
+          0.941119,
+          0.830399,
+          0.244014,
+          0.95752,
+          0.0392387,
+          0.0500654,
+          0.00580551,
+          0.65381,
+          0.0349274,
+          0.0694162,
+          0.046099,
+          0.747442,
+          0.0741661,
+          0.119482,
+          0.0519045,
+          -0.11774
+        ]
+      }
+    ]
+  },
+  "water": {
+    "start": {
+      "result": "[\"RTShadows=on capability=available terrainPatches=9 foliageInstances=52 lastCompletedRays=2085772 lastCompletedHits=6624 totalRays=42858573255 rayQueriesExecuted=yes lastWorldDispatch=yes lastTerrainHits=0 lastAlphaHits=0 lastGPUms(rays/compose)=0.5888/0.060032; shared RTAO=off capability=available BLAS=18 cachedBLAS=18 TLAS=2 instances=76 instancedTriangles=10667 completedPasses=15820 lastCompletedRays=0 lastCompletedHits=0 totalRays=390105400 rayQueriesExecuted=yes lastWorldDispatch=no BLASbuilds=786 TLASbuilds=94 lastGPUms(BLAS/TLAS/rays/filter/frame)=6.4e-05/6.4e-05/0/0/5.26643; shared static LOD0 scene radius=160m; dynamic=off; AO radius=4m includes bounded terrain, excludes foliage cards; ambient-only composition; static collection excludes animation/damage; blended effects/proxies excluded; sunlight-only native opaque/cutout and terrain receivers, CSM fallback retained\",\"RTReflections=on capability=available waterRays=1990225 hits=106111 shadedHits=106111 shadedTerrain=89631 shadedAlpha=62 totalWaterRays=530629180 totalShadedHits=27859632 rayQueriesExecuted=yes hitShadingExecuted=yes lastWorldDispatch=yes hitSurface=unavailable (diagnostics disabled) lastGPUms(traceShade/filter)=0.835584/0.329952; shared RTAO=off capability=available BLAS=18 cachedBLAS=18 TLAS=2 instances=76 instancedTriangles=10667 completedPasses=15820 lastCompletedRays=0 lastCompletedHits=0 totalRays=390105400 rayQueriesExecuted=yes lastWorldDispatch=no BLASbuilds=786 TLASbuilds=94 lastGPUms(BLAS/TLAS/rays/filter/frame)=6.4e-05/6.4e-05/0/0/5.26643; shared static LOD0 scene radius=160m; dynamic=off; AO radius=4m includes bounded terrain, excludes foliage cards; ambient-only composition; static collection excludes animation/damage; blended effects/proxies excluded; actual water only, 80m receivers/70m rays, textured hits and weather sky fallback\",\"WaterRefraction requested=on active=on captured=yes composited=yes captures=422 composites=422 lastGPUms(capture/optics)=0.096256/0.252928 fallback=none; raster-only coastal terrain, missing bottom/underwater retains original water\",23.991]",
+      "ok": true
+    },
+    "end": {
+      "result": "[\"RTShadows=on capability=available terrainPatches=9 foliageInstances=52 lastCompletedRays=2083244 lastCompletedHits=7561 totalRays=43445791132 rayQueriesExecuted=yes lastWorldDispatch=yes lastTerrainHits=0 lastAlphaHits=0 lastGPUms(rays/compose)=0.5888/0.067904; shared RTAO=off capability=available BLAS=18 cachedBLAS=18 TLAS=2 instances=76 instancedTriangles=10667 completedPasses=16101 lastCompletedRays=0 lastCompletedHits=0 totalRays=390105400 rayQueriesExecuted=yes lastWorldDispatch=no BLASbuilds=786 TLASbuilds=94 lastGPUms(BLAS/TLAS/rays/filter/frame)=6.4e-05/6.4e-05/0/0/5.77997; shared static LOD0 scene radius=160m; dynamic=off; AO radius=4m includes bounded terrain, excludes foliage cards; ambient-only composition; static collection excludes animation/damage; blended effects/proxies excluded; sunlight-only native opaque/cutout and terrain receivers, CSM fallback retained\",\"RTReflections=on capability=available waterRays=1981974 hits=109569 shadedHits=109569 shadedTerrain=92682 shadedAlpha=38 totalWaterRays=1091893283 totalShadedHits=56898104 rayQueriesExecuted=yes hitShadingExecuted=yes lastWorldDispatch=yes hitSurface=unavailable (diagnostics disabled) lastGPUms(traceShade/filter)=0.840704/0.330272; shared RTAO=off capability=available BLAS=18 cachedBLAS=18 TLAS=2 instances=76 instancedTriangles=10667 completedPasses=16101 lastCompletedRays=0 lastCompletedHits=0 totalRays=390105400 rayQueriesExecuted=yes lastWorldDispatch=no BLASbuilds=786 TLASbuilds=94 lastGPUms(BLAS/TLAS/rays/filter/frame)=6.4e-05/6.4e-05/0/0/5.77997; shared static LOD0 scene radius=160m; dynamic=off; AO radius=4m includes bounded terrain, excludes foliage cards; ambient-only composition; static collection excludes animation/damage; blended effects/proxies excluded; actual water only, 80m receivers/70m rays, textured hits and weather sky fallback\",\"WaterRefraction requested=on active=on captured=yes composited=yes captures=703 composites=703 lastGPUms(capture/optics)=0.104448/0.256000 fallback=none; raster-only coastal terrain, missing bottom/underwater retains original water\",29.662]",
+      "ok": true
+    }
+  },
+  "GL33": {
+    "commands": [
+      {
+        "mode": "off",
+        "result": {
+          "result": "\"UNSUPPORTED: PBR prototype requires Vulkan\"",
+          "ok": true
+        }
+      },
+      {
+        "mode": "on",
+        "result": {
+          "result": "\"UNSUPPORTED: PBR prototype requires Vulkan\"",
+          "ok": true
+        }
+      },
+      {
+        "mode": "enhanced",
+        "result": {
+          "result": "\"UNSUPPORTED: PBR prototype requires Vulkan\"",
+          "ok": true
+        }
+      },
+      {
+        "mode": "off",
+        "result": {
+          "result": "\"UNSUPPORTED: PBR prototype requires Vulkan\"",
+          "ok": true
+        }
+      }
+    ],
+    "worldROI": [
+      300,
+      600,
+      1000,
+      850
+    ],
+    "changedPixels": 0
+  },
+  "finalGL33SHA256": "2D37A34518E02177E14479898F383D692D441C52C0400884BFDB7FCC3B130E65"
+}
