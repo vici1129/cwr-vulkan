@@ -46,6 +46,14 @@ Qualification LOD 0 res=1
         self.assertEqual(lod["lightModes"], {"0": 3})
         self.assertEqual(lod["sections"][0]["materialIndices"], {"0": 2, "201": 1})
         self.assertEqual(lod["sections"][0]["flags"], 0x8000)
+        # New native UV diagnostics are optional for historical inventories;
+        # signed/repeating bounds must not pollute the material histogram.
+        extended = text.replace("materialIndices=0:2 201:1", "materialIndices=0:2 201:1 uvMin=-.5,0 uvMax=4,1.25 invalidUV=0")
+        section = parse_model(extended)["visualLODs"][0]["sections"][0]
+        self.assertEqual(section["materialIndices"], {"0": 2, "201": 1})
+        self.assertEqual(section["uvMin"], [-.5, 0])
+        self.assertEqual(section["uvMax"], [4, 1.25])
+        self.assertEqual(section["invalidUV"], 0)
 
 
 class SnapshotIntegrityTests(unittest.TestCase):

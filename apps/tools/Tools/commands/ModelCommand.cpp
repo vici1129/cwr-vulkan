@@ -242,11 +242,20 @@ static void setupModelInspect(CLI::App& model)
                             }
                             std::array<unsigned, 256> materials{};
                             unsigned invalid = 0;
+                            std::array<float, 2> uvMin{INFINITY, INFINITY}, uvMax{-INFINITY, -INFINITY};
+                            unsigned invalidUV = 0;
                             for (int v : vertices)
                             {
                                 ++materials[(lod->Clip(v) & ClipUserMask) / ClipUserStep];
                                 invalid += v >= lod->NNorm() ||
                                     !(std::isfinite(lod->Norm(v).SquareSize()) && lod->Norm(v).SquareSize() > 1e-12f);
+                                const auto& uv = lod->UV(v);
+                                if (!std::isfinite(uv.u) || !std::isfinite(uv.v)) ++invalidUV;
+                                else
+                                {
+                                    uvMin[0] = std::min(uvMin[0], uv.u); uvMin[1] = std::min(uvMin[1], uv.v);
+                                    uvMax[0] = std::max(uvMax[0], uv.u); uvMax[1] = std::max(uvMax[1], uv.v);
+                                }
                             }
                             const auto* texture = section.properties.GetTexture();
                             std::cout << "    native section " << s << " tex="
@@ -256,6 +265,9 @@ static void setupModelInspect(CLI::App& model)
                                       << " materialIndices=";
                             for (unsigned m = 0; m < materials.size(); ++m)
                                 if (materials[m]) std::cout << m << ":" << materials[m] << " ";
+                            if (!vertices.empty())
+                                std::cout << " uvMin=" << uvMin[0] << "," << uvMin[1]
+                                          << " uvMax=" << uvMax[0] << "," << uvMax[1] << " invalidUV=" << invalidUV;
                             std::cout << std::endl;
                         }
                 }

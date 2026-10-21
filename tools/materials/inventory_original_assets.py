@@ -162,6 +162,9 @@ def parse_model(output):
             assert section["texture"] == ("" if m[2] == "<none>" else norm(m[2]))
             section.update(flags=int(m[3], 16), vertices=int(m[4]), invalidNormals=int(m[5]),
                            materialIndices={k: int(v) for k, v in re.findall(r"(\d+):(\d+)", m[6])})
+            if uv := re.search(r" uvMin=(\S+),(\S+) uvMax=(\S+),(\S+) invalidUV=(\d+)", line):
+                section.update(uvMin=list(map(float, uv.groups()[:2])),
+                               uvMax=list(map(float, uv.groups()[2:4])), invalidUV=int(uv[5]))
     visual = [lod for lod in lods.values() if lod["resolution"] < 10000]
     for lod in visual:
         assert "normals" in lod, lod

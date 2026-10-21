@@ -45,7 +45,11 @@ inline unsigned StockPBRIdentity(std::string_view texture)
 // the v3 allowlist/identities unchanged. Reuse the original receiver families;
 // classification alone never bypasses the captured-ambient/opaque-world gates.
 inline constexpr StockPBRMaterial EnhancedPBRMaterials[]{
-    {"data\\tasky_p90.pac", .90f, 3}, {"data\\budova2_stit2.pac", .90f, 5}};
+    {"data\\tasky_p90.pac", .90f, 3}, {"data\\budova2_stit2.pac", .90f, 5},
+    // Original Nogova stone and worn masonry. Entire decoded sources are rough
+    // dielectrics; shared users still require ordinary lighting/geometry/opacity.
+    {"o\\skal\\kamen02.pac", .85f, 2}, {"o\\skal\\kamen04.pac", .85f, 2},
+    {"o\\skal\\kamen05.pac", .85f, 2}, {"o\\hous\\zidka01.pac", .90f, 6}};
 inline unsigned PBRReceiverFamily(unsigned id)
 {
     if (id >= 64 && id < 64 + std::size(StockPBRMaterials)) return StockPBRMaterials[id - 64].receiverFamily;

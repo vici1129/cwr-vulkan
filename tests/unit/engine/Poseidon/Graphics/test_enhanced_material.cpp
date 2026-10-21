@@ -62,12 +62,16 @@ TEST_CASE("Additional stock materials leave v3 unchanged and use explicit GI rec
         REQUIRE(PBRMaterial(material.texture,128,true)>0);
         REQUIRE(EnhancedPBRIdentity(material.texture)>=128);
         REQUIRE(PBRReceiverFamily(EnhancedPBRIdentity(material.texture))==material.receiverFamily);
-        REQUIRE(material.receiverFamily>=3);
+        REQUIRE(material.receiverFamily>=2);
     }
     // Alpha-opaque pixels do not make window/door/hardware atlases one material.
     for (const auto key : {"data\\domek1_side.pac", "data\\domek2_side.pac", "data\\cihldum_back.pac",
                            "data\\stodola_new_side.pac", "data\\cihldum_side.pac", "data\\k1_stara_prkna.pac",
                            "data\\vidle.paa", "data\\water.pac"})
+        REQUIRE(EnhancedPBRIdentity(key)==0);
+    // Namespace and extension are part of source proof, even for matching names.
+    for (const auto key : {"data\\kamen02.pac", "other\\skal\\kamen02.pac", "o\\skal\\kamen02.paa",
+                           "data\\zidka01.pac", "o\\hous\\brana02.pac"})
         REQUIRE(EnhancedPBRIdentity(key)==0);
 }
 

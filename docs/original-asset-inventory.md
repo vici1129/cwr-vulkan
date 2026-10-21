@@ -11,6 +11,10 @@ and [30-item prioritized backlog](evidence/original-asset-inventory/backlog.json
 contain paths, provenance and per-island usage. No original asset bytes are
 published. The backlog bundles close variants into **30 tasks / 78 models**.
 
+Implementation batches and the current per-model assessment ledger are tracked
+in [original-world material modernization](material-modernization.md). The
+inventory below remains the original source-policy snapshot.
+
 ## Library size and actual world references
 
 | Scope | Unique model paths | Unique PAC/PAA paths |
