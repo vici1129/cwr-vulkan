@@ -216,7 +216,9 @@ void EngineVK::SubmitSoftware(const std::vector<uint32_t>& indices, const ShapeS
                 const auto& vertex=_softwareMesh->GetVertex(index);
                 if (uv.u!=vertex.t0.u || uv.v!=vertex.t0.v) return {};
             }
-            if (vk::OriginalTriangleRegion(*_softwareSourceShape,regional.identity,original)!=regional.identity) return {};
+            const auto identity=vk::OriginalTriangleRegion(*_softwareSourceShape,regional.identity,original,_softwareFlags);
+            if (!vk::SameOriginalRegionSource(regional.identity,identity) || !texture->RegionalMaterial(identity)) return {};
+            return {slot,identity};
         }
         return {slot,candidate.identity};
     };
@@ -226,7 +228,8 @@ void EngineVK::SubmitSoftware(const std::vector<uint32_t>& indices, const ShapeS
         size_t end = begin + 3;
         while (end < indices.size() && material(end) == std::pair{slot,identity}) end += 3;
         const auto* lighting = slot ? &_softwarePBRLighting[slot-1] : nullptr;
-        const auto adopted=identity==regional.identity && regional?regional:source;
+        const auto adopted=source?source:
+            (vk::SameOriginalRegionSource(regional.identity,identity)?texture->RegionalMaterial(identity):vk::QualifiedMaterial{});
         if (begin == 0 && end == indices.size()) SubmitSoftwareLit(indices, lighting, adopted);
         else
         {

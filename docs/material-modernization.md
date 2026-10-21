@@ -6,7 +6,7 @@ The [per-model ledger](evidence/material-modernization/progress.json) retains al
 and concrete prerequisite blockers. It is not a visible-coverage percentage.
 The original inventory remains an immutable baseline.
 
-After batch 05, 32 models have complete source review, 75 have partial source
+After batch 06, 32 models have complete source review, 75 have partial source
 review, and 408 await source review. Another 211 have no source-unknown triangles
 under the existing native classifier: their existing coverage and opacity,
 authored-lighting or geometry fallback contracts are retained. This last group
@@ -21,6 +21,10 @@ Batch 05 adds [dedicated timber, roofs/plain finishes and exact chapel masonry](
 Three proposed Podhradi-specific sources were withdrawn after the dusk appearance
 check; their mixed trim and partial-wall lighting boundaries remain pending.
 The main Podhradi and apartment facades are not claimed as completed coverage.
+Batch 06 adds [multiple physical regions in original barn atlases](material-modernization-batch-06.md)
+across ten already-partial model reviews. One new board region participates in
+PBR/reflection but retains its ambient reference after failed receiver trials;
+the evidence explicitly distinguishes reflector prerequisites from reception.
 
 The [fresh gameplay-adapter census](evidence/material-modernization/runtime-census.json)
 rechecks all 726 models / 1,711 visual LODs. The original inventory used the legacy
@@ -29,7 +33,7 @@ reproduces every complete section prerequisite multiset, normal/lighting hint an
 LOD count. Section ordering differs and must not be treated as an asset identity.
 This corrects the earlier loader description; neither census certifies live
 instance lighting, GI reception or optical review of every original image.
-Use the [batch-05 reproduction command](material-modernization-batch-05.md#runtime-census-tests-and-preservation)
+Use the [batch-06 reproduction command](material-modernization-batch-06.md#current-census-and-remaining-work)
 for the current executable; earlier batch commands describe their policy snapshots.
 
 ## Batch 01: Nogova rough stone and boundary masonry

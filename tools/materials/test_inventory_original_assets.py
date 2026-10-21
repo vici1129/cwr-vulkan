@@ -59,6 +59,11 @@ Qualification LOD 0 res=1
         section = parse_model(regional)['visualLODs'][0]['sections'][0]
         self.assertEqual(section['source'], 0)  # A region never upgrades the whole atlas.
         self.assertEqual(section['regionalSources'], {'512': 1})
+        reflection_only = regional.replace('regionalSources=512:1,',
+            'regionalSources=529:1, regionalReceptionDeferred=529:1,')
+        section = parse_model(reflection_only)['visualLODs'][0]['sections'][0]
+        self.assertEqual(section['regionalSources'], {'529': 1})
+        self.assertEqual(section['regionalReceptionDeferred'], {'529': 1})
 
 
 class SnapshotIntegrityTests(unittest.TestCase):

@@ -26,7 +26,7 @@ inline void QualifyGIReceiver(ShapeLighting& lighting, bool software)
         [&](const auto* material) { return material->id == id; });
     const bool source = family == 1 && id == SourceDiffuseIdentity;
     const auto* region=OriginalRegion(id);
-    const bool regional=region && family==int(region->family);
+    const bool regional=region && region->reception && family==int(region->family);
     if (lighting.rtWater[3] == 1 && lighting.pbr[0] > 0 && (stock || catalog || source || regional))
     {
         lighting.rtWater[3] = 2;

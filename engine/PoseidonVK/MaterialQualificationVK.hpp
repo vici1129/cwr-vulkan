@@ -95,14 +95,14 @@ inline unsigned OriginalRegionCandidate(const Shape& shape, std::string_view tex
     return OriginalRegionBindingsCompatible(shape.SourceFingerprint(),OriginalRegionTextureBindings(names))?candidate:0;
 }
 inline unsigned OriginalTriangleRegion(const Shape& shape, unsigned candidate,
-                                       const std::array<VertexIndex,3>& indices)
+                                       const std::array<VertexIndex,3>& indices, int flags)
 {
     const auto* region=OriginalRegion(candidate);
     if (!region || OriginalRegionCandidate(shape,region->texture)!=candidate ||
         OriginalTriangle(shape,indices)!=MaterialRejection::None) return 0;
     std::array<std::array<float,2>,3> uv;
     for (size_t i=0;i<3;++i) uv[i]={shape.UV(indices[i]).u,shape.UV(indices[i]).v};
-    return OriginalRegionUV(candidate,uv)?candidate:0;
+    return SelectOriginalRegion(*region,uv,flags);
 }
 inline std::vector<MaterialRange> OriginalMaterialRanges(const Shape& shape)
 {
@@ -121,7 +121,8 @@ inline std::vector<MaterialRange> OriginalMaterialRanges(const Shape& shape)
                 const std::array<VertexIndex,3> indices{face.GetVertex(0),face.GetVertex(v-1),face.GetVertex(v)};
                 auto rejection=OriginalTriangle(shape,indices);
                 if (!OriginalDiffuseFlags(section.properties.Special())) rejection=MaterialRejection::RenderBehavior;
-                const auto region=rejection==MaterialRejection::None?OriginalTriangleRegion(shape,candidate,indices):0;
+                const auto region=rejection==MaterialRejection::None?
+                    OriginalTriangleRegion(shape,candidate,indices,section.properties.Special()):0;
                 if (!ranges.empty() && ranges.back().section==unsigned(s) && ranges.back().rejection==rejection &&
                     ranges.back().regionalIdentity==region)
                     ranges.back().end=index+3;

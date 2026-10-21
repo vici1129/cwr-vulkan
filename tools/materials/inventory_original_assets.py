@@ -153,6 +153,9 @@ def parse_model(output):
             if regions := re.search(r" regionalSources=(\S+)", line):
                 lods[qualify]["sections"][-1]['regionalSources'] = {
                     k: int(v) for k, v in re.findall(r"(\d+):(\d+)", regions[1])}
+            if deferred := re.search(r" regionalReceptionDeferred=(\S+)", line):
+                lods[qualify]["sections"][-1]['regionalReceptionDeferred'] = {
+                    k: int(v) for k, v in re.findall(r"(\d+):(\d+)", deferred[1])}
         elif native and (m := re.match(r"  LOD (\d+) res=(\S+) vertices=(\d+) normals=(\d+) invalidNormals=(\d+) "
                                       r"userMaterialVertices=(\d+) landHintVertices=(\d+) lightModes=(.*)", line)):
             current = int(m[1])

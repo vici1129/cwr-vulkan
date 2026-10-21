@@ -480,9 +480,16 @@ void EngineVK::CollectRTAOScene()
                                 if (part.section!=sectionIndex) continue;
                                 auto split=range;
                                 split.first=part.begin; split.count=part.end-part.begin;
-                                if (part.rejection!=vk::MaterialRejection::None ||
-                                    (vk::OriginalRegion(unsigned(range.enhanced[3])) &&
-                                     part.regionalIdentity!=unsigned(range.enhanced[3])))
+                                bool accepted=part.rejection==vk::MaterialRejection::None;
+                                if (vk::OriginalRegion(unsigned(range.enhanced[3])))
+                                {
+                                    const auto* tex=dynamic_cast<TextureVK*>(shape->GetSection(sectionIndex).properties.GetTexture());
+                                    const auto source=tex && vk::SameOriginalRegionSource(unsigned(range.enhanced[3]),part.regionalIdentity)?
+                                        tex->RegionalMaterial(part.regionalIdentity):vk::QualifiedMaterial{};
+                                    accepted=accepted && bool(source);
+                                    if (accepted) split.enhanced={source.roughness,0,.04f,float(source.identity)};
+                                }
+                                if (!accepted)
                                 {
                                     split.enhanced={};
                                     split.sampler&=~(vk::RayDiffuse|vk::RayNormalMap|vk::RayRoughnessMap);

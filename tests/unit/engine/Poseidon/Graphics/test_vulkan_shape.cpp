@@ -27,7 +27,7 @@ TEST_CASE("Original atlas regions require exact geometry, pixels and entire orig
     for (const auto& region : vk::OriginalMaterialRegions)
     {
         REQUIRE_FALSE(vk::OriginalMaterialSource(region.texture));
-        REQUIRE(vk::OriginalRegionSource(region.identity,region.texture,region.width,region.height,region.pixels).family==6);
+        REQUIRE(vk::OriginalRegionSource(region.identity,region.texture,region.width,region.height,region.pixels).family==region.family);
         REQUIRE_FALSE(vk::OriginalRegionSource(region.identity,region.texture,region.width,region.height,region.pixels^1));
         REQUIRE_FALSE(vk::OriginalRegionSource(region.identity,region.texture,region.width/2,region.height,region.pixels));
         REQUIRE_FALSE(vk::OriginalRegionSource(region.identity,"other\\budova2_s.pac",region.width,region.height,region.pixels));
@@ -37,7 +37,15 @@ TEST_CASE("Original atlas regions require exact geometry, pixels and entire orig
             REQUIRE_FALSE(vk::OriginalRegionBindingsCompatible(geometry.fingerprint,geometry.textureBindings^1));
             const auto candidate=vk::OriginalRegionCandidate(geometry.model,geometry.resolution,geometry.vertices,
                 geometry.sections,geometry.fingerprint,region.texture);
-            REQUIRE((candidate==region.identity)==(geometry.model==region.model));
+            const bool known=std::any_of(std::begin(vk::OriginalMaterialRegions),std::end(vk::OriginalMaterialRegions),
+                [&](const auto& r){return r.model==geometry.model && r.texture==region.texture;});
+            REQUIRE(bool(candidate)==known);
+            if (candidate)
+            {
+                REQUIRE(vk::OriginalRegion(candidate)->model==geometry.model);
+                REQUIRE(vk::OriginalRegion(candidate)->texture==region.texture);
+                REQUIRE(vk::SameOriginalRegionSource(candidate,region.identity)==(geometry.model==region.model));
+            }
             REQUIRE_FALSE(vk::OriginalRegionCandidate(geometry.model,geometry.resolution,geometry.vertices,
                 geometry.sections,geometry.fingerprint^1,region.texture));
             REQUIRE_FALSE(vk::OriginalRegionCandidate("other\\statek_kulna.p3d",geometry.resolution,geometry.vertices,
@@ -48,6 +56,8 @@ TEST_CASE("Original atlas regions require exact geometry, pixels and entire orig
         const float u=region.uMin+.2f*(region.uMax-region.uMin),v=region.vMin+.2f*(region.vMax-region.vMin);
         const std::array<std::array<float,2>,3> lower{{{u,v},{u+.1f,v},{u,v+.1f}}};
         REQUIRE(vk::OriginalRegionUV(region.identity,lower));
+        REQUIRE(vk::SelectOriginalRegion(region,lower,ClampU|ClampV)==region.identity);
+        if (region.requiredClamp) REQUIRE_FALSE(vk::SelectOriginalRegion(region,lower,0));
         for (const auto bad : {std::array<float,2>{u,region.vMin-.01f},{region.uMax+.01f,v},{region.uMin-.01f,v},
                               {u,region.vMax+.01f},{u,std::numeric_limits<float>::quiet_NaN()}})
         {
@@ -67,9 +77,9 @@ TEST_CASE("Original atlas regions require exact geometry, pixels and entire orig
             lighting.pbr={source.roughness,.04f,0,float(source.identity)};
             lighting.pbrDiffuse[3]=float(source.family); lighting.rtWater[3]=1;
             vk::QualifyGIReceiver(lighting,software);
-            REQUIRE(lighting.rtWater[3]==2);
-            REQUIRE(lighting.pbrDiffuse[3]==float(6+(software?8:0)));
-            lighting.pbrDiffuse[3]=5; lighting.rtWater[3]=1;
+            REQUIRE(lighting.rtWater[3]==(region.reception?2:1));
+            REQUIRE(lighting.pbrDiffuse[3]==float(region.family+(software && region.reception?8:0)));
+            lighting.pbrDiffuse[3]=region.family==5?6:5; lighting.rtWater[3]=1;
             vk::QualifyGIReceiver(lighting,software);
             REQUIRE(lighting.rtWater[3]==1);
         }
@@ -81,6 +91,43 @@ TEST_CASE("Original atlas regions require exact geometry, pixels and entire orig
     const std::array<std::string_view,2> bindings{"data\\budova2_s.pac","data\\budova2_s2.pac"};
     const std::array<std::string_view,2> swapped{bindings[1],bindings[0]};
     REQUIRE(vk::OriginalRegionTextureBindings(bindings)!=vk::OriginalRegionTextureBindings(swapped));
+}
+
+TEST_CASE("Atlas region selection is unique, source-bound and sampler-aware",
+          "[Graphics][vulkan-shape][material-qualification]")
+{
+    auto wood=vk::OriginalMaterialRegions[0];
+    wood.identity=900;wood.family=4;wood.roughness=.85f;
+    wood.uMin=0;wood.uMax=.5f;wood.vMin=-.005f;wood.vMax=.49f;wood.requiredClamp=ClampV;
+    auto stone=wood;stone.identity=901;stone.family=6;stone.roughness=.9f;
+    stone.uMin=-3;stone.uMax=3;stone.vMin=.5f;stone.vMax=1;stone.requiredClamp=0;
+    const std::array<vk::OriginalMaterialRegion,2> rules{wood,stone},reversed{stone,wood};
+    const std::array<std::array<float,2>,3> boards{{{.01f,-.001f},{.49f,.01f},{.49f,.48f}}};
+    const std::array<std::array<float,2>,3> masonry{{{-2.f,.51f},{2.f,.51f},{2.f,.99f}}};
+    const std::array<std::array<float,2>,3> mixed{{{.1f,.2f},{.4f,.2f},{.4f,.8f}}};
+    for (const auto& set : {rules,reversed})
+    {
+        REQUIRE(vk::SelectOriginalRegion(wood,boards,ClampV,set)==wood.identity);
+        REQUIRE(vk::SelectOriginalRegion(stone,boards,ClampV,set)==wood.identity);
+        REQUIRE_FALSE(vk::SelectOriginalRegion(wood,boards,0,set));
+        REQUIRE(vk::SelectOriginalRegion(wood,masonry,0,set)==stone.identity);
+        REQUIRE_FALSE(vk::SelectOriginalRegion(wood,mixed,ClampV,set));
+    }
+    auto overlap=wood;overlap.identity=902;
+    const std::array duplicates{wood,overlap};
+    REQUIRE_FALSE(vk::SelectOriginalRegion(wood,boards,ClampV,duplicates));
+    for (int field=0;field<5;++field)
+    {
+        auto wrong=wood;
+        if(field==0) wrong.model="other\\model.p3d";
+        if(field==1) wrong.texture="other\\texture.pac";
+        if(field==2) ++wrong.width;
+        if(field==3) ++wrong.height;
+        if(field==4) wrong.pixels^=1;
+        REQUIRE_FALSE(vk::SameOriginalRegionSource(wood,wrong));
+        REQUIRE_FALSE(vk::SelectOriginalRegion(wrong,boards,ClampV,rules));
+    }
+    REQUIRE_FALSE(vk::SameOriginalRegionSource(0,wood.identity));
 }
 
 TEST_CASE("Automatic material qualification needs authored evidence, never opaque default state",

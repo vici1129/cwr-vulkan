@@ -134,8 +134,8 @@ This is prerequisite assessment, not completed optical review of all 726 models.
 Reproduce without changing assets:
 
 This command replays the batch-03 tool/policy snapshot. For the current executable,
-use the [batch-05 command](material-modernization-batch-05.md#runtime-census-tests-and-preservation),
-which explicitly replays all subsequent enhanced and regional identities.
+use the reproduction command linked from [the main progress page](material-modernization.md),
+which explicitly replays subsequent enhanced and regional identities.
 
 ```powershell
 python tools/materials/census_runtime_assets.py `

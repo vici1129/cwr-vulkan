@@ -235,15 +235,17 @@ static void setupModelInspect(CLI::App& model)
                                           << " textureBindings=" << Poseidon::vk::OriginalRegionTextureBindings(bindings) << std::endl;
                             }
                             const auto& section=lod->GetSection(s);
-                            unsigned triangle=0;
+                            unsigned triangle=0,originalFace=0;
                             for (Offset at=section.beg; at<section.end; lod->NextFace(at))
                             {
                                 const auto& face=lod->Face(at);
+                                ++originalFace;
                                 for (int v=2;v<face.N();++v,++triangle)
                                 {
                                     const std::array<VertexIndex,3> indices{face.GetVertex(0),face.GetVertex(v-1),face.GetVertex(v)};
                                     std::cout << "UV triangle lod=" << i << " section=" << s << " triangle=" << triangle
-                                              << " prerequisite=" << unsigned(Poseidon::vk::OriginalTriangle(*lod,indices));
+                                              << " prerequisite=" << unsigned(Poseidon::vk::OriginalTriangle(*lod,indices))
+                                              << " originalFace=" << originalFace << " faceCorners=" << face.N();
                                     for (auto index : indices)
                                         if (unsigned(index)<unsigned(lod->NVertex()))
                                         {
@@ -302,6 +304,9 @@ static void setupModelInspect(CLI::App& model)
                             {
                                 std::cout << " regionalSources=";
                                 for (const auto& [identity,count] : regions) std::cout << identity << ":" << count << ",";
+                                std::cout << " regionalReceptionDeferred=";
+                                for (const auto& [identity,count] : regions)
+                                    if (!Poseidon::vk::OriginalRegion(identity)->reception) std::cout << identity << ":" << count << ",";
                             }
                             std::cout << " reception=unverified(no ambient capture)" << std::endl;
                         }

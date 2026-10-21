@@ -134,6 +134,9 @@ python tools/materials/census_runtime_assets.py `
   --replay-regional-identities 512 513 514 515 516 517
 ```
 
+This command describes the batch-05 policy snapshot. With the current executable,
+use the reproduction command linked from [the main progress page](material-modernization.md).
+
 The highest-detail prerequisite increment is 2,055 across distinct models, without
 placement or alternative-LOD multiplication. It is an audit count, not an adoption
 objective. The 55-model source review includes withdrawn and unresolved candidates,

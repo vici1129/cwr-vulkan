@@ -62,7 +62,7 @@ replaying only enhanced identities 130–151 and regional identities 512–514.
 There are zero other geometry, lighting, opacity or rejection-bucket differences.
 Use the batch-03 reproduction command plus `--replay-regional-identities 512 513 514`.
 That describes this batch's policy snapshot. For the current executable, use the
-[batch-05 reproduction command](material-modernization-batch-05.md#runtime-census-tests-and-preservation).
+reproduction command linked from [the main progress page](material-modernization.md).
 This is not completed optical assessment of every original model.
 
 ## Actual gameplay and limits
