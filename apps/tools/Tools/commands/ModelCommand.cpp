@@ -9,6 +9,9 @@
 #include <Poseidon/Graphics/Textures/TextureBank.hpp>
 #include <PoseidonVK/MaterialQualificationVK.hpp>
 #include <Poseidon/IO/ParamFileExt.hpp>
+#include <Poseidon/World/Model/ModelCache.hpp>
+#include <Poseidon/World/Model/ShapeAdapter.hpp>
+#include <PoseidonVK/EnhancedMaterialVK.hpp>
 #include <iostream>
 #include <iomanip>
 #include <fstream>
@@ -85,6 +88,9 @@ static void setupModelInspect(CLI::App& model)
     static bool showAll = false;
     static bool classify = false;
     static bool showLighting = false;
+    static bool showUVTriangles = false;
+    static bool runtimeLoader = false;
+    static int uvLOD = -1, uvSection = -1;
     static bool qualify = false;
     static std::string materialConfig;
     static std::string texRoot;
@@ -97,6 +103,12 @@ static void setupModelInspect(CLI::App& model)
     cmd->add_flag("--classify", classify, "Classify each texture's alpha (opaque/cutout/blend) + render route");
     cmd->add_flag("--lighting", showLighting,
                   "Inspect native ODOL vertex normals and authored lighting hints (read-only)");
+    cmd->add_flag("--uv-triangles", showUVTriangles,
+                  "Dump original native visual-LOD triangle UVs and lighting prerequisites (read-only)");
+    cmd->add_flag("--runtime-loader", runtimeLoader,
+                  "Use gameplay's ODOL ShapeAdapter for native qualification, UVs and source fingerprints");
+    cmd->add_option("--uv-lod", uvLOD, "Limit UV triangle dump to this native LOD index (-1: all visual)");
+    cmd->add_option("--uv-section", uvSection, "Limit UV triangle dump to this native section (-1: all)");
     cmd->add_flag("--qualify", qualify, "Evaluate the runtime automatic material classifier (no ambient capture in tool)");
     cmd->add_option("--material-config", materialConfig, "Original config for authored texture/material mappings")
         ->check(CLI::ExistingFile);
@@ -165,24 +177,66 @@ static void setupModelInspect(CLI::App& model)
                 std::cout << std::endl;
             }
 
-            if (showLighting || qualify)
+            if (showLighting || qualify || showUVTriangles || runtimeLoader)
             {
                 if (qualify && !materialConfig.empty() && !Pars.ParseBinOrTxt(materialConfig.c_str()))
                     throw CLI::RuntimeError(1);
-                // Use the same native loader as gameplay, not reconstructed or
-                // generated normals from a preview mesh. This does not qualify
-                // any section for PBR/GI or alter the source asset.
-                auto shape = std::make_unique<LODShapeWithShadow>();
-                if (!shape->LoadOptimized(inputPath.c_str()))
+                // Preserve the historical legacy-native inventory route by
+                // default. The explicit runtime route follows ShapeBank's ODOL
+                // adapter, including source fingerprints. Neither mutates assets.
+                std::unique_ptr<LODShapeWithShadow> shape;
+                if (runtimeLoader)
+                {
+                    Poseidon::ModelCache cache;
+                    auto original=cache.load(inputPath);
+                    if (original && original->sourceFormat=="ODOL")
+                        shape.reset(Poseidon::Model::ShapeAdapter::convertToLODShape(*original));
+                }
+                else
+                {
+                    shape=std::make_unique<LODShapeWithShadow>();
+                    if (!shape->LoadOptimized(inputPath.c_str())) shape.reset();
+                }
+                if (!shape)
                 {
                     std::cerr << "Native lighting inspection requires a loadable optimized ODOL model" << std::endl;
                     throw CLI::RuntimeError(1);
                 }
-                std::cout << "Native lighting (source hints; not PBR/GI eligibility)" << std::endl;
+                std::cout << "Native lighting (source hints; not PBR/GI eligibility; loader="
+                          << (runtimeLoader?"runtime-adapter":"legacy-optimized") << ")" << std::endl;
                 for (int i = 0; i < shape->NLevels(); ++i)
                 {
                     const auto* lod = shape->Level(i);
                     if (!lod) continue;
+                    if (showUVTriangles && shape->Resolution(i)<10000 && (uvLOD<0 || uvLOD==i))
+                        for (int s=0;s<lod->NSections();++s)
+                        {
+                            if (uvSection>=0 && uvSection!=s) continue;
+                            if (s==0 || uvSection==s)
+                                std::cout << "UV geometry lod=" << i << " resolution=" << shape->Resolution(i)
+                                          << " fingerprint=" << lod->SourceFingerprint()
+                                          << " fingerprintValid=" << (lod->SourceFingerprint()!=0) << std::endl;
+                            const auto& section=lod->GetSection(s);
+                            unsigned triangle=0;
+                            for (Offset at=section.beg; at<section.end; lod->NextFace(at))
+                            {
+                                const auto& face=lod->Face(at);
+                                for (int v=2;v<face.N();++v,++triangle)
+                                {
+                                    const std::array<VertexIndex,3> indices{face.GetVertex(0),face.GetVertex(v-1),face.GetVertex(v)};
+                                    std::cout << "UV triangle lod=" << i << " section=" << s << " triangle=" << triangle
+                                              << " prerequisite=" << unsigned(Poseidon::vk::OriginalTriangle(*lod,indices));
+                                    for (auto index : indices)
+                                        if (unsigned(index)<unsigned(lod->NVertex()))
+                                        {
+                                            const auto& uv=lod->UV(index);
+                                            std::cout << " vertex=" << index << "," << uv.u << "," << uv.v;
+                                        }
+                                        else std::cout << " invalidIndex=" << index;
+                                    std::cout << std::endl;
+                                }
+                            }
+                        }
                     if (qualify && shape->Resolution(i)<10000)
                     {
                         const auto ranges=Poseidon::vk::OriginalMaterialRanges(*lod);
@@ -192,7 +246,7 @@ static void setupModelInspect(CLI::App& model)
                             const auto& section=lod->GetSection(s);
                             const auto* texture=section.properties.GetTexture();
                             const std::string name=texture?texture->Name():"";
-                            const auto source=Poseidon::vk::OriginalMaterialSource(name,section.surfMat);
+                            const auto source=Poseidon::vk::OriginalMaterialSource(Poseidon::vk::MaterialIdentity(name),section.surfMat);
                             // Qualification requires an exact source path. The preview's
                             // basename-search fallback cannot prove material provenance.
                             const auto pixels=Poseidon::DecodePAAFile(

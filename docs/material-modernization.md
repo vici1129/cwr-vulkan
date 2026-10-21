@@ -6,13 +6,22 @@ The [per-model ledger](evidence/material-modernization/progress.json) retains al
 and concrete prerequisite blockers. It is not a visible-coverage percentage.
 The original inventory remains an immutable baseline.
 
-After batch 02, 28 models have complete source review, ten have partial source
-review, and 477 await source review. Another 211 have no source-unknown triangles
+After batch 03, 31 models have complete source review, 31 have partial source
+review, and 453 await source review. Another 211 have no source-unknown triangles
 under the existing native classifier: their existing coverage and opacity,
 authored-lighting or geometry fallback contracts are retained. This last group
 is a prerequisite disposition, not a claim that all of its pixels are PBR or GI.
-Backlog tasks 1–4 and 25–27 have source review complete; the remaining tasks continue.
-Batch 02 is documented in [brick pillars, bark and stacked logs](material-modernization-batch-02.md).
+Backlog tasks 1–4, 6–8 and 25–27 have source review complete; the remaining tasks continue.
+Batch 02 covers [brick pillars, bark and stacked logs](material-modernization-batch-02.md);
+batch 03 covers [fence foundations, roof tiles and blank plaster](material-modernization-batch-03.md).
+
+The [fresh gameplay-adapter census](evidence/material-modernization/runtime-census.json)
+rechecks all 726 models / 1,711 visual LODs. The original inventory used the legacy
+optimized loader, not gameplay's ODOL adapter. Replaying its original source policy
+reproduces every complete section prerequisite multiset, normal/lighting hint and
+LOD count. Section ordering differs and must not be treated as an asset identity.
+This corrects the earlier loader description; neither census certifies live
+instance lighting, GI reception or optical review of every original image.
 
 ## Batch 01: Nogova rough stone and boundary masonry
 
@@ -121,6 +130,7 @@ in the [qualification receipt](evidence/material-modernization/batch-01/qualific
 Task-local commands and raw captures are retained in
 `build/material-modernization-20261021/` and `build/shadow-live/modernization-*`.
 
-The next batch continues classic fence foundations and farm/building surfaces.
-Metal, apertures, mixed photographic supports and window/door atlases retain
-their specific unresolved boundaries in the ledger.
+Work continues through farm/building UV regions and the remaining related
+families. Metal, apertures, mixed photographic supports and window/door atlases
+retain their specific unresolved boundaries in the ledger. A whole-atlas rejection
+does not close a model review when existing triangles may safely separate a wall.

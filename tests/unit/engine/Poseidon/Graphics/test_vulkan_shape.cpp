@@ -51,8 +51,18 @@ TEST_CASE("Automatic material qualification needs authored evidence, never opaqu
     for (int power : {0,8,128})
         REQUIRE(vk::OriginalRasterRoughness(vk::OriginalMaterialSource("data\\sloupek_bily_orezly_.pac"),
             "data\\sloupek_bily_orezly_.pac",power)==vk::PBRMaterial("data\\sloupek_bily_orezly_.pac",power,true));
-    for (const auto key : {"data\\blok_a_back.pac","data\\blok_a_side.pac","data\\ujezd_up.pac","o\\hous\\panel02.pac"})
+    for (const auto key : {"data\\blok_a_side.pac","data\\blok_a_side_02.pac","data\\domek1_side.pac","o\\hous\\panel02.pac"})
         REQUIRE_FALSE(vk::OriginalMaterialSource(key));
+    // Inspected blank plaster is distinct from its window-bearing neighbors.
+    // Source proof does not excuse authored lighting or alpha render behavior.
+    for (const auto key : {"data\\blok_a_back.pac","data\\ujezd_up.pac"})
+    {
+        const auto verified=vk::OriginalMaterialSource(key);
+        REQUIRE(verified.identity==vk::EnhancedPBRIdentity(key));
+        REQUIRE(verified.family==5);
+        REQUIRE(vk::QualifyOriginalMaterial(verified,vk::MaterialRejection::AuthoredLighting,0,true,true)==vk::MaterialRejection::AuthoredLighting);
+        REQUIRE(vk::QualifyOriginalMaterial(verified,vk::MaterialRejection::None,IsTransparent,true,true)==vk::MaterialRejection::RenderBehavior);
+    }
 }
 
 TEST_CASE("Automatic triangle ranges preserve ordinary neighbors of authored shadow lighting",

@@ -63,12 +63,22 @@ building modernization.
 
 ## Source-level PBR/GI qualification
 
-All **726 referenced models / 1,711 visual LODs** were inspected with the native
-ODOL loader and existing shared material qualifier. Every visual section records
+All **726 referenced models / 1,711 visual LODs** were inspected with the legacy
+optimized ODOL loader and existing shared material qualifier. Every visual section records
 its texture, original flags, material-index histogram, normal checks and
 qualification result. Visual means source resolution `<10000`, matching the
 existing tool/runtime contract; collision, memory and shadow LODs are not counted
 as visual surfaces.
+
+Loader clarification (batch 03): ordinary ODOL gameplay uses ModelCache and
+ShapeAdapter, whereas this original snapshot used `LODShape::LoadOptimized`.
+The [current runtime-adapter census](evidence/material-modernization/runtime-census.json)
+reinspects all 726 / 1,711 and, after explicitly replaying the older source policy,
+matches every LOD count, normal/vertex hint and complete section prerequisite
+multiset. Section order is not stable between these routes. The original snapshot
+is retained unchanged; it does not supply a runtime source fingerprint. Use the
+explicit `model inspect --runtime-loader` diagnostic for gameplay UV/fingerprint
+work. Neither route substitutes for a live instance/lighting/receiver check.
 
 For an interpretable geometry denominator, the following takes **one
 highest-detail visual LOD per distinct model** (minimum resolution, then index),

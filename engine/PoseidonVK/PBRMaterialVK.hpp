@@ -55,7 +55,15 @@ inline constexpr StockPBRMaterial EnhancedPBRMaterials[]{
     // hinged doors and mixed photographic end/support atlases stay legacy.
     {"data\\kmen_borovice_04.pac", .85f, 4}, {"o\\tree\\javor01_kr3.pac", .85f, 4},
     {"o\\hous\\hrmd_kr.pac", .85f, 4}, {"o\\hous\\hrmd_top.pac", .85f, 4},
-    {"o\\hous\\hrmd_zbk.pac", .85f, 4}};
+    {"o\\hous\\hrmd_zbk.pac", .85f, 4},
+    // Original separately sectioned fence foundations/caps and blank plaster.
+    // Adjacent wire, hardware, apertures and window-bearing atlases stay legacy.
+    {"data\\podezdivka1.pac", .90f, 7}, {"data\\podezdivka2.pac", .90f, 6},
+    {"data\\2_sloup_beton.pac", .90f, 7}, {"data\\vrsek_zidky.pac", .90f, 7},
+    {"data\\tasky_p.pac", .90f, 3}, {"data\\tasky_hnus.pac", .90f, 3},
+    {"data\\tasky_hnus90.pac", .90f, 3}, {"data\\blok_a_back.pac", .90f, 5},
+    {"data\\blok_a_rantl_top.pac", .90f, 5}, {"data\\komin_vetsi_side_01.pac", .90f, 5},
+    {"data\\ujezd_up.pac", .90f, 5}};
 inline unsigned PBRReceiverFamily(unsigned id)
 {
     if (id >= 64 && id < 64 + std::size(StockPBRMaterials)) return StockPBRMaterials[id - 64].receiverFamily;
