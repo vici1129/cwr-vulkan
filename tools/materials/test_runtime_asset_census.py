@@ -40,6 +40,23 @@ class CensusComparisonTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             section_signature(s, range(130, 152))
 
+    def test_regional_proof_is_not_a_whole_image_identity(self):
+        after = copy.deepcopy(self.before)
+        s = after['visualLODs'][0]['sections'][0]
+        s.update(regionalSources={'512': 1}, eligible=1, unknownSource=0)
+        self.assertTrue(compare_models(self.before, after))
+        self.assertEqual(compare_models(self.before, after, regional_replay=[512]), [])
+        s['source'] = 128
+        with self.assertRaises(ValueError):
+            section_signature(s, regional_replay=[512])
+
+    def test_regional_replay_cannot_erase_other_failures(self):
+        after = copy.deepcopy(self.before)
+        s = after['visualLODs'][0]['sections'][0]
+        s.update(regionalSources={'512': 1}, eligible=0, unknownSource=0, authoredLighting=1)
+        with self.assertRaises(ValueError):
+            section_signature(s, regional_replay=[512])
+
     def test_vertex_hints_and_section_duplicates_are_counted(self):
         after = copy.deepcopy(self.before)
         after['visualLODs'][0]['landHintVertices'] = 1

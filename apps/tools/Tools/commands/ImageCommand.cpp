@@ -7,6 +7,7 @@
 #include <Poseidon/Graphics/Textures/ImageContainer.hpp>
 #include <Poseidon/Asset/Probes/AssetInfo.hpp>
 #include <Poseidon/Asset/Probes/AssetPreview.hpp>
+#include <PoseidonVK/OriginalMaterialRegionsVK.hpp>
 #include <iostream>
 #include <iomanip>
 #include <vector>
@@ -33,7 +34,9 @@ static void setupImageInspect(CLI::App& image)
 {
     auto* cmd = image.add_subcommand("inspect", "Inspect PAA/PAC texture file");
     static std::string inputPath;
+    static bool fingerprint=false;
     cmd->add_option("input", inputPath, "Input PAA/PAC file path")->required()->check(CLI::ExistingFile);
+    cmd->add_flag("--fingerprint",fingerprint,"Report decoded original top-mip RGBA fingerprint (read-only)");
 
     cmd->callback(
         []()
@@ -67,6 +70,8 @@ static void setupImageInspect(CLI::App& image)
             Poseidon::DecodedImage img = Poseidon::DecodePAAFile(inputPath);
             if (img.valid())
             {
+                if (fingerprint)
+                    std::cout << "RGBA fingerprint: " << Poseidon::vk::OriginalRegionPixelFingerprint(img.rgba) << std::endl;
                 const size_t n = static_cast<size_t>(img.width) * static_cast<size_t>(img.height);
                 const Poseidon::AlphaStats a = Poseidon::ClassifyAlpha(img.rgba.data(), n);
                 const char* route =

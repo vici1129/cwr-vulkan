@@ -150,6 +150,9 @@ def parse_model(output):
             lods[qualify]["sections"].append(dict(zip(
                 ["index", "texture", "source", "opaque", "declared", *REASONS],
                 [int(v) if i != 1 else norm(v) for i, v in enumerate(values)])))
+            if regions := re.search(r" regionalSources=(\S+)", line):
+                lods[qualify]["sections"][-1]['regionalSources'] = {
+                    k: int(v) for k, v in re.findall(r"(\d+):(\d+)", regions[1])}
         elif native and (m := re.match(r"  LOD (\d+) res=(\S+) vertices=(\d+) normals=(\d+) invalidNormals=(\d+) "
                                       r"userMaterialVertices=(\d+) landHintVertices=(\d+) lightModes=(.*)", line)):
             current = int(m[1])

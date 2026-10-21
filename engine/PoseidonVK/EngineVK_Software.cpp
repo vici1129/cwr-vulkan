@@ -44,7 +44,8 @@ void EngineVK::CaptureSoftwareMaterial(TLVertexTable& dst, const TLMaterial& mat
     for (int s = 0; s < shape->NSections(); ++s)
         if (const auto* texture = dynamic_cast<TextureVK*>(shape->GetSection(s).properties.GetTexture());
             texture && (vk::PBRMaterial(texture->MaterialKey(), mat.specularPower, _vk.EnhancedMaterialsEnabled()) > 0 ||
-                (_vk.AutomaticMaterialsEnabled() && texture->AutomaticMaterial(shape->GetSection(s).surfMat))))
+                (_vk.AutomaticMaterialsEnabled() && (texture->AutomaticMaterial(shape->GetSection(s).surfMat) ||
+                    texture->RegionalMaterial(vk::OriginalRegionCandidate(*shape,texture->MaterialKey()))))))
         {
             candidate = true;
             break;
@@ -163,12 +164,16 @@ void EngineVK::SubmitSoftware(const std::vector<uint32_t>& indices, const ShapeS
     const auto source=texture && _vk.AutomaticMaterialsEnabled() && section &&
         section->properties.GetTexture()==texture ?
         vk::OriginalSectionSource(texture->MaterialKey(),section) : vk::QualifiedMaterial{};
+    const auto regional=texture && _vk.AutomaticMaterialsEnabled() && _softwareSourceShape && section &&
+        section->properties.GetTexture()==texture ? texture->RegionalMaterial(
+            vk::OriginalRegionCandidate(*_softwareSourceShape,texture->MaterialKey())) : vk::QualifiedMaterial{};
+    const auto candidate=source?source:regional;
     if (!_softwareMesh || !_vk.PBREnabled() || !_shadowWorld || _waterSurface || !texture ||
         texture->IsTransparent() || state.blend || !state.depthWrite || !state.depthTest ||
         (_softwareFlags & (DisableSun | IsShadow | IsLight | IsColored | IsAlphaFog | NoDropdown | SpecularTexture)) ||
         (vk::PBRMaterial(texture->MaterialKey(), 0, _vk.EnhancedMaterialsEnabled()) == 0 &&
-         !(_vk.AutomaticMaterialsEnabled() && source)) || _softwareMesh->pbrNormal.empty() ||
-        (_vk.AutomaticMaterialsEnabled() && vk::QualifyOriginalMaterial(source,vk::MaterialRejection::None,
+         !(_vk.AutomaticMaterialsEnabled() && candidate)) || _softwareMesh->pbrNormal.empty() ||
+        (_vk.AutomaticMaterialsEnabled() && vk::QualifyOriginalMaterial(candidate,vk::MaterialRejection::None,
             _softwareFlags,!texture->IsTransparent() && state.cutoff==0,!texture->IsDynamic())!=vk::MaterialRejection::None))
     {
         SubmitSoftwareLit(indices, nullptr);
@@ -176,40 +181,57 @@ void EngineVK::SubmitSoftware(const std::vector<uint32_t>& indices, const ShapeS
     }
     // A texture section can span multiple vertex lighting modes. Split only at
     // actual captured-material boundaries, preserving face order and fallback.
-    const auto material = [&](size_t i) -> int {
+    const auto material = [&](size_t i) -> std::pair<int,unsigned> {
         int slot = 0;
         for (size_t k = 0; k < 3; ++k)
         {
             const auto index = indices[i+k];
-            if (index >= _softwareMesh->pbrNormal.size()) return 0;
+            if (index >= _softwareMesh->pbrNormal.size()) return {};
             if (_vk.AutomaticMaterialsEnabled())
             {
                 const auto& vertex=_softwareMesh->GetVertex(index);
-                if (!std::isfinite(vertex.t0.u) || !std::isfinite(vertex.t0.v)) return 0;
+                if (!std::isfinite(vertex.t0.u) || !std::isfinite(vertex.t0.v)) return {};
             }
             const int next = int(_softwareMesh->pbrNormal[index][3]);
-            if (next <= 0 || next > int(_softwarePBRLighting.size()) || (k && slot != next)) return 0;
+            if (next <= 0 || next > int(_softwarePBRLighting.size()) || (k && slot != next)) return {};
             slot = next;
         }
         if (_vk.AutomaticMaterialsEnabled() && slot)
         {
             const auto& lighting=_softwarePBRLighting[slot-1];
             if (lighting.rtSun[1]!=0 || lighting.rtSun[2]!=0 || lighting.rtSun[3]!=0 ||
-                lighting.emissive[0]!=0 || lighting.emissive[1]!=0 || lighting.emissive[2]!=0) return 0;
+                lighting.emissive[0]!=0 || lighting.emissive[1]!=0 || lighting.emissive[2]!=0) return {};
         }
-        return slot;
+        if (!source && regional)
+        {
+            std::array<VertexIndex,3> original;
+            for (size_t k=0;k<3;++k)
+            {
+                const auto index=indices[i+k];
+                // Do not turn clipping-generated subtriangles of a mixed face
+                // into original wall regions. Original vertices/UVs must agree.
+                if (index>=unsigned(_softwareSourceShape->NVertex())) return {};
+                original[k]=VertexIndex(index);
+                const auto& uv=_softwareSourceShape->UV(original[k]);
+                const auto& vertex=_softwareMesh->GetVertex(index);
+                if (uv.u!=vertex.t0.u || uv.v!=vertex.t0.v) return {};
+            }
+            if (vk::OriginalTriangleRegion(*_softwareSourceShape,regional.identity,original)!=regional.identity) return {};
+        }
+        return {slot,candidate.identity};
     };
     for (size_t begin = 0; begin < indices.size();)
     {
-        const int slot = material(begin);
+        const auto [slot,identity] = material(begin);
         size_t end = begin + 3;
-        while (end < indices.size() && material(end) == slot) end += 3;
+        while (end < indices.size() && material(end) == std::pair{slot,identity}) end += 3;
         const auto* lighting = slot ? &_softwarePBRLighting[slot-1] : nullptr;
-        if (begin == 0 && end == indices.size()) SubmitSoftwareLit(indices, lighting, source);
+        const auto adopted=identity==regional.identity && regional?regional:source;
+        if (begin == 0 && end == indices.size()) SubmitSoftwareLit(indices, lighting, adopted);
         else
         {
             std::vector<uint32_t> part(indices.begin()+begin, indices.begin()+end);
-            SubmitSoftwareLit(part, lighting, source);
+            SubmitSoftwareLit(part, lighting, adopted);
         }
         begin = end;
     }
@@ -294,6 +316,7 @@ void EngineVK::SubmitSoftwareLit(const std::vector<uint32_t>& indices, const vk:
         receiver.pbr = {vk::PBRMaterial(texture->MaterialKey(), int(receiver.specular[3]), _vk.EnhancedMaterialsEnabled()), .04f, 0, 0};
         if (_vk.AutomaticMaterialsEnabled() && source.identity==vk::SourceDiffuseIdentity)
             ApplySourceDiffuse(receiver);
+        ApplyRegionalPBR(source,receiver);
         _vk.RecordPBRDraw(true);
     }
     receiver.aoReceiver[0] = _vk.RTAOEnabled() && _shadowWorld && !_waterSurface &&

@@ -54,6 +54,11 @@ Qualification LOD 0 res=1
         self.assertEqual(section["uvMin"], [-.5, 0])
         self.assertEqual(section["uvMax"], [4, 1.25])
         self.assertEqual(section["invalidUV"], 0)
+        regional = text.replace('eligible=0 unknownSource=1', 'eligible=1 unknownSource=0').replace(
+            'geometry=0 reception=', 'geometry=0 regionalSources=512:1, reception=')
+        section = parse_model(regional)['visualLODs'][0]['sections'][0]
+        self.assertEqual(section['source'], 0)  # A region never upgrades the whole atlas.
+        self.assertEqual(section['regionalSources'], {'512': 1})
 
 
 class SnapshotIntegrityTests(unittest.TestCase):

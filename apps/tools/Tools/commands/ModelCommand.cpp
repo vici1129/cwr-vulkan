@@ -22,6 +22,7 @@
 #include <set>
 #include <array>
 #include <memory>
+#include <map>
 #include <stdint.h>
 #include <CLI/App.hpp>
 #include <CLI/Error.hpp>
@@ -190,7 +191,18 @@ static void setupModelInspect(CLI::App& model)
                     Poseidon::ModelCache cache;
                     auto original=cache.load(inputPath);
                     if (original && original->sourceFormat=="ODOL")
+                    {
+                        // An explicit extracted-library root establishes the
+                        // canonical bank-relative model key; never guess a basename.
+                        if (!texRoot.empty())
+                        {
+                            const auto relative=std::filesystem::weakly_canonical(inputPath).lexically_relative(
+                                std::filesystem::weakly_canonical(texRoot));
+                            if (!relative.empty() && !relative.is_absolute() && *relative.begin()!="..")
+                                original->sourcePath=relative.generic_string();
+                        }
                         shape.reset(Poseidon::Model::ShapeAdapter::convertToLODShape(*original));
+                    }
                 }
                 else
                 {
@@ -213,9 +225,15 @@ static void setupModelInspect(CLI::App& model)
                         {
                             if (uvSection>=0 && uvSection!=s) continue;
                             if (s==0 || uvSection==s)
+                            {
+                                std::vector<std::string_view> bindings;
+                                for (int t=0;t<lod->NTextures();++t)
+                                    bindings.emplace_back(lod->GetTexture(t)?static_cast<const char*>(lod->GetTexture(t)->Name()):"");
                                 std::cout << "UV geometry lod=" << i << " resolution=" << shape->Resolution(i)
                                           << " fingerprint=" << lod->SourceFingerprint()
-                                          << " fingerprintValid=" << (lod->SourceFingerprint()!=0) << std::endl;
+                                          << " fingerprintValid=" << (lod->SourceFingerprint()!=0)
+                                          << " textureBindings=" << Poseidon::vk::OriginalRegionTextureBindings(bindings) << std::endl;
+                            }
                             const auto& section=lod->GetSection(s);
                             unsigned triangle=0;
                             for (Offset at=section.beg; at<section.end; lod->NextFace(at))
@@ -231,6 +249,14 @@ static void setupModelInspect(CLI::App& model)
                                         {
                                             const auto& uv=lod->UV(index);
                                             std::cout << " vertex=" << index << "," << uv.u << "," << uv.v;
+                                            const auto& position=lod->Pos(index);
+                                            std::cout << " position=" << position.X() << "," << position.Y() << "," << position.Z();
+                                            if (unsigned(index)<unsigned(lod->NNorm()))
+                                            {
+                                                const auto& normal=lod->Norm(index);
+                                                std::cout << " normal=" << normal.X() << "," << normal.Y() << "," << normal.Z();
+                                            }
+                                            else std::cout << " invalidNormalIndex=" << index;
                                         }
                                         else std::cout << " invalidIndex=" << index;
                                     std::cout << std::endl;
@@ -254,15 +280,30 @@ static void setupModelInspect(CLI::App& model)
                             const bool opaque=pixels.valid() && Poseidon::ClassifyAlpha(pixels.rgba.data(),
                                 size_t(pixels.width)*pixels.height).kind==Poseidon::AlphaStats::Opaque;
                             std::array<unsigned,5> counts{};
+                            std::map<unsigned,unsigned> regions;
+                            const auto pixelHash=Poseidon::vk::OriginalRegionPixelFingerprint(pixels.rgba);
                             for (const auto& part : ranges)
                                 if (part.section==unsigned(s))
-                                    counts[unsigned(Poseidon::vk::QualifyOriginalMaterial(source,part.rejection,
-                                        section.properties.Special(),opaque,true))]+=(part.end-part.begin)/3;
+                                {
+                                    const auto regional=source?source:Poseidon::vk::OriginalRegionSource(
+                                        part.regionalIdentity,Poseidon::vk::MaterialIdentity(name),pixels.width,pixels.height,pixelHash);
+                                    const auto result=Poseidon::vk::QualifyOriginalMaterial(regional,part.rejection,
+                                        section.properties.Special(),opaque,true);
+                                    counts[unsigned(result)]+=(part.end-part.begin)/3;
+                                    if (result==Poseidon::vk::MaterialRejection::None && Poseidon::vk::OriginalRegion(regional.identity))
+                                        regions[regional.identity]+=(part.end-part.begin)/3;
+                                }
                             std::cout << "  section=" << s << " texture=" << name << " source=" << source.identity
                                 << " opaque=" << opaque << " declared=" << Poseidon::vk::SourceDiffuseMaterial(section.surfMat)
                                 << " eligible=" << counts[0] << " unknownSource=" << counts[1]
                                 << " renderBehavior=" << counts[2] << " authoredLighting=" << counts[3]
-                                << " geometry=" << counts[4] << " reception=unverified(no ambient capture)" << std::endl;
+                                << " geometry=" << counts[4];
+                            if (!regions.empty())
+                            {
+                                std::cout << " regionalSources=";
+                                for (const auto& [identity,count] : regions) std::cout << identity << ":" << count << ",";
+                            }
+                            std::cout << " reception=unverified(no ambient capture)" << std::endl;
                         }
                     }
                     unsigned user = 0, fitted = 0, invalidNormals = 0;

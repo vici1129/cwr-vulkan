@@ -21,6 +21,7 @@ class TextureVK final : public Texture
     const std::string& MaterialKey() const { return _materialKey; }
     vk::QualifiedMaterial AutomaticMaterial() const;
     vk::QualifiedMaterial AutomaticMaterial(const TexMaterial*) const;
+    vk::QualifiedMaterial RegionalMaterial(unsigned identity) const;
     int AWidth(int level = 0) const override;
     int AHeight(int level = 0) const override;
     int ANMipmaps() const override { return int(_levels.size()); }
@@ -49,6 +50,8 @@ class TextureVK final : public Texture
     mutable bool _automaticReady = false;
     mutable Ref<TexMaterial> _automaticSource;
     mutable vk::QualifiedMaterial _automaticMaterial;
+    mutable bool _regionalPixelsReady=false;
+    mutable uint64_t _regionalPixels=0;
     std::string _materialKey;
     std::array<float, 3> _wetResponse{};
     bool _wetRoad = false;

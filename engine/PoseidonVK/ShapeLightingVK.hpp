@@ -15,7 +15,9 @@ inline void QualifyGIReceiver(ShapeLighting& lighting, bool software)
 {
     if (!(lighting.pbrDiffuse[3] >= 1 && lighting.pbrDiffuse[3] <= 7) ||
         !(lighting.pbr[3] >= 1 && (lighting.pbr[3] < 128 + std::size(EnhancedPBRMaterials) ||
-                                 lighting.pbr[3] == SourceDiffuseIdentity))) return;
+                                 lighting.pbr[3] == SourceDiffuseIdentity ||
+                                 std::any_of(std::begin(OriginalMaterialRegions),std::end(OriginalMaterialRegions),
+                                     [&](const auto& r){return lighting.pbr[3]==float(r.identity);})))) return;
     const int family = int(lighting.pbrDiffuse[3]);
     const unsigned id = unsigned(lighting.pbr[3]);
     if (float(family) != lighting.pbrDiffuse[3] || float(id) != lighting.pbr[3]) return;
@@ -23,7 +25,9 @@ inline void QualifyGIReceiver(ShapeLighting& lighting, bool software)
     const bool catalog = family == 1 && std::any_of(EnhancedCatalog.begin(), EnhancedCatalog.end(),
         [&](const auto* material) { return material->id == id; });
     const bool source = family == 1 && id == SourceDiffuseIdentity;
-    if (lighting.rtWater[3] == 1 && lighting.pbr[0] > 0 && (stock || catalog || source))
+    const auto* region=OriginalRegion(id);
+    const bool regional=region && family==int(region->family);
+    if (lighting.rtWater[3] == 1 && lighting.pbr[0] > 0 && (stock || catalog || source || regional))
     {
         lighting.rtWater[3] = 2;
         lighting.pbrDiffuse[3] = float(family + (software ? 8 : 0));

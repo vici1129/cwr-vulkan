@@ -1,6 +1,7 @@
 #pragma once
 #include <PoseidonVK/ShapeGeometryVK.hpp>
 #include <PoseidonVK/PBRMaterialVK.hpp>
+#include <PoseidonVK/OriginalMaterialRegionsVK.hpp>
 #include <cmath>
 
 namespace Poseidon::vk
@@ -29,7 +30,8 @@ inline QualifiedMaterial OriginalMaterialSource(std::string_view texture, const 
 inline float OriginalRasterRoughness(QualifiedMaterial source, std::string_view texture, int legacyPower)
 {
     // Source evidence must not replace the verified signpost's authored lobe hint.
-    return source.identity==SourceDiffuseIdentity ? source.roughness : PBRMaterial(texture,legacyPower,true);
+    return source.identity==SourceDiffuseIdentity || OriginalRegion(source.identity) ?
+        source.roughness : PBRMaterial(texture,legacyPower,true);
 }
 enum class MaterialRejection { None, Source, RenderBehavior, AuthoredLighting, Geometry };
 inline bool OriginalDiffuseFlags(int flags)
@@ -76,7 +78,32 @@ struct MaterialRange
 {
     uint32_t begin, end, section;
     MaterialRejection rejection;
+    unsigned regionalIdentity=0; // Geometry/UV candidate only; exact immutable pixels still required.
 };
+inline unsigned OriginalRegionCandidate(const Shape& shape, std::string_view texture)
+{
+    if (shape.IsAnimated() || (shape.GetOrHints() & ClipLandMask)) return 0;
+    const auto candidate=OriginalRegionCandidate(static_cast<const char*>(shape.SourceModel()),shape.SourceResolution(),
+        shape.NVertex(),shape.NSections(),shape.SourceFingerprint(),texture);
+    if (!candidate) return 0;
+    std::vector<std::string_view> names;
+    for (int i=0;i<shape.NTextures();++i)
+    {
+        const auto* image=shape.GetTexture(i);
+        names.emplace_back(image?static_cast<const char*>(image->Name()):"");
+    }
+    return OriginalRegionBindingsCompatible(shape.SourceFingerprint(),OriginalRegionTextureBindings(names))?candidate:0;
+}
+inline unsigned OriginalTriangleRegion(const Shape& shape, unsigned candidate,
+                                       const std::array<VertexIndex,3>& indices)
+{
+    const auto* region=OriginalRegion(candidate);
+    if (!region || OriginalRegionCandidate(shape,region->texture)!=candidate ||
+        OriginalTriangle(shape,indices)!=MaterialRejection::None) return 0;
+    std::array<std::array<float,2>,3> uv;
+    for (size_t i=0;i<3;++i) uv[i]={shape.UV(indices[i]).u,shape.UV(indices[i]).v};
+    return OriginalRegionUV(candidate,uv)?candidate:0;
+}
 inline std::vector<MaterialRange> OriginalMaterialRanges(const Shape& shape)
 {
     std::vector<MaterialRange> ranges;
@@ -84,16 +111,21 @@ inline std::vector<MaterialRange> OriginalMaterialRanges(const Shape& shape)
     for (int s=0; s<shape.NSections(); ++s)
     {
         const auto& section=shape.GetSection(s);
+        const auto* texture=section.properties.GetTexture();
+        const auto candidate=texture?OriginalRegionCandidate(shape,MaterialIdentity(static_cast<const char*>(texture->Name()))):0;
         for (Offset at=section.beg; at<section.end; shape.NextFace(at))
         {
             const auto& face=shape.Face(at);
             for (int v=2; v<face.N(); ++v)
             {
-                auto rejection=OriginalTriangle(shape,{face.GetVertex(0),face.GetVertex(v-1),face.GetVertex(v)});
+                const std::array<VertexIndex,3> indices{face.GetVertex(0),face.GetVertex(v-1),face.GetVertex(v)};
+                auto rejection=OriginalTriangle(shape,indices);
                 if (!OriginalDiffuseFlags(section.properties.Special())) rejection=MaterialRejection::RenderBehavior;
-                if (!ranges.empty() && ranges.back().section==unsigned(s) && ranges.back().rejection==rejection)
+                const auto region=rejection==MaterialRejection::None?OriginalTriangleRegion(shape,candidate,indices):0;
+                if (!ranges.empty() && ranges.back().section==unsigned(s) && ranges.back().rejection==rejection &&
+                    ranges.back().regionalIdentity==region)
                     ranges.back().end=index+3;
-                else ranges.push_back({index,index+3,unsigned(s),rejection});
+                else ranges.push_back({index,index+3,unsigned(s),rejection,region});
                 index+=3;
             }
         }

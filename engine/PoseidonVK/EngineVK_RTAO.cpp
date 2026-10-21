@@ -385,7 +385,8 @@ void EngineVK::CollectRTAOScene()
                             }
                             if (_vk.RTGIEnabled() && _vk.AutomaticMaterialsEnabled())
                             {
-                                const auto source=tex->AutomaticMaterial(section.surfMat);
+                                auto source=tex->AutomaticMaterial(section.surfMat);
+                                if (!source) source=tex->RegionalMaterial(vk::OriginalRegionCandidate(*shape,tex->MaterialKey()));
                                 const auto result=vk::QualifyOriginalMaterial(source,vk::MaterialRejection::None,
                                     flags|object->GetObjSpecial(),alpha==AlphaStats::Opaque,!fitted && !tex->IsDynamic());
                                 candidate.enhanced={};
@@ -479,7 +480,9 @@ void EngineVK::CollectRTAOScene()
                                 if (part.section!=sectionIndex) continue;
                                 auto split=range;
                                 split.first=part.begin; split.count=part.end-part.begin;
-                                if (part.rejection!=vk::MaterialRejection::None)
+                                if (part.rejection!=vk::MaterialRejection::None ||
+                                    (vk::OriginalRegion(unsigned(range.enhanced[3])) &&
+                                     part.regionalIdentity!=unsigned(range.enhanced[3])))
                                 {
                                     split.enhanced={};
                                     split.sampler&=~(vk::RayDiffuse|vk::RayNormalMap|vk::RayRoughnessMap);

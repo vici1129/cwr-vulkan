@@ -14,8 +14,15 @@ from pathlib import Path
 from inventory_original_assets import REASONS, ROOT, parse_model, save, sha
 
 
-def section_signature(section, replay=()):
+def section_signature(section, replay=(), regional_replay=()):
     s = dict(section)
+    regions = dict(s.get('regionalSources', {}))
+    for identity in list(regions):
+        if int(identity) in regional_replay:
+            if s['source'] or s['declared'] or not 0 < regions[identity] <= s['eligible']:
+                raise ValueError('Regional replay needs a bounded additional identity, not whole-source proof')
+            s['eligible'] -= regions[identity]
+            s['unknownSource'] += regions.pop(identity)
     if s['source'] in replay:
         if s['declared']:
             raise ValueError('Cannot replay a source-declared material as an enhanced identity')
@@ -23,10 +30,10 @@ def section_signature(section, replay=()):
         s['eligible'], s['source'] = 0, 0
     return (s['texture'], s['flags'], s['vertices'], s['invalidNormals'],
             tuple(sorted(s['materialIndices'].items())), s['source'], s['opaque'],
-            s['declared'], *(s[r] for r in REASONS))
+            s['declared'], *(s[r] for r in REASONS), tuple(sorted(regions.items())))
 
 
-def compare_models(before, after, replay=()):
+def compare_models(before, after, replay=(), regional_replay=()):
     differences = []
     old = {lod['index']: lod for lod in before['visualLODs']}
     new = {lod['index']: lod for lod in after['visualLODs']}
@@ -40,7 +47,7 @@ def compare_models(before, after, replay=()):
                 differences.append({'lod': index, 'kind': key, 'old': a[key], 'runtime': b[key]})
         # Allocation/sort paths can reorder sections. Ordinals are not asset IDs.
         if collections.Counter(section_signature(s) for s in a['sections']) != collections.Counter(
-                section_signature(s, replay) for s in b['sections']):
+                section_signature(s, replay, regional_replay) for s in b['sections']):
             differences.append({'lod': index, 'kind': 'complete section prerequisite multiset'})
     return differences
 
@@ -56,6 +63,7 @@ def main():
     parser.add_argument('--workers', type=int, default=4)
     parser.add_argument('--replay-enhanced-from', type=int)
     parser.add_argument('--replay-enhanced-through', type=int)
+    parser.add_argument('--replay-regional-identities', nargs='+', type=int, default=[])
     args = parser.parse_args()
     for key in ('inventory', 'library', 'config', 'tool', 'cache', 'output'):
         setattr(args, key, getattr(args, key).resolve())
@@ -100,7 +108,7 @@ def main():
                 print('runtime model inspections', i, flush=True)
     differences = []
     for model in placed:
-        for difference in compare_models(model['inspection'], models[model['path']], replay):
+        for difference in compare_models(model['inspection'], models[model['path']], replay, args.replay_regional_identities):
             differences.append({'model': model['path'], **difference})
     summary = {'models': len(models), 'visualLODs': sum(len(m['visualLODs']) for m in models.values()),
                'highestDetailTriangleBuckets': dict(sum((collections.Counter(min(m['visualLODs'],
@@ -111,6 +119,7 @@ def main():
         'loader': 'ModelCache / ODOL ShapeAdapter, as ordinary ShapeBank gameplay. Immutable model prerequisites, not live instance or receiver coverage.',
         'comparison': 'All visual LOD indices, resolutions, normals, vertex hints, complete section multisets and rejection buckets. Section ordinals are deliberately not stable IDs. Original inventory predates UV-bound diagnostics; UV equality is separately checked in batch audits.',
         'replayedEnhancedIdentityInterval': [first, last] if first is not None else [],
+        'replayedRegionalIdentities': args.replay_regional_identities,
         'summary': summary, 'legacyInventoryDifferences': differences, 'models': models})
     print(summary)
     print('legacy/runtime prerequisite differences after explicit source-policy replay:', len(differences))

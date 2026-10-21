@@ -100,6 +100,17 @@ vk::QualifiedMaterial TextureVK::AutomaticMaterial(const TexMaterial* source) co
     // An explicit section override cannot inherit the texture's cached proof.
     return source==_automaticSource.GetRef()?material:vk::OriginalMaterialSource(_materialKey,source);
 }
+vk::QualifiedMaterial TextureVK::RegionalMaterial(unsigned identity) const
+{
+    const auto* region=vk::OriginalRegion(identity);
+    if (!region || _dynamic || _alpha!=AlphaStats::Opaque || _materialKey!=region->texture) return {};
+    if (!_regionalPixelsReady)
+    {
+        _regionalPixels=vk::OriginalRegionPixelFingerprint(_pixels.rgba);
+        _regionalPixelsReady=true;
+    }
+    return vk::OriginalRegionSource(identity,_materialKey,_pixels.width,_pixels.height,_regionalPixels);
+}
 int TextureVK::AWidth(int level) const
 {
     return _levels.at(level)._w;

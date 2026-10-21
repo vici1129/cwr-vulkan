@@ -245,6 +245,7 @@ void EngineVK::BeginMeshTL(const Shape& shape, int spec, bool dynamic)
     if (!buffer)
         throw std::logic_error("Vulkan Shape: mesh has no Vulkan vertex buffer");
     buffer->Update(shape, dynamic);
+    _nativeRegionalImmutable=!dynamic;
     CaptureTemporalNative(shape, dynamic);
     _activeShape = &shape;
 }
@@ -272,7 +273,9 @@ void EngineVK::DrawSectionTL(const Shape& shape, int begin, int end)
         dynamic_cast<TextureVK*>(shape.GetSection(begin).properties.GetTexture()) : nullptr;
     const auto automaticSource=automaticTexture ? automaticTexture->AutomaticMaterial(
         shape.GetSection(begin).surfMat) : vk::QualifiedMaterial{};
-    if (_vk.AutomaticMaterialsEnabled() && automaticSource && _shadowWorld && !_terrainSurface && !_waterSurface)
+    const auto regionalSource=automaticTexture && _nativeRegionalImmutable?automaticTexture->RegionalMaterial(
+        vk::OriginalRegionCandidate(shape,automaticTexture->MaterialKey())):vk::QualifiedMaterial{};
+    if (_vk.AutomaticMaterialsEnabled() && (automaticSource || regionalSource) && _shadowWorld && !_terrainSurface && !_waterSurface)
     {
         // The immutable geometry cache is also consumed by ray submission. Keep
         // face order, including rejected triangles; only their lighting differs.
@@ -285,7 +288,8 @@ void EngineVK::DrawSectionTL(const Shape& shape, int begin, int end)
             const auto* texture=dynamic_cast<TextureVK*>(section.properties.GetTexture());
             auto lighting=baseline;
             lighting.pbr={}; lighting.materialAmbient={}; lighting.materialSun={};
-            const auto source=texture?texture->AutomaticMaterial(section.surfMat):vk::QualifiedMaterial{};
+            auto source=texture?texture->AutomaticMaterial(section.surfMat):vk::QualifiedMaterial{};
+            if (!source && texture && _nativeRegionalImmutable) source=texture->RegionalMaterial(part.regionalIdentity);
             const auto result=vk::QualifyOriginalMaterial(source,part.rejection,
                 _shapeFlags|section.properties.Special(), texture && !texture->IsTransparent(),
                 texture && !texture->IsDynamic());
@@ -300,6 +304,7 @@ void EngineVK::DrawSectionTL(const Shape& shape, int begin, int end)
                 lighting.pbr={vk::OriginalRasterRoughness(source,texture->MaterialKey(),int(lighting.specular[3])),.04f,0,0};
                 ApplyStockPBR(*texture,lighting);
                 if (source.identity==vk::SourceDiffuseIdentity) ApplySourceDiffuse(lighting);
+                ApplyRegionalPBR(source,lighting);
                 // Catalog maps and identities remain authoritative when present.
                 if (ApplyEnhancedMaterial(shape,*texture,lighting,_sectionTexture,_sectionDetail))
                 {

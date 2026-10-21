@@ -34,6 +34,17 @@ void EngineVK::ApplyStockPBR(const TextureVK& texture, vk::ShapeLighting& lighti
     // Identity alone never reserves ambient: the caller still requires opaque
     // world geometry and the independently captured PBR lighting contract.
 }
+void EngineVK::ApplyRegionalPBR(vk::QualifiedMaterial source, vk::ShapeLighting& lighting)
+{
+    const auto* region=vk::OriginalRegion(source.identity);
+    if (!_vk.AutomaticMaterialsEnabled() || !region || source.family!=region->family ||
+        source.roughness!=region->roughness) return;
+    lighting.pbr={source.roughness,.04f,0,float(source.identity)};
+    auto rgba=[](ColorVal c) { return std::array<float,4>{c.R(),c.G(),c.B(),0}; };
+    lighting.materialAmbient=rgba(GScene->MainLight()->Ambient()*GetAccomodateEye());
+    lighting.materialSun=rgba(GScene->MainLight()->Diffuse()*GetAccomodateEye());
+    lighting.pbrDiffuse[3]=float(source.family);
+}
 bool EngineVK::ApplyEnhancedMaterial(const Shape& shape, const TextureVK& texture, vk::ShapeLighting& lighting,
                                      std::shared_ptr<vk::TextureImage>& albedo,
                                      std::shared_ptr<vk::TextureImage>& normal)

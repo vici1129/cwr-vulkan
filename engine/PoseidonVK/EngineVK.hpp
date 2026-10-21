@@ -321,6 +321,7 @@ class EngineVK final : public Engine
     std::vector<uint32_t> _softwareRemap, _softwareSources, _softwareIndices;
     std::vector<vk::ShapeLighting> _softwarePBRLighting;
     const Shape* _softwareSourceShape = nullptr;
+    bool _nativeRegionalImmutable=false;
     struct EnhancedMaps
     {
         Ref<Texture> albedo;
@@ -334,6 +335,7 @@ class EngineVK final : public Engine
                                std::shared_ptr<vk::TextureImage>&, std::shared_ptr<vk::TextureImage>&);
     void ApplyStockPBR(const TextureVK&, vk::ShapeLighting&);
     void ApplySourceDiffuse(vk::ShapeLighting&);
+    void ApplyRegionalPBR(vk::QualifiedMaterial, vk::ShapeLighting&);
     std::vector<vk::ScreenVertex> _screenVertices;
     void FlushQueues() override { _vk.FlushScreenBatch(); }
     void SubmitSoftware(const std::vector<uint32_t>& indices, const ShapeSection* section = nullptr);

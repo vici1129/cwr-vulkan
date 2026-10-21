@@ -21,6 +21,67 @@
 
 using namespace Poseidon;
 
+TEST_CASE("Original atlas regions require exact geometry, pixels and entire original triangles",
+          "[Graphics][vulkan-shape][material-qualification]")
+{
+    for (const auto& region : vk::OriginalMaterialRegions)
+    {
+        REQUIRE_FALSE(vk::OriginalMaterialSource(region.texture));
+        REQUIRE(vk::OriginalRegionSource(region.identity,region.texture,region.width,region.height,region.pixels).family==6);
+        REQUIRE_FALSE(vk::OriginalRegionSource(region.identity,region.texture,region.width,region.height,region.pixels^1));
+        REQUIRE_FALSE(vk::OriginalRegionSource(region.identity,region.texture,region.width/2,region.height,region.pixels));
+        REQUIRE_FALSE(vk::OriginalRegionSource(region.identity,"other\\budova2_s.pac",region.width,region.height,region.pixels));
+        for (const auto& geometry : vk::OriginalRegionGeometries)
+        {
+            REQUIRE(vk::OriginalRegionBindingsCompatible(geometry.fingerprint,geometry.textureBindings));
+            REQUIRE_FALSE(vk::OriginalRegionBindingsCompatible(geometry.fingerprint,geometry.textureBindings^1));
+            const auto candidate=vk::OriginalRegionCandidate(geometry.model,geometry.resolution,geometry.vertices,
+                geometry.sections,geometry.fingerprint,region.texture);
+            REQUIRE((candidate==region.identity)==(geometry.model==region.model));
+            REQUIRE_FALSE(vk::OriginalRegionCandidate(geometry.model,geometry.resolution,geometry.vertices,
+                geometry.sections,geometry.fingerprint^1,region.texture));
+            REQUIRE_FALSE(vk::OriginalRegionCandidate("other\\statek_kulna.p3d",geometry.resolution,geometry.vertices,
+                geometry.sections,geometry.fingerprint,region.texture));
+            REQUIRE_FALSE(vk::OriginalRegionCandidate(geometry.model,10000,geometry.vertices,
+                geometry.sections,geometry.fingerprint,region.texture));
+        }
+        const std::array<std::array<float,2>,3> lower{{{.0081f,.6854f},{.9942f,.6869f},{.9942f,.9674f}}};
+        REQUIRE(vk::OriginalRegionUV(region.identity,lower));
+        for (const auto bad : {std::array<float,2>{.5f,.2f},{1.01f,.8f},{-.01f,.8f},
+                              {.5f,1.01f},{.5f,std::numeric_limits<float>::quiet_NaN()}})
+        {
+            auto mixed=lower; mixed[1]=bad;
+            REQUIRE_FALSE(vk::OriginalRegionUV(region.identity,mixed));
+        }
+        auto source=vk::OriginalRegionSource(region.identity,region.texture,region.width,region.height,region.pixels);
+        for (auto rejection : {vk::MaterialRejection::Geometry,vk::MaterialRejection::AuthoredLighting})
+            REQUIRE(vk::QualifyOriginalMaterial(source,rejection,ClampU|ClampV,true,true)==rejection);
+        for (auto flag : {IsShadow,IsTransparent,IsAlpha,NoZWrite,IsAnimated,DisableSun,IsColored})
+            REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::None,flag,true,true)==vk::MaterialRejection::RenderBehavior);
+        REQUIRE_FALSE(vk::OriginalMaterialReception(vk::MaterialRejection::None,false,true));
+        REQUIRE_FALSE(vk::OriginalMaterialReception(vk::MaterialRejection::None,true,false));
+        for (bool software : {false,true})
+        {
+            vk::ShapeLighting lighting;
+            lighting.pbr={source.roughness,.04f,0,float(source.identity)};
+            lighting.pbrDiffuse[3]=float(source.family); lighting.rtWater[3]=1;
+            vk::QualifyGIReceiver(lighting,software);
+            REQUIRE(lighting.rtWater[3]==2);
+            REQUIRE(lighting.pbrDiffuse[3]==float(6+(software?8:0)));
+            lighting.pbrDiffuse[3]=5; lighting.rtWater[3]=1;
+            vk::QualifyGIReceiver(lighting,software);
+            REQUIRE(lighting.rtWater[3]==1);
+        }
+    }
+    // Keep an actually unallocated boundary as the explicit registry grows.
+    REQUIRE_FALSE(vk::OriginalRegion(vk::OriginalMaterialRegions[std::size(vk::OriginalMaterialRegions)-1].identity+1));
+    REQUIRE_FALSE(vk::OriginalRegionUV(0,{}));
+    REQUIRE(vk::OriginalRegionPixelFingerprint(std::array<uint8_t,4>{1,2,3,255})==9228046714267810950ull);
+    const std::array<std::string_view,2> bindings{"data\\budova2_s.pac","data\\budova2_s2.pac"};
+    const std::array<std::string_view,2> swapped{bindings[1],bindings[0]};
+    REQUIRE(vk::OriginalRegionTextureBindings(bindings)!=vk::OriginalRegionTextureBindings(swapped));
+}
+
 TEST_CASE("Automatic material qualification needs authored evidence, never opaque default state",
           "[Graphics][vulkan-shape][material-qualification]")
 {
