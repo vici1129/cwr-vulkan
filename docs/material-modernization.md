@@ -6,12 +6,13 @@ The [per-model ledger](evidence/material-modernization/progress.json) retains al
 and concrete prerequisite blockers. It is not a visible-coverage percentage.
 The original inventory remains an immutable baseline.
 
-After batch 01, 20 models have complete source review, seven have partial source
-review, and 488 await source review. Another 211 have no source-unknown triangles
+After batch 02, 28 models have complete source review, ten have partial source
+review, and 477 await source review. Another 211 have no source-unknown triangles
 under the existing native classifier: their existing coverage and opacity,
 authored-lighting or geometry fallback contracts are retained. This last group
 is a prerequisite disposition, not a claim that all of its pixels are PBR or GI.
-Backlog tasks 1, 2 and 25 have source review complete; the remaining tasks continue.
+Backlog tasks 1–4 and 25–27 have source review complete; the remaining tasks continue.
+Batch 02 is documented in [brick pillars, bark and stacked logs](material-modernization-batch-02.md).
 
 ## Batch 01: Nogova rough stone and boundary masonry
 
@@ -120,6 +121,6 @@ in the [qualification receipt](evidence/material-modernization/batch-01/qualific
 Task-local commands and raw captures are retained in
 `build/material-modernization-20261021/` and `build/shadow-live/modernization-*`.
 
-The next batch investigates classic brick fence pillars and separable wood-pile
-surfaces. Corrugated metal and door hardware already found in the latter stay
-unqualified unless a safe existing-path separation can be demonstrated.
+The next batch continues classic fence foundations and farm/building surfaces.
+Metal, apertures, mixed photographic supports and window/door atlases retain
+their specific unresolved boundaries in the ledger.

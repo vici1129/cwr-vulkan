@@ -208,7 +208,7 @@ TEST_CASE("Stock GI receivers require qualified identity and independent opaque 
             vk::QualifyGIReceiver(l,software);
             REQUIRE(l.rtWater[3]==1);
         }
-    for (float identity : {0.f,1.5f,63.f,87.f,127.f,128.5f,136.f,1000.f,-1.f,std::numeric_limits<float>::quiet_NaN()})
+    for (float identity : {0.f,1.5f,63.f,87.f,127.f,128.5f,float(128+std::size(vk::EnhancedPBRMaterials)),1000.f,-1.f,std::numeric_limits<float>::quiet_NaN()})
     {
         vk::ShapeLighting l;l.rtWater[3]=1;l.pbr={.9f,.04f,0,identity};l.pbrDiffuse[3]=1;
         vk::QualifyGIReceiver(l,true);

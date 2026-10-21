@@ -49,7 +49,13 @@ inline constexpr StockPBRMaterial EnhancedPBRMaterials[]{
     // Original Nogova stone and worn masonry. Entire decoded sources are rough
     // dielectrics; shared users still require ordinary lighting/geometry/opacity.
     {"o\\skal\\kamen02.pac", .85f, 2}, {"o\\skal\\kamen04.pac", .85f, 2},
-    {"o\\skal\\kamen05.pac", .85f, 2}, {"o\\hous\\zidka01.pac", .90f, 6}};
+    {"o\\skal\\kamen05.pac", .85f, 2}, {"o\\hous\\zidka01.pac", .90f, 6},
+    {"data\\2_sloup_cihl.pac", .90f, 6}, {"data\\2_sloup_cihl_n.pac", .90f, 6},
+    // Dedicated bark/stacked-log sources only. Canopies, corrugated roofing,
+    // hinged doors and mixed photographic end/support atlases stay legacy.
+    {"data\\kmen_borovice_04.pac", .85f, 4}, {"o\\tree\\javor01_kr3.pac", .85f, 4},
+    {"o\\hous\\hrmd_kr.pac", .85f, 4}, {"o\\hous\\hrmd_top.pac", .85f, 4},
+    {"o\\hous\\hrmd_zbk.pac", .85f, 4}};
 inline unsigned PBRReceiverFamily(unsigned id)
 {
     if (id >= 64 && id < 64 + std::size(StockPBRMaterials)) return StockPBRMaterials[id - 64].receiverFamily;
