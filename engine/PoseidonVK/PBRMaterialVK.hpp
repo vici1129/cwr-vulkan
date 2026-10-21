@@ -72,7 +72,17 @@ inline constexpr StockPBRMaterial EnhancedPBRMaterials[]{
     {"o\\hous\\tasky_tmavsi.pac", .90f, 3}, {"o\\hous\\dumpod_beton.pac", .90f, 7},
     {"o\\hous\\dumpod_podez.pac", .90f, 6}, {"o\\hous\\zalchat_beton.pac", .90f, 7},
     {"o\\hous\\zalchat_strop.pac", .85f, 4}, {"o\\hous\\stenain01.pac", .90f, 5},
-    {"o\\hous\\panel04.pac", .90f, 7}, {"o\\hous\\panel_inter02.pac", .90f, 5}};
+    {"o\\hous\\panel04.pac", .90f, 7}, {"o\\hous\\panel_inter02.pac", .90f, 5},
+    // Dedicated original bark on separately modeled trunks/branches. Repeating
+    // UVs sample this same physical class; canopy/impostor and authored vertices
+    // keep their existing gates. Mixed photo/background and cut-end atlases stay
+    // untyped. These coefficients are the existing unmeasured wood approximation.
+    {"data\\kmen2.pac", .85f, 4}, {"data\\kmen_borovice.pac", .85f, 4},
+    {"data\\kura3.pac", .85f, 4}, {"data\\kura_jablon_asi_ne.pac", .85f, 4},
+    {"data\\lesni_kmen_smrku.pac", .85f, 4}, {"data\\n_strom_01_kura.pac", .85f, 4},
+    {"data\\n_strom_lipa_kmen.pac", .85f, 4}, {"o\\tree\\akat01_krd2.pac", .85f, 4},
+    {"o\\tree\\borovice02c.pac", .85f, 4}, {"o\\tree\\dd_les_kura03.pac", .85f, 4},
+    {"o\\tree\\dub_kura_fx.pac", .85f, 4}, {"o\\tree\\smrkur.pac", .85f, 4}};
 inline unsigned PBRReceiverFamily(unsigned id)
 {
     if (id >= 64 && id < 64 + std::size(StockPBRMaterials)) return StockPBRMaterials[id - 64].receiverFamily;

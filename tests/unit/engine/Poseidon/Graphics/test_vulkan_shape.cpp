@@ -174,6 +174,36 @@ TEST_CASE("Automatic material qualification needs authored evidence, never opaqu
     }
 }
 
+TEST_CASE("Dedicated bark identities do not promote foliage, authored trunks or mixed source atlases",
+          "[Graphics][vulkan-shape][material-qualification]")
+{
+    const std::array keys{"data\\kmen2.pac", "data\\kmen_borovice.pac", "data\\kura3.pac",
+        "data\\kura_jablon_asi_ne.pac", "data\\lesni_kmen_smrku.pac", "data\\n_strom_01_kura.pac",
+        "data\\n_strom_lipa_kmen.pac", "o\\tree\\akat01_krd2.pac", "o\\tree\\borovice02c.pac",
+        "o\\tree\\dd_les_kura03.pac", "o\\tree\\dub_kura_fx.pac", "o\\tree\\smrkur.pac"};
+    for (unsigned i=0;i<keys.size();++i)
+    {
+        const auto source=vk::OriginalMaterialSource(keys[i]);
+        REQUIRE(source.identity==166+i);
+        REQUIRE(source.family==4);
+        REQUIRE(source.roughness==.85f);
+        REQUIRE(vk::PBRMaterial(keys[i],128)==0); // v3 is unchanged
+        REQUIRE(vk::PBRMaterial(keys[i],128,true)==.85f);
+        REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::None,NoClamp,true,true)==vk::MaterialRejection::None);
+        REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::AuthoredLighting,NoClamp,true,true)==vk::MaterialRejection::AuthoredLighting);
+        REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::Geometry,NoClamp,true,true)==vk::MaterialRejection::Geometry);
+        REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::None,IsTransparent,true,true)==vk::MaterialRejection::RenderBehavior);
+        REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::None,NoClamp,false,true)==vk::MaterialRejection::RenderBehavior);
+        REQUIRE_FALSE(vk::OriginalMaterialReception(vk::MaterialRejection::None,false,true));
+        REQUIRE_FALSE(vk::OriginalMaterialReception(vk::MaterialRejection::None,true,false));
+    }
+    for (const auto key : {"data\\briza_kriv_kmen.pac", "o\\tree\\kmenletokruh.pac",
+        "o\\tree\\smrkvtvmal.pac", "o\\tree\\smrkvtvvel.pac", "o\\tree\\smrk_m_lod.pac",
+        "o\\tree\\dd_bush02.pac", "o\\tree\\dd_bush05.pac", "data\\akat01_krd2.pac",
+        "other\\tree\\smrkur.pac", "o\\tree\\smrkur.paa"})
+        REQUIRE_FALSE(vk::OriginalMaterialSource(key));
+}
+
 TEST_CASE("Automatic triangle ranges preserve ordinary neighbors of authored shadow lighting",
           "[Graphics][vulkan-shape][material-qualification]")
 {

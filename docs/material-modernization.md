@@ -6,8 +6,8 @@ The [per-model ledger](evidence/material-modernization/progress.json) retains al
 and concrete prerequisite blockers. It is not a visible-coverage percentage.
 The original inventory remains an immutable baseline.
 
-After batch 07, 32 models have complete source review, 75 have partial source
-review, and 408 await source review. Another 211 have no source-unknown triangles
+After batch 08, 54 models have complete source review, 78 have partial source
+review, and 383 await source review. Another 211 have no source-unknown triangles
 under the existing native classifier: their existing coverage and opacity,
 authored-lighting or geometry fallback contracts are retained. This last group
 is a prerequisite disposition, not a claim that all of its pixels are PBR or GI.
@@ -27,6 +27,10 @@ PBR/reflection but retains its ambient reference after failed receiver trials;
 the evidence explicitly distinguishes reflector prerequisites from reception.
 
 Batch 07 [corrects LOD provenance and documents the canopy pilots](material-modernization-batch-07.md).
+Batch 08 [assesses dedicated original bark across 35 shared models](material-modernization-batch-08.md).
+Twelve source identities gain the existing PBR/GI-reflector paths; native auto
+tree reception remains gated and CPU reception is independently demonstrated.
+Mixed bent-birch/cut-end sources and canopy cards do not inherit the bark response.
 The [ordinary-adapter census](evidence/material-modernization/runtime-census.json)
 rechecks 726 models / **1,708 retained visual LODs** under the inspection configuration.
 The separate [source-only census](evidence/material-modernization/source-census.json)
@@ -39,7 +43,7 @@ comparison. Section ordering is not an asset identity. Neither census certifies
 live instance lighting, GI reception or optical review of every original image.
 Backlog 28/29 retain their alpha-card and authored-lighting contracts after original
 pixel/geometry review; this is not newly implemented foliage coverage.
-Use the [batch-07 reproduction command](material-modernization-batch-07.md#reproduction-and-progress)
+Use the [batch-08 reproduction command](material-modernization-batch-08.md#tests-census-and-remaining-work)
 for the current executable; earlier batch commands describe their policy snapshots.
 
 ## Batch 01: Nogova rough stone and boundary masonry
