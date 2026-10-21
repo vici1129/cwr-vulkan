@@ -19,7 +19,9 @@ namespace ShapeAdapter
     };
 
     ProxyModelName normalizeProxyModelName(const std::string& selectionName);
-    LODShapeWithShadow* convertToLODShape(const Model& model, bool reversed = false);
+    // Tool-only source inspection can retain levels normally removed by runtime
+    // optimization. Ordinary gameplay callers keep the unchanged default.
+    LODShapeWithShadow* convertToLODShape(const Model& model, bool reversed = false, bool preserveSourceLODs = false);
 }
 
 } // namespace Model

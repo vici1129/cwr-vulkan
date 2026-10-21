@@ -6,6 +6,39 @@ from inventory_original_assets import ROOT, REASONS, norm, parse_model
 
 
 class InventoryTests(unittest.TestCase):
+    def test_removed_visual_lod_does_not_inherit_collision_metadata(self):
+        text = '''File: fixture.p3d
+Format: ODOL
+LOD 0 (Resolution: 1)
+  Points: 3
+  Faces: 1
+  Textures: 0
+  Selections: 0
+LOD 1 (Resolution: 40)
+  Points: 16
+  Faces: 6
+  Textures: 0
+  Selections: 0
+LOD 2 (Resolution: 1e+13)
+  Points: 328
+  Faces: 246
+  Textures: 0
+  Selections: 0
+Native lighting (source hints; not PBR/GI eligibility; loader=runtime-adapter)
+Qualification LOD 0 res=1
+  LOD 0 res=1 vertices=3 normals=3 invalidNormals=0 userMaterialVertices=0 landHintVertices=0 lightModes=0:3
+  LOD 1 res=1e+13 vertices=328 normals=328 invalidNormals=0 userMaterialVertices=0 landHintVertices=0 lightModes=0:328
+'''
+        corrected=parse_model(text)
+        self.assertEqual(corrected['declaredVisualLODCount'],2)
+        self.assertEqual([l['index'] for l in corrected['visualLODs']],[0])
+        self.assertEqual(corrected['excludedVisualLODs'][0]['resolution'],40)
+        self.assertNotIn('normals',corrected['excludedVisualLODs'][0])
+        legacy=parse_model(text,legacy_indexed=True)
+        self.assertEqual(legacy['visualLODs'][1]['normals'],328)
+        self.assertEqual(corrected['nonvisualLODCount'],1)
+        with self.assertRaises(ValueError):parse_model(text.replace('LOD 1 res=1e+13','LOD 1 res=2'))
+
     def test_full_namespaces_are_not_basename_deduplicated(self):
         self.assertEqual(norm(r"\DATA3D\House.P3D"), "data3d/house.p3d")
         self.assertNotEqual(norm("data/wall.pac"), norm("o/wall.pac"))

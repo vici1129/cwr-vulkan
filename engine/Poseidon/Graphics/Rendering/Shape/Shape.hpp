@@ -13,7 +13,7 @@
 // Forward declarations for ShapeAdapter friend access
 
 namespace Poseidon { namespace Model { struct Model; namespace ShapeAdapter {
-    class LODShapeWithShadow* convertToLODShape(const Model& model, bool reversed);
+    class LODShapeWithShadow* convertToLODShape(const Model& model, bool reversed, bool preserveSourceLODs);
 }}}
 namespace Poseidon
 {
@@ -276,7 +276,7 @@ class Shape: public Poseidon::VertexTable
 {
 	friend class ::Object;
 	friend class LODShape;
-	friend class LODShapeWithShadow* Poseidon::Model::ShapeAdapter::convertToLODShape(const Poseidon::Model::Model& model, bool reversed);
+	friend class LODShapeWithShadow* Poseidon::Model::ShapeAdapter::convertToLODShape(const Poseidon::Model::Model& model, bool reversed, bool preserveSourceLODs);
 	
  private:
 	 render::RenderIdentity _renderIdentity;
@@ -663,7 +663,7 @@ class LODShape: public RefCountWithLinks
 {
 	friend class ::Object;
 	friend class LODShapeWithShadow;
-	friend class LODShapeWithShadow* Poseidon::Model::ShapeAdapter::convertToLODShape(const Poseidon::Model::Model& model, bool reversed);
+	friend class LODShapeWithShadow* Poseidon::Model::ShapeAdapter::convertToLODShape(const Poseidon::Model::Model& model, bool reversed, bool preserveSourceLODs);
 
 	protected:
 	// first list most accessed items

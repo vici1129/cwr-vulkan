@@ -6,7 +6,7 @@ The [per-model ledger](evidence/material-modernization/progress.json) retains al
 and concrete prerequisite blockers. It is not a visible-coverage percentage.
 The original inventory remains an immutable baseline.
 
-After batch 06, 32 models have complete source review, 75 have partial source
+After batch 07, 32 models have complete source review, 75 have partial source
 review, and 408 await source review. Another 211 have no source-unknown triangles
 under the existing native classifier: their existing coverage and opacity,
 authored-lighting or geometry fallback contracts are retained. This last group
@@ -26,14 +26,20 @@ across ten already-partial model reviews. One new board region participates in
 PBR/reflection but retains its ambient reference after failed receiver trials;
 the evidence explicitly distinguishes reflector prerequisites from reception.
 
-The [fresh gameplay-adapter census](evidence/material-modernization/runtime-census.json)
-rechecks all 726 models / 1,711 visual LODs. The original inventory used the legacy
-optimized loader, not gameplay's ODOL adapter. Replaying its original source policy
-reproduces every complete section prerequisite multiset, normal/lighting hint and
-LOD count. Section ordering differs and must not be treated as an asset identity.
-This corrects the earlier loader description; neither census certifies live
-instance lighting, GI reception or optical review of every original image.
-Use the [batch-06 reproduction command](material-modernization-batch-06.md#current-census-and-remaining-work)
+Batch 07 [corrects LOD provenance and documents the canopy pilots](material-modernization-batch-07.md).
+The [ordinary-adapter census](evidence/material-modernization/runtime-census.json)
+rechecks 726 models / **1,708 retained visual LODs** under the inspection configuration.
+The separate [source-only census](evidence/material-modernization/source-census.json)
+inspects all **1,711 authored visual LODs**. Three forest levels marked `notl=1` are
+removed by the original hardware-lighting policy; the old parser mislabeled their
+slots with later collision metadata. The immutable original inventory is unchanged.
+Every retained level reproduces the previous complete prerequisites, including UVs;
+the three source-only extra levels are explicitly outside that historical native
+comparison. Section ordering is not an asset identity. Neither census certifies
+live instance lighting, GI reception or optical review of every original image.
+Backlog 28/29 retain their alpha-card and authored-lighting contracts after original
+pixel/geometry review; this is not newly implemented foliage coverage.
+Use the [batch-07 reproduction command](material-modernization-batch-07.md#reproduction-and-progress)
 for the current executable; earlier batch commands describe their policy snapshots.
 
 ## Batch 01: Nogova rough stone and boundary masonry

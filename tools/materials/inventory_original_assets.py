@@ -131,8 +131,15 @@ def scan(args):
     return data
 
 
-def parse_model(output):
+def parse_model(output, *, legacy_indexed=False):
+    """Parse actual native levels, never collision data into a removed visual slot.
+
+    legacy_indexed exists ONLY to verify immutable historical records before
+    correcting their interpretation; it is not a material/renderer policy.
+    Unexpected reindexing of retained visual levels fails closed.
+    """
     lods, current, native, qualify = {}, None, False, None
+    inspected = set()
     for line in output.splitlines():
         if m := re.match(r"LOD (\d+) \(Resolution: ([^)]+)\)", line):
             current = int(m[1]); lods[current] = {"index": current, "resolution": float(m[2]), "textures": [], "sections": []}
@@ -144,6 +151,9 @@ def parse_model(output):
             native = True
         elif m := re.match(r"Qualification LOD (\d+) res=(.*)", line):
             qualify = int(m[1])
+            if not legacy_indexed and lods[qualify]['resolution'] != float(m[2]):
+                raise ValueError('Retained native visual LOD resolution/index mismatch: '+line)
+            inspected.add(qualify)
         elif m := re.match(r"  section=(\d+) texture=(.*?) source=(\d+) opaque=(\d+) declared=(\d+) "
                           r"eligible=(\d+) unknownSource=(\d+) renderBehavior=(\d+) authoredLighting=(\d+) geometry=(\d+)", line):
             values = m.groups()
@@ -159,11 +169,23 @@ def parse_model(output):
         elif native and (m := re.match(r"  LOD (\d+) res=(\S+) vertices=(\d+) normals=(\d+) invalidNormals=(\d+) "
                                       r"userMaterialVertices=(\d+) landHintVertices=(\d+) lightModes=(.*)", line)):
             current = int(m[1])
+            if not legacy_indexed:
+                if float(m[2]) >= 10000:
+                    current = None
+                    continue
+                if lods[current]['resolution'] != float(m[2]):
+                    raise ValueError('Native visual LOD resolution/index mismatch: '+line)
+                inspected.add(current)
             lods[current].update(dict(zip(["vertices", "normals", "invalidNormals", "authoredVertices", "landHintVertices"],
                                          map(int, m.groups()[2:7]))))
             lods[current]["lightModes"] = {k: int(v) for k, v in re.findall(r"(\d+):(\d+)", m[8])}
+            if not legacy_indexed and (hints := re.search(r" orHints=(\d+) andHints=(\d+)", line)):
+                lods[current].update(orHints=int(hints[1]),andHints=int(hints[2]))
+            if not legacy_indexed and (notl := re.search(r" notl=(-?\d+)", line)):
+                lods[current]['notl'] = int(notl[1])
         elif native and (m := re.match(r"    native section (\d+) tex=(.*?) flags=0x([0-9a-f]+) vertices=(\d+) "
                                       r"invalidVertexNormals=(\d+) materialIndices=(.*)", line)):
+            if current is None:continue
             section = next(s for s in lods[current]["sections"] if s["index"] == int(m[1]))
             assert section["texture"] == ("" if m[2] == "<none>" else norm(m[2]))
             section.update(flags=int(m[3], 16), vertices=int(m[4]), invalidNormals=int(m[5]),
@@ -171,14 +193,20 @@ def parse_model(output):
             if uv := re.search(r" uvMin=(\S+),(\S+) uvMax=(\S+),(\S+) invalidUV=(\d+)", line):
                 section.update(uvMin=list(map(float, uv.groups()[:2])),
                                uvMax=list(map(float, uv.groups()[2:4])), invalidUV=int(uv[5]))
-    visual = [lod for lod in lods.values() if lod["resolution"] < 10000]
+    declared = [lod for lod in lods.values() if lod["resolution"] < 10000]
+    visual = declared if legacy_indexed else [lod for lod in declared if lod['index'] in inspected]
     for lod in visual:
         assert "normals" in lod, lod
         for section in lod["sections"]:
             assert "flags" in section, section
         lod["triangles"] = {reason: sum(s[reason] for s in lod["sections"]) for reason in REASONS}
-    return {"format": re.search(r"^Format: (.+)$", output, re.M)[1], "visualLODs": visual,
-            "nonvisualLODCount": len(lods) - len(visual)}
+    result = {"format": re.search(r"^Format: (.+)$", output, re.M)[1], "visualLODs": visual,
+              "nonvisualLODCount": len(lods) - len(declared)}
+    if not legacy_indexed:
+        result['declaredVisualLODCount'] = len(declared)
+        result['excludedVisualLODs'] = [{k:lod[k] for k in ('index','resolution','textures','pointsCount','facesCount')}
+            for lod in declared if lod['index'] not in inspected]
+    return result
 
 
 def inspect(args, data):

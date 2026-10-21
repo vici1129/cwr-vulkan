@@ -1,5 +1,10 @@
 # Batch 06: original barn-atlas boards and masonry
 
+LOD-count erratum: [batch 07](material-modernization-batch-07.md) separates the
+1,711 authored levels from 1,708 ordinary-adapter retained levels and corrects
+three removed forest slots. This batch's 37 locally verified building LODs and
+material decisions are unaffected; the original receipts remain historical.
+
 Base: `e248c40923885b505c291a3c8f17abbdd99873c1`. The existing auto-only regional
 path now distinguishes multiple physical materials in one original atlas. It
 adds 16 exact-model regions across **10 world-placed models / 37 visual LODs**.

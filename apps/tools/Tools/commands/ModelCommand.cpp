@@ -91,6 +91,7 @@ static void setupModelInspect(CLI::App& model)
     static bool showLighting = false;
     static bool showUVTriangles = false;
     static bool runtimeLoader = false;
+    static bool allSourceLODs = false;
     static int uvLOD = -1, uvSection = -1;
     static bool qualify = false;
     static std::string materialConfig;
@@ -108,6 +109,9 @@ static void setupModelInspect(CLI::App& model)
                   "Dump original native visual-LOD triangle UVs and lighting prerequisites (read-only)");
     cmd->add_flag("--runtime-loader", runtimeLoader,
                   "Use gameplay's ODOL ShapeAdapter for native qualification, UVs and source fingerprints");
+    cmd->add_flag("--all-source-lods", allSourceLODs,
+                  "Inspect source levels before runtime optimization (diagnostic only, not gameplay)")
+        ->needs("--runtime-loader");
     cmd->add_option("--uv-lod", uvLOD, "Limit UV triangle dump to this native LOD index (-1: all visual)");
     cmd->add_option("--uv-section", uvSection, "Limit UV triangle dump to this native section (-1: all)");
     cmd->add_flag("--qualify", qualify, "Evaluate the runtime automatic material classifier (no ambient capture in tool)");
@@ -201,7 +205,7 @@ static void setupModelInspect(CLI::App& model)
                             if (!relative.empty() && !relative.is_absolute() && *relative.begin()!="..")
                                 original->sourcePath=relative.generic_string();
                         }
-                        shape.reset(Poseidon::Model::ShapeAdapter::convertToLODShape(*original));
+                        shape.reset(Poseidon::Model::ShapeAdapter::convertToLODShape(*original,false,allSourceLODs));
                     }
                 }
                 else
@@ -215,7 +219,7 @@ static void setupModelInspect(CLI::App& model)
                     throw CLI::RuntimeError(1);
                 }
                 std::cout << "Native lighting (source hints; not PBR/GI eligibility; loader="
-                          << (runtimeLoader?"runtime-adapter":"legacy-optimized") << ")" << std::endl;
+                          << (runtimeLoader?(allSourceLODs?"runtime-adapter-source-lods":"runtime-adapter"):"legacy-optimized") << ")" << std::endl;
                 for (int i = 0; i < shape->NLevels(); ++i)
                 {
                     const auto* lod = shape->Level(i);
@@ -329,7 +333,9 @@ static void setupModelInspect(CLI::App& model)
                               << " landHintVertices=" << fitted << " lightModes=";
                     for (unsigned m = 0; m < modes.size(); ++m)
                         if (modes[m]) std::cout << m << ":" << modes[m] << " ";
-                    std::cout << std::endl;
+                    std::cout << " orHints=" << unsigned(lod->GetOrHints())
+                              << " andHints=" << unsigned(lod->GetAndHints())
+                              << " notl=" << atoi(lod->PropertyValue("notl")) << std::endl;
                     if (showSections && shape->Resolution(i) < 10000)
                         for (int s = 0; s < lod->NSections(); ++s)
                         {

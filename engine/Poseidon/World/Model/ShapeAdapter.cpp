@@ -101,7 +101,7 @@ static int convertFaceFlagsToSpecial(FaceFlags flags)
 //   MLOD: MLODLoader converts raw POINT_* flags (data3d.h) to ClipFlags, encodes
 //         materials into ClipUserMask, then stores in vertex.flags.
 // Both paths are identical here — always cast vertex.flags to ClipFlags directly.
-LODShapeWithShadow* convertToLODShape(const Poseidon::Model::Model& model, bool reversed)
+LODShapeWithShadow* convertToLODShape(const Poseidon::Model::Model& model, bool reversed, bool preserveSourceLODs)
 {
     auto shape = new LODShapeWithShadow();
 
@@ -731,7 +731,8 @@ LODShapeWithShadow* convertToLODShape(const Poseidon::Model::Model& model, bool 
         }
 
         // LODShape::SerializeBin IsLoading block
-        shape->OptimizeShapes();
+        if (preserveSourceLODs) shape->ScanShapes();
+        else shape->OptimizeShapes();
         shape->CheckForcedProperties();
         shape->InitConvexComponents();
         shape->_propertyClass = shape->PropertyValue("class");
@@ -758,7 +759,8 @@ LODShapeWithShadow* convertToLODShape(const Poseidon::Model::Model& model, bool 
     else
     {
         shape->CalculateMinMax(true);
-        shape->OptimizeShapes();
+        if (preserveSourceLODs) shape->ScanShapes();
+        else shape->OptimizeShapes();
 
         // Shape.cpp:4961-4971
         for (int i = 0; i < lodCount; i++)

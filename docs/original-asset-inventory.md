@@ -15,6 +15,12 @@ Implementation batches and the current per-model assessment ledger are tracked
 in [original-world material modernization](material-modernization.md). The
 inventory below remains the original source-policy snapshot.
 
+LOD provenance erratum: [batch 07](material-modernization-batch-07.md) separately
+inspects all 1,711 authored visual LODs and 1,708 ordinary-adapter retained levels
+under the inspection configuration. Three removed forest slots previously carried
+later collision metadata. The original inventory JSON remains immutable; current
+censuses explicitly distinguish those scopes and historical parsing diagnostics.
+
 ## Library size and actual world references
 
 | Scope | Unique model paths | Unique PAC/PAA paths |
@@ -63,22 +69,28 @@ building modernization.
 
 ## Source-level PBR/GI qualification
 
-All **726 referenced models / 1,711 visual LODs** were inspected with the legacy
-optimized ODOL loader and existing shared material qualifier. Every visual section records
-its texture, original flags, material-index histogram, normal checks and
-qualification result. Visual means source resolution `<10000`, matching the
+The original snapshot records **726 referenced models / 1,711 authored visual
+LODs** using the legacy optimized ODOL loader and shared material qualifier.
+Three removed visual slots did not receive native visual qualification; see the
+LOD provenance erratum above. Retained visual sections record their texture,
+original flags, material-index histogram, normal checks and qualification result.
+Visual means source resolution `<10000`, matching the
 existing tool/runtime contract; collision, memory and shadow LODs are not counted
 as visual surfaces.
 
 Loader clarification (batch 03): ordinary ODOL gameplay uses ModelCache and
 ShapeAdapter, whereas this original snapshot used `LODShape::LoadOptimized`.
-The [current runtime-adapter census](evidence/material-modernization/runtime-census.json)
-reinspects all 726 / 1,711 and, after explicitly replaying the older source policy,
-matches every LOD count, normal/vertex hint and complete section prerequisite
-multiset. Section order is not stable between these routes. The original snapshot
-is retained unchanged; it does not supply a runtime source fingerprint. Use the
-explicit `model inspect --runtime-loader` diagnostic for gameplay UV/fingerprint
-work. Neither route substitutes for a live instance/lighting/receiver check.
+The [current ordinary-adapter census](evidence/material-modernization/runtime-census.json)
+reinspects all 726 models / 1,708 retained visual levels under inspection defaults.
+After historical report verification, provenance correction and explicit older
+source-policy replay, it matches retained normal/vertex hints and complete section
+prerequisites. The [separate source census](evidence/material-modernization/source-census.json)
+inspects all 1,711 authored levels, explicitly distinguishing the three source-only
+levels without retained historical qualification. Section order is not stable.
+The original snapshot stays unchanged and supplies no runtime source fingerprint.
+Use `model inspect --runtime-loader` for ordinary adapter UV/fingerprint work;
+`--all-source-lods` explicitly selects diagnostic source-only inspection. Neither
+substitutes for a live instance/lighting/receiver check.
 
 For an interpretable geometry denominator, the following takes **one
 highest-detail visual LOD per distinct model** (minimum resolution, then index),

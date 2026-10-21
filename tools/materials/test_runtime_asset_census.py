@@ -1,10 +1,43 @@
 """Regression checks for order-independent, source-policy-only census replay."""
 import copy
 import unittest
-from census_runtime_assets import compare_models, section_signature
+from census_runtime_assets import compare_models, section_signature, baseline_comparison_view, historical_interpretation
 
 
 class CensusComparisonTests(unittest.TestCase):
+    def test_historical_resolution_corruption_is_reported_not_accepted_as_current(self):
+        text='''Format: ODOL
+LOD 0 (Resolution: 2)
+  Points: 3
+  Faces: 1
+LOD 1 (Resolution: 40)
+  Points: 16
+  Faces: 6
+Native lighting (source hints)
+Qualification LOD 0 res=2e-41
+  LOD 0 res=2e-41 vertices=3 normals=3 invalidNormals=0 userMaterialVertices=0 landHintVertices=0 lightModes=0:3
+  LOD 1 res=1e+13 vertices=328 normals=328 invalidNormals=0 userMaterialVertices=0 landHintVertices=0 lightModes=0:328
+'''
+        result=historical_interpretation(text)
+        self.assertEqual(len(result['visualLODs']),1)
+        self.assertEqual(result['visualLODs'][0]['resolution'],2)
+        self.assertEqual(result['excludedVisualLODs'][0]['resolution'],40)
+        self.assertEqual(result['historicalResolutionDiagnostics'][0]['historicalNativeResolution'],2e-41)
+        with self.assertRaises(ValueError):historical_interpretation(text.replace('LOD 1 res=1e+13','LOD 1 res=40'))
+        with self.assertRaises(ValueError):historical_interpretation(text.replace('LOD 0 res=2e-41 vertices','LOD 0 res=2 vertices'))
+
+    def test_source_only_extra_levels_are_explicit_not_runtime_coverage(self):
+        before={'visualLODs':[{'index':0,'resolution':1}],
+                'excludedVisualLODs':[{'index':1,'resolution':40}]}
+        after={'visualLODs':[{'index':0,'resolution':1},{'index':1,'resolution':40}]}
+        view,extra=baseline_comparison_view(before,after,True)
+        self.assertEqual([l['index'] for l in view['visualLODs']],[0])
+        self.assertEqual(extra[0]['index'],1)
+        self.assertEqual(extra[0]['resolution'],40)
+        self.assertEqual(baseline_comparison_view(before,after,False),(after,[]))
+        with self.assertRaises(ValueError):baseline_comparison_view(before,{'visualLODs':[{'index':0,'resolution':1}]},True)
+        with self.assertRaises(ValueError):baseline_comparison_view(before,{'visualLODs':[{'index':0,'resolution':1},{'index':1,'resolution':41}]},True)
+
     def setUp(self):
         section = dict(index=0, texture='data/wall.pac', flags=16384, vertices=3,
                        invalidNormals=0, materialIndices={'0': 3}, source=0, opaque=1,

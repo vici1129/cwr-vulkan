@@ -47,3 +47,27 @@ TEST_CASE("ShapeAdapter: ODOL morph frames become animation phases", "[ShapeAdap
     REQUIRE(lod->Pos(0)[1] == Catch::Approx(0.225f));
     REQUIRE(lod->Pos(1)[1] == Catch::Approx(-0.175f));
 }
+
+TEST_CASE("ShapeAdapter: source inspection preserves declared LODs without changing source geometry",
+          "[ShapeAdapter][odol][source-lods]")
+{
+    auto model=Poseidon::Asset::Formats::ODOLLoader::load(GET_FIXTURE("p3d/animated_morph_odol.p3d"));
+    auto distantLOD=model.lodLevels.front();distantLOD.resolution=40.f;
+    distantLOD.mesh.andHints=distantLOD.mesh.orHints=static_cast<RenderHints>(ClipDecalStep);
+    model.lodLevels.push_back(distantLOD);
+    std::unique_ptr<LODShapeWithShadow> source(ShapeAdapter::convertToLODShape(model,false,true));
+    REQUIRE(source->NLevels()==2);
+    for (int i=0;i<2;++i)
+    {
+        REQUIRE(source->Resolution(i)==model.lodLevels[i].resolution);
+        REQUIRE(source->Level(i)->SourceResolution()==model.lodLevels[i].resolution);
+        REQUIRE(source->Level(i)->NVertex()==model.lodLevels[i].mesh.vertices.size());
+        REQUIRE(source->Level(i)->SourceFingerprint()!=0);
+        for(int v=0;v<source->Level(i)->NVertex();++v)
+        {
+            REQUIRE(source->Level(i)->UV(v).u==model.lodLevels[i].mesh.vertices[v].uv.u);
+            REQUIRE(source->Level(i)->UV(v).v==model.lodLevels[i].mesh.vertices[v].uv.v);
+        }
+    }
+    REQUIRE((source->Level(1)->GetAndHints()&ClipDecalMask)!=ClipDecalNone);
+}
