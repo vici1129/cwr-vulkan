@@ -286,6 +286,43 @@ TEST_CASE("Ruin regions retain lintel, debris, window and exact fractional LOD b
     }
 }
 
+TEST_CASE("Inspected roof tiles do not promote chimney openings or ambiguous roof sheets",
+          "[Graphics][vulkan-shape][material-qualification]")
+{
+    const std::array keys{"data\\kostel_strecha.pac", "data\\strecha_tasky.pac", "o\\hous\\hasicakstrecha.pac"};
+    for (unsigned i=0;i<keys.size();++i)
+    {
+        const auto source=vk::OriginalMaterialSource(keys[i]);
+        REQUIRE(source.identity==185+i);
+        REQUIRE(source.family==3);
+        REQUIRE(source.roughness==.9f);
+        REQUIRE(vk::PBRMaterial(keys[i],128)==0); // v3 is unchanged
+        REQUIRE(vk::PBRMaterial(keys[i],128,true)==.9f);
+        REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::None,NoClamp,true,true)==vk::MaterialRejection::None);
+        for (auto rejection : {vk::MaterialRejection::AuthoredLighting,vk::MaterialRejection::Geometry})
+            REQUIRE(vk::QualifyOriginalMaterial(source,rejection,NoClamp,true,true)==rejection);
+        for (auto flag : {IsTransparent,IsAlpha,NoZWrite,IsOnSurface,IsAnimated,DisableSun})
+            REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::None,flag,true,true)==vk::MaterialRejection::RenderBehavior);
+        REQUIRE_FALSE(vk::OriginalMaterialReception(vk::MaterialRejection::None,false,true));
+        REQUIRE_FALSE(vk::OriginalMaterialReception(vk::MaterialRejection::None,true,false));
+    }
+    // Every other source in the original 31-image roof/chimney survey remains
+    // untyped as a whole image. Potential brick-only original faces are a
+    // separate unfinished region review, never a license for the hole/frame.
+    for (const auto key : {"data\\blok_a_strecha.pac","data\\blok_a_strecha_02.pac",
+        "data\\dum_05_strecha_01.pac","data\\garaz_strecha.pac","data\\hang_strecha.pac",
+        "data\\hang_strecha_kraj.pac","data\\hruzdum_strecha.pac","data\\kdomek_komin.pac",
+        "data\\kdomek_podkomin.pac","data\\komin.pac","data\\komin_maly_side_01.pac",
+        "data\\komin_roura_side.pac","data\\komin_roura_top.pac","data\\komin_side_af.pac",
+        "data\\komin_top_01.pac","data\\kostel2_strecha2.pac","data\\kostel2_strecha3.pac",
+        "data\\kostel2_strecha_veze.pac","data\\kostel2_strecha_vezi.pac","data\\kostel2_strecha_zakr.pac",
+        "data\\kostel_t_strecha.pac","data\\strazni_vez_strecha_.pac","o\\hous\\chata6strecha.pac",
+        "o\\hous\\kostel02_strechal.pac","o\\hous\\orlhot_kom.pac","o\\hous\\panel_strecha.pac",
+        "o\\hous\\posed_strecha.pac","o\\hous\\radnice_strecha.pac",
+        "data\\kostel_strecha.paa","other\\strecha_tasky.pac","data\\hasicakstrecha.pac"})
+        REQUIRE_FALSE(vk::OriginalMaterialSource(key));
+}
+
 TEST_CASE("Original blended roads retain surface depth and fitted-ground lighting gates",
           "[Graphics][vulkan-shape][material-qualification]")
 {

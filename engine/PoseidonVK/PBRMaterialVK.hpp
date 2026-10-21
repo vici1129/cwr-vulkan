@@ -88,7 +88,12 @@ inline constexpr StockPBRMaterial EnhancedPBRMaterials[]{
     {"data\\piskovec.pac", .85f, 2}, {"data\\skala_piskovec.pac", .90f, 6},
     {"data\\skala_piskovec3.pac", .85f, 2}, {"data\\bozi_muka_sokl.pac", .90f, 6},
     {"data\\hrobecek2_side.pac", .90f, 6}, {"data\\hrobecek2_side2.pac", .90f, 6},
-    {"data\\hrobecek2_side3.pac", .90f, 6}};
+    {"data\\hrobecek2_side3.pac", .90f, 6},
+    // Dedicated original overlapping roof tiles, including shared gate caps.
+    // Chimney apertures, metal/coating ambiguity and mixed roof atlases do not
+    // inherit these identities. Original lighting/capture gates still apply.
+    {"data\\kostel_strecha.pac", .90f, 3}, {"data\\strecha_tasky.pac", .90f, 3},
+    {"o\\hous\\hasicakstrecha.pac", .90f, 3}};
 inline unsigned PBRReceiverFamily(unsigned id)
 {
     if (id >= 64 && id < 64 + std::size(StockPBRMaterials)) return StockPBRMaterials[id - 64].receiverFamily;
