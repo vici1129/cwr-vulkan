@@ -21,6 +21,7 @@
 #include <cmath>
 #include <set>
 #include <array>
+#include <bit>
 #include <memory>
 #include <map>
 #include <stdint.h>
@@ -236,7 +237,8 @@ static void setupModelInspect(CLI::App& model)
                                 std::cout << "UV geometry lod=" << i << " resolution=" << shape->Resolution(i)
                                           << " fingerprint=" << lod->SourceFingerprint()
                                           << " fingerprintValid=" << (lod->SourceFingerprint()!=0)
-                                          << " textureBindings=" << Poseidon::vk::OriginalRegionTextureBindings(bindings) << std::endl;
+                                          << " textureBindings=" << Poseidon::vk::OriginalRegionTextureBindings(bindings)
+                                          << " resolutionBits=" << std::bit_cast<uint32_t>(lod->SourceResolution()) << std::endl;
                             }
                             const auto& section=lod->GetSection(s);
                             unsigned triangle=0,originalFace=0;

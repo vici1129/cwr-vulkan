@@ -82,7 +82,13 @@ inline constexpr StockPBRMaterial EnhancedPBRMaterials[]{
     {"data\\lesni_kmen_smrku.pac", .85f, 4}, {"data\\n_strom_01_kura.pac", .85f, 4},
     {"data\\n_strom_lipa_kmen.pac", .85f, 4}, {"o\\tree\\akat01_krd2.pac", .85f, 4},
     {"o\\tree\\borovice02c.pac", .85f, 4}, {"o\\tree\\dd_les_kura03.pac", .85f, 4},
-    {"o\\tree\\dub_kura_fx.pac", .85f, 4}, {"o\\tree\\smrkur.pac", .85f, 4}};
+    {"o\\tree\\dub_kura_fx.pac", .85f, 4}, {"o\\tree\\smrkur.pac", .85f, 4},
+    // Original dedicated sandstone, castle foundation stone and separately modeled stone
+    // memorial sides/base. Mixed grave/inscription/soil atlases stay untyped.
+    {"data\\piskovec.pac", .85f, 2}, {"data\\skala_piskovec.pac", .90f, 6},
+    {"data\\skala_piskovec3.pac", .85f, 2}, {"data\\bozi_muka_sokl.pac", .90f, 6},
+    {"data\\hrobecek2_side.pac", .90f, 6}, {"data\\hrobecek2_side2.pac", .90f, 6},
+    {"data\\hrobecek2_side3.pac", .90f, 6}};
 inline unsigned PBRReceiverFamily(unsigned id)
 {
     if (id >= 64 && id < 64 + std::size(StockPBRMaterials)) return StockPBRMaterials[id - 64].receiverFamily;

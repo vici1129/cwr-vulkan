@@ -49,7 +49,17 @@ inline constexpr OriginalMaterialRegion OriginalMaterialRegions[]{
     {530,6,"o\\hous\\stodola3.p3d","o\\hous\\stodola01.pac",0.9f,-3.f,0.5f,3.f,1.f,512,512,17838487729387079901ull,0},
     {531,6,"o\\hous\\stodola3.p3d","o\\hous\\stodola01a.pac",0.9f,0.f,0.674f,0.742f,1.f,512,512,18343219702901983844ull,0},
     {532,6,"o\\hous\\zluty_statek.p3d","o\\hous\\stodola01.pac",0.9f,-3.f,0.5f,3.f,1.f,512,512,17838487729387079901ull,0},
-    {533,6,"o\\hous\\zluty_statek_in.p3d","o\\hous\\stodola01.pac",0.9f,-3.f,0.5f,3.f,1.f,512,512,17838487729387079901ull,0}};
+    {533,6,"o\\hous\\zluty_statek_in.p3d","o\\hous\\stodola01.pac",0.9f,-3.f,0.5f,3.f,1.f,512,512,17838487729387079901ull,0},
+    // Exact original grave-border/headstone back and side stone tiles only.
+    // Plaques, inscriptions, soil/grass and photographic canvas stay unknown.
+    // All accepted fans preserve complete original faces; original U/V clamp
+    // is required. These are not whole-image or all-LOD grave approvals.
+    {534,6,"o\\hous\\hrob1.p3d","o\\hous\\nahrobky01.pac",.9f,.503f,.503f,.998f,.998f,512,512,14926218387339521888ull,49152},
+    {535,6,"o\\hous\\hrob2.p3d","o\\hous\\nahrobky01.pac",.9f,.503f,.503f,.998f,.998f,512,512,14926218387339521888ull,49152},
+    {536,6,"o\\hous\\nahrobek1.p3d","o\\hous\\nahrobky01.pac",.9f,.503f,.503f,.998f,.998f,512,512,14926218387339521888ull,49152},
+    {537,6,"o\\hous\\nahrobek2.p3d","o\\hous\\nahrobky01.pac",.9f,.503f,.503f,.998f,.998f,512,512,14926218387339521888ull,49152},
+    {538,6,"o\\hous\\nahrobek4.p3d","o\\hous\\nahrobky01.pac",.9f,.503f,.503f,.998f,.998f,512,512,14926218387339521888ull,49152},
+    {539,6,"o\\hous\\nahrobek5.p3d","o\\hous\\nahrobky01.pac",.9f,.503f,.503f,.998f,.998f,512,512,14926218387339521888ull,49152}};
 struct OriginalRegionGeometry
 {
     std::string_view model;
@@ -105,7 +115,17 @@ inline constexpr OriginalRegionGeometry OriginalRegionGeometries[]{
     {"o\\hous\\zluty_statek_in.p3d",1.5f,2256,16,8526395828640554920ull,17349429700551960015ull},
     {"o\\hous\\zluty_statek_in.p3d",3.5f,1163,16,17137202592052439178ull,2579747255288632147ull},
     {"o\\hous\\zluty_statek_in.p3d",7.f,606,13,12894334512326825925ull,5175187356609308597ull},
-    {"o\\hous\\zluty_statek_in.p3d",10.5f,328,9,13231501501395638605ull,13513855425676969831ull}};
+    {"o\\hous\\zluty_statek_in.p3d",10.5f,328,9,13231501501395638605ull,13513855425676969831ull},
+    {"o\\hous\\hrob1.p3d",.5f,56,1,2774244882950967991ull,3899942120700159320ull},
+    {"o\\hous\\hrob2.p3d",.5f,62,1,1493411141501128581ull,3899942120700159320ull},
+    {"o\\hous\\nahrobek1.p3d",.5f,210,1,11012760105967815471ull,3899942120700159320ull},
+    {"o\\hous\\nahrobek2.p3d",.5f,72,1,12145211315437245301ull,3899942120700159320ull},
+    {"o\\hous\\nahrobek2.p3d",1.5f,24,1,3951004517269286628ull,3899942120700159320ull},
+    {"o\\hous\\nahrobek4.p3d",.5f,56,1,8589466640802520870ull,3899942120700159320ull},
+    {"o\\hous\\nahrobek4.p3d",1.5f,24,1,3970343494535995746ull,3899942120700159320ull},
+    {"o\\hous\\nahrobek5.p3d",.5f,152,1,5048361025609538717ull,3899942120700159320ull},
+    // Exact original float bits 1067966286; rounded tool text 1.3115 is not equal.
+    {"o\\hous\\nahrobek5.p3d",1.31150222f,48,1,12748362274169703965ull,3899942120700159320ull}};
 inline const OriginalMaterialRegion* OriginalRegion(unsigned identity)
 {
     for (const auto& r : OriginalMaterialRegions) if (r.identity==identity) return &r;

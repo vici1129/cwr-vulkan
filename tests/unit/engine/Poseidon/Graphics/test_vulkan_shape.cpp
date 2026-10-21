@@ -204,6 +204,51 @@ TEST_CASE("Dedicated bark identities do not promote foliage, authored trunks or 
         REQUIRE_FALSE(vk::OriginalMaterialSource(key));
 }
 
+TEST_CASE("Inspected stone sources distinguish natural rock, masonry and mixed memorial atlases",
+          "[Graphics][vulkan-shape][material-qualification]")
+{
+    struct Source { const char* key; float roughness; unsigned family; };
+    const std::array sources{Source{"data\\piskovec.pac",.85f,2},
+        Source{"data\\skala_piskovec.pac",.9f,6}, Source{"data\\skala_piskovec3.pac",.85f,2},
+        Source{"data\\bozi_muka_sokl.pac",.9f,6}, Source{"data\\hrobecek2_side.pac",.9f,6},
+        Source{"data\\hrobecek2_side2.pac",.9f,6}, Source{"data\\hrobecek2_side3.pac",.9f,6}};
+    for (unsigned i=0;i<sources.size();++i)
+    {
+        const auto& expected=sources[i];const auto source=vk::OriginalMaterialSource(expected.key);
+        REQUIRE(source.identity==178+i);
+        REQUIRE(source.family==expected.family);
+        REQUIRE(source.roughness==expected.roughness);
+        REQUIRE(vk::PBRMaterial(expected.key,128)==0);
+        REQUIRE(vk::PBRMaterial(expected.key,128,true)==expected.roughness);
+        REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::AuthoredLighting,0,true,true)==vk::MaterialRejection::AuthoredLighting);
+        REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::Geometry,0,true,true)==vk::MaterialRejection::Geometry);
+        REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::None,IsTransparent,true,true)==vk::MaterialRejection::RenderBehavior);
+    }
+    for (const auto key : {"o\\hous\\nahrobky01.pac","data\\hrobecek2.pac","data\\cross_opak.pac",
+        "other\\piskovec.pac","data\\piskovec.paa","data\\helfenburk_vez_front.pac"})
+        REQUIRE_FALSE(vk::OriginalMaterialSource(key));
+    const std::array<std::array<float,2>,3> stone{{{.6f,.6f},{.72f,.6f},{.6f,.72f}}};
+    auto soil=stone;soil[0][0]=.49f;
+    auto plaque=stone;plaque[0][1]=.49f;
+    for (unsigned id=534;id<=539;++id)
+    {
+        const auto* region=vk::OriginalRegion(id);REQUIRE(region);
+        REQUIRE(vk::SelectOriginalRegion(*region,stone,ClampU|ClampV)==id);
+        REQUIRE_FALSE(vk::SelectOriginalRegion(*region,stone,ClampU));
+        REQUIRE_FALSE(vk::SelectOriginalRegion(*region,stone,ClampV));
+        REQUIRE_FALSE(vk::SelectOriginalRegion(*region,soil,ClampU|ClampV));
+        REQUIRE_FALSE(vk::SelectOriginalRegion(*region,plaque,ClampU|ClampV));
+    }
+    const auto found=std::find_if(std::begin(vk::OriginalRegionGeometries),std::end(vk::OriginalRegionGeometries),
+        [](const auto& geometry){return geometry.model=="o\\hous\\nahrobek5.p3d" && geometry.resolution==1.31150222f;});
+    REQUIRE(found!=std::end(vk::OriginalRegionGeometries));
+    const auto& fractional=*found;
+    REQUIRE(vk::OriginalRegionCandidate(fractional.model,1.31150222f,fractional.vertices,
+        fractional.sections,fractional.fingerprint,"o\\hous\\nahrobky01.pac")==539);
+    REQUIRE_FALSE(vk::OriginalRegionCandidate(fractional.model,1.3115f,fractional.vertices,
+        fractional.sections,fractional.fingerprint,"o\\hous\\nahrobky01.pac"));
+}
+
 TEST_CASE("Automatic triangle ranges preserve ordinary neighbors of authored shadow lighting",
           "[Graphics][vulkan-shape][material-qualification]")
 {
