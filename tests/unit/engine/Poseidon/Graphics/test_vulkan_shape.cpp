@@ -249,6 +249,39 @@ TEST_CASE("Inspected stone sources distinguish natural rock, masonry and mixed m
         fractional.sections,fractional.fingerprint,"o\\hous\\nahrobky01.pac"));
 }
 
+TEST_CASE("Original blended roads retain surface depth and fitted-ground lighting gates",
+          "[Graphics][vulkan-shape][material-qualification]")
+{
+    // Exact legacy adapter flags in the 75-model road-source audit, including
+    // bridge overlay LODs and the two near cobble LODs without source land hints.
+    for (const int flags : {147712,147714,180480,180482})
+    {
+        REQUIRE(flags & IsAlpha);
+        REQUIRE_FALSE(vk::OriginalDiffuseFlags(flags));
+        const vk::QualifiedMaterial hypotheticalStone{130,2,.85f};
+        REQUIRE(vk::QualifyOriginalMaterial(hypotheticalStone,vk::MaterialRejection::None,
+            flags,true,true)==vk::MaterialRejection::RenderBehavior);
+        REQUIRE_FALSE(vk::OriginalMaterialReception(vk::MaterialRejection::RenderBehavior,true,true));
+    }
+    // Removing only alpha or guessing an opaque center does not make a fitted
+    // overlay ordinary geometry; none of these independent gates is optional.
+    for (const int flags : {OnSurface,IsOnSurface,NoZWrite,ZBiasStep})
+        REQUIRE_FALSE(vk::OriginalDiffuseFlags(flags));
+    REQUIRE_FALSE(vk::OriginalOrdinaryVertex(ClipLandOn));
+    REQUIRE_FALSE(vk::OriginalOrdinaryVertex(ClipLandKeep));
+    REQUIRE(vk::OriginalOrdinaryVertex(ClipNone));
+    for (const auto key : {"data\\asfaltka.paa","data\\asfaltka_kr.paa","data\\cesta.paa",
+        "data\\cesta_kr.paa","data\\silnice.paa","data\\silnice_kr.paa",
+        "o\\road\\asf_new.paa","o\\road\\asf_konec.paa","o\\road\\ces_hned.paa",
+        "o\\road\\ces_hned_konec.paa","o\\road\\sil_new.paa","o\\road\\sil_konec.paa",
+        "o\\road\\sil_konecupl.paa","o\\road\\sil_kos.paa","o\\road\\sil_kos_k.paa",
+        "o\\road\\sil_kos_cur.paa","o\\road\\sil_kos_cur2.paa"})
+    {
+        REQUIRE_FALSE(vk::OriginalMaterialSource(key));
+        REQUIRE(vk::PBRMaterial(key,128,true)==0);
+    }
+}
+
 TEST_CASE("Automatic triangle ranges preserve ordinary neighbors of authored shadow lighting",
           "[Graphics][vulkan-shape][material-qualification]")
 {

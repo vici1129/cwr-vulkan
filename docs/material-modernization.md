@@ -6,8 +6,8 @@ The [per-model ledger](evidence/material-modernization/progress.json) retains al
 and concrete prerequisite blockers. It is not a visible-coverage percentage.
 The original inventory remains an immutable baseline.
 
-After batch 09, 60 models have complete source review, 90 have partial source
-review, and 365 await source review. Another 211 have no source-unknown triangles
+After batch 10, 60 models have complete source review, 91 have partial source
+review, and 364 await source review. Another 211 have no source-unknown triangles
 under the existing native classifier: their existing coverage and opacity,
 authored-lighting or geometry fallback contracts are retained. This last group
 is a prerequisite disposition, not a claim that all of its pixels are PBR or GI.
@@ -35,6 +35,10 @@ Batch 09 [assesses sandstone, castle foundations and memorial stone](material-mo
 across 18 models / 53 authored levels. Seven dedicated sources and six exact-model
 stone-tile regions gain existing paths; mixed plaques, soil, canvas, crosses and
 unreviewed castle facades retain their specific unresolved boundaries.
+Batch 10 [reviews fitted roads and shared bridge overlays](material-modernization-batch-10.md)
+across 75 models / 106 levels. Seventeen original fractional-alpha sources retain
+their blend, surface/depth and terrain-fitting contracts; no road rendering
+coverage is added. The bridge's other sources remain a partial review.
 The [ordinary-adapter census](evidence/material-modernization/runtime-census.json)
 rechecks 726 models / **1,708 retained visual LODs** under the inspection configuration.
 The separate [source-only census](evidence/material-modernization/source-census.json)
@@ -47,6 +51,9 @@ comparison. Section ordering is not an asset identity. Neither census certifies
 live instance lighting, GI reception or optical review of every original image.
 Backlog 28/29 retain their alpha-card and authored-lighting contracts after original
 pixel/geometry review; this is not newly implemented foliage coverage.
+Backlog 30 likewise retains the fitted-road contract after explicit source review.
+All 30 pilot tasks now have a disposition, but 16 remain partial source reviews;
+the wider 726-model assessment and remaining defensible implementations continue.
 Use the [batch-09 reproduction command](material-modernization-batch-09.md#tests-census-and-progress)
 for the current executable; earlier batch commands describe their policy snapshots.
 
