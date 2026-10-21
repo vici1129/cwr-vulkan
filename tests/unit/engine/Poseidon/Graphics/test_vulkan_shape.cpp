@@ -12,6 +12,7 @@
 #include <PoseidonVK/TextureInterpolationVK.hpp>
 #include <catch2/catch_approx.hpp>
 #include <limits>
+#include <bit>
 #include <PoseidonVK/LocalShadowVK.hpp>
 #include <PoseidonVK/WetSurfaceVK.hpp>
 #include <PoseidonVK/PBRMaterialVK.hpp>
@@ -247,6 +248,42 @@ TEST_CASE("Inspected stone sources distinguish natural rock, masonry and mixed m
         fractional.sections,fractional.fingerprint,"o\\hous\\nahrobky01.pac")==539);
     REQUIRE_FALSE(vk::OriginalRegionCandidate(fractional.model,1.3115f,fractional.vertices,
         fractional.sections,fractional.fingerprint,"o\\hous\\nahrobky01.pac"));
+}
+
+TEST_CASE("Ruin regions retain lintel, debris, window and exact fractional LOD boundaries",
+          "[Graphics][vulkan-shape][material-qualification]")
+{
+    for (const auto key : {"o\\hous\\zborenina1.pac","o\\hous\\zborenina1a.pac",
+                          "o\\hous\\domek_ruina1.pac","o\\hous\\domek_ruina2.pac"})
+        REQUIRE_FALSE(vk::OriginalMaterialSource(key));
+    REQUIRE_FALSE(std::any_of(std::begin(vk::OriginalMaterialRegions),std::end(vk::OriginalMaterialRegions),
+        [](const auto& r){return r.texture=="o\\hous\\domek_ruina1.pac" || r.texture=="o\\hous\\domek_ruina2.pac";}));
+    for (unsigned id=540;id<=543;++id)
+    {
+        const auto* r=vk::OriginalRegion(id);REQUIRE(r);
+        REQUIRE(r->family==6);REQUIRE(r->roughness==.9f);
+        const float u=(r->uMin+r->uMax)*.5f,v=(r->vMin+r->vMax)*.5f;
+        const std::array<std::array<float,2>,3> inside{{{u,v},{u+.01f,v},{u,v+.01f}}};
+        REQUIRE(vk::SelectOriginalRegion(*r,inside,ClampV)==id);
+        auto mixed=inside;
+        if(id==542)mixed[0][0]=-.001f; // No wrapping into the right-hand lintel tile.
+        else mixed[0][1]=r->vMin-.01f;
+        REQUIRE_FALSE(vk::SelectOriginalRegion(*r,mixed,ClampV));
+        REQUIRE(vk::QualifyOriginalMaterial({id,r->family,r->roughness},
+            vk::MaterialRejection::AuthoredLighting,ClampV,true,true)==vk::MaterialRejection::AuthoredLighting);
+    }
+    struct Exact { const char* model; float exact, rounded; uint32_t bits; };
+    for (const auto& e : {Exact{"o\\hous\\ruiny_3_dvere.p3d",6.90305948f,6.90306f,1088218589u},
+        Exact{"o\\hous\\ruiny_3_prasklina.p3d",6.86704254f,6.86704f,1088143056u},
+        Exact{"o\\hous\\ruiny_3_roh.p3d",7.31359243f,7.31359f,1089079539u}})
+    {
+        REQUIRE(std::bit_cast<uint32_t>(e.exact)==e.bits);
+        const auto g=std::find_if(std::begin(vk::OriginalRegionGeometries),std::end(vk::OriginalRegionGeometries),
+            [&](const auto& g){return g.model==e.model && g.resolution==e.exact;});
+        REQUIRE(g!=std::end(vk::OriginalRegionGeometries));
+        REQUIRE(vk::OriginalRegionCandidate(g->model,e.exact,g->vertices,g->sections,g->fingerprint,"o\\hous\\zborenina1.pac"));
+        REQUIRE_FALSE(vk::OriginalRegionCandidate(g->model,e.rounded,g->vertices,g->sections,g->fingerprint,"o\\hous\\zborenina1.pac"));
+    }
 }
 
 TEST_CASE("Original blended roads retain surface depth and fitted-ground lighting gates",

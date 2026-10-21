@@ -59,7 +59,15 @@ inline constexpr OriginalMaterialRegion OriginalMaterialRegions[]{
     {536,6,"o\\hous\\nahrobek1.p3d","o\\hous\\nahrobky01.pac",.9f,.503f,.503f,.998f,.998f,512,512,14926218387339521888ull,49152},
     {537,6,"o\\hous\\nahrobek2.p3d","o\\hous\\nahrobky01.pac",.9f,.503f,.503f,.998f,.998f,512,512,14926218387339521888ull,49152},
     {538,6,"o\\hous\\nahrobek4.p3d","o\\hous\\nahrobky01.pac",.9f,.503f,.503f,.998f,.998f,512,512,14926218387339521888ull,49152},
-    {539,6,"o\\hous\\nahrobek5.p3d","o\\hous\\nahrobky01.pac",.9f,.503f,.503f,.998f,.998f,512,512,14926218387339521888ull,49152}};
+    {539,6,"o\\hous\\nahrobek5.p3d","o\\hous\\nahrobky01.pac",.9f,.503f,.503f,.998f,.998f,512,512,14926218387339521888ull,49152},
+    // Original ruin stone rows only. Broad
+    // candidate boxes that split an original polygon fan were not admitted.
+    // Upper lintel detail, rubble/ground, cornices, windows, doors and recesses
+    // remain untyped; neither image is a whole-source material declaration.
+    {540,6,"o\\hous\\ruiny_3_dvere.p3d","o\\hous\\zborenina1.pac",.9f,-2.f,.45f,2.f,1.f,512,512,13902399811565099486ull},
+    {541,6,"o\\hous\\ruiny_3_prasklina.p3d","o\\hous\\zborenina1.pac",.9f,-2.f,.45f,2.f,1.f,512,512,13902399811565099486ull},
+    {542,6,"o\\hous\\ruiny_3_roh.p3d","o\\hous\\zborenina1.pac",.9f,0.f,0.f,.5f,1.f,512,512,13902399811565099486ull},
+    {543,6,"o\\hous\\ruiny_obvod_3.p3d","o\\hous\\zborenina1.pac",.9f,-2.f,.45f,2.f,1.f,512,512,13902399811565099486ull}};
 struct OriginalRegionGeometry
 {
     std::string_view model;
@@ -125,7 +133,19 @@ inline constexpr OriginalRegionGeometry OriginalRegionGeometries[]{
     {"o\\hous\\nahrobek4.p3d",1.5f,24,1,3970343494535995746ull,3899942120700159320ull},
     {"o\\hous\\nahrobek5.p3d",.5f,152,1,5048361025609538717ull,3899942120700159320ull},
     // Exact original float bits 1067966286; rounded tool text 1.3115 is not equal.
-    {"o\\hous\\nahrobek5.p3d",1.31150222f,48,1,12748362274169703965ull,3899942120700159320ull}};
+    {"o\\hous\\nahrobek5.p3d",1.31150222f,48,1,12748362274169703965ull,3899942120700159320ull},
+    {"o\\hous\\ruiny_3_dvere.p3d",1.5f,258,2,6735771090150322089ull,13338746079624542812ull},
+    {"o\\hous\\ruiny_3_dvere.p3d",3.f,172,2,3458622000636597664ull,13338746079624542812ull},
+    {"o\\hous\\ruiny_3_dvere.p3d",6.90305948f,48,2,5222537571644633332ull,13338746079624542812ull},
+    {"o\\hous\\ruiny_3_prasklina.p3d",1.5f,267,2,9425136041773489085ull,13338746079624542812ull},
+    {"o\\hous\\ruiny_3_prasklina.p3d",3.f,188,2,12483104871365995009ull,13338746079624542812ull},
+    {"o\\hous\\ruiny_3_prasklina.p3d",6.86704254f,58,2,13671049410095702043ull,13338746079624542812ull},
+    {"o\\hous\\ruiny_3_roh.p3d",1.5f,249,2,8091803884691766016ull,13338746079624542812ull},
+    {"o\\hous\\ruiny_3_roh.p3d",3.f,168,2,10081780795647295214ull,13338746079624542812ull},
+    {"o\\hous\\ruiny_3_roh.p3d",7.31359243f,54,2,6998320021019578047ull,13338746079624542812ull},
+    {"o\\hous\\ruiny_obvod_3.p3d",1.5f,1002,2,13917087705965509574ull,13338746079624542812ull},
+    {"o\\hous\\ruiny_obvod_3.p3d",3.f,554,2,12306342127119174464ull,13338746079624542812ull},
+    {"o\\hous\\ruiny_obvod_3.p3d",7.5f,204,2,4482430926070839521ull,13338746079624542812ull}};
 inline const OriginalMaterialRegion* OriginalRegion(unsigned identity)
 {
     for (const auto& r : OriginalMaterialRegions) if (r.identity==identity) return &r;
