@@ -102,6 +102,23 @@ mission-completion acceptance. Initial scout views that landed inside a nearby
 barn were not used as facade acceptance; the paired views use a verified clear
 placement instead.
 
+The initial northern `ruin-crack` camera is foliage-occluded. Its counters and
+images are retained as diagnostics, **not clear crack appearance acceptance**.
+A supplementary pair at original desert placement 2638.5,5068.2 uses a standing
+camera at 2638.5,5056.2 facing positive world Z. The first edge-on scout at that location is
+also not substituted for the final clear paired view. Renderer/material policy
+and the tested executable hashes are unchanged for this supplementary check.
+
+The clear final view records 19,452 native stone-family receiver pixels; its
+native/CPU/restored controls record 19,444 / 19,297 / 19,500. Its bounded probes
+observe 541 on six reflected paths (plus neighboring 540/543 once each). The
+before/after pair was visually inspected with no new triangle seam observed.
+The two supplementary runs present **36,639 frames** with synchronization
+validation enabled, zero errors and warnings, and normal exits. They are
+appearance checks, not extra timing intervals; the earlier performance table
+is unchanged. Original-input/settings hashes and private-repository preservation
+were rechecked after these runs.
+
 Stock v3, auto/GI-off, sky-only and GI-on views separate material and transport
 effects. Morning, overcast/dusk, moving/settled TAA and FSR Quality, two-bounce
 operation, explicit native/CPU restoration and lower-LOD retreats are independent
@@ -115,8 +132,8 @@ keeps final accepted runs separate from the withdrawn six-region pilot. Family
 receiver counters are frame samples, not source-specific pixel percentages.
 Bounded source-identity probes are not all-world coverage or transport statistics.
 
-The final morning views record 30,996 stone-family receiver pixels at the desert
-door group, 712 at the crack view, 12,980 at the corner view and 20,148 at the
+The original final-build morning cameras record 30,996 stone-family receiver pixels at the desert
+door group, 712 in the foliage-occluded northern crack diagnostic, 12,980 at the corner view and 20,148 at the
 enclosure. The explicit door native/CPU/restored control records 30,911 / 18,178 /
 30,996; the enclosure records 20,186 / 20,183 / 20,148. These routes are separately
 observed and are not claimed to have identical capture or clipping footprints.
@@ -134,7 +151,7 @@ not source-specific receiver counts or proof that every eligible face was hit.
 | Original standing view | Before | Final stone-only build |
 | --- | --- | --- |
 | Desert door group | [before](evidence/material-modernization/batch-11/modernization-b11-baseline-noe-1080-ruin-door-gi.png) | [after](evidence/material-modernization/batch-11/modernization-b11-final-noe-1080-ruin-door-gi.png) |
-| Stone crack | [before](evidence/material-modernization/batch-11/modernization-b11-baseline-noe-1080-ruin-crack-gi.png) | [after](evidence/material-modernization/batch-11/modernization-b11-final-noe-1080-ruin-crack-gi.png) |
+| Stone crack, clear desert placement | [before](evidence/material-modernization/batch-11/modernization-b11-crack-clear-baseline-gi.png) | [after](evidence/material-modernization/batch-11/modernization-b11-crack-clear-final-gi.png) |
 | Stone corner | [before](evidence/material-modernization/batch-11/modernization-b11-baseline-noe-1080-ruin-corner-gi.png) | [after](evidence/material-modernization/batch-11/modernization-b11-final-noe-1080-ruin-corner-gi.png) |
 | Enclosure | [before](evidence/material-modernization/batch-11/modernization-b11-baseline-noe-1080-ruin-enclosure-gi.png) | [after](evidence/material-modernization/batch-11/modernization-b11-final-noe-1080-ruin-enclosure-gi.png) |
 
