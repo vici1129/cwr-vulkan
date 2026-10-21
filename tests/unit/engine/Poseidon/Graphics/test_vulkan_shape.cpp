@@ -45,10 +45,11 @@ TEST_CASE("Original atlas regions require exact geometry, pixels and entire orig
             REQUIRE_FALSE(vk::OriginalRegionCandidate(geometry.model,10000,geometry.vertices,
                 geometry.sections,geometry.fingerprint,region.texture));
         }
-        const std::array<std::array<float,2>,3> lower{{{.0081f,.6854f},{.9942f,.6869f},{.9942f,.9674f}}};
+        const float u=region.uMin+.2f*(region.uMax-region.uMin),v=region.vMin+.2f*(region.vMax-region.vMin);
+        const std::array<std::array<float,2>,3> lower{{{u,v},{u+.1f,v},{u,v+.1f}}};
         REQUIRE(vk::OriginalRegionUV(region.identity,lower));
-        for (const auto bad : {std::array<float,2>{.5f,.2f},{1.01f,.8f},{-.01f,.8f},
-                              {.5f,1.01f},{.5f,std::numeric_limits<float>::quiet_NaN()}})
+        for (const auto bad : {std::array<float,2>{u,region.vMin-.01f},{region.uMax+.01f,v},{region.uMin-.01f,v},
+                              {u,region.vMax+.01f},{u,std::numeric_limits<float>::quiet_NaN()}})
         {
             auto mixed=lower; mixed[1]=bad;
             REQUIRE_FALSE(vk::OriginalRegionUV(region.identity,mixed));

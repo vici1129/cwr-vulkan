@@ -19,7 +19,13 @@ struct OriginalMaterialRegion
 inline constexpr OriginalMaterialRegion OriginalMaterialRegions[]{
     {512,6,"data3d\\statek_kulna.p3d","data\\budova2_s.pac", .9f,0,.675f,1,1,256,128,10590596532554886688ull},
     {513,6,"data3d\\statek_kulna.p3d","data\\budova2_s2.pac",.9f,0,.625f,1,1,256,128,11073974456645178822ull},
-    {514,6,"data3d\\statek_brana.p3d","data\\budova2_s.pac", .9f,0,.675f,1,1,256,128,10590596532554886688ull}};
+    {514,6,"data3d\\statek_brana.p3d","data\\budova2_s.pac", .9f,0,.675f,1,1,256,128,10590596532554886688ull},
+    // Exact original chapel niche/back/side masonry, not its separate cap or
+    // sculptural ornaments. Model proof prevents the photo canvas/background
+    // from becoming an unrestricted material source on unrelated geometry.
+    {515,6,"data3d\\kaple.p3d","data\\kaple_01_back.pac", .9f,.2f,.01f,.8f,.99f,256,256,5927400689038083574ull},
+    {516,6,"data3d\\kaple.p3d","data\\kaple_01_front.pac",.9f,.2f,.01f,.8f,.99f,256,256,8912488960514094014ull},
+    {517,6,"data3d\\kaple.p3d","data\\kaple_01_side.pac", .9f,0,.04f,1,1.005f,64,256,13572942148143298778ull}};
 struct OriginalRegionGeometry
 {
     std::string_view model;
@@ -34,7 +40,12 @@ inline constexpr OriginalRegionGeometry OriginalRegionGeometries[]{
     {"data3d\\statek_kulna.p3d",3.f,41,5,4806727032941264610ull,1282800507099886727ull},
     {"data3d\\statek_brana.p3d",.5f,198,5,8877832809354361115ull,6883824423279479731ull},
     {"data3d\\statek_brana.p3d",1.f,114,5,1080067108508164804ull,17298411900941076431ull},
-    {"data3d\\statek_brana.p3d",1.5f,58,3,8086190560358923383ull,16878692861437147427ull}};
+    {"data3d\\statek_brana.p3d",1.5f,58,3,8086190560358923383ull,16878692861437147427ull},
+    {"data3d\\kaple.p3d",.4f,296,8,12162760974536677195ull,18186419010863367403ull},
+    {"data3d\\kaple.p3d",.8f,164,7,6501890606620591884ull,4203960603334158429ull},
+    {"data3d\\kaple.p3d",1.6f,118,7,11911249842636768872ull,4203960603334158429ull},
+    {"data3d\\kaple.p3d",2.4f,44,4,12542486061275321990ull,12467772214814294321ull},
+    {"data3d\\kaple.p3d",4.8f,30,4,6219200114251799554ull,12467772214814294321ull}};
 inline const OriginalMaterialRegion* OriginalRegion(unsigned identity)
 {
     for (const auto& r : OriginalMaterialRegions) if (r.identity==identity) return &r;

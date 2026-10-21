@@ -71,7 +71,12 @@ TEST_CASE("Additional stock materials leave v3 unchanged and use explicit GI rec
                            "o\\hous\\hrmd_zp.pac", "o\\tree\\javor01_lsd2.pac", "data\\n_strom_04_new2.pac",
                            "data\\blok_a_side.pac", "data\\blok_a_side_02.pac", "data\\blok_a_strecha.pac",
                            "data\\jezek_texture.pac", "data\\plot_rust_noise.pac", "data\\sloupek_vrata.pac",
-                           "data\\budova2_s.pac", "data\\budova2_stit.pac", "data\\komin_top_01.pac"})
+                           "data\\budova2_s.pac", "data\\budova2_stit.pac", "data\\komin_top_01.pac",
+                           "o\\hous\\panel01.pac", "o\\hous\\panel02.pac", "o\\hous\\panel03.pac",
+                           "o\\hous\\panel_inter01.pac", "o\\hous\\panel_strecha.pac", "o\\hous\\orlhot_kom.pac",
+                           "o\\hous\\dum_podhradi1_1.pac", "o\\hous\\dum_podhradi1_3.pac",
+                           "o\\hous\\dum_podhradi1_4.pac", "o\\hous\\dum_podhradi1_5.pac", "o\\hous\\dum_podhradi1_6.pac",
+                           "o\\hous\\stodola01.pac", "o\\hous\\stodola01a.pac", "data\\kaple_01_front.pac"})
         REQUIRE(EnhancedPBRIdentity(key)==0);
     // Namespace and extension are part of source proof, even for matching names.
     for (const auto key : {"data\\kamen02.pac", "other\\skal\\kamen02.pac", "o\\skal\\kamen02.paa",

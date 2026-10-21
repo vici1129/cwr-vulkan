@@ -133,9 +133,9 @@ This is prerequisite assessment, not completed optical review of all 726 models.
 
 Reproduce without changing assets:
 
-This command replays the batch-03 tool/policy snapshot. With later regional rules
-enabled in the current tool, also pass `--replay-regional-identities 512 513 514`
-to compare against the immutable original inventory; see batch 04.
+This command replays the batch-03 tool/policy snapshot. For the current executable,
+use the [batch-05 command](material-modernization-batch-05.md#runtime-census-tests-and-preservation),
+which explicitly replays all subsequent enhanced and regional identities.
 
 ```powershell
 python tools/materials/census_runtime_assets.py `

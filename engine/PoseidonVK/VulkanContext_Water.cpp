@@ -49,7 +49,8 @@ std::string VulkanContext::SetPBR(std::string_view mode)
         "inspected stone/mortar, concrete, plaster/brick and wood sections; "
         "enhanced-only tasky_p90 roof, budova2_stit2 plaster gable, Nogova kamen02/04/05 stone, zidka01 masonry, "
         "brick pillars, dedicated pine/maple bark/stacked-log sources, fence foundations/caps, "
-        "clay tiles and separately inspected blank plaster/roof-edge/chimney sections "
+        "clay tiles, dedicated timber/rough roofs, plain concrete/plaster/paving, and inspected blank plaster/roof-edge/chimney sections; "
+        "automatic-only exact-model masonry UV regions "
         "(captured ambient required for GI); "
         "F0=0.04, metallic=0; unsupported lighting/atlases legacy; no RT requirement; "
         "draws since toggle=" + std::to_string(_pbrDraws) + "; software=" + std::to_string(_pbrSoftwareDraws);

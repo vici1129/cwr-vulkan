@@ -63,7 +63,16 @@ inline constexpr StockPBRMaterial EnhancedPBRMaterials[]{
     {"data\\tasky_p.pac", .90f, 3}, {"data\\tasky_hnus.pac", .90f, 3},
     {"data\\tasky_hnus90.pac", .90f, 3}, {"data\\blok_a_back.pac", .90f, 5},
     {"data\\blok_a_rantl_top.pac", .90f, 5}, {"data\\komin_vetsi_side_01.pac", .90f, 5},
-    {"data\\ujezd_up.pac", .90f, 5}};
+    {"data\\ujezd_up.pac", .90f, 5},
+    // Dedicated original timber, rough roofing and plain building finishes.
+    // Hardware/window/vent-bearing neighbor atlases do not inherit these keys.
+    {"data\\futra.pac", .85f, 4}, {"data\\kostel_t_tramy_podel.pac", .85f, 4},
+    {"o\\hous\\drevo02.pac", .85f, 4}, {"o\\hous\\drevo_modre.pac", .85f, 4},
+    {"o\\hous\\strecha02.pac", .90f, 3}, {"o\\hous\\strecha_tasky.pac", .90f, 3},
+    {"o\\hous\\tasky_tmavsi.pac", .90f, 3}, {"o\\hous\\dumpod_beton.pac", .90f, 7},
+    {"o\\hous\\dumpod_podez.pac", .90f, 6}, {"o\\hous\\zalchat_beton.pac", .90f, 7},
+    {"o\\hous\\zalchat_strop.pac", .85f, 4}, {"o\\hous\\stenain01.pac", .90f, 5},
+    {"o\\hous\\panel04.pac", .90f, 7}, {"o\\hous\\panel_inter02.pac", .90f, 5}};
 inline unsigned PBRReceiverFamily(unsigned id)
 {
     if (id >= 64 && id < 64 + std::size(StockPBRMaterials)) return StockPBRMaterials[id - 64].receiverFamily;

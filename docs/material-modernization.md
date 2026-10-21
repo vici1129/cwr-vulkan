@@ -6,17 +6,21 @@ The [per-model ledger](evidence/material-modernization/progress.json) retains al
 and concrete prerequisite blockers. It is not a visible-coverage percentage.
 The original inventory remains an immutable baseline.
 
-After batch 04, 31 models have complete source review, 32 have partial source
-review, and 452 await source review. Another 211 have no source-unknown triangles
+After batch 05, 32 models have complete source review, 75 have partial source
+review, and 408 await source review. Another 211 have no source-unknown triangles
 under the existing native classifier: their existing coverage and opacity,
 authored-lighting or geometry fallback contracts are retained. This last group
 is a prerequisite disposition, not a claim that all of its pixels are PBR or GI.
-Backlog tasks 1–4, 6–8 and 25–27 have source review complete; the remaining tasks continue.
+Backlog tasks 1–4, 6–8 and 24–27 have source review complete; the remaining tasks continue.
 Batch 02 covers [brick pillars, bark and stacked logs](material-modernization-batch-02.md);
 batch 03 covers [fence foundations, roof tiles and blank plaster](material-modernization-batch-03.md).
 Batch 04 adds [original-triangle UV regions for farm masonry](material-modernization-batch-04.md),
 while retaining the main windowed facades. Its visible change is deliberately
 limited to soffits and occasional exposed foundations, not full building relighting.
+Batch 05 adds [dedicated timber, roofs/plain finishes and exact chapel masonry](material-modernization-batch-05.md).
+Three proposed Podhradi-specific sources were withdrawn after the dusk appearance
+check; their mixed trim and partial-wall lighting boundaries remain pending.
+The main Podhradi and apartment facades are not claimed as completed coverage.
 
 The [fresh gameplay-adapter census](evidence/material-modernization/runtime-census.json)
 rechecks all 726 models / 1,711 visual LODs. The original inventory used the legacy
@@ -25,6 +29,8 @@ reproduces every complete section prerequisite multiset, normal/lighting hint an
 LOD count. Section ordering differs and must not be treated as an asset identity.
 This corrects the earlier loader description; neither census certifies live
 instance lighting, GI reception or optical review of every original image.
+Use the [batch-05 reproduction command](material-modernization-batch-05.md#runtime-census-tests-and-preservation)
+for the current executable; earlier batch commands describe their policy snapshots.
 
 ## Batch 01: Nogova rough stone and boundary masonry
 
