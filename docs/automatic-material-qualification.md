@@ -47,6 +47,12 @@ must supply their own evidence. Dirty geometry/hints invalidate the range cache.
 The ray path declines qualification if splitting would exceed the existing
 1024-geometry device guarantee, while retaining all original traversal geometry.
 
+CPU submission now obtains source evidence from the actual submitted section,
+including after clipping rebases its face offsets, and carries that identity
+through material setup. It does not substitute the texture-default declaration
+for an unsupported or missing section declaration. Missing section evidence
+falls back to legacy in automatic mode; other modes do not perform this lookup.
+
 Reflector eligibility never requires receiver eligibility. Reception additionally
 requires independently captured ambient and direct material inputs plus the
 existing opaque-world contract. Packed lit color is never inverted to recover
@@ -89,6 +95,9 @@ eligible/unknown/render/lighting/geometry counts. Its result describes source
 and reflector prerequisites, **not independently captured gameplay ambient**.
 Missing exact-path texture inputs fail closed. The supplied base config does
 not stand in for all addons; runtime additionally sees the actual loaded config.
+When `--texroot` is omitted, exact texture references are resolved relative to
+the input model's directory, not the process working directory. An explicit
+root still overrides that default; neither case uses basename searching.
 
 ## Validation and limits
 
@@ -172,3 +181,29 @@ authored-lighting veto in the opt-in ray path. Safely expanding these particular
 untyped atlases still needs stronger original evidence or a separately authorized
 material annotation approach. This result does not weaken the ambiguity gate to
 manufacture a positive coverage result.
+
+### Surgical qualification follow-up (2026-10-21)
+
+The texture-root default and CPU section-provenance corrections above are
+covered by focused regressions. The mixed-model test shares vertices between
+eligible, unsupported, missing-source and shadow-only sections, clips away an
+earlier section, and compares the submitted section's source decision with the
+native/ray classifier. This is a synthetic parity regression, not evidence of
+an affected stock asset or a newly qualified facade.
+
+Both public game/test builds pass. Focused material/shape/receiver tests pass
+56 cases / 14,565 assertions on Vulkan and 55 / 14,525 on GL33; all 690 existing
+driver-free policy checks pass. A CLI check of 33 barracks sections matches
+omitted-root and explicit-model-directory classifications from a different
+working directory; an explicit root containing translucent decoy textures
+still rejects opacity. Qualification retains exact-path lookup.
+
+The final 1080p Malden runtime completes 1,899 frames with core and
+synchronization validation enabled, zero errors/warnings, native/CPU/native
+receiver participation, and qualified second-bounce hits before restoring one
+bounce. Local receipts and raw captures are retained under
+`build/shadow-live/qualification-surgical-20261021-final/`; CLI receipts are in
+`build/shadow-live/qualification-path-surgical-20261021-verified2/`.
+The tested runtime SHA256 is
+`4A871A02EFF6AE29552A3D36FABBCE6759C25694F67E81432E4E5BF46F346CE5`.
+No new GPU-cost or pilot-coverage claim is made by this follow-up.

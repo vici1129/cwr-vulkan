@@ -69,6 +69,14 @@ class FaceArray: public StreamArray<Poly,StaticArray<char> >
 	FaceArray( int size, bool dynamic );
 	void ReserveFaces( int size, bool dynamic );
 	void SetSections( const ShapeSection *sec, int nSec);
+	// Match the submitted range after clipping, whose face offsets may have changed.
+	const ShapeSection *FindSection(Offset beg, Offset end) const
+	{
+		if (beg >= end) return nullptr;
+		for (int s=0; s<_sections.Size(); ++s)
+			if (_sections[s].beg==beg && _sections[s].end==end) return &_sections[s];
+		return nullptr;
+	}
 	
 	void Draw
 	(

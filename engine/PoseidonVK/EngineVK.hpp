@@ -336,8 +336,9 @@ class EngineVK final : public Engine
     void ApplySourceDiffuse(vk::ShapeLighting&);
     std::vector<vk::ScreenVertex> _screenVertices;
     void FlushQueues() override { _vk.FlushScreenBatch(); }
-    void SubmitSoftware(const std::vector<uint32_t>& indices);
-    void SubmitSoftwareLit(const std::vector<uint32_t>& indices, const vk::ShapeLighting* material);
+    void SubmitSoftware(const std::vector<uint32_t>& indices, const ShapeSection* section = nullptr);
+    void SubmitSoftwareLit(const std::vector<uint32_t>& indices, const vk::ShapeLighting* material,
+                           vk::QualifiedMaterial source = {});
     void SubmitScreen(const MipInfo&, const Vertex2DAbs*, int, const Rect2DAbs&, int, float fog = 1, const Color* light = nullptr);
     void DrawDecalColor(Vector3Par, float, float, float, PackedColor, const MipInfo&, int, const Color*);
     void StopAfterFailure(const std::exception& error);

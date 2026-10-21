@@ -154,13 +154,15 @@ void EngineVK::DrawSection(const FaceArray& faces, Offset begin, Offset end)
             indices.insert(indices.end(),
                            {uint32_t(face.GetVertex(0)), uint32_t(face.GetVertex(v - 1)), uint32_t(face.GetVertex(v))});
     }
-    SubmitSoftware(indices);
+    SubmitSoftware(indices,_vk.AutomaticMaterialsEnabled()?faces.FindSection(begin,end):nullptr);
 }
-void EngineVK::SubmitSoftware(const std::vector<uint32_t>& indices)
+void EngineVK::SubmitSoftware(const std::vector<uint32_t>& indices, const ShapeSection* section)
 {
     auto* texture = dynamic_cast<TextureVK*>(_softwareMip._texture);
     const auto state = vk::SoftwareAlpha(_softwareFlags, texture ? texture->GetAlphaClass() : AlphaStats::Opaque);
-    const auto source=texture && _vk.AutomaticMaterialsEnabled()?texture->AutomaticMaterial():vk::QualifiedMaterial{};
+    const auto source=texture && _vk.AutomaticMaterialsEnabled() && section &&
+        section->properties.GetTexture()==texture ?
+        vk::OriginalSectionSource(texture->MaterialKey(),section) : vk::QualifiedMaterial{};
     if (!_softwareMesh || !_vk.PBREnabled() || !_shadowWorld || _waterSurface || !texture ||
         texture->IsTransparent() || state.blend || !state.depthWrite || !state.depthTest ||
         (_softwareFlags & (DisableSun | IsShadow | IsLight | IsColored | IsAlphaFog | NoDropdown | SpecularTexture)) ||
@@ -203,16 +205,17 @@ void EngineVK::SubmitSoftware(const std::vector<uint32_t>& indices)
         size_t end = begin + 3;
         while (end < indices.size() && material(end) == slot) end += 3;
         const auto* lighting = slot ? &_softwarePBRLighting[slot-1] : nullptr;
-        if (begin == 0 && end == indices.size()) SubmitSoftwareLit(indices, lighting);
+        if (begin == 0 && end == indices.size()) SubmitSoftwareLit(indices, lighting, source);
         else
         {
             std::vector<uint32_t> part(indices.begin()+begin, indices.begin()+end);
-            SubmitSoftwareLit(part, lighting);
+            SubmitSoftwareLit(part, lighting, source);
         }
         begin = end;
     }
 }
-void EngineVK::SubmitSoftwareLit(const std::vector<uint32_t>& indices, const vk::ShapeLighting* material)
+void EngineVK::SubmitSoftwareLit(const std::vector<uint32_t>& indices, const vk::ShapeLighting* material,
+                                vk::QualifiedMaterial source)
 {
     if (!_softwareMesh)
         throw std::logic_error("Vulkan software drawing requires BeginMesh");
@@ -289,8 +292,7 @@ void EngineVK::SubmitSoftwareLit(const std::vector<uint32_t>& indices, const vk:
     {
         auto* texture = static_cast<TextureVK*>(_softwareMip._texture);
         receiver.pbr = {vk::PBRMaterial(texture->MaterialKey(), int(receiver.specular[3]), _vk.EnhancedMaterialsEnabled()), .04f, 0, 0};
-        if (_vk.AutomaticMaterialsEnabled() &&
-            texture->AutomaticMaterial().identity==vk::SourceDiffuseIdentity)
+        if (_vk.AutomaticMaterialsEnabled() && source.identity==vk::SourceDiffuseIdentity)
             ApplySourceDiffuse(receiver);
         _vk.RecordPBRDraw(true);
     }

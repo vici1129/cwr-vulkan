@@ -45,6 +45,13 @@ inline bool OriginalOrdinaryVertex(ClipFlags clip)
     // legacy. A neighboring ordinary triangle never inherits their rejection.
     return !(clip & (ClipUserMask | ClipLightMask | ClipLandMask));
 }
+inline QualifiedMaterial OriginalSectionSource(std::string_view texture, const ShapeSectionInfo* section)
+{
+    // A different eligible section must not lend its source proof to this draw.
+    // Missing section evidence (including standalone polygons) stays legacy.
+    if (!section || !OriginalDiffuseFlags(section->properties.Special())) return {};
+    return OriginalMaterialSource(texture,section->surfMat);
+}
 inline MaterialRejection OriginalTriangle(const Shape& shape, const std::array<VertexIndex, 3>& indices)
 {
     if (shape.NNorm()!=shape.NVertex()) return MaterialRejection::Geometry;

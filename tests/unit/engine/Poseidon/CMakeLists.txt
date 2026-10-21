@@ -125,6 +125,7 @@ ofpr_catch_discover_tests(PoseidonCoreTests
 )
 
 set(POSEIDON_TEST_SOURCES
+    ${CMAKE_SOURCE_DIR}/tests/unit/apps/Tools/test_model_texture_path.cpp
     # Test infrastructure
     test_main.cpp
     test_stubs.cpp

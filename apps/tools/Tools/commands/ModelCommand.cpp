@@ -1,4 +1,5 @@
 #include "ModelCommand.hpp"
+#include "ModelTexturePath.hpp"
 #include "../SDLPreview.hpp"
 #include <Poseidon/Graphics/Rendering/Shape/Shape.hpp>
 #include <Poseidon/Asset/Probes/AssetInfo.hpp>
@@ -194,8 +195,8 @@ static void setupModelInspect(CLI::App& model)
                             const auto source=Poseidon::vk::OriginalMaterialSource(name,section.surfMat);
                             // Qualification requires an exact source path. The preview's
                             // basename-search fallback cannot prove material provenance.
-                            auto relative=name; std::replace(relative.begin(),relative.end(),'\\','/');
-                            const auto pixels=Poseidon::DecodePAAFile((std::filesystem::path(texRoot)/relative).string());
+                            const auto pixels=Poseidon::DecodePAAFile(
+                                QualificationTexturePath(inputPath,texRoot,name).string());
                             const bool opaque=pixels.valid() && Poseidon::ClassifyAlpha(pixels.rgba.data(),
                                 size_t(pixels.width)*pixels.height).kind==Poseidon::AlphaStats::Opaque;
                             std::array<unsigned,5> counts{};

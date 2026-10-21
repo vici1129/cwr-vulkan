@@ -17,6 +17,7 @@
 #include <PoseidonVK/PBRMaterialVK.hpp>
 #include <PoseidonVK/RaySurfaceVK.hpp>
 #include <Poseidon/Graphics/Core/TLVertex.hpp>
+#include <Poseidon/World/Scene/Camera/Camera.hpp>
 
 using namespace Poseidon;
 
@@ -84,6 +85,75 @@ TEST_CASE("Automatic triangle ranges preserve ordinary neighbors of authored sha
     shape.SetNorm(0)=Vector3(0,0,-1);
     shape.SetUV(0,std::numeric_limits<float>::infinity(),0);
     REQUIRE(vk::OriginalTriangle(shape,{0,1,2})==vk::MaterialRejection::Geometry);
+}
+
+TEST_CASE("CPU submission retains mixed section source evidence after clipping",
+          "[Graphics][vulkan-shape][material-qualification]")
+{
+    const std::string key="arbitrary/original-wall.pac";
+    Ref<TexMaterial> declared=new TexMaterial(TESTS_ROOT_DIR "/fixtures/rendering/source-diffuse.cpp");
+    Ref<TexMaterial> unsupported=new TexMaterial(TESTS_ROOT_DIR "/fixtures/rendering/source-diffuse.cpp");
+    unsupported->_specularPower=8;
+    // The texture default alone would qualify even the unsupported section.
+    REQUIRE(vk::OriginalMaterialSource(key,declared).identity==vk::SourceDiffuseIdentity);
+    Shape shape;
+    for (float z : {2.f,.5f})
+    {
+        shape.AddVertexFast(Vector3(0,0,z),Vector3(0,0,-1),0,0,0);
+        shape.AddVertexFast(Vector3(1,0,z),Vector3(0,0,-1),0,1,0);
+        shape.AddVertexFast(Vector3(0,1,z),Vector3(0,0,-1),0,0,1);
+    }
+    std::array<ShapeSection,5> sections;
+    for (int s=0;s<int(sections.size());++s)
+    {
+        auto& section=sections[s];
+        section.properties.Init(); section.material=0; section.surfMat=declared;
+        if (s==1) section.surfMat=unsupported;
+        if (s==3) section.surfMat=nullptr;
+        if (s==4) section.properties.SetSpecial(IsShadow);
+        section.beg=shape.EndFaces();
+        Poly face; face.Init(); face.SetN(3);
+        // First section is entirely clipped away. All others share vertices,
+        // so a vertex lighting slot cannot encode their different eligibility.
+        for (int v=0;v<3;++v) face.Set(v,(s==0?3:0)+v);
+        shape.AddFace(face);
+        section.end=shape.EndFaces(); shape.AddSection(section);
+    }
+    TLVertexTable table;
+    for (int v=0;v<shape.NVertex();++v)
+    {
+        table.AddPos(); table.SetTransPos(v)=shape.Pos(v);
+        table.SetClip(v,v<3?ClipNone:ClipFront);
+    }
+    table.pbrNormal.resize(table.NVertex(),{0,0,1,1});
+    Camera camera; camera.SetPerspective(1,100,1,1);
+    FaceArray clipped;
+    clipped.Clip(shape.Faces(),table,camera,ClipFront,false);
+    REQUIRE(clipped.Begin()<clipped.End());
+    REQUIRE_FALSE(clipped.FindSection(clipped.Begin(),clipped.Begin()));
+    const auto ranges=vk::OriginalMaterialRanges(shape);
+    REQUIRE(ranges.size()==sections.size());
+    Offset at=clipped.Begin();
+    for (int s=1;s<int(sections.size());++s)
+    {
+        const auto begin=at; clipped.Next(at);
+        const auto* submitted=clipped.FindSection(begin,at);
+        REQUIRE(submitted);
+        REQUIRE(submitted->surfMat==sections[s].surfMat);
+        REQUIRE(submitted->properties.Special()==sections[s].properties.Special());
+        const auto cpu=vk::OriginalSectionSource(key,submitted);
+        const auto nativeRay=vk::OriginalMaterialSource(key,sections[s].surfMat);
+        const bool accepted=vk::QualifyOriginalMaterial(nativeRay,ranges[s].rejection,
+            sections[s].properties.Special(),true,true)==vk::MaterialRejection::None;
+        REQUIRE(bool(cpu)==accepted);
+        REQUIRE(bool(cpu)==(s==2));
+        if (cpu) REQUIRE(cpu.identity==vk::SourceDiffuseIdentity);
+    }
+    REQUIRE(at==clipped.End());
+    REQUIRE_FALSE(vk::OriginalSectionSource(key,nullptr));
+    REQUIRE_FALSE(vk::OriginalSectionSource("data\\tasky_tmavsi.pac",nullptr));
+    REQUIRE(vk::OriginalSectionSource("data\\tasky_tmavsi.pac",&sections[1]).identity==
+            vk::EnhancedPBRIdentity("data\\tasky_tmavsi.pac"));
 }
 
 TEST_CASE("Terrain receivers use independent original normals and palette, rejecting potential water", "[Graphics][vulkan-shape][ray-surface]")
