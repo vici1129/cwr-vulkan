@@ -43,7 +43,8 @@ void EngineVK::CaptureSoftwareMaterial(TLVertexTable& dst, const TLMaterial& mat
     bool candidate = false;
     for (int s = 0; s < shape->NSections(); ++s)
         if (const auto* texture = dynamic_cast<TextureVK*>(shape->GetSection(s).properties.GetTexture());
-            texture && vk::PBRMaterial(texture->MaterialKey(), mat.specularPower, _vk.EnhancedMaterialsEnabled()) > 0)
+            texture && (vk::PBRMaterial(texture->MaterialKey(), mat.specularPower, _vk.EnhancedMaterialsEnabled()) > 0 ||
+                (_vk.AutomaticMaterialsEnabled() && texture->AutomaticMaterial(shape->GetSection(s).surfMat))))
         {
             candidate = true;
             break;
@@ -92,14 +93,15 @@ void EngineVK::CaptureSoftwareMaterial(TLVertexTable& dst, const TLMaterial& mat
     // normals face inward; use the same sign as ExtractShapeGeometry.
     for (int i = beg; i < end; ++i)
     {
-        if (dst.Clip(i) & ClipUserMask)
+        if ((dst.Clip(i) & ClipUserMask) ||
+            (_vk.AutomaticMaterialsEnabled() && !vk::OriginalOrdinaryVertex(mesh.Clip(i))))
         {
             dst.pbrNormal[i] = {};
             continue;
         }
         const auto& n = mesh.Norm(i);
         Vector3 normal = vk::SoftwarePBRNormal(worldToModel, n);
-        if (normal.SquareSize() > 1e-12f)
+        if (std::isfinite(normal.SquareSize()) && normal.SquareSize() > 1e-12f)
         {
             normal.Normalize();
             dst.pbrNormal[i] = {normal.X(), normal.Y(), normal.Z(), slot};
@@ -158,10 +160,14 @@ void EngineVK::SubmitSoftware(const std::vector<uint32_t>& indices)
 {
     auto* texture = dynamic_cast<TextureVK*>(_softwareMip._texture);
     const auto state = vk::SoftwareAlpha(_softwareFlags, texture ? texture->GetAlphaClass() : AlphaStats::Opaque);
+    const auto source=texture && _vk.AutomaticMaterialsEnabled()?texture->AutomaticMaterial():vk::QualifiedMaterial{};
     if (!_softwareMesh || !_vk.PBREnabled() || !_shadowWorld || _waterSurface || !texture ||
         texture->IsTransparent() || state.blend || !state.depthWrite || !state.depthTest ||
         (_softwareFlags & (DisableSun | IsShadow | IsLight | IsColored | IsAlphaFog | NoDropdown | SpecularTexture)) ||
-        vk::PBRMaterial(texture->MaterialKey(), 0, _vk.EnhancedMaterialsEnabled()) == 0 || _softwareMesh->pbrNormal.empty())
+        (vk::PBRMaterial(texture->MaterialKey(), 0, _vk.EnhancedMaterialsEnabled()) == 0 &&
+         !(_vk.AutomaticMaterialsEnabled() && source)) || _softwareMesh->pbrNormal.empty() ||
+        (_vk.AutomaticMaterialsEnabled() && vk::QualifyOriginalMaterial(source,vk::MaterialRejection::None,
+            _softwareFlags,!texture->IsTransparent() && state.cutoff==0,!texture->IsDynamic())!=vk::MaterialRejection::None))
     {
         SubmitSoftwareLit(indices, nullptr);
         return;
@@ -174,9 +180,20 @@ void EngineVK::SubmitSoftware(const std::vector<uint32_t>& indices)
         {
             const auto index = indices[i+k];
             if (index >= _softwareMesh->pbrNormal.size()) return 0;
+            if (_vk.AutomaticMaterialsEnabled())
+            {
+                const auto& vertex=_softwareMesh->GetVertex(index);
+                if (!std::isfinite(vertex.t0.u) || !std::isfinite(vertex.t0.v)) return 0;
+            }
             const int next = int(_softwareMesh->pbrNormal[index][3]);
             if (next <= 0 || next > int(_softwarePBRLighting.size()) || (k && slot != next)) return 0;
             slot = next;
+        }
+        if (_vk.AutomaticMaterialsEnabled() && slot)
+        {
+            const auto& lighting=_softwarePBRLighting[slot-1];
+            if (lighting.rtSun[1]!=0 || lighting.rtSun[2]!=0 || lighting.rtSun[3]!=0 ||
+                lighting.emissive[0]!=0 || lighting.emissive[1]!=0 || lighting.emissive[2]!=0) return 0;
         }
         return slot;
     };
@@ -270,8 +287,11 @@ void EngineVK::SubmitSoftwareLit(const std::vector<uint32_t>& indices, const vk:
     vk::ShapeLighting receiver = material ? *material : vk::ShapeLighting{};
     if (material)
     {
-        const auto* texture = static_cast<TextureVK*>(_softwareMip._texture);
+        auto* texture = static_cast<TextureVK*>(_softwareMip._texture);
         receiver.pbr = {vk::PBRMaterial(texture->MaterialKey(), int(receiver.specular[3]), _vk.EnhancedMaterialsEnabled()), .04f, 0, 0};
+        if (_vk.AutomaticMaterialsEnabled() &&
+            texture->AutomaticMaterial().identity==vk::SourceDiffuseIdentity)
+            ApplySourceDiffuse(receiver);
         _vk.RecordPBRDraw(true);
     }
     receiver.aoReceiver[0] = _vk.RTAOEnabled() && _shadowWorld && !_waterSurface &&
@@ -319,7 +339,11 @@ void EngineVK::SubmitSoftwareLit(const std::vector<uint32_t>& indices, const vk:
         {
             ApplyStockPBR(*texture, receiver);
             ApplyEnhancedMaterial(*_softwareSourceShape, *texture, receiver, image, waterBump);
-            vk::QualifyGIReceiver(receiver, true);
+            // Material capture supplies independent ambient/direct inputs; no
+            // subtraction from packed CPU-lit color is used for qualification.
+            if (!_vk.AutomaticMaterialsEnabled() || vk::OriginalMaterialReception(vk::MaterialRejection::None,
+                    material->ambient[3]>0,material->pbrDiffuse[0]>=.99f && material->pbrDiffuse[1]>=.99f &&
+                    material->pbrDiffuse[2]>=.99f)) vk::QualifyGIReceiver(receiver, true);
         }
     receiver.rainRipples = _waterSurface ? RainRippleParameters() : std::array<float, 4>{};
     if (_waterSurface && (_vk.WaterSurfaceEnabled() || receiver.rainRipples[0] > 0))

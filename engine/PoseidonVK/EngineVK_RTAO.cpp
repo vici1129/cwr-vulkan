@@ -367,7 +367,7 @@ void EngineVK::CollectRTAOScene()
                             }
                             vk::ShapeLighting enhanced;
                             bool materialVertices=shape->NNorm()==shape->NVertex();
-                            if (_vk.RTGIEnabled() && vk::EnhancedPBRIdentity(tex->MaterialKey()))
+                            if (_vk.RTGIEnabled() && !_vk.AutomaticMaterialsEnabled() && vk::EnhancedPBRIdentity(tex->MaterialKey()))
                                 for(Offset at=section.beg; at<section.end && materialVertices; shape->NextFace(at))
                                 {
                                     const auto& face=shape->Face(at);
@@ -382,6 +382,20 @@ void EngineVK::CollectRTAOScene()
                                 _vk.PrepareRTAOAlpha(candidate.color,pixels.width,pixels.height,pixels.rgba.data());
                                 candidate.enhanced={vk::PBRMaterial(tex->MaterialKey(),0,true),0,.04f,
                                     float(vk::EnhancedPBRIdentity(tex->MaterialKey()))};
+                            }
+                            if (_vk.RTGIEnabled() && _vk.AutomaticMaterialsEnabled())
+                            {
+                                const auto source=tex->AutomaticMaterial(section.surfMat);
+                                const auto result=vk::QualifyOriginalMaterial(source,vk::MaterialRejection::None,
+                                    flags|object->GetObjSpecial(),alpha==AlphaStats::Opaque,!fitted && !tex->IsDynamic());
+                                candidate.enhanced={};
+                                if (result==vk::MaterialRejection::None)
+                                {
+                                    candidate.color=tex->Image(_vk);
+                                    const auto& pixels=tex->Pixels();
+                                    _vk.PrepareRTAOAlpha(candidate.color,pixels.width,pixels.height,pixels.rgba.data());
+                                    candidate.enhanced={source.roughness,0,.04f,float(source.identity)};
+                                }
                             }
                             if (!((flags | object->GetObjSpecial()) & (DisableSun | IsColored | IsLight | IsAlphaFog)) &&
                                 ApplyEnhancedMaterial(*shape, *tex, enhanced, candidate.color, candidate.normalRoughness))
@@ -440,12 +454,54 @@ void EngineVK::CollectRTAOScene()
                 if(!fitted) { buffer->Update(*shape, false); instance.mesh = buffer->Buffers(); }
                 for (auto* ranges : {&instance.ranges, &shadowOnly})
                 {
-                    for (auto& range : *ranges)
+                    if (!_vk.AutomaticMaterialsEnabled())
                     {
+                        // Keep the original in-place submission for existing modes.
+                        for (auto& range : *ranges)
+                        {
+                            const auto section=(fitted?fittedSections:buffer->Sections()).at(range.first);
+                            range.first=section.begin; range.count=section.end-section.begin;
+                        }
+                        std::erase_if(*ranges,[](const auto& range){return range.count==0;});
+                        continue;
+                    }
+                    std::vector<vk::RTAORange> qualified;
+                    for (auto range : *ranges)
+                    {
+                        const auto sectionIndex=range.first;
                         const auto section = (fitted?fittedSections:buffer->Sections()).at(range.first);
                         range.first = section.begin;
                         range.count = section.end - section.begin;
+                        if (_vk.AutomaticMaterialsEnabled() && !fitted && range.enhanced[3]>0)
+                        {
+                            for (const auto& part : buffer->MaterialRanges(*shape))
+                            {
+                                if (part.section!=sectionIndex) continue;
+                                auto split=range;
+                                split.first=part.begin; split.count=part.end-part.begin;
+                                if (part.rejection!=vk::MaterialRejection::None)
+                                {
+                                    split.enhanced={};
+                                    split.sampler&=~(vk::RayDiffuse|vk::RayNormalMap|vk::RayRoughnessMap);
+                                }
+                                qualified.push_back(std::move(split));
+                            }
+                        }
+                        else qualified.push_back(std::move(range));
                     }
+                    // The existing device contract guarantees 1024 geometries.
+                    // If splitting exceeds it, retain original traversal ranges
+                    // and decline material transport rather than drop geometry.
+                    if (qualified.size()>1024)
+                    {
+                        for (auto& range : *ranges)
+                        {
+                            const auto section=(fitted?fittedSections:buffer->Sections()).at(range.first);
+                            range.first=section.begin; range.count=section.end-section.begin;
+                            range.enhanced={};
+                        }
+                    }
+                    else *ranges=std::move(qualified);
                     std::erase_if(*ranges, [](const auto& range) { return range.count == 0; });
                 }
                 instance.transform = vk::RayInstanceTransform(object->Transform());

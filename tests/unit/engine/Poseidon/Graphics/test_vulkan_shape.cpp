@@ -20,6 +20,72 @@
 
 using namespace Poseidon;
 
+TEST_CASE("Automatic material qualification needs authored evidence, never opaque default state",
+          "[Graphics][vulkan-shape][material-qualification]")
+{
+    TexMaterial untyped;
+    REQUIRE_FALSE(untyped.SourceDefined());
+    REQUIRE_FALSE(vk::SourceDiffuseMaterial(&untyped));
+    REQUIRE_FALSE(vk::OriginalMaterialSource("arbitrary/opaque-atlas.pac",&untyped));
+    TexMaterial declared(TESTS_ROOT_DIR "/fixtures/rendering/source-diffuse.cpp");
+    REQUIRE(declared.SourceDefined());
+    REQUIRE(vk::SourceDiffuseMaterial(&declared));
+    const auto source=vk::OriginalMaterialSource("any/original-texture.pac",&declared);
+    REQUIRE(source.identity==vk::SourceDiffuseIdentity);
+    REQUIRE(source.roughness==.9f);
+    REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::None,ClampU,true,true)==vk::MaterialRejection::None);
+    REQUIRE_FALSE(vk::OriginalMaterialReception(vk::MaterialRejection::None,false,true));
+    REQUIRE_FALSE(vk::OriginalMaterialReception(vk::MaterialRejection::None,true,false));
+    REQUIRE(vk::OriginalMaterialReception(vk::MaterialRejection::None,true,true));
+    for (auto flag : {IsShadow,DisableSun,IsColored,IsLight,IsAlpha,IsTransparent,NoZWrite,SpecularTexture,IsAnimated})
+        REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::None,flag,true,true)==vk::MaterialRejection::RenderBehavior);
+    REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::None,0,false,true)==vk::MaterialRejection::RenderBehavior);
+    REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::None,0,true,false)==vk::MaterialRejection::RenderBehavior);
+    declared._specular=Color(.2f,.2f,.2f);
+    REQUIRE_FALSE(vk::SourceDiffuseMaterial(&declared));
+    declared._specular=HBlack; declared._forcedDiffuse=Color(.1f,0,0);
+    REQUIRE_FALSE(vk::SourceDiffuseMaterial(&declared));
+    // Hand-verified material identity has precedence over source declarations.
+    REQUIRE(vk::OriginalMaterialSource("data\\tasky_tmavsi.pac",&declared).identity==vk::StockPBRIdentity("data\\tasky_tmavsi.pac"));
+    for (int power : {0,8,128})
+        REQUIRE(vk::OriginalRasterRoughness(vk::OriginalMaterialSource("data\\sloupek_bily_orezly_.pac"),
+            "data\\sloupek_bily_orezly_.pac",power)==vk::PBRMaterial("data\\sloupek_bily_orezly_.pac",power,true));
+    for (const auto key : {"data\\blok_a_back.pac","data\\blok_a_side.pac","data\\ujezd_up.pac","o\\hous\\panel02.pac"})
+        REQUIRE_FALSE(vk::OriginalMaterialSource(key));
+}
+
+TEST_CASE("Automatic triangle ranges preserve ordinary neighbors of authored shadow lighting",
+          "[Graphics][vulkan-shape][material-qualification]")
+{
+    Shape shape;
+    for (int mode : {0,201,0,205,0,207,0})
+    {
+        const auto first=shape.NVertex();
+        shape.AddVertexFast(Vector3(0,0,float(first)),Vector3(0,0,-1),mode*ClipUserStep,0,0);
+        shape.AddVertexFast(Vector3(1,0,float(first)),Vector3(0,0,-1),mode*ClipUserStep,1,0);
+        shape.AddVertexFast(Vector3(0,1,float(first)),Vector3(0,0,-1),mode*ClipUserStep,0,1);
+        Poly face; face.Init(); face.SetN(3);
+        for (int v=0;v<3;++v) face.Set(v,first+v);
+        shape.AddFace(face);
+    }
+    ShapeSection section; section.properties.Init(); section.material=0;
+    section.beg=shape.BeginFaces(); section.end=shape.EndFaces(); shape.AddSection(section);
+    auto ranges=vk::OriginalMaterialRanges(shape);
+    REQUIRE(ranges.size()==7);
+    for (unsigned r=0;r<ranges.size();++r)
+    {
+        REQUIRE(ranges[r].begin==r*3); REQUIRE(ranges[r].end==(r+1)*3);
+        REQUIRE(ranges[r].rejection==(r%2?vk::MaterialRejection::AuthoredLighting:vk::MaterialRejection::None));
+    }
+    REQUIRE_FALSE(vk::OriginalOrdinaryVertex(ClipLightSky));
+    REQUIRE_FALSE(vk::OriginalOrdinaryVertex(ClipLandOn));
+    shape.SetNorm(0)=VZero;
+    REQUIRE(vk::OriginalTriangle(shape,{0,1,2})==vk::MaterialRejection::Geometry);
+    shape.SetNorm(0)=Vector3(0,0,-1);
+    shape.SetUV(0,std::numeric_limits<float>::infinity(),0);
+    REQUIRE(vk::OriginalTriangle(shape,{0,1,2})==vk::MaterialRejection::Geometry);
+}
+
 TEST_CASE("Terrain receivers use independent original normals and palette, rejecting potential water", "[Graphics][vulkan-shape][ray-surface]")
 {
     const auto valid=vk::TerrainReceiverMaterial(20,5.25f,{0,2,0},{1.1f,.9f,1});

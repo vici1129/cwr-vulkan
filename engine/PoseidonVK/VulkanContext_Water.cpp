@@ -41,6 +41,7 @@ std::string VulkanContext::SetPBR(std::string_view mode)
 {
     if (mode == "status") return std::string("PBR prototype=stock-dielectric-v3 requested=") +
         (_pbrEnabled ? "on" : "off") + "; enhanced=" + (_enhancedMaterials ? "on" : "off") +
+        "; automatic=" + (_automaticMaterials ? "on" : "off") +
         "; native + captured CPU-lit opaque geometry: data/skala_piskovec2.pac (matte rock), "
         "data/sloupek_bily_orezly_.pac (painted signposts), "
         "data/strecha_tasky_vln.pac + data/strecha_tasky_vln90.pac (roof tiles r=0.90), "
@@ -49,11 +50,14 @@ std::string VulkanContext::SetPBR(std::string_view mode)
         "enhanced-only tasky_p90 roof and budova2_stit2 plaster gable (captured ambient required for GI); "
         "F0=0.04, metallic=0; unsupported lighting/atlases legacy; no RT requirement; "
         "draws since toggle=" + std::to_string(_pbrDraws) + "; software=" + std::to_string(_pbrSoftwareDraws);
-    if (mode != "on" && mode != "off" && mode != "enhanced") return "INVALID: triPBR on, off, enhanced, status";
-    if (_pbrEnabled != (mode != "off") || _enhancedMaterials != (mode == "enhanced"))
+    if (mode != "on" && mode != "off" && mode != "enhanced" && mode != "auto")
+        return "INVALID: triPBR on, off, enhanced, auto, status";
+    const bool enhanced = mode == "enhanced" || mode == "auto";
+    if (_pbrEnabled != (mode != "off") || _enhancedMaterials != enhanced || _automaticMaterials != (mode == "auto"))
     { ResetTemporalHistory(); _pbrDraws = {}; _pbrSoftwareDraws = {}; }
     _pbrEnabled = mode != "off";
-    _enhancedMaterials = mode == "enhanced";
+    _enhancedMaterials = enhanced;
+    _automaticMaterials = mode == "auto";
     return "OK: PBR stock-dielectric-v3 " + std::string(mode);
 }
 

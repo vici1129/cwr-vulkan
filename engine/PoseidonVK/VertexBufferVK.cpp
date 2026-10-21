@@ -29,6 +29,8 @@ void VertexBufferVK::Update(const Shape& shape, bool dynamic)
 {
     if (!vk::NeedsShapeSnapshot(dynamic, bufferDirty))
         return;
+    // Lighting hints can change without changing the packed vertex bytes.
+    _materialRanges.clear();
     // Damage/animation can invalidate a formerly immutable shared Shape. Never
     // overwrite its allocation: raster frames and cached BLAS retain the old
     // shared snapshot until their fences retire it.
@@ -70,6 +72,12 @@ const std::vector<vk::TerrainReceiverRange>& VertexBufferVK::TerrainReceivers()
         _terrainReceiversReady = true;
     }
     return _terrainReceivers;
+}
+
+const std::vector<vk::MaterialRange>& VertexBufferVK::MaterialRanges(const Shape& shape)
+{
+    if (_materialRanges.empty()) _materialRanges=vk::OriginalMaterialRanges(shape);
+    return _materialRanges;
 }
 
 VertexBuffer* EngineVK::CreateVertexBuffer(const Shape& shape, VBType type)

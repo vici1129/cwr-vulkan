@@ -1,6 +1,7 @@
 #include <PoseidonVK/TextureVK.hpp>
 #include <PoseidonVK/TextureInterpolationVK.hpp>
 #include <PoseidonVK/WetSurfaceVK.hpp>
+#include <PoseidonVK/MaterialQualificationVK.hpp>
 #include <Poseidon/IO/Streams/QBStream.hpp>
 #include <Poseidon/Foundation/Logging/Logging.hpp>
 #include <algorithm>
@@ -82,6 +83,22 @@ void TextureVK::RefreshMetadata()
         sum[i % 4] += _pixels.rgba[i];
     const double scale = 4.0 / (255.0 * _pixels.rgba.size());
     _average = Color(sum[0] * scale, sum[1] * scale, sum[2] * scale, sum[3] * scale);
+}
+vk::QualifiedMaterial TextureVK::AutomaticMaterial() const
+{
+    if (!_automaticReady)
+    {
+        _automaticSource=GTexMaterialBank.TextureToMaterial(const_cast<TextureVK*>(this));
+        _automaticMaterial=vk::OriginalMaterialSource(_materialKey,_automaticSource);
+        _automaticReady=true;
+    }
+    return _automaticMaterial;
+}
+vk::QualifiedMaterial TextureVK::AutomaticMaterial(const TexMaterial* source) const
+{
+    const auto material=AutomaticMaterial();
+    // An explicit section override cannot inherit the texture's cached proof.
+    return source==_automaticSource.GetRef()?material:vk::OriginalMaterialSource(_materialKey,source);
 }
 int TextureVK::AWidth(int level) const
 {

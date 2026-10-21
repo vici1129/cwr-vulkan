@@ -333,6 +333,7 @@ class EngineVK final : public Engine
     bool ApplyEnhancedMaterial(const Shape&, const TextureVK&, vk::ShapeLighting&,
                                std::shared_ptr<vk::TextureImage>&, std::shared_ptr<vk::TextureImage>&);
     void ApplyStockPBR(const TextureVK&, vk::ShapeLighting&);
+    void ApplySourceDiffuse(vk::ShapeLighting&);
     std::vector<vk::ScreenVertex> _screenVertices;
     void FlushQueues() override { _vk.FlushScreenBatch(); }
     void SubmitSoftware(const std::vector<uint32_t>& indices);

@@ -268,6 +268,53 @@ void EngineVK::DrawSectionTL(const Shape& shape, int begin, int end)
         color[i] *= _materialColor[i];
     if (!_vk.FrameOpen())
         return; // Minimized drawable: no acquired image, but unsupported states above still fail.
+    const auto* automaticTexture=_vk.AutomaticMaterialsEnabled() ?
+        dynamic_cast<TextureVK*>(shape.GetSection(begin).properties.GetTexture()) : nullptr;
+    const auto automaticSource=automaticTexture ? automaticTexture->AutomaticMaterial(
+        shape.GetSection(begin).surfMat) : vk::QualifiedMaterial{};
+    if (_vk.AutomaticMaterialsEnabled() && automaticSource && _shadowWorld && !_terrainSurface && !_waterSurface)
+    {
+        // The immutable geometry cache is also consumed by ray submission. Keep
+        // face order, including rejected triangles; only their lighting differs.
+        const auto baseline=_lighting;
+        for (const auto& part : buffer->MaterialRanges(shape))
+        {
+            const auto first=std::max(part.begin,range.begin), last=std::min(part.end,range.end);
+            if (first>=last) continue;
+            const auto& section=shape.GetSection(part.section);
+            const auto* texture=dynamic_cast<TextureVK*>(section.properties.GetTexture());
+            auto lighting=baseline;
+            lighting.pbr={}; lighting.materialAmbient={}; lighting.materialSun={};
+            const auto source=texture?texture->AutomaticMaterial(section.surfMat):vk::QualifiedMaterial{};
+            const auto result=vk::QualifyOriginalMaterial(source,part.rejection,
+                _shapeFlags|section.properties.Special(), texture && !texture->IsTransparent(),
+                texture && !texture->IsDynamic());
+            const bool captured=lighting.ambient[3]>0 && lighting.pbrDiffuse[0]>=.99f &&
+                lighting.pbrDiffuse[1]>=.99f && lighting.pbrDiffuse[2]>=.99f &&
+                !_sectionBlend && _sectionDepthTest && _sectionDepthWrite && _sectionAlphaCutoff==0 &&
+                lighting.rtSun[1]==0 && lighting.rtSun[2]==0 && lighting.rtSun[3]==0 &&
+                lighting.emissive[0]==0 && lighting.emissive[1]==0 && lighting.emissive[2]==0 &&
+                color[0]==1 && color[1]==1 && color[2]==1 && color[3]==1;
+            if (result==vk::MaterialRejection::None && captured)
+            {
+                lighting.pbr={vk::OriginalRasterRoughness(source,texture->MaterialKey(),int(lighting.specular[3])),.04f,0,0};
+                ApplyStockPBR(*texture,lighting);
+                if (source.identity==vk::SourceDiffuseIdentity) ApplySourceDiffuse(lighting);
+                // Catalog maps and identities remain authoritative when present.
+                if (ApplyEnhancedMaterial(shape,*texture,lighting,_sectionTexture,_sectionDetail))
+                {
+                    GfxMatrix matrix{}; ConvertMatrix(matrix,_shapeModelWorld);
+                    std::copy_n(&matrix._11,16,lighting.materialToWorld.begin());
+                }
+                if (vk::OriginalMaterialReception(result,captured,true)) vk::QualifyGIReceiver(lighting,false);
+                _vk.RecordPBRDraw();
+            }
+            _vk.DrawMesh(buffer->Buffers(),first,last-first,sizeof(VertexIndex)==2,_shapeMVP,color,
+                _sectionTexture,_sectionSampler,_sectionAlphaCutoff,_sectionBlend,false,_sectionDepthTest,nullptr,
+                _sectionDetail,_secondaryMode,_bumpLight,0,0,_sectionDepthWrite,&lighting,_sectionShadow);
+        }
+        return;
+    }
     if (_lighting.pbr[0] > 0 && _sectionTexture)
         if (const auto* texture = dynamic_cast<TextureVK*>(shape.GetSection(begin).properties.GetTexture()))
         {

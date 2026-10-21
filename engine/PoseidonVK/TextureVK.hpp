@@ -1,6 +1,8 @@
 #pragma once
 #include <Poseidon/Graphics/Textures/TextureBank.hpp>
 #include <PoseidonVK/VulkanContext.hpp>
+#include <PoseidonVK/PBRMaterialVK.hpp>
+#include <Poseidon/Graphics/Rendering/Lighting/Material.hpp>
 #include <map>
 #include <stdexcept>
 
@@ -17,6 +19,8 @@ class TextureVK final : public Texture
     const std::array<float, 3>& WetResponse() const { return _wetResponse; }
     bool WetRoad() const { return _wetRoad; }
     const std::string& MaterialKey() const { return _materialKey; }
+    vk::QualifiedMaterial AutomaticMaterial() const;
+    vk::QualifiedMaterial AutomaticMaterial(const TexMaterial*) const;
     int AWidth(int level = 0) const override;
     int AHeight(int level = 0) const override;
     int ANMipmaps() const override { return int(_levels.size()); }
@@ -42,6 +46,9 @@ class TextureVK final : public Texture
     void RefreshMetadata();
     const DecodedImage& InterpolationPixels();
     bool _dynamic = false;
+    mutable bool _automaticReady = false;
+    mutable Ref<TexMaterial> _automaticSource;
+    mutable vk::QualifiedMaterial _automaticMaterial;
     std::string _materialKey;
     std::array<float, 3> _wetResponse{};
     bool _wetRoad = false;

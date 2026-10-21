@@ -2,6 +2,7 @@
 #include <PoseidonVK/EnhancedMaterialVK.hpp>
 #include <PoseidonVK/EnhancedMaterialMapsVK.hpp>
 #include <PoseidonVK/PBRMaterialVK.hpp>
+#include <PoseidonVK/MaterialQualificationVK.hpp>
 #include <Poseidon/World/Scene/Scene.hpp>
 #include <Poseidon/Graphics/Rendering/Shape/Shape.hpp>
 #include <filesystem>
@@ -10,6 +11,14 @@
 
 namespace Poseidon
 {
+void EngineVK::ApplySourceDiffuse(vk::ShapeLighting& lighting)
+{
+    lighting.pbr={.9f,.04f,0,float(vk::SourceDiffuseIdentity)};
+    auto rgba=[](ColorVal c) { return std::array<float,4>{c.R(),c.G(),c.B(),0}; };
+    lighting.materialAmbient=rgba(GScene->MainLight()->Ambient()*GetAccomodateEye());
+    lighting.materialSun=rgba(GScene->MainLight()->Diffuse()*GetAccomodateEye());
+    lighting.pbrDiffuse[3]=1; // source-declared diffuse, no inferred masonry identity
+}
 void EngineVK::ApplyStockPBR(const TextureVK& texture, vk::ShapeLighting& lighting)
 {
     if (!_vk.EnhancedMaterialsEnabled() || lighting.pbr[0] <= 0)

@@ -269,6 +269,7 @@ class VulkanContext
     std::string SetPBR(std::string_view mode);
     bool PBREnabled() const { return _pbrEnabled; }
     bool EnhancedMaterialsEnabled() const { return _pbrEnabled && _enhancedMaterials; }
+    bool AutomaticMaterialsEnabled() const { return EnhancedMaterialsEnabled() && _automaticMaterials; }
     void RecordPBRDraw(bool software = false) { ++_pbrDraws; if (software) ++_pbrSoftwareDraws; }
     std::string SetWetSurfaces(std::string_view mode);
     std::string SetUnderwater(std::string_view mode);
@@ -620,6 +621,7 @@ class VulkanContext
     bool _shoreFoamRequested = false, _shoreFoamEnabled = false;
     bool _pbrEnabled = false;
     bool _enhancedMaterials = false;
+    bool _automaticMaterials = false;
     uint64_t _pbrDraws = 0;
     uint64_t _pbrSoftwareDraws = 0;
     bool _wetSurfacesEnabled = false, _underwaterEnabled = false;

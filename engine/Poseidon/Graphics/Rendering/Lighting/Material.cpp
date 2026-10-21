@@ -68,6 +68,11 @@ TexMaterial::TexMaterial(const char* name)
         LOG_DEBUG(Graphics, "Material {} not load failed", name);
         return;
     }
+    // Automatic qualification must distinguish a complete authored declaration
+    // from default values supplied by the legacy loader.
+    _sourceDefined = entry->FindEntry("ambient") && entry->FindEntry("diffuse") &&
+        entry->FindEntry("forcedDiffuse") && entry->FindEntry("specular") &&
+        entry->FindEntry("emmisive") && entry->FindEntry("specularPower");
     LoadValue(_emmisive, *entry, "emmisive", HBlack);
     LoadValue(_ambient, *entry, "ambient", HWhite);
     LoadValue(_diffuse, *entry, "diffuse", HWhite);

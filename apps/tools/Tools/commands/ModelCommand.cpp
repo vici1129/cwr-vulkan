@@ -6,6 +6,8 @@
 #include <Poseidon/Asset/Formats/Common/FormatDetector.hpp>
 #include <Poseidon/Graphics/Textures/PAADecoder.hpp>
 #include <Poseidon/Graphics/Textures/TextureBank.hpp>
+#include <PoseidonVK/MaterialQualificationVK.hpp>
+#include <Poseidon/IO/ParamFileExt.hpp>
 #include <iostream>
 #include <iomanip>
 #include <fstream>
@@ -82,6 +84,8 @@ static void setupModelInspect(CLI::App& model)
     static bool showAll = false;
     static bool classify = false;
     static bool showLighting = false;
+    static bool qualify = false;
+    static std::string materialConfig;
     static std::string texRoot;
 
     cmd->add_option("input", inputPath, "Input P3D file path")->required()->check(CLI::ExistingFile);
@@ -92,6 +96,9 @@ static void setupModelInspect(CLI::App& model)
     cmd->add_flag("--classify", classify, "Classify each texture's alpha (opaque/cutout/blend) + render route");
     cmd->add_flag("--lighting", showLighting,
                   "Inspect native ODOL vertex normals and authored lighting hints (read-only)");
+    cmd->add_flag("--qualify", qualify, "Evaluate the runtime automatic material classifier (no ambient capture in tool)");
+    cmd->add_option("--material-config", materialConfig, "Original config for authored texture/material mappings")
+        ->check(CLI::ExistingFile);
     cmd->add_option("--texroot", texRoot,
                     "Directory to resolve texture paths from (recursive basename match; defaults to model dir)");
 
@@ -157,8 +164,10 @@ static void setupModelInspect(CLI::App& model)
                 std::cout << std::endl;
             }
 
-            if (showLighting)
+            if (showLighting || qualify)
             {
+                if (qualify && !materialConfig.empty() && !Pars.ParseBinOrTxt(materialConfig.c_str()))
+                    throw CLI::RuntimeError(1);
                 // Use the same native loader as gameplay, not reconstructed or
                 // generated normals from a preview mesh. This does not qualify
                 // any section for PBR/GI or alter the source asset.
@@ -173,6 +182,34 @@ static void setupModelInspect(CLI::App& model)
                 {
                     const auto* lod = shape->Level(i);
                     if (!lod) continue;
+                    if (qualify && shape->Resolution(i)<10000)
+                    {
+                        const auto ranges=Poseidon::vk::OriginalMaterialRanges(*lod);
+                        std::cout << "Qualification LOD " << i << " res=" << shape->Resolution(i) << std::endl;
+                        for (int s=0;s<lod->NSections();++s)
+                        {
+                            const auto& section=lod->GetSection(s);
+                            const auto* texture=section.properties.GetTexture();
+                            const std::string name=texture?texture->Name():"";
+                            const auto source=Poseidon::vk::OriginalMaterialSource(name,section.surfMat);
+                            // Qualification requires an exact source path. The preview's
+                            // basename-search fallback cannot prove material provenance.
+                            auto relative=name; std::replace(relative.begin(),relative.end(),'\\','/');
+                            const auto pixels=Poseidon::DecodePAAFile((std::filesystem::path(texRoot)/relative).string());
+                            const bool opaque=pixels.valid() && Poseidon::ClassifyAlpha(pixels.rgba.data(),
+                                size_t(pixels.width)*pixels.height).kind==Poseidon::AlphaStats::Opaque;
+                            std::array<unsigned,5> counts{};
+                            for (const auto& part : ranges)
+                                if (part.section==unsigned(s))
+                                    counts[unsigned(Poseidon::vk::QualifyOriginalMaterial(source,part.rejection,
+                                        section.properties.Special(),opaque,true))]+=(part.end-part.begin)/3;
+                            std::cout << "  section=" << s << " texture=" << name << " source=" << source.identity
+                                << " opaque=" << opaque << " declared=" << Poseidon::vk::SourceDiffuseMaterial(section.surfMat)
+                                << " eligible=" << counts[0] << " unknownSource=" << counts[1]
+                                << " renderBehavior=" << counts[2] << " authoredLighting=" << counts[3]
+                                << " geometry=" << counts[4] << " reception=unverified(no ambient capture)" << std::endl;
+                        }
+                    }
                     unsigned user = 0, fitted = 0, invalidNormals = 0;
                     std::array<unsigned, 16> modes{};
                     for (int v = 0; v < lod->NVertex(); ++v)

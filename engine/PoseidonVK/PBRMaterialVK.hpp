@@ -6,6 +6,12 @@
 
 namespace Poseidon::vk
 {
+struct QualifiedMaterial
+{
+    unsigned identity = 0, family = 0;
+    float roughness = 0;
+    explicit operator bool() const { return identity != 0; }
+};
 struct StockPBRMaterial
 {
     std::string_view texture;

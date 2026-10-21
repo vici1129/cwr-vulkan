@@ -751,6 +751,13 @@ int main()
         Check(context.SetPBR("off").starts_with("OK:") && !context.PBREnabled(), "PBR off restores legacy selection");
         Check(context.SetPBR("status").find("draws since toggle=0; software=0") != std::string::npos,
               "PBR mode change resets telemetry");
+        Check(!context.AutomaticMaterialsEnabled(), "automatic qualification defaults off");
+        Check(context.SetPBR("auto").starts_with("OK:") && context.AutomaticMaterialsEnabled() &&
+              context.EnhancedMaterialsEnabled(), "automatic prototype is explicitly additive to enhanced mode");
+        context.SetPBR("enhanced");
+        Check(!context.AutomaticMaterialsEnabled() && context.EnhancedMaterialsEnabled(),
+              "existing enhanced mode does not enable automatic qualification");
+        context.SetPBR("off");
         Check(context.SetWetSurfaces("status").find("requested=off") != std::string::npos &&
               context.SetUnderwater("status").find("requested=off") != std::string::npos,
               "environment effects default off");

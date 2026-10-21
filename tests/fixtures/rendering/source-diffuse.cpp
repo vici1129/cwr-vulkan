@@ -1,0 +1,7 @@
+// Explicit material contract for the automatic-qualification unit test.
+ambient[]={1,1,1,1};
+diffuse[]={1,1,1,1};
+forcedDiffuse[]={0,0,0,0};
+specular[]={0,0,0,0};
+specularPower=0;
+emmisive[]={0,0,0,0};

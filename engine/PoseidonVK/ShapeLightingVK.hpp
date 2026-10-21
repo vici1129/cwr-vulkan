@@ -3,6 +3,7 @@
 #include <PoseidonVK/ShapeLightingData.hpp>
 #include <PoseidonVK/PBRMaterialVK.hpp>
 #include <PoseidonVK/EnhancedMaterialVK.hpp>
+#include <PoseidonVK/MaterialQualificationVK.hpp>
 #include <Poseidon/Graphics/Core/TLVertex.hpp>
 #include <Poseidon/Graphics/Rendering/Lighting/Lights.hpp>
 
@@ -13,14 +14,16 @@ namespace Poseidon::vk
 inline void QualifyGIReceiver(ShapeLighting& lighting, bool software)
 {
     if (!(lighting.pbrDiffuse[3] >= 1 && lighting.pbrDiffuse[3] <= 7) ||
-        !(lighting.pbr[3] >= 1 && lighting.pbr[3] < 128 + std::size(EnhancedPBRMaterials))) return;
+        !(lighting.pbr[3] >= 1 && (lighting.pbr[3] < 128 + std::size(EnhancedPBRMaterials) ||
+                                 lighting.pbr[3] == SourceDiffuseIdentity))) return;
     const int family = int(lighting.pbrDiffuse[3]);
     const unsigned id = unsigned(lighting.pbr[3]);
     if (float(family) != lighting.pbrDiffuse[3] || float(id) != lighting.pbr[3]) return;
     const bool stock = family == int(PBRReceiverFamily(id)) && family > 0;
     const bool catalog = family == 1 && std::any_of(EnhancedCatalog.begin(), EnhancedCatalog.end(),
         [&](const auto* material) { return material->id == id; });
-    if (lighting.rtWater[3] == 1 && lighting.pbr[0] > 0 && (stock || catalog))
+    const bool source = family == 1 && id == SourceDiffuseIdentity;
+    if (lighting.rtWater[3] == 1 && lighting.pbr[0] > 0 && (stock || catalog || source))
     {
         lighting.rtWater[3] = 2;
         lighting.pbrDiffuse[3] = float(family + (software ? 8 : 0));

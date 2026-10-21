@@ -32,8 +32,11 @@ class TexMaterial: public RefCountWithLinks
 
 	TexMaterial();
 	TexMaterial(const char *name);
+	bool SourceDefined() const { return _sourceDefined; }
 	void Combine(TLMaterial &dst, const TLMaterial &src);
 	const RStringB &GetName() const {return _name;} // required by BankArray
+	private:
+	bool _sourceDefined = false; // Missing/default render state is not authored material evidence.
 };
 
 } // namespace Poseidon
