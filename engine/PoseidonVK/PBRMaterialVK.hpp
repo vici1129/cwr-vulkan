@@ -108,7 +108,14 @@ inline constexpr StockPBRMaterial EnhancedPBRMaterials[]{
     {"data\\panel_maskac_opak.pac", .90f, 7},
     // Independently inspected continuous original castle masonry. Root-bearing
     // rubble and neighboring slit/recess atlases do not share these identities.
-    {"o\\divk\\zed.pac", .90f, 6}};
+    {"o\\divk\\zed.pac", .90f, 6},
+    // Dedicated original timber boards/posts, independently inspected against
+    // original geometry and standing views. Mixed bark/peg and cut-end photo
+    // atlases, uncertain roofing and authored interior floors stay separate.
+    {"o\\hous\\posedbok.pac", .85f, 4},
+    {"o\\hous\\posedbokin.pac", .85f, 4},
+    {"o\\hous\\posedfloor.pac", .85f, 4},
+    {"o\\hous\\posed01a.pac", .85f, 4}};
 inline unsigned PBRReceiverFamily(unsigned id)
 {
     if (id >= 64 && id < 64 + std::size(StockPBRMaterials)) return StockPBRMaterials[id - 64].receiverFamily;

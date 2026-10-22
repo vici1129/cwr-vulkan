@@ -356,6 +356,39 @@ TEST_CASE("Castle masonry and slit-free faces do not classify roots or photograp
     for (unsigned id=557;id<=559;++id) REQUIRE_FALSE(vk::OriginalRegion(id)->reception);
 }
 
+TEST_CASE("Dedicated timber sources preserve original floor lighting and mixed photo exclusions",
+          "[Graphics][vulkan-shape][material-qualification]")
+{
+    const std::array keys{std::string_view("o\\hous\\posedbok.pac"),std::string_view("o\\hous\\posedbokin.pac"),
+        std::string_view("o\\hous\\posedfloor.pac"),
+        std::string_view("o\\hous\\posed01a.pac")};
+    REQUIRE(128+std::size(vk::EnhancedPBRMaterials)<=vk::SourceDiffuseIdentity);
+    for (unsigned i=0;i<keys.size();++i)
+    {
+        const auto source=vk::OriginalMaterialSource(keys[i]);
+        REQUIRE(source.identity==194+i);REQUIRE(source.family==4);REQUIRE(source.roughness==.85f);
+        REQUIRE(vk::PBRReceiverFamily(source.identity)==4);
+        REQUIRE_FALSE(vk::StockPBRIdentity(keys[i]));REQUIRE(vk::PBRMaterial(keys[i],128)==0);
+        REQUIRE(vk::PBRMaterial(keys[i],128,true)==.85f);
+        REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::AuthoredLighting,NoClamp,true,true)==vk::MaterialRejection::AuthoredLighting);
+        REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::Geometry,NoClamp,true,true)==vk::MaterialRejection::Geometry);
+        REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::None,IsAlpha,true,true)==vk::MaterialRejection::RenderBehavior);
+    }
+    for (const auto key : {"o\\hous\\prkno_str.pac","data\\k1_stara_prkna.pac","data\\podlaha_prkna_h.pac","o\\hous\\posed6.pac","o\\hous\\posed8.pac",
+        "o\\hous\\posed_strecha.pac","o\\hous\\letokruhy.pac","data\\drevo_dirkate.pac",
+        "o\\hous\\posedfloor.paa","data\\posedbok.pac","other\\hous\\posed01a.pac"})
+        REQUIRE_FALSE(vk::OriginalMaterialSource(key));
+    const auto* underside=vk::OriginalRegion(561);REQUIRE(underside);REQUIRE_FALSE(underside->reception);
+    REQUIRE(underside->model=="o\\hous\\posed.p3d");REQUIRE(underside->texture=="o\\hous\\prkno_str.pac");
+    REQUIRE(underside->family==4);REQUIRE(underside->roughness==.85f);
+    REQUIRE(vk::OriginalRegionSource(561,underside->texture,256,256,11743484817861242001ull).identity==561);
+    REQUIRE_FALSE(vk::OriginalRegionSource(561,underside->texture,256,256,11743484817861242000ull));
+    const std::array<std::array<float,2>,3> boards{{{.002f,-.0017f},{1.0007f,0},{0,1.0042f}}};
+    REQUIRE(vk::SelectOriginalRegion(*underside,boards,NoClamp)==561);
+    REQUIRE(std::count_if(std::begin(vk::OriginalRegionGeometries),std::end(vk::OriginalRegionGeometries),
+        [&](const auto& g){return g.model==underside->model;})==4);
+}
+
 TEST_CASE("Original concrete structure images do not classify buried siblings metal or dark support optics",
           "[Graphics][vulkan-shape][material-qualification]")
 {

@@ -90,7 +90,11 @@ inline constexpr OriginalMaterialRegion OriginalMaterialRegions[]{
     {559,3,"data3d\\mesto_dum.p3d","data\\tasky_tmavsi90.pac",.9f,-4.f,-.003f,4.f,2.375f,256,256,13546172877813697002ull,0,false},
     // Lower original mineral portion only; upper photographed arrow slits and
     // every other model/source retain their independent fallback contracts.
-    {560,6,"o\\divk\\zedlv.p3d","o\\divk\\zed_lv03.pac",.9f,0.f,.17f,1.f,1.f,512,512,1822267094740399805ull}};
+    {560,6,"o\\divk\\zedlv.p3d","o\\divk\\zed_lv03.pac",.9f,0.f,.17f,1.f,1.f,512,512,1822267094740399805ull},
+    // Exact original timber underside keeps original ambient: its receiver
+    // pilot produced a circular GI lighting patch. Existing PBR/reflection
+    // evidence remains separate, without a whole-source receiver exception.
+    {561,4,"o\\hous\\posed.p3d","o\\hous\\prkno_str.pac",.85f,-.005f,-.005f,1.005f,1.005f,256,256,11743484817861242001ull,0,false}};
 struct OriginalRegionGeometry
 {
     std::string_view model;
@@ -235,7 +239,11 @@ inline constexpr OriginalRegionGeometry OriginalRegionGeometries[]{
     {"data3d\\mesto_dum.p3d",8.0f,64,5,4787542041987995589ull,13286391708091769522ull},
     {"o\\divk\\zedlv.p3d",1.5f,1144,7,11729301607590043927ull,7676748547982011476ull},
     {"o\\divk\\zedlv.p3d",3.0f,356,6,14228621904998315830ull,7676748547982011476ull},
-    {"o\\divk\\zedlv.p3d",6.5f,133,6,9347651997511948723ull,7676748547982011476ull}};
+    {"o\\divk\\zedlv.p3d",6.5f,133,6,9347651997511948723ull,7676748547982011476ull},
+    {"o\\hous\\posed.p3d",1.0f,947,9,12524194718702672150ull,4442514148780103821ull},
+    {"o\\hous\\posed.p3d",3.0f,660,9,6697910606867376652ull,11833992726965263909ull},
+    {"o\\hous\\posed.p3d",4.5f,303,8,9212267419171645288ull,5951255797030222080ull},
+    {"o\\hous\\posed.p3d",6.75f,219,6,9830010683061641721ull,9513662246265850544ull}};
 inline const OriginalMaterialRegion* OriginalRegion(unsigned identity)
 {
     for (const auto& r : OriginalMaterialRegions) if (r.identity==identity) return &r;

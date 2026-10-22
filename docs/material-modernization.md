@@ -6,7 +6,7 @@ The [per-model ledger](evidence/material-modernization/progress.json) retains al
 and concrete prerequisite blockers. It is not a visible-coverage percentage.
 The original inventory remains an immutable baseline.
 
-After batch 20, 210 models have complete source assessment, 126 have partial source
+After batch 21, 212 models have complete source assessment, 124 have partial source
 review, and 179 await source review. Complete assessments include explicitly
 retained optical cases, not only new material adoptions. Another 211 have no
 source-unknown triangles under the existing native classifier: their existing coverage and opacity,
@@ -96,6 +96,14 @@ limits; paint-only bounds split original faces or isolate tiny fragments. The
 booth's ordinary quad is its roof, not its authored interior floor. Watchtower
 metal/coating photographs retain their original treatment; shared painted boards
 remain an actionable followup. No new material or rendering coverage is counted.
+Batch 21 [adds bounded original hunting-stand timber paths and resolves the shared-floor followup](material-modernization-batch-21.md)
+while surveying 16 models / 78 levels. New paths apply to eight stand placements;
+four original timber identities gain existing paths, with native/CPU reception
+demonstrated at the stand, while an exact roof
+underside region retains original ambient after a circular receiver-patch failure.
+The old church-board whole-source exclusion stays intact. All 510 shared-floor
+authored triangles remain gated; unrelated building facades remain pending.
+Stand/watchtower source reviews close, not 16 new rendering adoptions.
 The [ordinary-adapter census](evidence/material-modernization/runtime-census.json)
 rechecks 726 models / **1,708 retained visual LODs** under the inspection configuration.
 The separate [source-only census](evidence/material-modernization/source-census.json)
@@ -111,7 +119,7 @@ pixel/geometry review; this is not newly implemented foliage coverage.
 Backlog 30 likewise retains the fitted-road contract after explicit source review.
 All 30 pilot tasks now have a disposition, but 16 remain partial source reviews;
 the wider 726-model assessment and remaining defensible implementations continue.
-Use the [batch-18 reproduction command](material-modernization-batch-18.md#source-census-and-tests)
+Use the [batch-21 reproduction command](material-modernization-batch-21.md#gpu-cost-source-census-and-preservation)
 for the current executable; earlier batch commands describe their policy snapshots.
 
 ## Batch 01: Nogova rough stone and boundary masonry
