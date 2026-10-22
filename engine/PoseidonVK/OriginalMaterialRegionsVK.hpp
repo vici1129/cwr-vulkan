@@ -109,7 +109,11 @@ inline constexpr OriginalMaterialRegion OriginalMaterialRegions[]{
     // from physical stone/whole-face proof alone or defer reception as a fix.
     {566,6,"data3d\\helfenburk_zed.p3d","data\\helfenburg_hradby_in.pac",.9f,-10,.22f,10,1.005f,128,128,9827691540806335610ull},
     {567,6,"data3d\\helfenburk_brana.p3d","data\\helfenburk_brana_ins.pac",.9f,.005f,.39f,.34f,.98f,256,256,12126241923363600779ull},
-    {568,6,"data3d\\helfenburk_brana.p3d","data\\helfenburk_brana_ins.pac",.9f,.64f,.39f,.995f,.98f,256,256,12126241923363600779ull}};
+    {568,6,"data3d\\helfenburk_brana.p3d","data\\helfenburk_brana_ins.pac",.9f,.64f,.39f,.995f,.98f,256,256,12126241923363600779ull},
+    // Only the original dry upper beam row, never the green/dark waterline.
+    // Full observed repeated U keeps long original beam fans whole; narrower
+    // intermediate bounds cut fans and are not a physical material repair.
+    {569,4,"data3d\\molo_drevo.p3d","data\\molo_drev_side.pac",.85f,0,0,43,.25f,64,256,3594089815499870373ull,32768}};
 struct OriginalRegionGeometry
 {
     std::string_view model;
@@ -277,7 +281,12 @@ inline constexpr OriginalRegionGeometry OriginalRegionGeometries[]{
     {"data3d\\helfenburk_cimburi.p3d",7.5f,66,3,10833202311971340885ull,7312600183817937085ull},
     {"data3d\\helfenburk_cimburi.p3d",10.f,34,3,776821966535561065ull,10361178586207389736ull},
     {"data3d\\helfenburk_zed.p3d",2.f,52,3,10458519965023346827ull,5077560204557737039ull},
-    {"data3d\\helfenburk_zed.p3d",8.f,28,2,17335393911317756424ull,2913505486968009910ull}};
+    {"data3d\\helfenburk_zed.p3d",8.f,28,2,17335393911317756424ull,2913505486968009910ull},
+    {"data3d\\molo_drevo.p3d",.699999988f,747,6,10131866362269146586ull,17554237083310623026ull},
+    {"data3d\\molo_drevo.p3d",1.45000005f,315,5,9622605280816716790ull,3597680008006599372ull},
+    {"data3d\\molo_drevo.p3d",3.5f,108,4,13969350428586801093ull,8142896281327530070ull},
+    {"data3d\\molo_drevo.p3d",6.5f,80,4,6691579467177444179ull,8142896281327530070ull},
+    {"data3d\\molo_drevo.p3d",9.f,24,3,8603565756850670027ull,15411719490152194493ull}};
 inline const OriginalMaterialRegion* OriginalRegion(unsigned identity)
 {
     for (const auto& r : OriginalMaterialRegions) if (r.identity==identity) return &r;

@@ -389,6 +389,44 @@ TEST_CASE("Dedicated timber sources preserve original floor lighting and mixed p
         [&](const auto& g){return g.model==underside->model;})==4);
 }
 
+TEST_CASE("Pier timber proof retains original waterline authored ceiling and submerged end contracts",
+          "[Graphics][vulkan-shape][material-qualification]")
+{
+    const std::array keys{std::string_view("data\\oldwood.pac"),std::string_view("data\\dosky.pac")};
+    REQUIRE(128+std::size(vk::EnhancedPBRMaterials)<=vk::SourceDiffuseIdentity);
+    for (unsigned i=0;i<keys.size();++i)
+    {
+        const auto source=vk::OriginalMaterialSource(keys[i]);
+        REQUIRE(source.identity==202+i);REQUIRE(source.family==4);REQUIRE(source.roughness==.85f);
+        REQUIRE_FALSE(vk::StockPBRIdentity(keys[i]));REQUIRE(vk::PBRMaterial(keys[i],128)==0);
+        REQUIRE(vk::PBRMaterial(keys[i],128,true)==.85f);
+        REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::AuthoredLighting,NoClamp,true,true)==vk::MaterialRejection::AuthoredLighting);
+        REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::Geometry,NoClamp,true,true)==vk::MaterialRejection::Geometry);
+        REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::None,IsAlpha,true,true)==vk::MaterialRejection::RenderBehavior);
+    }
+    for (const auto key : {"data\\molo_drev_side.pac","data\\prkynka.pac","data\\prkynka_l.pac",
+        "data\\oldwood.paa","other\\oldwood.pac","data\\dosky.paa","other\\dosky.pac"})
+        REQUIRE_FALSE(vk::OriginalMaterialSource(key));
+    const auto* dry=vk::OriginalRegion(569);REQUIRE(dry);REQUIRE(dry->reception);
+    REQUIRE(dry->model=="data3d\\molo_drevo.p3d");REQUIRE(dry->texture=="data\\molo_drev_side.pac");
+    REQUIRE(dry->family==4);REQUIRE(dry->roughness==.85f);
+    REQUIRE(vk::OriginalRegionSource(569,dry->texture,64,256,3594089815499870373ull).identity==569);
+    REQUIRE_FALSE(vk::OriginalRegionSource(569,dry->texture,64,256,3594089815499870372ull));
+    const std::array<std::array<float,2>,3> beam{{{.02f,.01f},{42.5805f,.01f},{.02f,.24f}}};
+    const std::array<std::array<float,2>,3> waterline{{{.1f,.5f},{.9f,.5f},{.1f,1.f}}};
+    auto mixed=beam;mixed[2][1]=.251f;
+    REQUIRE(vk::SelectOriginalRegion(*dry,beam,ClampV)==569);
+    REQUIRE(vk::SelectOriginalRegion(*dry,beam,NoClamp)==0);
+    REQUIRE(vk::SelectOriginalRegion(*dry,waterline,ClampV)==0);
+    REQUIRE(vk::SelectOriginalRegion(*dry,mixed,ClampV)==0);
+    REQUIRE(vk::OriginalRegionCandidate(dry->model,.7f,747,6,10131866362269146586ull,dry->texture)==569);
+    REQUIRE(vk::OriginalRegionCandidate(dry->model,.70001f,747,6,10131866362269146586ull,dry->texture)==0);
+    REQUIRE(vk::OriginalRegionBindingsCompatible(10131866362269146586ull,17554237083310623026ull));
+    REQUIRE_FALSE(vk::OriginalRegionBindingsCompatible(10131866362269146586ull,17554237083310623027ull));
+    REQUIRE(std::count_if(std::begin(vk::OriginalRegionGeometries),std::end(vk::OriginalRegionGeometries),
+        [&](const auto& g){return g.model==dry->model;})==5);
+}
+
 TEST_CASE("Helfenburk masonry regions retain photographed apertures and independent original lighting",
           "[Graphics][vulkan-shape][material-qualification]")
 {

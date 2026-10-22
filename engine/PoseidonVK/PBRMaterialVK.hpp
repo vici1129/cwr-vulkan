@@ -123,7 +123,11 @@ inline constexpr StockPBRMaterial EnhancedPBRMaterials[]{
     {"data\\kasna_schod.pac", .90f, 6},
     {"data\\kasna_sloupekbtr.pac", .90f, 6},
     // Original broken mineral wall edges, not the castle's slit/window atlases.
-    {"data\\helfenburg_zhrouc_zd.pac", .90f, 6}};
+    {"data\\helfenburg_zhrouc_zd.pac", .90f, 6},
+    // Original timber deck boards and wood shingles, not the wet pier-side
+    // photograph, authored ceiling or mostly submerged end-piece boards.
+    {"data\\oldwood.pac", .85f, 4},
+    {"data\\dosky.pac", .85f, 4}};
 inline unsigned PBRReceiverFamily(unsigned id)
 {
     if (id >= 64 && id < 64 + std::size(StockPBRMaterials)) return StockPBRMaterials[id - 64].receiverFamily;
