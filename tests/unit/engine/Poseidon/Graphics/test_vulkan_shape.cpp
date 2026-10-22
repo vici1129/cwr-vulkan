@@ -323,6 +323,36 @@ TEST_CASE("Inspected roof tiles do not promote chimney openings or ambiguous roo
         REQUIRE_FALSE(vk::OriginalMaterialSource(key));
 }
 
+TEST_CASE("Original concrete structure images do not classify buried siblings metal or dark support optics",
+          "[Graphics][vulkan-shape][material-qualification]")
+{
+    const std::array keys{std::string_view("data\\beton_universal.pac"),
+        std::string_view("data\\beton_preklad_opak.pac"),std::string_view("data\\panel_maskac_opak.pac")};
+    for (unsigned i=0;i<keys.size();++i)
+    {
+        const auto key=keys[i];const auto source=vk::OriginalMaterialSource(key);
+        REQUIRE(source.identity==190+i);REQUIRE(source.family==7);REQUIRE(source.roughness==.9f);
+        REQUIRE_FALSE(vk::StockPBRIdentity(key));REQUIRE(vk::PBRMaterial(key,128)==0);
+        REQUIRE(vk::PBRMaterial(key,128,true)==.9f);
+        for (int flags : {int(NoClamp),int(ClampU),int(ClampV),int(ClampU|ClampV)})
+        {
+            REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::None,flags,true,true)==vk::MaterialRejection::None);
+            REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::AuthoredLighting,flags,true,true)==vk::MaterialRejection::AuthoredLighting);
+            REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::Geometry,flags,true,true)==vk::MaterialRejection::Geometry);
+        }
+        REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::None,IsAlpha,true,true)==vk::MaterialRejection::RenderBehavior);
+        REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::None,NoClamp,false,true)==vk::MaterialRejection::RenderBehavior);
+        REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::None,NoClamp,true,false)==vk::MaterialRejection::RenderBehavior);
+        REQUIRE_FALSE(vk::OriginalMaterialReception(vk::MaterialRejection::None,false,true));
+        REQUIRE_FALSE(vk::OriginalMaterialReception(vk::MaterialRejection::None,true,false));
+    }
+    for (const auto key : {"data\\beton_top.pac","data\\beton_preklad_opakd.pac","data\\beton_cesta.pac",
+        "data\\lampa_old_01_betonsl.pac","data\\lampa_old_01_klobouk.pac","data\\lampa_old_01_tyc_sid.pac",
+        "data\\lampa_old_01_vnitr.pac","data\\vrata_01.pac","other\\beton_universal.pac",
+        "data\\beton_universal.paa","other\\panel_maskac_opak.pac"})
+        REQUIRE_FALSE(vk::OriginalMaterialSource(key));
+}
+
 TEST_CASE("Village bell masonry and tile variants do not classify bells or mixed facades",
           "[Graphics][vulkan-shape][material-qualification]")
 {

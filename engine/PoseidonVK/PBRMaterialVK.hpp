@@ -99,7 +99,13 @@ inline constexpr StockPBRMaterial EnhancedPBRMaterials[]{
     {"data\\patnik_new.pac", .90f, 7},
     // Original bell-station mineral body. Its separate bell/cutouts and all
     // neighboring facade sources retain their original contracts.
-    {"data\\zvonicka_side.pac", .90f, 6}};
+    {"data\\zvonicka_side.pac", .90f, 6},
+    // Original exposed concrete barriers, military structure faces and thick
+    // painted firing panels. Dark siblings, doors and hardware stay separate;
+    // original per-triangle authored-lighting gates remain independent.
+    {"data\\beton_universal.pac", .90f, 7},
+    {"data\\beton_preklad_opak.pac", .90f, 7},
+    {"data\\panel_maskac_opak.pac", .90f, 7}};
 inline unsigned PBRReceiverFamily(unsigned id)
 {
     if (id >= 64 && id < 64 + std::size(StockPBRMaterials)) return StockPBRMaterials[id - 64].receiverFamily;
