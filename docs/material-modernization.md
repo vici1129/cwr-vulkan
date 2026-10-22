@@ -6,8 +6,8 @@ The [per-model ledger](evidence/material-modernization/progress.json) retains al
 and concrete prerequisite blockers. It is not a visible-coverage percentage.
 The original inventory remains an immutable baseline.
 
-After batch 19, 208 models have complete source assessment, 126 have partial source
-review, and 181 await source review. Complete assessments include explicitly
+After batch 20, 210 models have complete source assessment, 126 have partial source
+review, and 179 await source review. Complete assessments include explicitly
 retained optical cases, not only new material adoptions. Another 211 have no
 source-unknown triangles under the existing native classifier: their existing coverage and opacity,
 authored-lighting or geometry fallback contracts are retained. This last group
@@ -90,6 +90,12 @@ utility sources retain specific limits; inspected bark-only bounds contain no
 complete original faces. Existing blended tree cards and the mixed-birch
 regression exclusion stay intact. No new rendering identity or coverage is counted;
 the material policy and current census remain unchanged from batch 18.
+Batch 20 [assesses guard booths, pallets and watchtower sources](material-modernization-batch-20.md)
+across six models / 20 levels. Booth/pallet assessments close with specific source
+limits; paint-only bounds split original faces or isolate tiny fragments. The
+booth's ordinary quad is its roof, not its authored interior floor. Watchtower
+metal/coating photographs retain their original treatment; shared painted boards
+remain an actionable followup. No new material or rendering coverage is counted.
 The [ordinary-adapter census](evidence/material-modernization/runtime-census.json)
 rechecks 726 models / **1,708 retained visual LODs** under the inspection configuration.
 The separate [source-only census](evidence/material-modernization/source-census.json)
