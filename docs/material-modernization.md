@@ -6,8 +6,8 @@ The [per-model ledger](evidence/material-modernization/progress.json) retains al
 and concrete prerequisite blockers. It is not a visible-coverage percentage.
 The original inventory remains an immutable baseline.
 
-After batch 18, 206 models have complete source assessment, 126 have partial source
-review, and 183 await source review. Complete assessments include explicitly
+After batch 19, 208 models have complete source assessment, 126 have partial source
+review, and 181 await source review. Complete assessments include explicitly
 retained optical cases, not only new material adoptions. Another 211 have no
 source-unknown triangles under the existing native classifier: their existing coverage and opacity,
 authored-lighting or geometry fallback contracts are retained. This last group
@@ -84,6 +84,12 @@ CPU/reflection evidence. A second stone source is withdrawn because same-runtime
 CPU controls expose a hard raster-lighting boundary even with GI off. Original
 lighting is retained without shader or gate changes. Tiny rubble and mixed
 roots/recess atlases receive explicit fallback reasons, not coverage claims.
+Batch 19 [completes crooked-birch and apple source assessments](material-modernization-batch-19.md)
+across two models / six levels / 1,037 placements. Mixed trunk/background and dark
+utility sources retain specific limits; inspected bark-only bounds contain no
+complete original faces. Existing blended tree cards and the mixed-birch
+regression exclusion stay intact. No new rendering identity or coverage is counted;
+the material policy and current census remain unchanged from batch 18.
 The [ordinary-adapter census](evidence/material-modernization/runtime-census.json)
 rechecks 726 models / **1,708 retained visual LODs** under the inspection configuration.
 The separate [source-only census](evidence/material-modernization/source-census.json)
