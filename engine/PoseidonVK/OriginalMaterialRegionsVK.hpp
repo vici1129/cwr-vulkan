@@ -113,7 +113,11 @@ inline constexpr OriginalMaterialRegion OriginalMaterialRegions[]{
     // Only the original dry upper beam row, never the green/dark waterline.
     // Full observed repeated U keeps long original beam fans whole; narrower
     // intermediate bounds cut fans and are not a physical material repair.
-    {569,4,"data3d\\molo_drevo.p3d","data\\molo_drev_side.pac",.85f,0,0,43,.25f,64,256,3594089815499870373ull,32768}};
+    {569,4,"data3d\\molo_drevo.p3d","data\\molo_drev_side.pac",.85f,0,0,43,.25f,64,256,3594089815499870373ull,32768},
+    // Complete original bridge curb/parapet concrete faces only. Repeated U
+    // stays in the mineral row; paving, vegetation, coated rail and lamp/drain
+    // hardware retain their original treatment. Exact source and all four LODs.
+    {570,7,"o\\hous\\most_stred30.p3d","o\\misc\\most01.pac",.9f,-1,0,9,.24f,512,512,6332993264091036107ull,32768}};
 struct OriginalRegionGeometry
 {
     std::string_view model;
@@ -286,7 +290,11 @@ inline constexpr OriginalRegionGeometry OriginalRegionGeometries[]{
     {"data3d\\molo_drevo.p3d",1.45000005f,315,5,9622605280816716790ull,3597680008006599372ull},
     {"data3d\\molo_drevo.p3d",3.5f,108,4,13969350428586801093ull,8142896281327530070ull},
     {"data3d\\molo_drevo.p3d",6.5f,80,4,6691579467177444179ull,8142896281327530070ull},
-    {"data3d\\molo_drevo.p3d",9.f,24,3,8603565756850670027ull,15411719490152194493ull}};
+    {"data3d\\molo_drevo.p3d",9.f,24,3,8603565756850670027ull,15411719490152194493ull},
+    {"o\\hous\\most_stred30.p3d",1.f,1268,3,14780229580148744717ull,8554578632992421120ull},
+    {"o\\hous\\most_stred30.p3d",2.5f,780,4,10009608823202926598ull,2211745915036769752ull},
+    {"o\\hous\\most_stred30.p3d",5.f,500,4,5878835632165113038ull,2211745915036769752ull},
+    {"o\\hous\\most_stred30.p3d",9.f,198,4,15025897628212485069ull,13194166653877726212ull}};
 inline const OriginalMaterialRegion* OriginalRegion(unsigned identity)
 {
     for (const auto& r : OriginalMaterialRegions) if (r.identity==identity) return &r;

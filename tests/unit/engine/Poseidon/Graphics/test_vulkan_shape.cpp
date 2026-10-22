@@ -389,6 +389,40 @@ TEST_CASE("Dedicated timber sources preserve original floor lighting and mixed p
         [&](const auto& g){return g.model==underside->model;})==4);
 }
 
+TEST_CASE("Bridge concrete retains mixed rail hardware road and original lighting contracts",
+          "[Graphics][vulkan-shape][material-qualification]")
+{
+    const auto key=std::string_view("o\\misc\\most02.pac");
+    const auto source=vk::OriginalMaterialSource(key);
+    REQUIRE(source.identity==206);REQUIRE(source.family==7);REQUIRE(source.roughness==.9f);
+    REQUIRE_FALSE(vk::StockPBRIdentity(key));REQUIRE(vk::PBRMaterial(key,128)==0);
+    REQUIRE(vk::PBRMaterial(key,128,true)==.9f);
+    REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::None,NoClamp,true,true)==vk::MaterialRejection::None);
+    REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::AuthoredLighting,NoClamp,true,true)==vk::MaterialRejection::AuthoredLighting);
+    REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::Geometry,NoClamp,true,true)==vk::MaterialRejection::Geometry);
+    for (const int flags : std::array<int,4>{IsAlpha,OnSurface,NoZWrite,IsAlpha|ClampU|IsAlphaOrdered})
+        REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::None,flags,true,true)==vk::MaterialRejection::RenderBehavior);
+    REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::None,NoClamp,false,true)==vk::MaterialRejection::RenderBehavior);
+    REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::None,NoClamp,true,false)==vk::MaterialRejection::RenderBehavior);
+    for (const auto excluded : {"o\\misc\\most01.pac","o\\misc\\sil_new.pac","o\\road\\sil_new.paa",
+        "o\\misc\\most02.paa","o\\road\\most02.pac","other\\most02.pac"})
+        REQUIRE_FALSE(vk::OriginalMaterialSource(excluded));
+    const auto* curb=vk::OriginalRegion(570);REQUIRE(curb);REQUIRE(curb->reception);
+    REQUIRE(curb->model=="o\\hous\\most_stred30.p3d");REQUIRE(curb->texture=="o\\misc\\most01.pac");
+    REQUIRE(curb->family==7);REQUIRE(curb->roughness==.9f);
+    REQUIRE(vk::OriginalRegionSource(570,curb->texture,512,512,6332993264091036107ull).identity==570);
+    REQUIRE_FALSE(vk::OriginalRegionSource(570,curb->texture,512,512,6332993264091036106ull));
+    const std::array<std::array<float,2>,3> concrete{{{-.01f,.002f},{8.2f,.002f},{8.2f,.23f}}};
+    REQUIRE(vk::SelectOriginalRegion(*curb,concrete,ClampV)==570);
+    REQUIRE_FALSE(vk::SelectOriginalRegion(*curb,concrete,NoClamp));
+    auto mixed=concrete;mixed[2][1]=.25f;REQUIRE_FALSE(vk::SelectOriginalRegion(*curb,mixed,ClampV));
+    REQUIRE(vk::OriginalRegionCandidate(curb->model,1.f,1268,3,14780229580148744717ull,curb->texture)==570);
+    REQUIRE_FALSE(vk::OriginalRegionCandidate(curb->model,1.f,1268,3,14780229580148744716ull,curb->texture));
+    REQUIRE_FALSE(vk::OriginalRegionCandidate("o\\hous\\other.p3d",1.f,1268,3,14780229580148744717ull,curb->texture));
+    REQUIRE(std::count_if(std::begin(vk::OriginalRegionGeometries),std::end(vk::OriginalRegionGeometries),
+        [&](const auto& g){return g.model==curb->model;})==4);
+}
+
 TEST_CASE("Quay paving retains mixed door waterline hardware and original lighting contracts",
           "[Graphics][vulkan-shape][material-qualification]")
 {

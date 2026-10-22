@@ -6,7 +6,7 @@ The [per-model ledger](evidence/material-modernization/progress.json) retains al
 and concrete prerequisite blockers. It is not a visible-coverage percentage.
 The original inventory remains an immutable baseline.
 
-After batch 26, 227 models have complete source assessment, 120 have partial source
+After batch 27, 228 models have complete source assessment, 119 have partial source
 review, and 168 await source review. Complete assessments include explicitly
 retained optical cases, not only new material adoptions. Another 211 have no
 source-unknown triangles under the existing native classifier: their existing coverage and opacity,
@@ -39,7 +39,7 @@ unreviewed castle facades retain their specific unresolved boundaries.
 Batch 10 [reviews fitted roads and shared bridge overlays](material-modernization-batch-10.md)
 across 75 models / 106 levels. Seventeen original fractional-alpha sources retain
 their blend, surface/depth and terrain-fitting contracts; no road rendering
-coverage is added. The bridge's other sources remain a partial review.
+coverage is added. The bridge's other sources are subsequently assessed in batch 27.
 Batch 11 [adds exact original ruin-stone regions and assesses related plaster](material-modernization-batch-11.md)
 across six models / 19 authored levels. Four whole-face stone regions use the
 existing paths. Two plaster candidates were withdrawn after normal-view checks
@@ -141,6 +141,14 @@ scenery. Mixed door/cap, green vertical seawall, corroded shed and utility sourc
 retain concrete reasons. A dusk band is isolated to existing RT sunlight shadows
 and moves with sun time; shadows are restored without any renderer/gate workaround.
 Separate forced-CPU GPU cost rises materially and is reported, not recommended.
+Batch 27 [adds original bridge support and bounded curb concrete](material-modernization-batch-27.md)
+after inspecting `o/hous/most_stred30.p3d`, all four authored visual levels and
+its three remaining source images. The 1,776 previously source-unknown triangles
+are fully assessed: 400 gain existing concrete prerequisites, while 1,376 mixed
+atlas/road triangles retain specific fallback reasons. Six alpha road-overlay
+triangles keep their original contract. Native reception and eligible reflected
+hits are demonstrated in original Nogova views; CPU reception is reported
+separately. No lighting gate, geometry, shader or GL33 behavior is changed.
 The [ordinary-adapter census](evidence/material-modernization/runtime-census.json)
 rechecks 726 models / **1,708 retained visual LODs** under the inspection configuration.
 The separate [source-only census](evidence/material-modernization/source-census.json)
@@ -156,7 +164,7 @@ pixel/geometry review; this is not newly implemented foliage coverage.
 Backlog 30 likewise retains the fitted-road contract after explicit source review.
 All 30 pilot tasks now have a disposition, but 16 remain partial source reviews;
 the wider 726-model assessment and remaining defensible implementations continue.
-Use the [batch-26 reproduction command](material-modernization-batch-26.md#cost-census-and-preservation)
+Use the [batch-27 reproduction command](material-modernization-batch-27.md#validation-and-reproduction)
 for the current executable; earlier batch commands describe their policy snapshots.
 
 ## Batch 01: Nogova rough stone and boundary masonry
