@@ -323,6 +323,36 @@ TEST_CASE("Inspected roof tiles do not promote chimney openings or ambiguous roo
         REQUIRE_FALSE(vk::OriginalMaterialSource(key));
 }
 
+TEST_CASE("Chimney brick regions preserve frame aperture and original-face boundaries",
+          "[Graphics][vulkan-shape][material-qualification]")
+{
+    REQUIRE_FALSE(vk::OriginalMaterialSource("o\\hous\\orlhot_kom.pac"));
+    REQUIRE(vk::PBRMaterial("o\\hous\\orlhot_kom.pac",128,true)==0);
+    unsigned geometries=0;
+    for (unsigned id=544;id<=556;++id)
+    {
+        const auto* r=vk::OriginalRegion(id);REQUIRE(r);
+        REQUIRE(r->texture=="o\\hous\\orlhot_kom.pac");
+        REQUIRE(r->family==6);REQUIRE(r->roughness==.9f);
+        REQUIRE(r->uMin==.22f);REQUIRE(r->uMax==.79f);
+        REQUIRE(r->vMin==0);REQUIRE(r->vMax==1);
+        const std::array<std::array<float,2>,3> brick{{{.44f,.01f},{.66f,.01f},{.66f,.98f}}};
+        REQUIRE(vk::SelectOriginalRegion(*r,brick,NoClamp)==id);
+        for (auto outside : {std::array<float,2>{.21f,.5f},{.81f,.5f},{.5f,-.001f},{.5f,1.001f}})
+        {
+            auto mixed=brick;mixed[0]=outside;
+            REQUIRE_FALSE(vk::SelectOriginalRegion(*r,mixed,NoClamp));
+        }
+        const auto source=vk::OriginalRegionSource(id,r->texture,256,128,13663165639993867772ull);
+        REQUIRE(source.identity==id);
+        REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::AuthoredLighting,NoClamp,true,true)==vk::MaterialRejection::AuthoredLighting);
+        REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::Geometry,NoClamp,true,true)==vk::MaterialRejection::Geometry);
+        geometries+=unsigned(std::count_if(std::begin(vk::OriginalRegionGeometries),std::end(vk::OriginalRegionGeometries),
+            [&](const auto& g){return g.model==r->model;}));
+    }
+    REQUIRE(geometries==50);
+}
+
 TEST_CASE("Original blended roads retain surface depth and fitted-ground lighting gates",
           "[Graphics][vulkan-shape][material-qualification]")
 {
