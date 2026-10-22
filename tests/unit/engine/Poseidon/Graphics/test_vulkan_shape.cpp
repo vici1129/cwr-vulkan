@@ -389,6 +389,47 @@ TEST_CASE("Dedicated timber sources preserve original floor lighting and mixed p
         [&](const auto& g){return g.model==underside->model;})==4);
 }
 
+TEST_CASE("Helfenburk masonry regions retain photographed apertures and independent original lighting",
+          "[Graphics][vulkan-shape][material-qualification]")
+{
+    const auto broken=vk::OriginalMaterialSource("data\\helfenburg_zhrouc_zd.pac");
+    REQUIRE(broken.identity==201);REQUIRE(broken.family==6);REQUIRE(broken.roughness==.9f);
+    REQUIRE_FALSE(vk::StockPBRIdentity("data\\helfenburg_zhrouc_zd.pac"));
+    REQUIRE(vk::PBRMaterial("data\\helfenburg_zhrouc_zd.pac",128)==0);
+    REQUIRE(vk::PBRMaterial("data\\helfenburg_zhrouc_zd.pac",128,true)==.9f);
+    REQUIRE(128+std::size(vk::EnhancedPBRMaterials)<=vk::SourceDiffuseIdentity);
+    for (const auto key : {"data\\helfenburg_hradby_in.pac","data\\helfenburg_hradby_ou.pac",
+        "data\\helfenburk_brana.pac","data\\helfenburk_brana_ins.pac","data\\helfenburk_vez_front.pac",
+        "data\\helfenburk_vez_side.pac","data\\travahlina.pac","data\\zbor_dum_total_strop.pac",
+        "data\\helfenburg_zhrouc_zd.paa","other\\helfenburg_zhrouc_zd.pac"})
+        REQUIRE_FALSE(vk::OriginalMaterialSource(key));
+    REQUIRE_FALSE(vk::OriginalRegion(565));
+    REQUIRE(vk::OriginalRegionCandidate("data3d\\helfenburk_cimburi.p3d",1.5f,180,3,7745460651206043115ull,"data\\helfenburg_hradby_ou.pac")==0);
+    for (unsigned id : {563u,564u,566u,567u,568u})
+    {
+        const auto* region=vk::OriginalRegion(id);REQUIRE(region);REQUIRE(region->reception);
+        REQUIRE(region->family==6);REQUIRE(region->roughness==.9f);
+        const auto source=vk::OriginalRegionSource(id,region->texture,region->width,region->height,region->pixels);
+        REQUIRE(source.identity==id);
+        REQUIRE_FALSE(vk::OriginalRegionSource(id,region->texture,region->width,region->height,region->pixels^1));
+        REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::AuthoredLighting,NoClamp,true,true)==vk::MaterialRejection::AuthoredLighting);
+        REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::Geometry,NoClamp,true,true)==vk::MaterialRejection::Geometry);
+        REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::None,IsAlpha,true,true)==vk::MaterialRejection::RenderBehavior);
+        const std::array<std::array<float,2>,3> mineral{{{region->uMin,region->vMin},{region->uMax,region->vMin},{region->uMin,region->vMax}}};
+        REQUIRE(vk::SelectOriginalRegion(*region,mineral,NoClamp)==id);
+        const std::array<std::array<float,2>,3> aperture{{{.4f,.05f},{.6f,.05f},{.5f,.1f}}};
+        REQUIRE(vk::SelectOriginalRegion(*region,aperture,NoClamp)==0);
+        auto mixed=mineral;mixed[0][1]=region->vMin-.01f;
+        REQUIRE(vk::SelectOriginalRegion(*region,mixed,NoClamp)==0);
+    }
+    REQUIRE(vk::OriginalRegionCandidate("data3d\\helfenburk.p3d",1.5f,2688,7,10398649646306529083ull,"data\\helfenburk_vez_front.pac")==563);
+    REQUIRE(vk::OriginalRegionCandidate("data3d\\helfenburk.p3d",1.51f,2688,7,10398649646306529083ull,"data\\helfenburk_vez_front.pac")==0);
+    REQUIRE(vk::OriginalRegionBindingsCompatible(10398649646306529083ull,7556951306542028860ull));
+    REQUIRE_FALSE(vk::OriginalRegionBindingsCompatible(10398649646306529083ull,7556951306542028861ull));
+    REQUIRE(vk::SelectOriginalRegion(*vk::OriginalRegion(567),std::array<std::array<float,2>,3>{{{.3f,.5f},{.7f,.5f},{.3f,.9f}}},NoClamp)==0);
+    REQUIRE(vk::SelectOriginalRegion(*vk::OriginalRegion(568),std::array<std::array<float,2>,3>{{{.3f,.5f},{.7f,.5f},{.7f,.9f}}},NoClamp)==0);
+}
+
 TEST_CASE("Original fountain mineral sources do not classify photographed spouts vegetation or water",
           "[Graphics][vulkan-shape][material-qualification]")
 {

@@ -98,7 +98,18 @@ inline constexpr OriginalMaterialRegion OriginalMaterialRegions[]{
     // Lower original fountain mineral row, not the upper spout photograph.
     // Original repeated U and tiny V edge overshoot sample inspected mineral
     // pixels only; geometry/binding/image proof and original gates remain.
-    {562,6,"o\\hous\\kasna_new.p3d","o\\hous\\kasna01.pac",.9f,-.2f,.5f,2.f,1.006f,256,256,16872738925428872060ull}};
+    {562,6,"o\\hous\\kasna_new.p3d","o\\hous\\kasna01.pac",.9f,-.2f,.5f,2.f,1.006f,256,256,16872738925428872060ull},
+    // Exact original Helfenburk mineral rows/side strips only. Slits, windows,
+    // arch recess/background and green edge pixels are not whole-source stone.
+    // Repeated U stays within a mineral-only row; original sampler flags remain.
+    {563,6,"data3d\\helfenburk.p3d","data\\helfenburk_vez_front.pac",.9f,-10,.56f,10,1.005f,256,256,13782917694651118931ull},
+    {564,6,"data3d\\helfenburk_cimburi.p3d","data\\helfenburg_hradby_in.pac",.9f,-10,.22f,10,1.005f,128,128,9827691540806335610ull},
+    // Outer battlement row565 withdrawn: a diagonal raster-lighting boundary
+    // persisted with GI off and disappeared with PBR off. Do not re-enable it
+    // from physical stone/whole-face proof alone or defer reception as a fix.
+    {566,6,"data3d\\helfenburk_zed.p3d","data\\helfenburg_hradby_in.pac",.9f,-10,.22f,10,1.005f,128,128,9827691540806335610ull},
+    {567,6,"data3d\\helfenburk_brana.p3d","data\\helfenburk_brana_ins.pac",.9f,.005f,.39f,.34f,.98f,256,256,12126241923363600779ull},
+    {568,6,"data3d\\helfenburk_brana.p3d","data\\helfenburk_brana_ins.pac",.9f,.64f,.39f,.995f,.98f,256,256,12126241923363600779ull}};
 struct OriginalRegionGeometry
 {
     std::string_view model;
@@ -251,7 +262,22 @@ inline constexpr OriginalRegionGeometry OriginalRegionGeometries[]{
     {"o\\hous\\kasna_new.p3d",0.100000001f,868,8,17211535105529068734ull,2516690770884684202ull},
     {"o\\hous\\kasna_new.p3d",2.f,523,8,18009936640925690221ull,2986319403548584685ull},
     {"o\\hous\\kasna_new.p3d",5.f,291,4,18381355984370083630ull,11309712293679337872ull},
-    {"o\\hous\\kasna_new.p3d",6.54187679f,190,5,5126656687611659204ull,5978338520408643504ull}};
+    {"o\\hous\\kasna_new.p3d",6.54187679f,190,5,5126656687611659204ull,5978338520408643504ull},
+    {"data3d\\helfenburk.p3d",1.5f,2688,7,10398649646306529083ull,7556951306542028860ull},
+    {"data3d\\helfenburk.p3d",3.f,1348,7,34708025095817527ull,7556951306542028860ull},
+    {"data3d\\helfenburk.p3d",5.f,576,6,8136165685868148456ull,9358811738638422972ull},
+    {"data3d\\helfenburk.p3d",8.5f,273,4,110197564143541049ull,9358811738638422972ull},
+    {"data3d\\helfenburk.p3d",12.f,60,3,13851135116701149963ull,16519045380345307852ull},
+    {"data3d\\helfenburk_brana.p3d",1.70000005f,756,8,17183233117381342167ull,16304420777501984339ull},
+    {"data3d\\helfenburk_brana.p3d",3.5f,551,8,17150133038972266937ull,5694354888778463499ull},
+    {"data3d\\helfenburk_brana.p3d",8.5f,199,8,12408982878598658395ull,11501598420521712604ull},
+    {"data3d\\helfenburk_brana.p3d",11.25f,106,6,4458443391602502506ull,9964032157763713895ull},
+    {"data3d\\helfenburk_cimburi.p3d",1.5f,180,3,7745460651206043115ull,7312600183817937085ull},
+    {"data3d\\helfenburk_cimburi.p3d",3.f,155,3,4633544958055012547ull,7312600183817937085ull},
+    {"data3d\\helfenburk_cimburi.p3d",7.5f,66,3,10833202311971340885ull,7312600183817937085ull},
+    {"data3d\\helfenburk_cimburi.p3d",10.f,34,3,776821966535561065ull,10361178586207389736ull},
+    {"data3d\\helfenburk_zed.p3d",2.f,52,3,10458519965023346827ull,5077560204557737039ull},
+    {"data3d\\helfenburk_zed.p3d",8.f,28,2,17335393911317756424ull,2913505486968009910ull}};
 inline const OriginalMaterialRegion* OriginalRegion(unsigned identity)
 {
     for (const auto& r : OriginalMaterialRegions) if (r.identity==identity) return &r;

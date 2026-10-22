@@ -121,7 +121,9 @@ inline constexpr StockPBRMaterial EnhancedPBRMaterials[]{
     // independent. Hidden slab planes are not claimed as visible coverage.
     {"data\\kasna_rantl.pac", .90f, 6},
     {"data\\kasna_schod.pac", .90f, 6},
-    {"data\\kasna_sloupekbtr.pac", .90f, 6}};
+    {"data\\kasna_sloupekbtr.pac", .90f, 6},
+    // Original broken mineral wall edges, not the castle's slit/window atlases.
+    {"data\\helfenburg_zhrouc_zd.pac", .90f, 6}};
 inline unsigned PBRReceiverFamily(unsigned id)
 {
     if (id >= 64 && id < 64 + std::size(StockPBRMaterials)) return StockPBRMaterials[id - 64].receiverFamily;
