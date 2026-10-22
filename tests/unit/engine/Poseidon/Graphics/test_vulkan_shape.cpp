@@ -323,6 +323,30 @@ TEST_CASE("Inspected roof tiles do not promote chimney openings or ambiguous roo
         REQUIRE_FALSE(vk::OriginalMaterialSource(key));
 }
 
+TEST_CASE("Concrete roadside blocks do not classify rails rusty pipes or sign coatings",
+          "[Graphics][vulkan-shape][material-qualification]")
+{
+    const auto source=vk::OriginalMaterialSource("data\\patnik_new.pac");
+    REQUIRE(source.identity==188);REQUIRE(source.family==7);REQUIRE(source.roughness==.9f);
+    REQUIRE(vk::PBRMaterial("data\\patnik_new.pac",128)==0);
+    REQUIRE(vk::PBRMaterial("data\\patnik_new.pac",128,true)==.9f);
+    for (const auto key : {"data\\patnik_new.paa","other\\patnik_new.pac",
+        "data\\sloupek_bily_orezly.pac","data\\sloup_bily_orez_v.pac","data\\rez_trubka.pac",
+        "data\\nemocnice_zn.pac","data\\nemocnice_zn_bck.pac","data\\pumpa.pac",
+        "data\\pumpa_bck.pac","data\\slepa.pac","data\\sterk.pac"})
+        REQUIRE_FALSE(vk::OriginalMaterialSource(key));
+    // Keep the previously supported rail/post identity and authored lobe hint.
+    REQUIRE(vk::OriginalMaterialSource("data\\sloupek_bily_orezly_.pac").identity==86);
+    REQUIRE(vk::PBRReceiverFamily(86)==0);
+    REQUIRE(vk::PBRMaterial("data\\sloupek_bily_orezly_.pac",128,true)==.5f);
+    REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::None,ClampU|ClampV,true,true)==vk::MaterialRejection::None);
+    REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::AuthoredLighting,ClampU|ClampV,true,true)==vk::MaterialRejection::AuthoredLighting);
+    REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::Geometry,ClampU|ClampV,true,true)==vk::MaterialRejection::Geometry);
+    REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::None,IsTransparent,true,true)==vk::MaterialRejection::RenderBehavior);
+    REQUIRE_FALSE(vk::OriginalMaterialReception(vk::MaterialRejection::None,false,true));
+    REQUIRE_FALSE(vk::OriginalMaterialReception(vk::MaterialRejection::None,true,false));
+}
+
 TEST_CASE("Chimney brick regions preserve frame aperture and original-face boundaries",
           "[Graphics][vulkan-shape][material-qualification]")
 {

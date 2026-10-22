@@ -93,7 +93,10 @@ inline constexpr StockPBRMaterial EnhancedPBRMaterials[]{
     // Chimney apertures, metal/coating ambiguity and mixed roof atlases do not
     // inherit these identities. Original lighting/capture gates still apply.
     {"data\\kostel_strecha.pac", .90f, 3}, {"data\\strecha_tasky.pac", .90f, 3},
-    {"o\\hous\\hasicakstrecha.pac", .90f, 3}};
+    {"o\\hous\\hasicakstrecha.pac", .90f, 3},
+    // Original weathered concrete marker/barrier blocks. The separate rail,
+    // rusty pipes and mixed sign coatings do not inherit this identity.
+    {"data\\patnik_new.pac", .90f, 7}};
 inline unsigned PBRReceiverFamily(unsigned id)
 {
     if (id >= 64 && id < 64 + std::size(StockPBRMaterials)) return StockPBRMaterials[id - 64].receiverFamily;
