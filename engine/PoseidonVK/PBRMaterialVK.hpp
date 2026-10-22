@@ -115,7 +115,13 @@ inline constexpr StockPBRMaterial EnhancedPBRMaterials[]{
     {"o\\hous\\posedbok.pac", .85f, 4},
     {"o\\hous\\posedbokin.pac", .85f, 4},
     {"o\\hous\\posedfloor.pac", .85f, 4},
-    {"o\\hous\\posed01a.pac", .85f, 4}};
+    {"o\\hous\\posed01a.pac", .85f, 4},
+    // Separate original fountain mineral rim, slab and unstriped masonry post.
+    // Vegetation/hardware-bearing wall photos, dark ornaments and water remain
+    // independent. Hidden slab planes are not claimed as visible coverage.
+    {"data\\kasna_rantl.pac", .90f, 6},
+    {"data\\kasna_schod.pac", .90f, 6},
+    {"data\\kasna_sloupekbtr.pac", .90f, 6}};
 inline unsigned PBRReceiverFamily(unsigned id)
 {
     if (id >= 64 && id < 64 + std::size(StockPBRMaterials)) return StockPBRMaterials[id - 64].receiverFamily;

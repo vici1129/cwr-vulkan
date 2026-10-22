@@ -94,7 +94,11 @@ inline constexpr OriginalMaterialRegion OriginalMaterialRegions[]{
     // Exact original timber underside keeps original ambient: its receiver
     // pilot produced a circular GI lighting patch. Existing PBR/reflection
     // evidence remains separate, without a whole-source receiver exception.
-    {561,4,"o\\hous\\posed.p3d","o\\hous\\prkno_str.pac",.85f,-.005f,-.005f,1.005f,1.005f,256,256,11743484817861242001ull,0,false}};
+    {561,4,"o\\hous\\posed.p3d","o\\hous\\prkno_str.pac",.85f,-.005f,-.005f,1.005f,1.005f,256,256,11743484817861242001ull,0,false},
+    // Lower original fountain mineral row, not the upper spout photograph.
+    // Original repeated U and tiny V edge overshoot sample inspected mineral
+    // pixels only; geometry/binding/image proof and original gates remain.
+    {562,6,"o\\hous\\kasna_new.p3d","o\\hous\\kasna01.pac",.9f,-.2f,.5f,2.f,1.006f,256,256,16872738925428872060ull}};
 struct OriginalRegionGeometry
 {
     std::string_view model;
@@ -243,7 +247,11 @@ inline constexpr OriginalRegionGeometry OriginalRegionGeometries[]{
     {"o\\hous\\posed.p3d",1.0f,947,9,12524194718702672150ull,4442514148780103821ull},
     {"o\\hous\\posed.p3d",3.0f,660,9,6697910606867376652ull,11833992726965263909ull},
     {"o\\hous\\posed.p3d",4.5f,303,8,9212267419171645288ull,5951255797030222080ull},
-    {"o\\hous\\posed.p3d",6.75f,219,6,9830010683061641721ull,9513662246265850544ull}};
+    {"o\\hous\\posed.p3d",6.75f,219,6,9830010683061641721ull,9513662246265850544ull},
+    {"o\\hous\\kasna_new.p3d",0.100000001f,868,8,17211535105529068734ull,2516690770884684202ull},
+    {"o\\hous\\kasna_new.p3d",2.f,523,8,18009936640925690221ull,2986319403548584685ull},
+    {"o\\hous\\kasna_new.p3d",5.f,291,4,18381355984370083630ull,11309712293679337872ull},
+    {"o\\hous\\kasna_new.p3d",6.54187679f,190,5,5126656687611659204ull,5978338520408643504ull}};
 inline const OriginalMaterialRegion* OriginalRegion(unsigned identity)
 {
     for (const auto& r : OriginalMaterialRegions) if (r.identity==identity) return &r;

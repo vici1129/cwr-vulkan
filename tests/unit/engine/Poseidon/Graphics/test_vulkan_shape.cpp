@@ -389,6 +389,47 @@ TEST_CASE("Dedicated timber sources preserve original floor lighting and mixed p
         [&](const auto& g){return g.model==underside->model;})==4);
 }
 
+TEST_CASE("Original fountain mineral sources do not classify photographed spouts vegetation or water",
+          "[Graphics][vulkan-shape][material-qualification]")
+{
+    const std::array keys{std::string_view("data\\kasna_rantl.pac"),std::string_view("data\\kasna_schod.pac"),
+        std::string_view("data\\kasna_sloupekbtr.pac")};
+    REQUIRE(128+std::size(vk::EnhancedPBRMaterials)<=vk::SourceDiffuseIdentity);
+    for (unsigned i=0;i<keys.size();++i)
+    {
+        const auto source=vk::OriginalMaterialSource(keys[i]);
+        REQUIRE(source.identity==198+i);REQUIRE(source.family==6);REQUIRE(source.roughness==.9f);
+        REQUIRE_FALSE(vk::StockPBRIdentity(keys[i]));REQUIRE(vk::PBRMaterial(keys[i],128)==0);
+        REQUIRE(vk::PBRMaterial(keys[i],128,true)==.9f);
+        REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::AuthoredLighting,NoClamp,true,true)==vk::MaterialRejection::AuthoredLighting);
+        REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::Geometry,NoClamp,true,true)==vk::MaterialRejection::Geometry);
+        REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::None,IsAlpha,true,true)==vk::MaterialRejection::RenderBehavior);
+    }
+    for (const auto key : {"data\\kasna_nesmysl.pac","data\\kasna_sidegif.pac","data\\kasna_sloupekgif.pac",
+        "data\\kasna_dno.pac","data\\kasna_in.pac","data\\kasna_voda.01.paa",
+        "o\\hous\\kasna01.pac","o\\hous\\kasna01_dno.pac","o\\hous\\kasna01_dno.01.pac",
+        "o\\hous\\kasna01_hladina.paa","o\\hous\\kasna01_hladina.01.paa",
+        "data\\kasna_rantl.paa","other\\kasna_schod.pac"})
+        REQUIRE_FALSE(vk::OriginalMaterialSource(key));
+    const auto* mineral=vk::OriginalRegion(562);REQUIRE(mineral);REQUIRE(mineral->reception);
+    REQUIRE(mineral->model=="o\\hous\\kasna_new.p3d");REQUIRE(mineral->texture=="o\\hous\\kasna01.pac");
+    REQUIRE(mineral->family==6);REQUIRE(mineral->roughness==.9f);
+    REQUIRE(vk::OriginalRegionSource(562,mineral->texture,256,256,16872738925428872060ull).identity==562);
+    REQUIRE_FALSE(vk::OriginalRegionSource(562,mineral->texture,256,256,16872738925428872061ull));
+    const std::array<std::array<float,2>,3> panel{{{-.18f,.51f},{1.9f,.51f},{.3f,1.0052f}}};
+    const std::array<std::array<float,2>,3> spout{{{.1f,.1f},{.9f,.1f},{.1f,.2f}}};
+    const std::array<std::array<float,2>,3> mixed{{{0,.49f},{1,.51f},{0,.8f}}};
+    REQUIRE(vk::SelectOriginalRegion(*mineral,panel,NoClamp)==562);
+    REQUIRE(vk::SelectOriginalRegion(*mineral,spout,NoClamp)==0);
+    REQUIRE(vk::SelectOriginalRegion(*mineral,mixed,NoClamp)==0);
+    REQUIRE(vk::OriginalRegionCandidate(mineral->model,6.54187679f,190,5,5126656687611659204ull,mineral->texture)==562);
+    REQUIRE(vk::OriginalRegionCandidate(mineral->model,6.54188f,190,5,5126656687611659204ull,mineral->texture)==0);
+    REQUIRE(vk::OriginalRegionBindingsCompatible(5126656687611659204ull,5978338520408643504ull));
+    REQUIRE_FALSE(vk::OriginalRegionBindingsCompatible(5126656687611659204ull,5978338520408643505ull));
+    REQUIRE(std::count_if(std::begin(vk::OriginalRegionGeometries),std::end(vk::OriginalRegionGeometries),
+        [&](const auto& g){return g.model==mineral->model;})==4);
+}
+
 TEST_CASE("Original concrete structure images do not classify buried siblings metal or dark support optics",
           "[Graphics][vulkan-shape][material-qualification]")
 {
