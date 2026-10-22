@@ -87,7 +87,10 @@ inline constexpr OriginalMaterialRegion OriginalMaterialRegions[]{
     // trial darkened a roof. PBR/reflection proof is independent of reception.
     {557,3,"data3d\\dum_mesto.p3d","data\\tasky_tmavsi90.pac",.9f,-4.f,-.003f,4.f,2.375f,256,256,13546172877813697002ull,0,false},
     {558,3,"data3d\\dum_mesto_in.p3d","data\\tasky_tmavsi90.pac",.9f,-4.f,-.003f,4.f,2.375f,256,256,13546172877813697002ull,0,false},
-    {559,3,"data3d\\mesto_dum.p3d","data\\tasky_tmavsi90.pac",.9f,-4.f,-.003f,4.f,2.375f,256,256,13546172877813697002ull,0,false}};
+    {559,3,"data3d\\mesto_dum.p3d","data\\tasky_tmavsi90.pac",.9f,-4.f,-.003f,4.f,2.375f,256,256,13546172877813697002ull,0,false},
+    // Lower original mineral portion only; upper photographed arrow slits and
+    // every other model/source retain their independent fallback contracts.
+    {560,6,"o\\divk\\zedlv.p3d","o\\divk\\zed_lv03.pac",.9f,0.f,.17f,1.f,1.f,512,512,1822267094740399805ull}};
 struct OriginalRegionGeometry
 {
     std::string_view model;
@@ -229,7 +232,10 @@ inline constexpr OriginalRegionGeometry OriginalRegionGeometries[]{
     {"data3d\\mesto_dum.p3d",0.800000012f,561,9,3212206315252044389ull,3342267452610380588ull},
     {"data3d\\mesto_dum.p3d",1.5f,306,6,3368909437175227566ull,9157510334747740524ull},
     {"data3d\\mesto_dum.p3d",4.5f,111,5,2075397282267259389ull,2862888864409434420ull},
-    {"data3d\\mesto_dum.p3d",8.0f,64,5,4787542041987995589ull,13286391708091769522ull}};
+    {"data3d\\mesto_dum.p3d",8.0f,64,5,4787542041987995589ull,13286391708091769522ull},
+    {"o\\divk\\zedlv.p3d",1.5f,1144,7,11729301607590043927ull,7676748547982011476ull},
+    {"o\\divk\\zedlv.p3d",3.0f,356,6,14228621904998315830ull,7676748547982011476ull},
+    {"o\\divk\\zedlv.p3d",6.5f,133,6,9347651997511948723ull,7676748547982011476ull}};
 inline const OriginalMaterialRegion* OriginalRegion(unsigned identity)
 {
     for (const auto& r : OriginalMaterialRegions) if (r.identity==identity) return &r;

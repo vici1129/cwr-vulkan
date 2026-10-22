@@ -323,6 +323,39 @@ TEST_CASE("Inspected roof tiles do not promote chimney openings or ambiguous roo
         REQUIRE_FALSE(vk::OriginalMaterialSource(key));
 }
 
+TEST_CASE("Castle masonry and slit-free faces do not classify roots or photographed cavities",
+          "[Graphics][vulkan-shape][material-qualification]")
+{
+    REQUIRE(128+std::size(vk::EnhancedPBRMaterials)<=vk::SourceDiffuseIdentity);
+    const std::array keys{std::string_view("o\\divk\\zed.pac")};
+    for (unsigned i=0;i<keys.size();++i)
+    {
+        const auto source=vk::OriginalMaterialSource(keys[i]);
+        REQUIRE(source.identity==193+i);REQUIRE(source.family==6);REQUIRE(source.roughness==.9f);
+        REQUIRE_FALSE(vk::StockPBRIdentity(keys[i]));REQUIRE(vk::PBRMaterial(keys[i],128)==0);
+        REQUIRE(vk::PBRMaterial(keys[i],128,true)==.9f);
+        REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::AuthoredLighting,NoClamp,true,true)==vk::MaterialRejection::AuthoredLighting);
+        REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::Geometry,NoClamp,true,true)==vk::MaterialRejection::Geometry);
+        REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::None,IsAlpha,true,true)==vk::MaterialRejection::RenderBehavior);
+    }
+    for (const auto key : {"o\\divk\\r_sm_km.pac","o\\divk\\zed_lv03.pac","o\\divk\\zed_lv05.pac",
+        "o\\divk\\zed_pr01.pac","o\\divk\\zed_pr04.pac","o\\divk\\zed_pr05.pac","o\\divk\\zed_diry.pac",
+        "o\\divk\\hrad_zedop.pac","other\\divk\\zed.pac","o\\divk\\zed.paa","other\\divk\\hrad_zedop.pac"})
+        REQUIRE_FALSE(vk::OriginalMaterialSource(key));
+    const auto* region=vk::OriginalRegion(560);REQUIRE(region);REQUIRE(region->reception);
+    REQUIRE(region->model=="o\\divk\\zedlv.p3d");REQUIRE(region->texture=="o\\divk\\zed_lv03.pac");
+    REQUIRE(region->family==6);REQUIRE(region->roughness==.9f);
+    REQUIRE(vk::OriginalRegionSource(560,region->texture,512,512,1822267094740399805ull).identity==560);
+    const std::array<std::array<float,2>,3> mineral{{{0,.18f},{1,.18f},{0,1}}};
+    const std::array<std::array<float,2>,3> slit{{{0,.10f},{.4f,.10f},{0,.16f}}};
+    REQUIRE(vk::SelectOriginalRegion(*region,mineral,NoClamp)==560);
+    REQUIRE(vk::SelectOriginalRegion(*region,slit,NoClamp)==0);
+    REQUIRE(std::count_if(std::begin(vk::OriginalRegionGeometries),std::end(vk::OriginalRegionGeometries),
+        [&](const auto& g){return g.model==region->model;})==3);
+    REQUIRE_FALSE(vk::OriginalRegion(529)->reception);
+    for (unsigned id=557;id<=559;++id) REQUIRE_FALSE(vk::OriginalRegion(id)->reception);
+}
+
 TEST_CASE("Original concrete structure images do not classify buried siblings metal or dark support optics",
           "[Graphics][vulkan-shape][material-qualification]")
 {

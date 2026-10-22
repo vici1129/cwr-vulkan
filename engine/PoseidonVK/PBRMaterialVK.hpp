@@ -105,7 +105,10 @@ inline constexpr StockPBRMaterial EnhancedPBRMaterials[]{
     // original per-triangle authored-lighting gates remain independent.
     {"data\\beton_universal.pac", .90f, 7},
     {"data\\beton_preklad_opak.pac", .90f, 7},
-    {"data\\panel_maskac_opak.pac", .90f, 7}};
+    {"data\\panel_maskac_opak.pac", .90f, 7},
+    // Independently inspected continuous original castle masonry. Root-bearing
+    // rubble and neighboring slit/recess atlases do not share these identities.
+    {"o\\divk\\zed.pac", .90f, 6}};
 inline unsigned PBRReceiverFamily(unsigned id)
 {
     if (id >= 64 && id < 64 + std::size(StockPBRMaterials)) return StockPBRMaterials[id - 64].receiverFamily;
