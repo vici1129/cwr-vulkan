@@ -389,6 +389,27 @@ TEST_CASE("Dedicated timber sources preserve original floor lighting and mixed p
         [&](const auto& g){return g.model==underside->model;})==4);
 }
 
+TEST_CASE("Quay paving retains mixed door waterline hardware and original lighting contracts",
+          "[Graphics][vulkan-shape][material-qualification]")
+{
+    REQUIRE(128+std::size(vk::EnhancedPBRMaterials)<=vk::SourceDiffuseIdentity);
+    const auto key=std::string_view("o\\hous\\nabrezi01a.pac");
+    const auto source=vk::OriginalMaterialSource(key);
+    REQUIRE(source.identity==205);REQUIRE(source.family==6);REQUIRE(source.roughness==.9f);
+    REQUIRE_FALSE(vk::StockPBRIdentity(key));REQUIRE(vk::PBRMaterial(key,128)==0);
+    REQUIRE(vk::PBRMaterial(key,128,true)==.9f);
+    REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::None,NoClamp,true,true)==vk::MaterialRejection::None);
+    REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::AuthoredLighting,NoClamp,true,true)==vk::MaterialRejection::AuthoredLighting);
+    REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::Geometry,NoClamp,true,true)==vk::MaterialRejection::Geometry);
+    REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::None,IsAlpha,true,true)==vk::MaterialRejection::RenderBehavior);
+    REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::None,NoClamp,false,true)==vk::MaterialRejection::RenderBehavior);
+    REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::None,NoClamp,true,false)==vk::MaterialRejection::RenderBehavior);
+    for (const auto excluded : {"o\\hous\\nabrezi01.pac","o\\hous\\nabrezi01b.pac",
+        "o\\hous\\nabrezi01c.pac","o\\hous\\budka01.pac","data\\blck_sum.pac",
+        "o\\hous\\nabrezi01a.paa","other\\nabrezi01a.pac"})
+        REQUIRE_FALSE(vk::OriginalMaterialSource(excluded));
+}
+
 TEST_CASE("Lighthouse masonry retains crown lamp door and original lighting contracts",
           "[Graphics][vulkan-shape][material-qualification]")
 {

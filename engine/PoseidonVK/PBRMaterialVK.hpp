@@ -130,7 +130,10 @@ inline constexpr StockPBRMaterial EnhancedPBRMaterials[]{
     {"data\\dosky.pac", .85f, 4},
     // Continuous original lighthouse/platform stone, not the rusted door,
     // lamp, stained crown/finial photo or balcony finish.
-    {"data\\majak_p3.pac", .90f, 6}};
+    {"data\\majak_p3.pac", .90f, 6},
+    // Original continuous quay paving stone. Mixed door/cap atlas, green
+    // seawall finish, corroded shed and black utility source stay separate.
+    {"o\\hous\\nabrezi01a.pac", .90f, 6}};
 inline unsigned PBRReceiverFamily(unsigned id)
 {
     if (id >= 64 && id < 64 + std::size(StockPBRMaterials)) return StockPBRMaterials[id - 64].receiverFamily;
