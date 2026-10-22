@@ -323,6 +323,51 @@ TEST_CASE("Inspected roof tiles do not promote chimney openings or ambiguous roo
         REQUIRE_FALSE(vk::OriginalMaterialSource(key));
 }
 
+TEST_CASE("Village bell masonry and tile variants do not classify bells or mixed facades",
+          "[Graphics][vulkan-shape][material-qualification]")
+{
+    for (const auto& key : {std::string_view("data\\zvonicka_side.pac")})
+    {
+        const auto source=vk::OriginalMaterialSource(key);
+        REQUIRE(source.identity==189);REQUIRE(source.family==6);REQUIRE(source.roughness==.9f);
+        REQUIRE_FALSE(vk::StockPBRIdentity(key));REQUIRE(vk::PBRMaterial(key,128)==0);
+        REQUIRE(vk::PBRMaterial(key,128,true)==.9f);
+        REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::None,ClampV,true,true)==vk::MaterialRejection::None);
+        REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::AuthoredLighting,ClampV,true,true)==vk::MaterialRejection::AuthoredLighting);
+        REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::Geometry,ClampV,true,true)==vk::MaterialRejection::Geometry);
+        REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::None,IsAlpha,true,true)==vk::MaterialRejection::RenderBehavior);
+        REQUIRE_FALSE(vk::OriginalMaterialReception(vk::MaterialRejection::None,false,true));
+        REQUIRE_FALSE(vk::OriginalMaterialReception(vk::MaterialRejection::None,true,false));
+    }
+    for (const auto key : {"data\\zvonicka_bell.paa","data\\zvonicka_side.paa","other\\zvonicka_side.pac",
+        "data\\tasky_tmavsi90.paa","other\\tasky_tmavsi90.pac","data\\deutsche_up.pac",
+        "data\\deutsche.pac","data\\deutsche_tram.pac","o\\divk\\zed_diry.pac","o\\divk\\drv_trm.pac"})
+        REQUIRE_FALSE(vk::OriginalMaterialSource(key));
+    REQUIRE(vk::StockPBRIdentity("data\\tasky_tmavsi.pac")==70);
+    REQUIRE(vk::PBRMaterial("data\\tasky_tmavsi.pac",128)==.9f);
+    REQUIRE_FALSE(vk::OriginalMaterialSource("data\\tasky_tmavsi90.pac"));
+    unsigned geometries=0;
+    for (unsigned id=557;id<=559;++id)
+    {
+        const auto* region=vk::OriginalRegion(id);REQUIRE(region);
+        REQUIRE(region->texture=="data\\tasky_tmavsi90.pac");REQUIRE(region->family==3);
+        REQUIRE(region->roughness==.9f);REQUIRE_FALSE(region->reception);
+        const auto source=vk::OriginalRegionSource(id,region->texture,256,256,13546172877813697002ull);
+        REQUIRE(source.identity==id);
+        REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::None,NoClamp,true,true)==vk::MaterialRejection::None);
+        for (bool software : {false,true})
+        {
+            vk::ShapeLighting lighting;
+            lighting.pbr={.9f,.04f,0,float(id)};lighting.pbrDiffuse[3]=3;lighting.rtWater[3]=1;
+            vk::QualifyGIReceiver(lighting,software);
+            REQUIRE(lighting.rtWater[3]==1);REQUIRE(lighting.pbrDiffuse[3]==3);
+        }
+        geometries+=unsigned(std::count_if(std::begin(vk::OriginalRegionGeometries),std::end(vk::OriginalRegionGeometries),
+            [&](const auto& g){return g.model==region->model;}));
+    }
+    REQUIRE(geometries==14);
+}
+
 TEST_CASE("Concrete roadside blocks do not classify rails rusty pipes or sign coatings",
           "[Graphics][vulkan-shape][material-qualification]")
 {

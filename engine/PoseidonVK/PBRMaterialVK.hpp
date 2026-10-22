@@ -96,7 +96,10 @@ inline constexpr StockPBRMaterial EnhancedPBRMaterials[]{
     {"o\\hous\\hasicakstrecha.pac", .90f, 3},
     // Original weathered concrete marker/barrier blocks. The separate rail,
     // rusty pipes and mixed sign coatings do not inherit this identity.
-    {"data\\patnik_new.pac", .90f, 7}};
+    {"data\\patnik_new.pac", .90f, 7},
+    // Original bell-station mineral body. Its separate bell/cutouts and all
+    // neighboring facade sources retain their original contracts.
+    {"data\\zvonicka_side.pac", .90f, 6}};
 inline unsigned PBRReceiverFamily(unsigned id)
 {
     if (id >= 64 && id < 64 + std::size(StockPBRMaterials)) return StockPBRMaterials[id - 64].receiverFamily;

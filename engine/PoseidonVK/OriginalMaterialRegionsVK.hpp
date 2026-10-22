@@ -82,7 +82,12 @@ inline constexpr OriginalMaterialRegion OriginalMaterialRegions[]{
     {553,6,"o\\hous\\dum_patrovy05.p3d","o\\hous\\orlhot_kom.pac",.9f,.22f,0.f,.79f,1.f,256,128,13663165639993867772ull},
     {554,6,"o\\hous\\dum_patrovy06.p3d","o\\hous\\orlhot_kom.pac",.9f,.22f,0.f,.79f,1.f,256,128,13663165639993867772ull},
     {555,6,"o\\hous\\orlhot.p3d","o\\hous\\orlhot_kom.pac",.9f,.22f,0.f,.79f,1.f,256,128,13663165639993867772ull},
-    {556,6,"o\\hous\\skola.p3d","o\\hous\\orlhot_kom.pac",.9f,.22f,0.f,.79f,1.f,256,128,13663165639993867772ull}};
+    {556,6,"o\\hous\\skola.p3d","o\\hous\\orlhot_kom.pac",.9f,.22f,0.f,.79f,1.f,256,128,13663165639993867772ull},
+    // Exact original clay-tile regions retain ambient after a CPU receiver
+    // trial darkened a roof. PBR/reflection proof is independent of reception.
+    {557,3,"data3d\\dum_mesto.p3d","data\\tasky_tmavsi90.pac",.9f,-4.f,-.003f,4.f,2.375f,256,256,13546172877813697002ull,0,false},
+    {558,3,"data3d\\dum_mesto_in.p3d","data\\tasky_tmavsi90.pac",.9f,-4.f,-.003f,4.f,2.375f,256,256,13546172877813697002ull,0,false},
+    {559,3,"data3d\\mesto_dum.p3d","data\\tasky_tmavsi90.pac",.9f,-4.f,-.003f,4.f,2.375f,256,256,13546172877813697002ull,0,false}};
 struct OriginalRegionGeometry
 {
     std::string_view model;
@@ -210,7 +215,21 @@ inline constexpr OriginalRegionGeometry OriginalRegionGeometries[]{
     {"o\\hous\\skola.p3d",2.5f,2593,8,6843024849697546784ull,3873148727259018644ull},
     {"o\\hous\\skola.p3d",5.0f,1414,6,7487344513501232794ull,640562560758088378ull},
     {"o\\hous\\skola.p3d",7.0f,745,7,55823775213719421ull,9549012262321542300ull},
-    {"o\\hous\\skola.p3d",10.5f,453,6,8781888987896163311ull,640562560758088378ull}};
+    {"o\\hous\\skola.p3d",10.5f,453,6,8781888987896163311ull,640562560758088378ull},
+    {"data3d\\dum_mesto.p3d",0.800000012f,561,9,13229794698948348814ull,3342267452610380588ull},
+    {"data3d\\dum_mesto.p3d",1.5f,306,6,18304640444456031118ull,9157510334747740524ull},
+    {"data3d\\dum_mesto.p3d",4.5f,111,5,10151047913987740120ull,2862888864409434420ull},
+    {"data3d\\dum_mesto.p3d",8.0f,64,5,8644078405580184596ull,13286391708091769522ull},
+    {"data3d\\dum_mesto_in.p3d",0.5f,4568,43,15524842651965961501ull,866191006726804034ull},
+    {"data3d\\dum_mesto_in.p3d",1.0f,2902,43,17550286268353246670ull,10132856651103183960ull},
+    {"data3d\\dum_mesto_in.p3d",2.0f,1671,39,390129015079528947ull,7458023366274878989ull},
+    {"data3d\\dum_mesto_in.p3d",4.0f,968,29,8894436870274565806ull,2001253423388972577ull},
+    {"data3d\\dum_mesto_in.p3d",8.0f,475,19,7101397086502021948ull,5814390518578910121ull},
+    {"data3d\\dum_mesto_in.p3d",12.0f,115,10,18058121945835722342ull,6691408359009747107ull},
+    {"data3d\\mesto_dum.p3d",0.800000012f,561,9,3212206315252044389ull,3342267452610380588ull},
+    {"data3d\\mesto_dum.p3d",1.5f,306,6,3368909437175227566ull,9157510334747740524ull},
+    {"data3d\\mesto_dum.p3d",4.5f,111,5,2075397282267259389ull,2862888864409434420ull},
+    {"data3d\\mesto_dum.p3d",8.0f,64,5,4787542041987995589ull,13286391708091769522ull}};
 inline const OriginalMaterialRegion* OriginalRegion(unsigned identity)
 {
     for (const auto& r : OriginalMaterialRegions) if (r.identity==identity) return &r;
