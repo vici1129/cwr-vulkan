@@ -6,8 +6,8 @@ The [per-model ledger](evidence/material-modernization/progress.json) retains al
 and concrete prerequisite blockers. It is not a visible-coverage percentage.
 The original inventory remains an immutable baseline.
 
-After batch 24, 222 models have complete source assessment, 121 have partial source
-review, and 172 await source review. Complete assessments include explicitly
+After batch 25, 225 models have complete source assessment, 120 have partial source
+review, and 170 await source review. Complete assessments include explicitly
 retained optical cases, not only new material adoptions. Another 211 have no
 source-unknown triangles under the existing native classifier: their existing coverage and opacity,
 authored-lighting or geometry fallback contracts are retained. This last group
@@ -126,6 +126,13 @@ waterline states are excluded; explicit matching simulation clocks retain the
 original ocean and submerged deck. Wet/green posts, authored ceiling and mostly
 submerged end-board sources retain concrete limits. Original assets and water
 rendering are unchanged.
+Batch 25 [adds scoped lighthouse stone participation](material-modernization-batch-25.md)
+across three models / 10 levels / 17 placements. CPU reception and normal-route
+eligible reflected hits are demonstrated; native reception remains zero in the
+sampled views. Crown, balcony, mixed door, optical and distant stair sources
+retain concrete reasons. Fresh fixed-view and advancing-simulation controls
+align, but a frozen post-AA view mismatch remains unresolved and is excluded
+from matched appearance acceptance. No renderer or gate workaround is made.
 The [ordinary-adapter census](evidence/material-modernization/runtime-census.json)
 rechecks 726 models / **1,708 retained visual LODs** under the inspection configuration.
 The separate [source-only census](evidence/material-modernization/source-census.json)
@@ -141,7 +148,7 @@ pixel/geometry review; this is not newly implemented foliage coverage.
 Backlog 30 likewise retains the fitted-road contract after explicit source review.
 All 30 pilot tasks now have a disposition, but 16 remain partial source reviews;
 the wider 726-model assessment and remaining defensible implementations continue.
-Use the [batch-24 reproduction command](material-modernization-batch-24.md#cost-census-and-preservation)
+Use the [batch-25 reproduction command](material-modernization-batch-25.md#cost-census-and-preservation)
 for the current executable; earlier batch commands describe their policy snapshots.
 
 ## Batch 01: Nogova rough stone and boundary masonry

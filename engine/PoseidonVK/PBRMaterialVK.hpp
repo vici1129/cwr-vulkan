@@ -127,7 +127,10 @@ inline constexpr StockPBRMaterial EnhancedPBRMaterials[]{
     // Original timber deck boards and wood shingles, not the wet pier-side
     // photograph, authored ceiling or mostly submerged end-piece boards.
     {"data\\oldwood.pac", .85f, 4},
-    {"data\\dosky.pac", .85f, 4}};
+    {"data\\dosky.pac", .85f, 4},
+    // Continuous original lighthouse/platform stone, not the rusted door,
+    // lamp, stained crown/finial photo or balcony finish.
+    {"data\\majak_p3.pac", .90f, 6}};
 inline unsigned PBRReceiverFamily(unsigned id)
 {
     if (id >= 64 && id < 64 + std::size(StockPBRMaterials)) return StockPBRMaterials[id - 64].receiverFamily;

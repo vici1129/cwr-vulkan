@@ -389,6 +389,27 @@ TEST_CASE("Dedicated timber sources preserve original floor lighting and mixed p
         [&](const auto& g){return g.model==underside->model;})==4);
 }
 
+TEST_CASE("Lighthouse masonry retains crown lamp door and original lighting contracts",
+          "[Graphics][vulkan-shape][material-qualification]")
+{
+    REQUIRE(128+std::size(vk::EnhancedPBRMaterials)<=vk::SourceDiffuseIdentity);
+    const auto key=std::string_view("data\\majak_p3.pac");
+    const auto source=vk::OriginalMaterialSource(key);
+    REQUIRE(source.identity==204);REQUIRE(source.family==6);REQUIRE(source.roughness==.9f);
+    REQUIRE_FALSE(vk::StockPBRIdentity(key));REQUIRE(vk::PBRMaterial(key,128)==0);
+    REQUIRE(vk::PBRMaterial(key,128,true)==.9f);
+    REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::None,NoClamp,true,true)==vk::MaterialRejection::None);
+    REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::AuthoredLighting,NoClamp,true,true)==vk::MaterialRejection::AuthoredLighting);
+    REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::Geometry,NoClamp,true,true)==vk::MaterialRejection::Geometry);
+    REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::None,IsAlpha,true,true)==vk::MaterialRejection::RenderBehavior);
+    REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::None,NoClamp,false,true)==vk::MaterialRejection::RenderBehavior);
+    REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::None,NoClamp,true,false)==vk::MaterialRejection::RenderBehavior);
+    for (const auto excluded : {"data\\majak_pokus2.pac","data\\majak_podlaha.pac","data\\majakdvere3.pac",
+        "data\\majaksvetlo.pac","data\\majakpschody.pac","data\\black_sum.pac",
+        "data\\majak_p3.paa","other\\majak_p3.pac"})
+        REQUIRE_FALSE(vk::OriginalMaterialSource(excluded));
+}
+
 TEST_CASE("Pier timber proof retains original waterline authored ceiling and submerged end contracts",
           "[Graphics][vulkan-shape][material-qualification]")
 {
