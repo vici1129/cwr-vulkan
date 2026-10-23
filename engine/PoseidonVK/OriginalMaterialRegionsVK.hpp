@@ -164,7 +164,28 @@ inline constexpr OriginalMaterialRegion OriginalMaterialRegions[]{
     {612,5,"data3d\\dumruina.p3d","data\\domek1_fr.pac",0.9f,0.675f,0.472f,0.746f,0.621f,128,256,6237457539494351429ull,49152},
     {613,5,"data3d\\dumruina.p3d","data\\domek1_side.pac",0.9f,0.4f,0.729f,0.499f,0.977f,256,128,8894902977663425111ull,49152},
     {614,5,"data3d\\dumruina.p3d","data\\druina_f.pac",0.9f,0.887f,0.77f,0.908f,0.99f,256,256,6851970734246394733ull,49152},
-    {615,5,"data3d\\dumruina.p3d","data\\druina_s.pac",0.9f,0.919f,-0.06f,1.f,0.992f,256,256,8907955257061210628ull,16384}};
+    {615,5,"data3d\\dumruina.p3d","data\\druina_s.pac",0.9f,0.919f,-0.06f,1.f,0.992f,256,256,8907955257061210628ull,16384},
+    // Original Nogova industrial buildings: inspected original faces and pixels.
+    {616,6,"o\\hous\\benzina.p3d","o\\hous\\benzina01.pac",0.9f,-16.f,0.722f,16.f,0.762f,512,512,6801732555674819419ull,32768,true},
+    {617,0,"o\\hous\\benzina.p3d","o\\hous\\benzina01.pac",0.9f,-16.f,0.59f,16.f,0.673f,512,512,6801732555674819419ull,32768,false},
+    {619,0,"o\\hous\\benzina.p3d","o\\hous\\benzina_strop.pac",0.9f,-16.f,-16.f,16.f,16.f,512,512,3599621086575245136ull,0,false},
+    {620,5,"o\\hous\\benzina.p3d","o\\hous\\pumpa_barak.pac",0.9f,-16.f,0.5f,16.f,1.f,512,512,15620128710104754233ull,32768,true},
+    {621,6,"o\\hous\\benzina.p3d","o\\hous\\tovarna1_podlaha1.pac",0.9f,-16.f,-16.f,16.f,16.f,512,512,6100961177904132923ull,0,true},
+    {623,5,"o\\hous\\hangar_2.p3d","o\\hous\\vlnityplot02.pac",0.9f,-16.f,-16.f,16.f,16.f,512,512,13751937356395318224ull,0,true},
+    {624,0,"o\\hous\\tovarna1.p3d","o\\hous\\doravnik.pac",0.9f,-16.f,0.f,16.f,0.241f,512,512,16221704915656700048ull,32768,false},
+    {625,0,"o\\hous\\tovarna1.p3d","o\\hous\\doravnik.pac",0.9f,-16.f,0.642f,16.f,1.003f,512,512,16221704915656700048ull,32768,false},
+    {626,6,"o\\hous\\tovarna1.p3d","o\\hous\\tovarna1_podklad.pac",0.9f,-16.f,-16.f,16.f,16.f,256,256,83775849856703069ull,0,true},
+    {627,6,"o\\hous\\tovarna1.p3d","o\\hous\\tovarna1_podlaha1.pac",0.9f,-16.f,-16.f,16.f,16.f,512,512,6100961177904132923ull,0,true},
+    {628,5,"o\\hous\\tovarna1.p3d","o\\hous\\tovarna1_stenainter.pac",0.9f,-16.f,-0.001f,16.f,0.499f,512,512,7171769500730650033ull,0,true},
+    {629,5,"o\\hous\\tovarna1.p3d","o\\hous\\tovarna1_stenalux.pac",0.9f,-16.f,0.81f,16.f,1.f,512,512,9286466506326686459ull,0,true},
+    {633,5,"o\\hous\\tovarna1.p3d","o\\hous\\tovarna1_stenaspod.pac",0.9f,-16.f,-16.f,16.f,16.f,512,512,5466802115847009576ull,0,true},
+    {634,5,"o\\hous\\tovarna1.p3d","o\\hous\\tovarna1_strop1.pac",0.9f,-16.f,-16.f,16.f,16.f,512,512,14016497444941050340ull,0,true},
+    {635,0,"o\\hous\\tovarna1.p3d","o\\hous\\tovarna1_vrata.pac",0.9f,-16.f,0.f,16.f,0.073f,512,512,16784712705505509660ull,32768,false},
+    {636,6,"o\\hous\\vysilac_fm.p3d","o\\hous\\tovarna1_podlaha1.pac",0.9f,-16.f,-16.f,16.f,16.f,512,512,6100961177904132923ull,0,true},
+    {637,0,"o\\hous\\vysilac_fm.p3d","o\\hous\\vysfm_2.pac",0.9f,-16.f,-16.f,16.f,16.f,128,256,179699150477140278ull,0,false},
+    {638,0,"o\\hous\\vysilac_fm.p3d","o\\hous\\vysfm_main.pac",0.9f,0.f,0.591f,1.f,1.f,512,512,8684224038013938358ull,0,false},
+    {639,0,"o\\hous\\vysilac_fm.p3d","o\\hous\\vysfm_main.pac",0.9f,0.f,0.f,0.5f,0.5f,512,512,8684224038013938358ull,0,false},
+    {640,0,"o\\hous\\tovarna1.p3d","o\\hous\\tovarna1_vrata.pac",0.9f,0.58f,0.073f,1.f,1.f,512,512,16784712705505509660ull,32768,false}};
 struct OriginalRegionGeometry
 {
     std::string_view model;
@@ -364,7 +385,24 @@ inline constexpr OriginalRegionGeometry OriginalRegionGeometries[]{
     {"data3d\\dumruina.p3d",1.5f,324,6,5931527609459071581ull,13722010174476748493ull},
     {"data3d\\dumruina.p3d",2.5f,218,6,8561479465346625898ull,13813516788222695557ull},
     {"data3d\\dumruina.p3d",4.f,130,5,7221849376374674186ull,448198932474945418ull},
-    {"data3d\\dumruina.p3d",6.5f,42,3,13768666065294067188ull,16270042924690560889ull}};
+    {"data3d\\dumruina.p3d",6.5f,42,3,13768666065294067188ull,16270042924690560889ull},
+    {"o\\hous\\benzina.p3d",0.5f,1331,6,18151060609422252041ull,12716003657386347446ull},
+    {"o\\hous\\benzina.p3d",1.5f,883,6,9594287972152523460ull,15224326383742776336ull},
+    {"o\\hous\\benzina.p3d",3.f,486,5,16046115058400897781ull,15224326383742776336ull},
+    {"o\\hous\\benzina.p3d",5.f,278,5,6126060910786893730ull,15224326383742776336ull},
+    {"o\\hous\\hangar_2.p3d",8.f,220,6,12330731485851089607ull,9810277170746996045ull},
+    {"o\\hous\\hangar_2.p3d",12.f,112,4,6137765894343846747ull,14910084028706863115ull},
+    {"o\\hous\\hangar_2.p3d",20.f,43,2,12305995152033489653ull,14910084028706863115ull},
+    {"o\\hous\\tovarna1.p3d",0.5f,13571,47,6683354467360407657ull,11910978504133824009ull},
+    {"o\\hous\\tovarna1.p3d",1.f,7108,46,767650916224296230ull,12353635939458584421ull},
+    {"o\\hous\\tovarna1.p3d",1.5f,3361,42,16401688393935626952ull,10894600496500258633ull},
+    {"o\\hous\\tovarna1.p3d",3.f,1464,19,2145939803518872566ull,5582724051612693506ull},
+    {"o\\hous\\tovarna1.p3d",5.f,724,16,10492678817087190058ull,215119497455350527ull},
+    {"o\\hous\\tovarna1.p3d",7.f,332,6,6172486938151309276ull,13496792594476089774ull},
+    {"o\\hous\\vysilac_fm.p3d",1.5f,941,7,11245590564669575808ull,8137094128029130190ull},
+    {"o\\hous\\vysilac_fm.p3d",3.f,695,6,12833058314803967094ull,8137094128029130190ull},
+    {"o\\hous\\vysilac_fm.p3d",5.f,563,6,2558469777690138663ull,8137094128029130190ull},
+    {"o\\hous\\vysilac_fm.p3d",9.f,239,6,14123251524929552291ull,6440892229967477466ull}};
 inline const OriginalMaterialRegion* OriginalRegion(unsigned identity)
 {
     for (const auto& r : OriginalMaterialRegions) if (r.identity==identity) return &r;
