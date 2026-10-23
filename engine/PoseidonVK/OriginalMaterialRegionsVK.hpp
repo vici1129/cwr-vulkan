@@ -185,7 +185,32 @@ inline constexpr OriginalMaterialRegion OriginalMaterialRegions[]{
     {637,0,"o\\hous\\vysilac_fm.p3d","o\\hous\\vysfm_2.pac",0.9f,-16.f,-16.f,16.f,16.f,128,256,179699150477140278ull,0,false},
     {638,0,"o\\hous\\vysilac_fm.p3d","o\\hous\\vysfm_main.pac",0.9f,0.f,0.591f,1.f,1.f,512,512,8684224038013938358ull,0,false},
     {639,0,"o\\hous\\vysilac_fm.p3d","o\\hous\\vysfm_main.pac",0.9f,0.f,0.f,0.5f,0.5f,512,512,8684224038013938358ull,0,false},
-    {640,0,"o\\hous\\tovarna1.p3d","o\\hous\\tovarna1_vrata.pac",0.9f,0.58f,0.073f,1.f,1.f,512,512,16784712705505509660ull,32768,false}};
+    {640,0,"o\\hous\\tovarna1.p3d","o\\hous\\tovarna1_vrata.pac",0.9f,0.58f,0.073f,1.f,1.f,512,512,16784712705505509660ull,32768,false},
+    // Batch 35: original church plaster, masonry and ambient-preserving roof.
+    {641,5,"data3d\\kostel.p3d","data\\k1_back_back.pac",0.9f,-0.011f,0.105f,1.f,1.f,256,256,16423010447666688775ull,16384,true},
+    {645,5,"data3d\\kostel.p3d","data\\k1_main_back.pac",0.9f,0.f,0.08f,1.f,1.f,256,256,3014036173356596896ull,0,true},
+    {651,5,"data3d\\kostel.p3d","data\\k1_middle_side.pac",0.9f,0.f,0.08f,1.f,1.f,256,256,12556947561234800875ull,0,true},
+    {652,5,"data3d\\kostel.p3d","data\\k1_vez_in.pac",0.9f,-2.f,0.f,2.f,1.f,256,256,14404042880409694810ull,0,true},
+    {660,0,"data3d\\kostel.p3d","data\\k1_vez_top.pac",0.9f,-2.f,0.f,2.f,1.f,128,128,2265028638277395098ull,0,false},
+    {661,5,"data3d\\kostel3.p3d","data\\k2_back_main.pac",0.9f,0.f,0.f,1.f,0.94f,256,256,1334997022389212427ull,0,true},
+    {662,5,"data3d\\kostel3.p3d","data\\k2_front_main.pac",0.9f,-2.f,0.46f,2.f,0.94f,256,256,6335845803320507506ull,0,true},
+    {663,5,"data3d\\kostel3.p3d","data\\k2_side_back.pac",0.9f,0.2f,0.07f,0.38f,0.9f,256,256,8003563687648358738ull,0,true},
+    {664,5,"data3d\\kostel3.p3d","data\\k2_side_back_back.pac",0.9f,0.f,0.07f,0.37f,0.79f,128,128,15386299788512755097ull,0,true},
+    {666,5,"data3d\\kostel3.p3d","data\\k2_vez_bot_side.pac",0.9f,0.068f,0.037f,0.456f,0.758f,256,256,17641800593525859298ull,0,true},
+    {667,5,"data3d\\kostel3.p3d","data\\k2_vez_bot_side.pac",0.9f,0.524f,0.037f,0.935f,0.758f,256,256,17641800593525859298ull,0,true},
+    {668,5,"data3d\\kostel3.p3d","data\\k2_vez_top_front.pac",0.9f,0.06f,0.035f,0.346f,0.473f,256,256,4933057603312722687ull,0,true},
+    {669,5,"data3d\\kostel3.p3d","data\\k2_vez_top_front.pac",0.9f,0.643f,0.035f,0.937f,0.473f,256,256,4933057603312722687ull,0,true},
+    {670,5,"data3d\\kostel3.p3d","data\\k2_vez_top_front.pac",0.9f,0.06f,0.507f,0.388f,1.f,256,256,4933057603312722687ull,0,true},
+    {671,5,"data3d\\kostel3.p3d","data\\k2_vez_top_front.pac",0.9f,0.6f,0.507f,0.937f,1.f,256,256,4933057603312722687ull,0,true},
+    {672,5,"data3d\\kostelik.p3d","data\\kaple_apsida_rside.pac",0.9f,-0.016f,0.14f,0.68f,0.87f,64,128,10892765231046570401ull,16384,true},
+    {673,5,"data3d\\kostelik.p3d","data\\kaple_main_back.pac",0.9f,0.058f,0.42f,0.923f,1.f,256,256,5853896552202648217ull,0,true},
+    {674,5,"data3d\\kostelik.p3d","data\\kaple_main_lside.pac",0.9f,-0.021f,0.05f,1.034f,0.4f,256,256,10900516450395627648ull,16384,true},
+    {675,5,"data3d\\kostelik.p3d","data\\kaple_main_lside.pac",0.9f,-0.021f,0.75f,1.034f,1.003f,256,256,10900516450395627648ull,49152,true},
+    {676,5,"data3d\\kostelik.p3d","data\\kaple_portal_rside.pac",0.9f,0.08f,0.328f,0.837f,1.002f,128,256,10066479803042512263ull,32768,true},
+    {677,5,"data3d\\kostelik.p3d","data\\kaple_vezicka_lside.pac",0.9f,0.1f,0.28f,0.77f,0.83f,64,128,15712170356749646781ull,0,true},
+    {678,6,"o\\misc\\kapl.p3d","o\\misc\\kplck.pac",0.9f,0.5f,0.005f,0.993f,0.705f,512,512,8202243489652701348ull,0,false},
+    {679,6,"o\\misc\\kapl.p3d","o\\misc\\kplck.pac",0.9f,0.055f,0.553f,0.435f,0.703f,512,512,8202243489652701348ull,0,true},
+    {680,6,"o\\misc\\kapl.p3d","o\\misc\\kplck.pac",0.9f,0.827f,0.717f,0.987f,0.969f,512,512,8202243489652701348ull,0,true}};
 struct OriginalRegionGeometry
 {
     std::string_view model;
@@ -402,7 +427,26 @@ inline constexpr OriginalRegionGeometry OriginalRegionGeometries[]{
     {"o\\hous\\vysilac_fm.p3d",1.5f,941,7,11245590564669575808ull,8137094128029130190ull},
     {"o\\hous\\vysilac_fm.p3d",3.f,695,6,12833058314803967094ull,8137094128029130190ull},
     {"o\\hous\\vysilac_fm.p3d",5.f,563,6,2558469777690138663ull,8137094128029130190ull},
-    {"o\\hous\\vysilac_fm.p3d",9.f,239,6,14123251524929552291ull,6440892229967477466ull}};
+    {"o\\hous\\vysilac_fm.p3d",9.f,239,6,14123251524929552291ull,6440892229967477466ull},
+    {"data3d\\kostel.p3d",1.f,1741,19,18320074246990853131ull,3307120048830419513ull},
+    {"data3d\\kostel.p3d",2.f,965,20,11582627389829547877ull,15587550143480241759ull},
+    {"data3d\\kostel.p3d",4.f,441,13,17782247987578667451ull,7927399726965041396ull},
+    {"data3d\\kostel.p3d",6.f,265,12,15492847810892696824ull,8863441038024072412ull},
+    {"data3d\\kostel.p3d",9.f,161,12,17191583906189778964ull,17089936930750311504ull},
+    {"data3d\\kostel3.p3d",2.f,1394,20,14144572603223829810ull,17627307035868362435ull},
+    {"data3d\\kostel3.p3d",4.f,655,20,15932817373322249868ull,11243719406278502731ull},
+    {"data3d\\kostel3.p3d",7.f,370,19,14358104058207798428ull,18142716880240871940ull},
+    {"data3d\\kostel3.p3d",9.f,185,12,14628716189242505801ull,12185071095838477049ull},
+    {"data3d\\kostel3.p3d",12.f,123,11,4419447437481064244ull,3580269821949306594ull},
+    {"data3d\\kostelik.p3d",1.f,656,10,17785096051985729357ull,3288709459819230646ull},
+    {"data3d\\kostelik.p3d",2.f,329,8,12877460376642751012ull,15525655842948521477ull},
+    {"data3d\\kostelik.p3d",4.f,197,7,7593980424360141212ull,12946733065102626674ull},
+    {"data3d\\kostelik.p3d",7.f,122,7,9111877143217899043ull,8589602148111343928ull},
+    {"data3d\\kostelik.p3d",9.f,81,6,1618778067944165358ull,7917561191599899127ull},
+    {"data3d\\kostelik.p3d",12.f,38,4,2198518086552883577ull,7329785406570712931ull},
+    {"o\\misc\\kapl.p3d",0.f,168,1,15137372396012286468ull,18110065149085066651ull},
+    {"o\\misc\\kapl.p3d",1.f,94,1,4893390489712652644ull,18110065149085066651ull},
+    {"o\\misc\\kapl.p3d",1.5f,58,1,8258530595982604484ull,18110065149085066651ull}};
 inline const OriginalMaterialRegion* OriginalRegion(unsigned identity)
 {
     for (const auto& r : OriginalMaterialRegions) if (r.identity==identity) return &r;

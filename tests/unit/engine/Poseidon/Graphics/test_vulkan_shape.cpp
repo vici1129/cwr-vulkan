@@ -95,6 +95,29 @@ TEST_CASE("Original atlas regions require exact geometry, pixels and entire orig
     REQUIRE(vk::OriginalRegionTextureBindings(bindings)!=vk::OriginalRegionTextureBindings(swapped));
 }
 
+TEST_CASE("Original church regions preserve glazing, doors and shrine artwork",
+          "[Graphics][vulkan-shape][material-qualification]")
+{
+    const auto selected=[](unsigned anchor,float u,float v) {
+        const std::array<std::array<float,2>,3> uv{{{u,v},{u+.001f,v},{u,v+.001f}}};
+        return vk::SelectOriginalRegion(*vk::OriginalRegion(anchor),uv,ClampU|ClampV);
+    };
+    REQUIRE(selected(651,.45f,.30f)==651); // Blank plaster with filled recesses.
+    REQUIRE_FALSE(selected(651,.45f,.02f)); // Separate roof row.
+    // Built full-fan trials failed PBR-on/GI-off raster appearance, including
+    // reception=false controls. Do not silently restore their window jambs.
+    for (unsigned id : {642,643,644,646,647,648,649,650,653,654,655,656,657,658,659,665})
+        REQUIRE_FALSE(vk::OriginalRegion(id));
+    REQUIRE_FALSE(selected(668,.50f,.25f)); // Shutter.
+    REQUIRE_FALSE(selected(668,.50f,.57f)); // Clock.
+    REQUIRE(selected(678,.70f,.40f)==678); // Plain shrine back.
+    REQUIRE_FALSE(selected(678,.25f,.40f)); // Painted devotional niche.
+    REQUIRE_FALSE(vk::OriginalRegion(660)->reception);
+    REQUIRE_FALSE(vk::OriginalRegion(678)->reception);
+    REQUIRE_FALSE(vk::OriginalMaterialSource("data\\k1_stara_prkna.pac"));
+    REQUIRE_FALSE(vk::OriginalMaterialSource("data\\zsu_det_insidehole.pac"));
+}
+
 TEST_CASE("Atlas region selection is unique, source-bound and sampler-aware",
           "[Graphics][vulkan-shape][material-qualification]")
 {

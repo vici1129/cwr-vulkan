@@ -6,8 +6,8 @@ The [per-model ledger](evidence/material-modernization/progress.json) retains al
 and concrete prerequisite blockers. It is not a visible-coverage percentage.
 The original inventory remains an immutable baseline.
 
-After batch 34, 360 models have complete source assessment, 119 have partial source
-review, and 36 await source review. Complete assessments include explicitly
+After batch 35, 364 models have complete source assessment, 117 have partial source
+review, and 34 await source review. Complete assessments include explicitly
 retained optical cases, not only new material adoptions. Another 211 have no
 source-unknown triangles under the existing native classifier: their existing coverage and opacity,
 authored-lighting or geometry fallback contracts are retained. This last group
@@ -207,6 +207,18 @@ original authored lighting, land, alpha and road/surface gates remain unchanged.
 All four source assessments close without implying full-model rendering coverage.
 Totals become 21,978 highest-detail / 43,556 alternative-LOD prerequisites,
 with 155 models in the assessment backlog and 437 distinct pending keys elsewhere.
+Batch 35 [assesses the four original churches and chapels](material-modernization-batch-35.md):
+19 visual LODs / 49 placements / all 29 pending keys. Twenty-four exact-model
+regions add rough plaster, mineral and ambient-preserving roof prerequisites.
+The isolated shrine demonstrates new native base/side reception; church-wall
+reception is demonstrated mainly on captured CPU-lit geometry. Independent new
+native reflector hits identify shrine and chapel regions, not the two larger
+churches in the bounded probes. Sixteen built raster failures are withdrawn,
+including their separately tested reflector-only variants. Optical artwork,
+whole-face atlas boundaries, authored lighting and sampler gates remain original.
+All four source assessments close without claiming full-model PBR coverage.
+Totals become 22,304 highest-detail / 44,246 alternative-LOD prerequisites,
+with 151 models in the assessment backlog and 408 distinct pending keys elsewhere.
 The [ordinary-adapter census](evidence/material-modernization/runtime-census.json)
 rechecks 726 models / **1,708 retained visual LODs** under the inspection configuration.
 The separate [source-only census](evidence/material-modernization/source-census.json)
