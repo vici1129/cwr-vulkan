@@ -6,7 +6,7 @@ The [per-model ledger](evidence/material-modernization/progress.json) retains al
 and concrete prerequisite blockers. It is not a visible-coverage percentage.
 The original inventory remains an immutable baseline.
 
-After batch 27, 228 models have complete source assessment, 119 have partial source
+After batch 28, 228 models have complete source assessment, 119 have partial source
 review, and 168 await source review. Complete assessments include explicitly
 retained optical cases, not only new material adoptions. Another 211 have no
 source-unknown triangles under the existing native classifier: their existing coverage and opacity,
@@ -149,6 +149,13 @@ atlas/road triangles retain specific fallback reasons. Six alpha road-overlay
 triangles keep their original contract. Native reception and eligible reflected
 hits are demonstrated in original Nogova views; CPU reception is reported
 separately. No lighting gate, geometry, shader or GL33 behavior is changed.
+Batch 28 [assesses common classic brick-house facades](material-modernization-batch-28.md)
+across three variants / 15 authored levels / 75 Malden placements. Broad original
+wall faces cross photographed windows, doors or pipes; conservative brick bands
+select no complete ordinary wall triangles, while the safe side-source region
+selects only small chimney faces. No rendering change qualifies. Original
+rendering and gates remain; these models stay partial with concrete regional
+limits recorded. No new native reception or coverage is counted.
 The [ordinary-adapter census](evidence/material-modernization/runtime-census.json)
 rechecks 726 models / **1,708 retained visual LODs** under the inspection configuration.
 The separate [source-only census](evidence/material-modernization/source-census.json)
