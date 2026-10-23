@@ -36,6 +36,10 @@ inline constexpr StockPBRMaterial StockPBRMaterials[]{
     {"data\\sloupek_bily_orezly_.pac", 0, 0}};
 inline unsigned StockPBRIdentity(std::string_view texture)
 {
+    // Original bytes and decoded pixels equal the supported shaded signpost.
+    // Reuse its lobe hint and family-zero PBR/reflector-only contract; the
+    // differently photographed unshaded names remain independent.
+    if (texture == "data\\sloup_bily_orez_v.pac") return 86;
     for (unsigned i = 0; i < std::size(StockPBRMaterials); ++i)
         if (texture == StockPBRMaterials[i].texture)
             return 64 + i;

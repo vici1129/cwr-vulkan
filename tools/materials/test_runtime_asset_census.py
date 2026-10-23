@@ -68,6 +68,25 @@ Qualification LOD 0 res=2e-41
             after['visualLODs'][0]['sections'][0].update(source=141, unknownSource=0, **{key: 1})
             self.assertTrue(compare_models(self.before, after, range(130, 152)))
 
+    def test_texture_replay_preserves_canonical_users_of_same_identity(self):
+        before=copy.deepcopy(self.before)
+        canonical=before['visualLODs'][0]['sections'][1]
+        canonical.update(source=86,eligible=1,unknownSource=0)
+        after=copy.deepcopy(before)
+        after['visualLODs'][0]['sections'][0].update(source=86,eligible=1,unknownSource=0)
+        pair=[('data/wall.pac',86)]
+        self.assertTrue(compare_models(before,after))
+        self.assertEqual(compare_models(before,after,texture_replay=pair),[])
+        self.assertTrue(compare_models(before,after,replay=[86]))
+        self.assertTrue(compare_models(before,after,texture_replay=[('data/other.pac',86)]))
+        self.assertTrue(compare_models(before,after,texture_replay=[('data/wall.pac',85)]))
+        for key in ('authoredLighting','renderBehavior','geometry'):
+            broken=copy.deepcopy(after)
+            broken['visualLODs'][0]['sections'][0].update(eligible=0,**{key:1})
+            self.assertTrue(compare_models(before,broken,texture_replay=pair))
+        declared=dict(after['visualLODs'][0]['sections'][0],declared=1)
+        with self.assertRaises(ValueError):section_signature(declared,texture_replay=pair)
+
     def test_declared_source_cannot_be_replayed(self):
         s = dict(self.before['visualLODs'][0]['sections'][0], source=141, declared=1)
         with self.assertRaises(ValueError):

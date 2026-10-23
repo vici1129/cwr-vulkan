@@ -74,7 +74,7 @@ def baseline_comparison_view(before, after, all_source_lods):
     return dict(after,visualLODs=[l for l in after['visualLODs'] if l['index'] in retained]), extra
 
 
-def section_signature(section, replay=(), regional_replay=()):
+def section_signature(section, replay=(), regional_replay=(), texture_replay=()):
     s = dict(section)
     regions = dict(s.get('regionalSources', {}))
     for identity in list(regions):
@@ -83,7 +83,9 @@ def section_signature(section, replay=(), regional_replay=()):
                 raise ValueError('Regional replay needs a bounded additional identity, not whole-source proof')
             s['eligible'] -= regions[identity]
             s['unknownSource'] += regions.pop(identity)
-    if s['source'] in replay:
+    # A new exact-name alias may reuse an old stock ID. Replaying that ID
+    # globally would also erase its already-supported canonical texture.
+    if s['source'] in replay or (s['texture'], s['source']) in texture_replay:
         if s['declared']:
             raise ValueError('Cannot replay a source-declared material as an enhanced identity')
         s['unknownSource'] += s['eligible']
@@ -93,7 +95,7 @@ def section_signature(section, replay=(), regional_replay=()):
             s['declared'], *(s[r] for r in REASONS), tuple(sorted(regions.items())))
 
 
-def compare_models(before, after, replay=(), regional_replay=()):
+def compare_models(before, after, replay=(), regional_replay=(), texture_replay=()):
     differences = []
     old = {lod['index']: lod for lod in before['visualLODs']}
     new = {lod['index']: lod for lod in after['visualLODs']}
@@ -107,7 +109,7 @@ def compare_models(before, after, replay=(), regional_replay=()):
                 differences.append({'lod': index, 'kind': key, 'old': a[key], 'runtime': b[key]})
         # Allocation/sort paths can reorder sections. Ordinals are not asset IDs.
         if collections.Counter(section_signature(s) for s in a['sections']) != collections.Counter(
-                section_signature(s, replay, regional_replay) for s in b['sections']):
+                section_signature(s, replay, regional_replay, texture_replay) for s in b['sections']):
             differences.append({'lod': index, 'kind': 'complete section prerequisite multiset'})
     return differences
 
@@ -124,6 +126,8 @@ def main():
     parser.add_argument('--replay-enhanced-from', type=int)
     parser.add_argument('--replay-enhanced-through', type=int)
     parser.add_argument('--replay-regional-identities', nargs='+', type=int, default=[])
+    parser.add_argument('--replay-texture-identity', nargs=2, action='append', default=[],
+        metavar=('TEXTURE', 'IDENTITY'), help='Replay only this exact texture/identity pair, preserving other users of the same stock identity')
     parser.add_argument('--legacy-report-cache',type=Path,
         help='Verify/reparse original historical reports; required to correct removed-LOD index artifacts')
     parser.add_argument('--all-source-lods',action='store_true',
@@ -141,6 +145,12 @@ def main():
     if (first is None) != (last is None) or (first is not None and not 128 <= first <= last < 256):
         parser.error('supply both replay interval endpoints, inside the enhanced identity range 128..255')
     replay = range(first, last+1) if first is not None else ()
+    texture_replay = []
+    for texture, identity in args.replay_texture_identity:
+        try:identity = int(identity)
+        except ValueError:parser.error('texture replay identity must be an integer')
+        if not 1 <= identity < 256:parser.error('texture replay identity must be inside 1..255')
+        texture_replay.append((texture.lower().replace('\\', '/'), identity))
     inventory = json.loads(args.inventory.read_text())
     placed = [m for m in inventory['models'] if 'inspection' in m]
     raw = args.cache/'models'
@@ -185,7 +195,7 @@ def main():
                     'reason':'Legacy parser copied later nonvisual native metadata into removed declared visual slots. Original inventory remains unchanged.'}
         after,extra=baseline_comparison_view(before,models[model['path']],args.all_source_lods)
         uncompared.extend({'model':model['path'],**r} for r in extra)
-        for difference in compare_models(before, after, replay, args.replay_regional_identities):
+        for difference in compare_models(before, after, replay, args.replay_regional_identities, texture_replay):
             differences.append({'model': model['path'], **difference})
     summary = {'models': len(models), 'visualLODs': sum(len(m['visualLODs']) for m in models.values()),
                'declaredVisualLODs':sum(m.get('declaredVisualLODCount',len(m['visualLODs'])) for m in models.values()),
@@ -199,6 +209,7 @@ def main():
         'comparison': 'All visual LOD indices, resolutions, normals, vertex hints, complete section multisets and rejection buckets. Section ordinals are deliberately not stable IDs. Original inventory predates UV-bound diagnostics; UV equality is separately checked in batch audits.',
         'replayedEnhancedIdentityInterval': [first, last] if first is not None else [],
         'replayedRegionalIdentities': args.replay_regional_identities,
+        'replayedTextureIdentities': texture_replay,
         'historicalReportsVerified':len(placed) if args.legacy_report_cache else 0,
         'legacyLODIndexCorrections':corrections,'sourceOnlyWithoutRetainedBaseline':uncompared,
         'historicalResolutionDiagnostics':historical_resolutions,

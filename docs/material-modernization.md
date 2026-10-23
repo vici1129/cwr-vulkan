@@ -6,7 +6,7 @@ The [per-model ledger](evidence/material-modernization/progress.json) retains al
 and concrete prerequisite blockers. It is not a visible-coverage percentage.
 The original inventory remains an immutable baseline.
 
-After batch 31, 352 models have complete source assessment, 119 have partial source
+After batch 32, 352 models have complete source assessment, 119 have partial source
 review, and 44 await source review. Complete assessments include explicitly
 retained optical cases, not only new material adoptions. Another 211 have no
 source-unknown triangles under the existing native classifier: their existing coverage and opacity,
@@ -179,6 +179,12 @@ sheet optics do not establish a safe new material. Transparency, damaged opening
 authored lighting and invalid-normal exclusions remain. All 11 reviews close with
 zero new rendering coverage or qualified triangles. Global pending assessment keys
 number 468; none remains pending within this batch's 11 models.
+Batch 32 [builds and tests the matching signpost and corrugated-panel candidates](material-modernization-batch-32.md).
+The shaded signpost source reuses identity 86; exact-model fence regions 589/590
+use rough dielectric PBR/reflector-only treatment. Original daylight/dusk, Off/On,
+motion and native reflector checks qualify both without adding GI receivers.
+The 424 highest-detail / 442 alternative-LOD prerequisite additions do not count
+as new source assessments. All assessment states and the 163-model backlog remain.
 The [ordinary-adapter census](evidence/material-modernization/runtime-census.json)
 rechecks 726 models / **1,708 retained visual LODs** under the inspection configuration.
 The separate [source-only census](evidence/material-modernization/source-census.json)
@@ -194,7 +200,8 @@ pixel/geometry review; this is not newly implemented foliage coverage.
 Backlog 30 likewise retains the fitted-road contract after explicit source review.
 All 30 pilot tasks now have a disposition, but 16 remain partial source reviews;
 the wider 726-model assessment and remaining defensible implementations continue.
-Use the [batch-29 reproduction command](material-modernization-batch-29.md#validation-and-reproduction)
+Use the [batch-29 inspection command](material-modernization-batch-29.md#validation-and-reproduction)
+with the [batch-32 census replay additions](material-modernization-batch-32.md)
 for the current executable; earlier batch commands describe their policy snapshots.
 
 ## Batch 01: Nogova rough stone and boundary masonry

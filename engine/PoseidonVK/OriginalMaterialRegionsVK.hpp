@@ -133,7 +133,12 @@ inline constexpr OriginalMaterialRegion OriginalMaterialRegions[]{
     {585,5,"o\\hous\\dum_patrovy01d.p3d","o\\hous\\dum_patrovy_balkon.pac",.9f,0.f,0.f,0.44f,0.47f,256,256,14158396793892771577ull,0},
     {586,5,"o\\hous\\dum_patrovy01prujezd.p3d","o\\hous\\dum_patrovy_balkon.pac",.9f,0.f,0.f,0.44f,0.47f,256,256,14158396793892771577ull,0},
     {587,5,"o\\hous\\dum_patr_nizky_prujezd.p3d","o\\hous\\interier_chodba01.pac",.9f,-0.001f,-0.001f,0.499f,1.001f,512,512,5968244007576842269ull,49152},
-    {588,5,"o\\hous\\dum_patrovy01prujezd.p3d","o\\hous\\interier_chodba01.pac",.9f,-0.001f,-0.001f,0.499f,1.001f,512,512,5968244007576842269ull,49152}};
+    {588,5,"o\\hous\\dum_patrovy01prujezd.p3d","o\\hous\\interier_chodba01.pac",.9f,-0.001f,-0.001f,0.499f,1.001f,512,512,5968244007576842269ull,49152},
+    // Batch 32: broad original sheet faces only. A rough dielectric
+    // approximation retains photographed corrugation and original ambient.
+    // Supports/hardware and all authored lighting stay outside this region.
+    {589,0,"o\\misc\\plot_vlnplech1.p3d","o\\hous\\vlnityplot02.pac",.9f,0.f,.5f,1.f,1.f,512,512,13751937356395318224ull,49152,false},
+    {590,0,"o\\misc\\plot_vlnplech2.p3d","o\\hous\\vlnityplot02.pac",.9f,0.f,.5f,1.f,1.f,512,512,13751937356395318224ull,49152,false}};
 struct OriginalRegionGeometry
 {
     std::string_view model;
@@ -310,7 +315,13 @@ inline constexpr OriginalRegionGeometry OriginalRegionGeometries[]{
     {"o\\hous\\most_stred30.p3d",1.f,1268,3,14780229580148744717ull,8554578632992421120ull},
     {"o\\hous\\most_stred30.p3d",2.5f,780,4,10009608823202926598ull,2211745915036769752ull},
     {"o\\hous\\most_stred30.p3d",5.f,500,4,5878835632165113038ull,2211745915036769752ull},
-    {"o\\hous\\most_stred30.p3d",9.f,198,4,15025897628212485069ull,13194166653877726212ull}};
+    {"o\\hous\\most_stred30.p3d",9.f,198,4,15025897628212485069ull,13194166653877726212ull},
+    {"o\\misc\\plot_vlnplech1.p3d",1.5f,56,2,11321681151004873519ull,7355607920613948024ull},
+    {"o\\misc\\plot_vlnplech1.p3d",2.5f,40,3,1920637591834022360ull,12904763434220526056ull},
+    {"o\\misc\\plot_vlnplech1.p3d",5.68439007f,8,1,6625424391375498599ull,7355607920613948024ull},
+    {"o\\misc\\plot_vlnplech2.p3d",1.5f,56,2,7168004884271722351ull,7355607920613948024ull},
+    {"o\\misc\\plot_vlnplech2.p3d",2.5f,40,3,16689575607842308744ull,12904763434220526056ull},
+    {"o\\misc\\plot_vlnplech2.p3d",5.68439007f,8,1,6625424391375498599ull,7355607920613948024ull}};
 inline const OriginalMaterialRegion* OriginalRegion(unsigned identity)
 {
     for (const auto& r : OriginalMaterialRegions) if (r.identity==identity) return &r;

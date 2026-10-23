@@ -703,7 +703,7 @@ TEST_CASE("Concrete roadside blocks do not classify rails rusty pipes or sign co
     REQUIRE(vk::PBRMaterial("data\\patnik_new.pac",128)==0);
     REQUIRE(vk::PBRMaterial("data\\patnik_new.pac",128,true)==.9f);
     for (const auto key : {"data\\patnik_new.paa","other\\patnik_new.pac",
-        "data\\sloupek_bily_orezly.pac","data\\sloup_bily_orez_v.pac","data\\rez_trubka.pac",
+        "data\\sloupek_bily_orezly.pac","data\\sloup_bily_orez.pac","data\\rez_trubka.pac",
         "data\\nemocnice_zn.pac","data\\nemocnice_zn_bck.pac","data\\pumpa.pac",
         "data\\pumpa_bck.pac","data\\slepa.pac","data\\sterk.pac"})
         REQUIRE_FALSE(vk::OriginalMaterialSource(key));
@@ -717,6 +717,54 @@ TEST_CASE("Concrete roadside blocks do not classify rails rusty pipes or sign co
     REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::None,IsTransparent,true,true)==vk::MaterialRejection::RenderBehavior);
     REQUIRE_FALSE(vk::OriginalMaterialReception(vk::MaterialRejection::None,false,true));
     REQUIRE_FALSE(vk::OriginalMaterialReception(vk::MaterialRejection::None,true,false));
+}
+
+TEST_CASE("Matching shaded signpost source retains the existing reflector-only contract",
+          "[Graphics][vulkan-shape][material-qualification]")
+{
+    const auto key="data\\sloup_bily_orez_v.pac";
+    const auto source=vk::OriginalMaterialSource(key);
+    REQUIRE(source.identity==86);REQUIRE(source.family==0);
+    for (int power : {-1,0,5,128,100000})
+        for (bool enhanced : {false,true})
+            REQUIRE(vk::PBRMaterial(key,power,enhanced)==vk::PBRMaterial("data\\sloupek_bily_orezly_.pac",power,enhanced));
+    REQUIRE_FALSE(vk::OriginalMaterialSource("data\\sloup_bily_orez.pac"));
+    REQUIRE_FALSE(vk::OriginalMaterialSource("data\\sloup_bily_orez_v.paa"));
+    REQUIRE_FALSE(vk::OriginalMaterialSource("addon\\sloup_bily_orez_v.pac"));
+    for (bool software : {false,true})
+    {
+        vk::ShapeLighting lighting;
+        lighting.pbr={.6f,.04f,0,86};lighting.pbrDiffuse[3]=0;lighting.rtWater[3]=1;
+        vk::QualifyGIReceiver(lighting,software);
+        REQUIRE(lighting.rtWater[3]==1);REQUIRE(lighting.pbrDiffuse[3]==0);
+    }
+    REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::AuthoredLighting,ClampU|ClampV,true,true)==vk::MaterialRejection::AuthoredLighting);
+    REQUIRE(vk::QualifyOriginalMaterial(source,vk::MaterialRejection::None,IsAlpha,true,true)==vk::MaterialRejection::RenderBehavior);
+}
+
+TEST_CASE("Corrugated broad panels are exact-model reflector-only regions",
+          "[Graphics][vulkan-shape][material-qualification]")
+{
+    REQUIRE_FALSE(vk::OriginalMaterialSource("o\\hous\\vlnityplot02.pac"));
+    for (unsigned id : {589u,590u})
+    {
+        const auto* region=vk::OriginalRegion(id);REQUIRE(region);
+        REQUIRE(region->family==0);REQUIRE_FALSE(region->reception);REQUIRE(region->roughness==.9f);
+        const std::array<std::array<float,2>,3> panel{{{.00283637f,.502442f},{.996571f,.502442f},{.996571f,.997234f}}};
+        REQUIRE(vk::SelectOriginalRegion(*region,panel,ClampU|ClampV)==id);
+        REQUIRE_FALSE(vk::SelectOriginalRegion(*region,panel,NoClamp));
+        auto support=panel;support[0]={.57f,.495777f};
+        REQUIRE_FALSE(vk::SelectOriginalRegion(*region,support,ClampU|ClampV));
+        unsigned levels=0;
+        for (const auto& g : vk::OriginalRegionGeometries)
+            if (g.model==region->model)
+            {
+                REQUIRE(vk::OriginalRegionCandidate(g.model,g.resolution,g.vertices,g.sections,g.fingerprint,region->texture)==id);
+                REQUIRE_FALSE(vk::OriginalRegionCandidate("o\\misc\\other.p3d",g.resolution,g.vertices,g.sections,g.fingerprint,region->texture));
+                ++levels;
+            }
+        REQUIRE(levels==3);
+    }
 }
 
 TEST_CASE("Chimney brick regions preserve frame aperture and original-face boundaries",
