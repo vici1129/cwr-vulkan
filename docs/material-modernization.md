@@ -6,8 +6,8 @@ The [per-model ledger](evidence/material-modernization/progress.json) retains al
 and concrete prerequisite blockers. It is not a visible-coverage percentage.
 The original inventory remains an immutable baseline.
 
-After batch 32, 352 models have complete source assessment, 119 have partial source
-review, and 44 await source review. Complete assessments include explicitly
+After batch 33, 356 models have complete source assessment, 119 have partial source
+review, and 40 await source review. Complete assessments include explicitly
 retained optical cases, not only new material adoptions. Another 211 have no
 source-unknown triangles under the existing native classifier: their existing coverage and opacity,
 authored-lighting or geometry fallback contracts are retained. This last group
@@ -185,6 +185,17 @@ use rough dielectric PBR/reflector-only treatment. Original daylight/dusk, Off/O
 motion and native reflector checks qualify both without adding GI receivers.
 The 424 highest-detail / 442 alternative-LOD prerequisite additions do not count
 as new source assessments. All assessment states and the 163-model backlog remain.
+Batch 33 [assesses the four original ruined-building models](material-modernization-batch-33.md):
+17 visual LODs / 22 placements / 21 pending source keys. Exact-model regions
+591–615 add mineral, plaster and timber prerequisites, with native reception and
+eligible reflector hits demonstrated on the three Kolgujev ruin variants.
+`dumruina` chimney reception is demonstrated separately on the CPU route; its
+native reception and new eligible reflector hits remain unproved in the tested
+Kolgujev, Malden and Everon views. Broad glazed/door/pipe faces and photographed
+chimney-cap openings retain explicit original-face exclusions. All four source
+assessments close without claiming full-model rendering coverage. Totals become
+20,226 highest-detail / 38,631 alternative-LOD prerequisites, with 159 models in
+the assessment backlog and 452 distinct pending assessment keys elsewhere.
 The [ordinary-adapter census](evidence/material-modernization/runtime-census.json)
 rechecks 726 models / **1,708 retained visual LODs** under the inspection configuration.
 The separate [source-only census](evidence/material-modernization/source-census.json)
@@ -201,7 +212,7 @@ Backlog 30 likewise retains the fitted-road contract after explicit source revie
 All 30 pilot tasks now have a disposition, but 16 remain partial source reviews;
 the wider 726-model assessment and remaining defensible implementations continue.
 Use the [batch-29 inspection command](material-modernization-batch-29.md#validation-and-reproduction)
-with the [batch-32 census replay additions](material-modernization-batch-32.md)
+with the [batch-33 census replay additions](material-modernization-batch-33.md)
 for the current executable; earlier batch commands describe their policy snapshots.
 
 ## Batch 01: Nogova rough stone and boundary masonry

@@ -138,7 +138,33 @@ inline constexpr OriginalMaterialRegion OriginalMaterialRegions[]{
     // approximation retains photographed corrugation and original ambient.
     // Supports/hardware and all authored lighting stay outside this region.
     {589,0,"o\\misc\\plot_vlnplech1.p3d","o\\hous\\vlnityplot02.pac",.9f,0.f,.5f,1.f,1.f,512,512,13751937356395318224ull,49152,false},
-    {590,0,"o\\misc\\plot_vlnplech2.p3d","o\\hous\\vlnityplot02.pac",.9f,0.f,.5f,1.f,1.f,512,512,13751937356395318224ull,49152,false}};
+    {590,0,"o\\misc\\plot_vlnplech2.p3d","o\\hous\\vlnityplot02.pac",.9f,0.f,.5f,1.f,1.f,512,512,13751937356395318224ull,49152,false},
+    // Original ruined buildings: exact original faces and source pixels.
+    {591,6,"data3d\\dum_zboreny.p3d","data\\kostel_trosky_zhrouc.pac",0.9f,-20.f,-20.f,20.f,20.f,64,256,12327624730100379077ull,0},
+    {592,5,"data3d\\dum_zboreny.p3d","data\\zbor_dum_meziokn.pac",0.9f,-20.f,-20.f,20.f,20.f,32,64,15401262728529687193ull,0},
+    {593,6,"data3d\\dum_zboreny.p3d","data\\zbor_dum_podlaha.pac",0.9f,-20.f,-20.f,20.f,20.f,256,256,6135160851138355440ull,0},
+    {594,5,"data3d\\dum_zboreny.p3d","data\\zbor_dum_stena1.pac",0.9f,-0.003f,-0.003f,1.003f,1.003f,256,256,11207586539484332316ull,49152},
+    {595,5,"data3d\\dum_zboreny.p3d","data\\zbor_dum_stena1b.pac",0.9f,-0.003f,-0.003f,1.003f,1.003f,256,256,5619699243108464824ull,49152},
+    {596,5,"data3d\\dum_zboreny.p3d","data\\zbor_dum_stena2.pac",0.9f,-0.003f,-0.003f,1.003f,1.003f,256,256,15262328813763726351ull,49152},
+    {597,5,"data3d\\dum_zboreny.p3d","data\\zbor_dum_stena2b.pac",0.9f,-0.003f,-0.003f,1.003f,1.003f,256,256,6859122900252000811ull,49152},
+    {598,5,"data3d\\dum_zboreny.p3d","data\\zbor_dum_stena_in.pac",0.9f,-0.003f,-0.003f,1.003f,1.003f,256,256,5089369297605075707ull,49152},
+    {599,5,"data3d\\dum_zboreny.p3d","data\\zbor_dum_strop128.pac",0.9f,-20.f,-20.f,20.f,20.f,128,128,14356653808597257431ull,0},
+    {600,6,"data3d\\dum_zboreny.p3d","data\\zbor_dum_zdivo.pac",0.9f,-20.f,-20.f,20.f,20.f,32,64,2131377680023048771ull,0},
+    {601,6,"data3d\\dum_zboreny_lidice.p3d","data\\zbor_dum_total.pac",0.9f,-0.003f,-0.003f,1.003f,1.003f,256,256,7103370963778392698ull,49152},
+    {602,6,"data3d\\dum_zboreny_lidice.p3d","data\\zbor_dum_total_borde.pac",0.9f,-20.f,-20.f,20.f,20.f,128,128,14708767490237228688ull,0},
+    {603,6,"data3d\\dum_zboreny_lidice.p3d","data\\zbor_dum_total_in.pac",0.9f,-0.003f,-0.003f,1.003f,1.003f,256,256,11609915936916334687ull,49152},
+    {604,6,"data3d\\dum_zboreny_lidice.p3d","data\\zbor_dum_total_zdivo.pac",0.9f,-20.f,-20.f,20.f,20.f,64,256,17484050193828169496ull,0},
+    {605,6,"data3d\\dum_zboreny_total.p3d","data\\zbor_dum_total.pac",0.9f,-0.003f,-0.003f,1.003f,1.003f,256,256,7103370963778392698ull,49152},
+    {606,6,"data3d\\dum_zboreny_total.p3d","data\\zbor_dum_total_borde.pac",0.9f,-20.f,-20.f,20.f,20.f,128,128,14708767490237228688ull,0},
+    {607,6,"data3d\\dum_zboreny_total.p3d","data\\zbor_dum_total_in.pac",0.9f,-0.003f,-0.003f,1.003f,1.003f,256,256,11609915936916334687ull,49152},
+    {608,5,"data3d\\dum_zboreny_total.p3d","data\\zbor_dum_total_stram.pac",0.9f,-20.f,-20.f,20.f,20.f,128,64,15166522702368520016ull,0},
+    {609,4,"data3d\\dum_zboreny_total.p3d","data\\zbor_dum_total_strop.pac",0.85f,-20.f,-20.f,20.f,20.f,128,128,591569180527072646ull,0},
+    {610,4,"data3d\\dum_zboreny_total.p3d","data\\zbor_dum_total_trame.pac",0.85f,-64.f,-64.f,64.f,64.f,64,64,979065954736008727ull,0},
+    {611,6,"data3d\\dum_zboreny_total.p3d","data\\zbor_dum_total_zdivo.pac",0.9f,-20.f,-20.f,20.f,20.f,64,256,17484050193828169496ull,0},
+    {612,5,"data3d\\dumruina.p3d","data\\domek1_fr.pac",0.9f,0.675f,0.472f,0.746f,0.621f,128,256,6237457539494351429ull,49152},
+    {613,5,"data3d\\dumruina.p3d","data\\domek1_side.pac",0.9f,0.4f,0.729f,0.499f,0.977f,256,128,8894902977663425111ull,49152},
+    {614,5,"data3d\\dumruina.p3d","data\\druina_f.pac",0.9f,0.887f,0.77f,0.908f,0.99f,256,256,6851970734246394733ull,49152},
+    {615,5,"data3d\\dumruina.p3d","data\\druina_s.pac",0.9f,0.919f,-0.06f,1.f,0.992f,256,256,8907955257061210628ull,16384}};
 struct OriginalRegionGeometry
 {
     std::string_view model;
@@ -321,7 +347,24 @@ inline constexpr OriginalRegionGeometry OriginalRegionGeometries[]{
     {"o\\misc\\plot_vlnplech1.p3d",5.68439007f,8,1,6625424391375498599ull,7355607920613948024ull},
     {"o\\misc\\plot_vlnplech2.p3d",1.5f,56,2,7168004884271722351ull,7355607920613948024ull},
     {"o\\misc\\plot_vlnplech2.p3d",2.5f,40,3,16689575607842308744ull,12904763434220526056ull},
-    {"o\\misc\\plot_vlnplech2.p3d",5.68439007f,8,1,6625424391375498599ull,7355607920613948024ull}};
+    {"o\\misc\\plot_vlnplech2.p3d",5.68439007f,8,1,6625424391375498599ull,7355607920613948024ull},
+    {"data3d\\dum_zboreny.p3d",1.5f,1033,15,5675601957251332470ull,7029068902903025149ull},
+    {"data3d\\dum_zboreny.p3d",3.f,733,13,14379656209944210211ull,16691858258288174640ull},
+    {"data3d\\dum_zboreny.p3d",5.f,315,9,12649839833664299363ull,7156081553864733400ull},
+    {"data3d\\dum_zboreny.p3d",7.f,160,8,14712106104318800117ull,13497868392979300230ull},
+    {"data3d\\dum_zboreny.p3d",9.f,83,7,17772095972453436262ull,13497868392979300230ull},
+    {"data3d\\dum_zboreny_lidice.p3d",1.5f,374,4,9835732097945408177ull,16212928750941514869ull},
+    {"data3d\\dum_zboreny_lidice.p3d",3.f,146,2,10343521897836204997ull,7534013690959036458ull},
+    {"data3d\\dum_zboreny_lidice.p3d",7.5f,52,3,12395940375007617230ull,999829090227169916ull},
+    {"data3d\\dum_zboreny_total.p3d",1.5f,856,7,4559345331769987997ull,9922149981545113083ull},
+    {"data3d\\dum_zboreny_total.p3d",3.f,515,6,17983825075022791168ull,17516104955383309378ull},
+    {"data3d\\dum_zboreny_total.p3d",5.f,183,4,18175874307987767769ull,5580598496835910797ull},
+    {"data3d\\dum_zboreny_total.p3d",7.5f,60,4,12756566564109664442ull,17943386121277082743ull},
+    {"data3d\\dumruina.p3d",0.7f,498,6,4787666996902674336ull,13813516788222695557ull},
+    {"data3d\\dumruina.p3d",1.5f,324,6,5931527609459071581ull,13722010174476748493ull},
+    {"data3d\\dumruina.p3d",2.5f,218,6,8561479465346625898ull,13813516788222695557ull},
+    {"data3d\\dumruina.p3d",4.f,130,5,7221849376374674186ull,448198932474945418ull},
+    {"data3d\\dumruina.p3d",6.5f,42,3,13768666065294067188ull,16270042924690560889ull}};
 inline const OriginalMaterialRegion* OriginalRegion(unsigned identity)
 {
     for (const auto& r : OriginalMaterialRegions) if (r.identity==identity) return &r;
