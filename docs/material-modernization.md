@@ -6,8 +6,8 @@ The [per-model ledger](evidence/material-modernization/progress.json) retains al
 and concrete prerequisite blockers. It is not a visible-coverage percentage.
 The original inventory remains an immutable baseline.
 
-After batch 28, 228 models have complete source assessment, 119 have partial source
-review, and 168 await source review. Complete assessments include explicitly
+After batch 30, 341 models have complete source assessment, 119 have partial source
+review, and 55 await source review. Complete assessments include explicitly
 retained optical cases, not only new material adoptions. Another 211 have no
 source-unknown triangles under the existing native classifier: their existing coverage and opacity,
 authored-lighting or geometry fallback contracts are retained. This last group
@@ -163,6 +163,14 @@ regions add 214 highest-detail / 592 alternative-LOD prerequisites across eight
 models. Retained mixed facades, utility fills, gutter optics and captured-lighting
 limits are not counted as new PBR coverage. All ten models remain partial; original
 artwork, geometry, UVs, lighting, transparency and qualification gates are preserved.
+Batch 30 [completes all original direction-sign source assessments](material-modernization-batch-30.md):
+113 models / 113 authored levels / 119 placements, grouped into four post-face
+arrangements. Mixed worn-paint/substrate photos and utility caps retain explicit
+original treatment; transparent artwork stays gated. Original hashes establish
+two byte-identical differently named post-source pairs, correcting earlier
+non-alias wording without extending the inherited signpost exception. All 113
+reviews close with zero new rendering coverage or qualified triangles. Global
+pending assessment keys number 471; family pending assessment keys are empty.
 The [ordinary-adapter census](evidence/material-modernization/runtime-census.json)
 rechecks 726 models / **1,708 retained visual LODs** under the inspection configuration.
 The separate [source-only census](evidence/material-modernization/source-census.json)

@@ -46,9 +46,12 @@ opaque pixels or a similar filename as material proof.
 - `data/rez_trubka.pac`: dark rust/oxide/metal pipe photograph; the original
   faces do not independently separate coating, oxide and exposed conductor.
 - `data/sloupek_bily_orezly.pac` and `data/sloup_bily_orez_v.pac`: mixed worn
-  paint/substrate and photographic shading. They are not aliases of the
-  separately supported underscored post source. No source-proved whole-face
-  coating boundary is promoted.
+  paint/substrate and photographic shading. These are distinct exact-name
+  material keys; no source-proved whole-face coating boundary is promoted.
+  [Batch 30](material-modernization-batch-30.md) subsequently proves byte/pixel
+  equality between `_v` and the supported underscored image, and between the
+  non-underscored image and `sloup_bily_orez.pac`. This corrects the earlier
+  non-alias wording; it does not extend identity 86 or establish uniform optics.
 - Hospital and fuel-sign back images contain sheet, mounting rails and fasteners
   spanning the same faces; no guessed uniform dielectric or metal response.
 - Hospital, fuel, dead-end and gravel-warning artwork does not establish an
