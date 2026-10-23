@@ -6,8 +6,8 @@ The [per-model ledger](evidence/material-modernization/progress.json) retains al
 and concrete prerequisite blockers. It is not a visible-coverage percentage.
 The original inventory remains an immutable baseline.
 
-After batch 30, 341 models have complete source assessment, 119 have partial source
-review, and 55 await source review. Complete assessments include explicitly
+After batch 31, 352 models have complete source assessment, 119 have partial source
+review, and 44 await source review. Complete assessments include explicitly
 retained optical cases, not only new material adoptions. Another 211 have no
 source-unknown triangles under the existing native classifier: their existing coverage and opacity,
 authored-lighting or geometry fallback contracts are retained. This last group
@@ -170,7 +170,15 @@ original treatment; transparent artwork stays gated. Original hashes establish
 two byte-identical differently named post-source pairs, correcting earlier
 non-alias wording without extending the inherited signpost exception. All 113
 reviews close with zero new rendering coverage or qualified triangles. Global
-pending assessment keys number 471; family pending assessment keys are empty.
+pending assessment keys after Batch 30 number 471; its family assessment is complete.
+Batch 31 [completes the original fence/gate source reviews](material-modernization-batch-31.md):
+11 models / 36 authored levels / 326 placements, grouped into green gates,
+wire-fence posts and corrugated panels. All five pending keys retain explicit
+original rendering: mixed coating/substrate, black utility caps and photographed
+sheet optics do not establish a safe new material. Transparency, damaged openings,
+authored lighting and invalid-normal exclusions remain. All 11 reviews close with
+zero new rendering coverage or qualified triangles. Global pending assessment keys
+number 468; none remains pending within this batch's 11 models.
 The [ordinary-adapter census](evidence/material-modernization/runtime-census.json)
 rechecks 726 models / **1,708 retained visual LODs** under the inspection configuration.
 The separate [source-only census](evidence/material-modernization/source-census.json)
