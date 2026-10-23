@@ -117,7 +117,23 @@ inline constexpr OriginalMaterialRegion OriginalMaterialRegions[]{
     // Complete original bridge curb/parapet concrete faces only. Repeated U
     // stays in the mineral row; paving, vegetation, coated rail and lamp/drain
     // hardware retain their original treatment. Exact source and all four LODs.
-    {570,7,"o\\hous\\most_stred30.p3d","o\\misc\\most01.pac",.9f,-1,0,9,.24f,512,512,6332993264091036107ull,32768}};
+    {570,7,"o\\hous\\most_stred30.p3d","o\\misc\\most01.pac",.9f,-1,0,9,.24f,512,512,6332993264091036107ull,32768},
+    // Nogova family: intact original plaster/balcony/corridor mineral faces.
+    // Gable trials571..577 withdrawn: PBR produced a triangular lighting cut
+    // on the original06 gable even with GI off. Do not infer acceptance from
+    // mineral pixels or intact fans. Window/door/rust boundaries remain legacy.
+    // Corridor edge overshoot requires the original ClampU|ClampV.
+    {578,5,"o\\hous\\dum_patrovy04.p3d","o\\hous\\dum_patrovy03.pac",.9f,0.f,0.f,0.6f,0.08f,512,512,11610047035768300935ull,0},
+    {579,5,"o\\hous\\dum_patrovy04.p3d","o\\hous\\dum_patrovy03.pac",.9f,0.63f,0.f,0.98f,0.34f,512,512,11610047035768300935ull,0},
+    {580,5,"o\\hous\\dum_patrovy05.p3d","o\\hous\\dum_patrovy03.pac",.9f,0.63f,0.f,0.98f,0.34f,512,512,11610047035768300935ull,0},
+    {581,5,"o\\hous\\dum_patr_nizky_prujezd.p3d","o\\hous\\dum_patrovy_balkon.pac",.9f,0.f,0.f,0.44f,0.47f,256,256,14158396793892771577ull,0},
+    {582,5,"o\\hous\\dum_patrovy01.p3d","o\\hous\\dum_patrovy_balkon.pac",.9f,0.f,0.f,0.44f,0.47f,256,256,14158396793892771577ull,0},
+    {583,5,"o\\hous\\dum_patrovy01c.p3d","o\\hous\\dum_patrovy_balkon.pac",.9f,0.f,0.f,0.44f,0.47f,256,256,14158396793892771577ull,0},
+    {584,6,"o\\hous\\dum_patrovy01c.p3d","o\\hous\\dum_patrovy_balkon.pac",.9f,0.f,0.53f,1.f,1.f,256,256,14158396793892771577ull,0},
+    {585,5,"o\\hous\\dum_patrovy01d.p3d","o\\hous\\dum_patrovy_balkon.pac",.9f,0.f,0.f,0.44f,0.47f,256,256,14158396793892771577ull,0},
+    {586,5,"o\\hous\\dum_patrovy01prujezd.p3d","o\\hous\\dum_patrovy_balkon.pac",.9f,0.f,0.f,0.44f,0.47f,256,256,14158396793892771577ull,0},
+    {587,5,"o\\hous\\dum_patr_nizky_prujezd.p3d","o\\hous\\interier_chodba01.pac",.9f,-0.001f,-0.001f,0.499f,1.001f,512,512,5968244007576842269ull,49152},
+    {588,5,"o\\hous\\dum_patrovy01prujezd.p3d","o\\hous\\interier_chodba01.pac",.9f,-0.001f,-0.001f,0.499f,1.001f,512,512,5968244007576842269ull,49152}};
 struct OriginalRegionGeometry
 {
     std::string_view model;

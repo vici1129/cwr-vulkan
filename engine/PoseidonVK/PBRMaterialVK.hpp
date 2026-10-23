@@ -136,7 +136,9 @@ inline constexpr StockPBRMaterial EnhancedPBRMaterials[]{
     {"o\\hous\\nabrezi01a.pac", .90f, 6},
     // Original bridge support/underside concrete, not the mixed curb/rail/lamp
     // atlas or the separate asphalt/marking sources and alpha road overlays.
-    {"o\\misc\\most02.pac", .90f, 7}};
+    {"o\\misc\\most02.pac", .90f, 7},
+    // Original dedicated overlapping clay roof tiles; six inspected users.
+    {"o\\hous\\tasky_jeste_tmavsi.pac", .90f, 3}};
 inline unsigned PBRReceiverFamily(unsigned id)
 {
     if (id >= 64 && id < 64 + std::size(StockPBRMaterials)) return StockPBRMaterials[id - 64].receiverFamily;

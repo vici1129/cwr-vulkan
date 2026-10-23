@@ -55,7 +55,8 @@ TEST_CASE("Original atlas regions require exact geometry, pixels and entire orig
                 geometry.sections,geometry.fingerprint,region.texture));
         }
         const float u=region.uMin+.2f*(region.uMax-region.uMin),v=region.vMin+.2f*(region.vMax-region.vMin);
-        const std::array<std::array<float,2>,3> lower{{{u,v},{u+.1f,v},{u,v+.1f}}};
+        const float du=.1f*(region.uMax-region.uMin),dv=.1f*(region.vMax-region.vMin);
+        const std::array<std::array<float,2>,3> lower{{{u,v},{u+du,v},{u,v+dv}}};
         REQUIRE(vk::OriginalRegionUV(region.identity,lower));
         REQUIRE(vk::SelectOriginalRegion(region,lower,ClampU|ClampV)==region.identity);
         if (region.requiredClamp) REQUIRE_FALSE(vk::SelectOriginalRegion(region,lower,0));
@@ -387,6 +388,40 @@ TEST_CASE("Dedicated timber sources preserve original floor lighting and mixed p
     REQUIRE(vk::SelectOriginalRegion(*underside,boards,NoClamp)==561);
     REQUIRE(std::count_if(std::begin(vk::OriginalRegionGeometries),std::end(vk::OriginalRegionGeometries),
         [&](const auto& g){return g.model==underside->model;})==4);
+}
+
+TEST_CASE("Nogova multistory regions preserve mixed sources and immutable lighting gates",
+          "[Graphics][vulkan-shape][material-qualification]")
+{
+    const auto roof=vk::OriginalMaterialSource("o\\hous\\tasky_jeste_tmavsi.pac");
+    REQUIRE(roof.identity==207);REQUIRE(roof.family==3);REQUIRE(roof.roughness==.9f);
+    REQUIRE_FALSE(vk::StockPBRIdentity("o\\hous\\tasky_jeste_tmavsi.pac"));
+    REQUIRE(vk::PBRMaterial("o\\hous\\tasky_jeste_tmavsi.pac",0)==0);
+    for (const auto mixed : {"o\\hous\\dum_patrovy01b.pac","o\\hous\\dum_patrovy03.pac",
+        "o\\hous\\dum_patrovy_balkon.pac","o\\hous\\interier_chodba01.pac",
+        "o\\hous\\interier_chodba02.pac","o\\hous\\orlhot_okap.pac","o\\hous\\blck_sum.pac"})
+        REQUIRE_FALSE(vk::OriginalMaterialSource(mixed));
+    const auto* corridor=vk::OriginalRegion(588);REQUIRE(corridor);
+    REQUIRE(corridor->model=="o\\hous\\dum_patrovy01prujezd.p3d");
+    REQUIRE(vk::OriginalRegionSource(588,corridor->texture,512,512,5968244007576842269ull).identity==588);
+    REQUIRE_FALSE(vk::OriginalRegionSource(588,corridor->texture,512,512,5968244007576842268ull));
+    const std::array<std::array<float,2>,3> plaster{{{-.0003f,.04f},{.4988f,.04f},{-.0003f,.42f}}};
+    REQUIRE(vk::SelectOriginalRegion(*corridor,plaster,ClampU|ClampV)==588);
+    REQUIRE_FALSE(vk::SelectOriginalRegion(*corridor,plaster,ClampV));
+    auto tiles=plaster;tiles[1][0]=.51f;
+    REQUIRE_FALSE(vk::SelectOriginalRegion(*corridor,tiles,ClampU|ClampV));
+    REQUIRE(vk::OriginalRegionCandidate(corridor->model,.5f,2955,37,8843464900919703133ull,corridor->texture)==588);
+    REQUIRE_FALSE(vk::OriginalRegionCandidate("o\\hous\\domek04.p3d",.5f,2955,37,8843464900919703133ull,corridor->texture));
+    for (const auto rejection : {vk::MaterialRejection::AuthoredLighting,vk::MaterialRejection::Geometry})
+        REQUIRE(vk::QualifyOriginalMaterial(roof,rejection,NoClamp,true,true)==rejection);
+    REQUIRE(vk::QualifyOriginalMaterial(roof,vk::MaterialRejection::None,IsAlpha,true,true)==vk::MaterialRejection::RenderBehavior);
+    REQUIRE(vk::QualifyOriginalMaterial(roof,vk::MaterialRejection::None,NoClamp,true,false)==vk::MaterialRejection::RenderBehavior);
+    // Source/fan proof did not prevent the original gable's lighting cut.
+    for (unsigned identity=571;identity<=577;++identity) REQUIRE_FALSE(vk::OriginalRegion(identity));
+    REQUIRE_FALSE(vk::OriginalRegionCandidate("o\\hous\\dum_patrovy06.p3d",.5f,1282,6,14960422536987656621ull,"o\\hous\\dum_patrovy01b.pac"));
+    const auto* balcony=vk::OriginalRegion(581);REQUIRE(balcony);
+    const std::array<std::array<float,2>,3> rustJoint{{{.4f,.1f},{.5f,.1f},{.4f,.4f}}};
+    REQUIRE_FALSE(vk::SelectOriginalRegion(*balcony,rustJoint,ClampV));
 }
 
 TEST_CASE("Bridge concrete retains mixed rail hardware road and original lighting contracts",

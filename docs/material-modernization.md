@@ -156,6 +156,13 @@ select no complete ordinary wall triangles, while the safe side-source region
 selects only small chimney faces. No rendering change qualifies. Original
 rendering and gates remain; these models stay partial with concrete regional
 limits recorded. No new native reception or coverage is counted.
+Batch 29 [reviews the complete Nogova multistory-building family](material-modernization-batch-29.md):
+10 models / 38 authored levels / 84 original placements, with explicit dispositions
+for all 19 pending texture keys. One dedicated roof source and 11 exact mineral
+regions add 214 highest-detail / 592 alternative-LOD prerequisites across eight
+models. Retained mixed facades, utility fills, gutter optics and captured-lighting
+limits are not counted as new PBR coverage. All ten models remain partial; original
+artwork, geometry, UVs, lighting, transparency and qualification gates are preserved.
 The [ordinary-adapter census](evidence/material-modernization/runtime-census.json)
 rechecks 726 models / **1,708 retained visual LODs** under the inspection configuration.
 The separate [source-only census](evidence/material-modernization/source-census.json)
@@ -171,7 +178,7 @@ pixel/geometry review; this is not newly implemented foliage coverage.
 Backlog 30 likewise retains the fitted-road contract after explicit source review.
 All 30 pilot tasks now have a disposition, but 16 remain partial source reviews;
 the wider 726-model assessment and remaining defensible implementations continue.
-Use the [batch-27 reproduction command](material-modernization-batch-27.md#validation-and-reproduction)
+Use the [batch-29 reproduction command](material-modernization-batch-29.md#validation-and-reproduction)
 for the current executable; earlier batch commands describe their policy snapshots.
 
 ## Batch 01: Nogova rough stone and boundary masonry
