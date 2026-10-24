@@ -6,13 +6,13 @@ The [per-model ledger](evidence/material-modernization/progress.json) retains al
 and concrete prerequisite blockers. It is not a visible-coverage percentage.
 The original inventory remains an immutable baseline.
 
-After batch 36, 368 models have complete source assessment, 116 have partial source
+After batch 37, 373 models have complete source assessment, 111 have partial source
 review, and 31 await source review. Complete assessments include explicitly
 retained optical cases, not only new material adoptions. Another 211 have no
 source-unknown triangles under the existing native classifier: their existing coverage and opacity,
 authored-lighting or geometry fallback contracts are retained. This last group
 is a prerequisite disposition, not a claim that all of its pixels are PBR or GI.
-Backlog tasks 1–4, 6–8 and 24–27 have source review complete; the remaining tasks continue.
+Backlog tasks 1–4, 6–8, 14–15, 19 and 24–27 have source review complete; the remaining tasks continue.
 Batch 02 covers [brick pillars, bark and stacked logs](material-modernization-batch-02.md);
 batch 03 covers [fence foundations, roof tiles and blank plaster](material-modernization-batch-03.md).
 Batch 04 adds [original-triangle UV regions for farm masonry](material-modernization-batch-04.md),
@@ -229,6 +229,18 @@ All four source assessments close without implying full-model modernization.
 Totals become 24,166 highest-detail / 47,596 alternative-LOD prerequisites,
 with 147 models in the assessment backlog and 402 distinct pending keys elsewhere.
 The shared `hlaska_sum` source remains pending on its other three model users.
+Batch 37 [assesses the original Nogova barns and farm buildings](material-modernization-batch-37.md):
+five models / 19 visual LODs / 176 placements / all four pending texture keys.
+Seventeen exact-model timber, blank-plaster and mineral regions add 206
+highest-detail / 452 alternative-LOD prerequisites. Seven built window-plaster
+candidates are withdrawn after raster wedges persist with GI off and with
+ambient-preserving treatment; two upper bounds narrow to complete blank walls.
+Region 529 retains ambient. New captured CPU-lit reception is demonstrated;
+new native reception remains unobserved, with independent reflector hits recorded.
+All five source assessments close with concrete retained geometry and rendering
+dispositions. Totals become 24,372 / 48,048 prerequisites, with 142 models /
+400 distinct pending keys in the assessment backlog. This is not full-model
+modernization or a visible-coverage percentage.
 The [ordinary-adapter census](evidence/material-modernization/runtime-census.json)
 rechecks 726 models / **1,708 retained visual LODs** under the inspection configuration.
 The separate [source-only census](evidence/material-modernization/source-census.json)

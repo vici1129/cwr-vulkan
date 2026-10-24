@@ -219,7 +219,25 @@ inline constexpr OriginalMaterialRegion OriginalMaterialRegions[]{
     {685,0,"data3d\\vez.p3d","data\\strazni_vez_sloupek_.pac",0.9f,-32.f,-32.f,32.f,32.f,16,64,1523332097709760409ull,0,false},
     {686,0,"data3d\\vez.p3d","data\\strazni_vez_strecha_.pac",0.9f,-32.f,-32.f,32.f,32.f,256,256,876137164239730975ull,0,false},
     {687,0,"o\\misc\\leseni2x.p3d","o\\misc\\lsni_tce.pac",0.9f,-32.f,-32.f,32.f,32.f,512,128,1376823476229684276ull,0,false},
-    {688,0,"o\\misc\\leseni4x.p3d","o\\misc\\lsni_tce.pac",0.9f,-32.f,-32.f,32.f,32.f,512,128,1376823476229684276ull,0,false}};
+    {688,0,"o\\misc\\leseni4x.p3d","o\\misc\\lsni_tce.pac",0.9f,-32.f,-32.f,32.f,32.f,512,128,1376823476229684276ull,0,false},
+    // Batch 37: original barn timber and farmhouse plaster/mineral regions.
+    {689,4,"o\\hous\\stodola.p3d","o\\hous\\stodola01.pac",0.85f,0.499f,0.f,1.f,0.5f,512,512,17838487729387079901ull,0,false},
+    {690,4,"o\\hous\\stodola.p3d","o\\hous\\stodola01a.pac",0.85f,0.f,0.f,0.785f,0.673f,512,512,18343219702901983844ull,0,false},
+    {691,4,"o\\hous\\stodola.p3d","o\\hous\\stodola01a.pac",0.85f,0.785f,0.604f,1.f,1.f,512,512,18343219702901983844ull,0,false},
+    {692,4,"o\\hous\\stodola2.p3d","o\\hous\\stodola01a.pac",0.85f,0.f,0.f,0.785f,0.673f,512,512,18343219702901983844ull,0,false},
+    {693,4,"o\\hous\\stodola3.p3d","o\\hous\\stodola01.pac",0.85f,0.499f,0.f,1.f,0.5f,512,512,17838487729387079901ull,0,false},
+    {694,4,"o\\hous\\stodola3.p3d","o\\hous\\stodola01a.pac",0.85f,0.f,0.f,0.785f,0.673f,512,512,18343219702901983844ull,0,false},
+    {695,4,"o\\hous\\stodola3.p3d","o\\hous\\stodola01a.pac",0.85f,0.785f,0.604f,1.f,1.f,512,512,18343219702901983844ull,0,false},
+    {696,5,"o\\hous\\zluty_statek.p3d","o\\hous\\zlutstat01.pac",0.9f,0.f,0.f,0.502f,0.392f,512,512,12468669674644636230ull,0,true},
+    {697,5,"o\\hous\\zluty_statek.p3d","o\\hous\\zlutstat01.pac",0.9f,0.99f,0.f,1.51f,0.392f,512,512,12468669674644636230ull,0,true},
+    {699,6,"o\\hous\\zluty_statek.p3d","o\\hous\\zlutstat01.pac",0.9f,-2.f,0.392f,3.f,0.501f,512,512,12468669674644636230ull,0,true},
+    {703,6,"o\\hous\\zluty_statek.p3d","o\\hous\\zlutstat01.pac",0.9f,0.f,0.895f,0.633f,1.f,512,512,12468669674644636230ull,0,true},
+    {704,4,"o\\hous\\zluty_statek_in.p3d","o\\hous\\dverein01.pac",0.85f,0.f,0.f,0.025f,1.002f,256,256,353622685086294026ull,32768,false},
+    {705,4,"o\\hous\\zluty_statek_in.p3d","o\\hous\\dverein01.pac",0.85f,0.478f,0.f,0.502f,1.002f,256,256,353622685086294026ull,32768,false},
+    {706,5,"o\\hous\\zluty_statek_in.p3d","o\\hous\\zlutstat01.pac",0.9f,0.f,0.f,0.502f,0.392f,512,512,12468669674644636230ull,0,true},
+    {707,5,"o\\hous\\zluty_statek_in.p3d","o\\hous\\zlutstat01.pac",0.9f,0.99f,0.f,1.51f,0.392f,512,512,12468669674644636230ull,0,true},
+    {709,6,"o\\hous\\zluty_statek_in.p3d","o\\hous\\zlutstat01.pac",0.9f,-2.f,0.392f,3.f,0.501f,512,512,12468669674644636230ull,0,true},
+    {712,6,"o\\hous\\zluty_statek_in.p3d","o\\hous\\zlutstat01.pac",0.9f,0.f,0.895f,0.633f,1.f,512,512,12468669674644636230ull,0,true}};
 struct OriginalRegionGeometry
 {
     std::string_view model;

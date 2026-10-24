@@ -95,6 +95,38 @@ TEST_CASE("Original atlas regions require exact geometry, pixels and entire orig
     REQUIRE(vk::OriginalRegionTextureBindings(bindings)!=vk::OriginalRegionTextureBindings(swapped));
 }
 
+TEST_CASE("Nogova barn and farm regions preserve ambient, apertures and original samplers",
+          "[Graphics][vulkan-shape][material-qualification]")
+{
+    const auto selected=[](unsigned anchor,float u,float v,int flags=ClampU|ClampV) {
+        const std::array<std::array<float,2>,3> uv{{{u,v},{u+.0001f,v},{u,v+.0001f}}};
+        return vk::SelectOriginalRegion(*vk::OriginalRegion(anchor),uv,flags);
+    };
+    REQUIRE_FALSE(vk::OriginalRegion(529)->reception); // Batch 06 receiver seams remain unresolved.
+    for (unsigned id : {689,690,691,692,693,694,695,704,705})
+        REQUIRE_FALSE(vk::OriginalRegion(id)->reception);
+    REQUIRE(selected(694,.4f,.3f)==694); // Complete original timber gable.
+    REQUIRE(selected(694,.9f,.8f)==695); // Separate small timber door.
+    REQUIRE(selected(696,.2f,.2f)==696); // Blank upper plaster.
+    REQUIRE(selected(696,1.2f,.2f)==697); // Original repeat samples blank plaster again.
+    REQUIRE_FALSE(selected(696,.74f,.16f)); // Upper window.
+    REQUIRE_FALSE(selected(696,.23f,.70f)); // Lower glazing.
+    REQUIRE_FALSE(selected(696,.75f,.75f)); // Door glazing and handle.
+    REQUIRE(selected(696,.5f,.43f)==699); // Weathered mineral strip.
+    // Built receiver and ambient-preserving lower plaster/frame trials create
+    // raster wedges against unqualified window faces, even with GI off.
+    for (unsigned id : {698,700,701,702,708,710,711}) REQUIRE_FALSE(vk::OriginalRegion(id));
+    REQUIRE_FALSE(selected(696,.6f,.2f)); // Upper-window left jamb also failed raster appearance.
+    REQUIRE_FALSE(selected(696,.4f,.7f));
+    REQUIRE(selected(696,.2f,.95f)==703); // Lower foundation.
+    REQUIRE_FALSE(selected(704,.01f,.5f,0)); // Highest-detail unclamped edge stays original.
+    REQUIRE(selected(704,.01f,.5f)==704);
+    REQUIRE_FALSE(selected(704,.25f,.5f)); // Door glass does not inherit border optics.
+    for (auto texture : {"o\\hous\\stodola01.pac","o\\hous\\stodola01a.pac",
+                         "o\\hous\\zlutstat01.pac","o\\hous\\dverein01.pac"})
+        REQUIRE_FALSE(vk::OriginalMaterialSource(texture));
+}
+
 TEST_CASE("Original church regions preserve glazing, doors and shrine artwork",
           "[Graphics][vulkan-shape][material-qualification]")
 {
