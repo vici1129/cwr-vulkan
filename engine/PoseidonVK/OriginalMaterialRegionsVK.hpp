@@ -210,7 +210,16 @@ inline constexpr OriginalMaterialRegion OriginalMaterialRegions[]{
     {677,5,"data3d\\kostelik.p3d","data\\kaple_vezicka_lside.pac",0.9f,0.1f,0.28f,0.77f,0.83f,64,128,15712170356749646781ull,0,true},
     {678,6,"o\\misc\\kapl.p3d","o\\misc\\kplck.pac",0.9f,0.5f,0.005f,0.993f,0.705f,512,512,8202243489652701348ull,0,false},
     {679,6,"o\\misc\\kapl.p3d","o\\misc\\kplck.pac",0.9f,0.055f,0.553f,0.435f,0.703f,512,512,8202243489652701348ull,0,true},
-    {680,6,"o\\misc\\kapl.p3d","o\\misc\\kplck.pac",0.9f,0.827f,0.717f,0.987f,0.969f,512,512,8202243489652701348ull,0,true}};
+    {680,6,"o\\misc\\kapl.p3d","o\\misc\\kplck.pac",0.9f,0.827f,0.717f,0.987f,0.969f,512,512,8202243489652701348ull,0,true},
+    // Batch 36: exact original tower/scaffold rough coatings retain ambient.
+    {681,0,"data3d\\hlaska.p3d","data\\hlaska_strana.pac",0.9f,-32.f,-32.f,32.f,32.f,128,16,12556970355022687971ull,0,false},
+    {682,0,"data3d\\hlaska.p3d","data\\hlaska_sum.pac",0.9f,-32.f,-32.f,32.f,32.f,64,64,14957028173378692120ull,0,false},
+    {683,0,"data3d\\vez.p3d","data\\strazni_vez_noha_sid.pac",0.9f,-32.f,-32.f,32.f,32.f,128,256,7962590755778238083ull,0,false},
+    {684,0,"data3d\\vez.p3d","data\\strazni_vez_side_01.pac",0.9f,-32.f,-32.f,32.f,32.f,256,256,8611975510574762736ull,0,false},
+    {685,0,"data3d\\vez.p3d","data\\strazni_vez_sloupek_.pac",0.9f,-32.f,-32.f,32.f,32.f,16,64,1523332097709760409ull,0,false},
+    {686,0,"data3d\\vez.p3d","data\\strazni_vez_strecha_.pac",0.9f,-32.f,-32.f,32.f,32.f,256,256,876137164239730975ull,0,false},
+    {687,0,"o\\misc\\leseni2x.p3d","o\\misc\\lsni_tce.pac",0.9f,-32.f,-32.f,32.f,32.f,512,128,1376823476229684276ull,0,false},
+    {688,0,"o\\misc\\leseni4x.p3d","o\\misc\\lsni_tce.pac",0.9f,-32.f,-32.f,32.f,32.f,512,128,1376823476229684276ull,0,false}};
 struct OriginalRegionGeometry
 {
     std::string_view model;
@@ -446,7 +455,24 @@ inline constexpr OriginalRegionGeometry OriginalRegionGeometries[]{
     {"data3d\\kostelik.p3d",12.f,38,4,2198518086552883577ull,7329785406570712931ull},
     {"o\\misc\\kapl.p3d",0.f,168,1,15137372396012286468ull,18110065149085066651ull},
     {"o\\misc\\kapl.p3d",1.f,94,1,4893390489712652644ull,18110065149085066651ull},
-    {"o\\misc\\kapl.p3d",1.5f,58,1,8258530595982604484ull,18110065149085066651ull}};
+    {"o\\misc\\kapl.p3d",1.5f,58,1,8258530595982604484ull,18110065149085066651ull},
+    {"data3d\\hlaska.p3d",0.5f,791,8,11763747801814978943ull,3940228036820280559ull},
+    {"data3d\\hlaska.p3d",1.25f,394,7,12986972820112979561ull,5002076436281450745ull},
+    {"data3d\\hlaska.p3d",2.5f,174,6,11046530150193499933ull,15559470767608166673ull},
+    {"data3d\\hlaska.p3d",5.f,112,5,17216403583341681316ull,15607686025014355372ull},
+    {"data3d\\hlaska.p3d",10.f,52,5,4744103710967203566ull,15607686025014355372ull},
+    {"data3d\\vez.p3d",0.5f,516,6,3367133445047817312ull,12550804054889580271ull},
+    {"data3d\\vez.p3d",1.5f,280,4,4869309262767218177ull,3558206755264452884ull},
+    {"data3d\\vez.p3d",3.f,112,4,82706592857285727ull,17327690960921258364ull},
+    {"data3d\\vez.p3d",7.f,36,3,14078864120863053121ull,1519343373977755092ull},
+    {"o\\misc\\leseni2x.p3d",0.5f,1488,4,8200913292852085222ull,3613895339836946549ull},
+    {"o\\misc\\leseni2x.p3d",3.f,886,4,9722824021948524719ull,3613895339836946549ull},
+    {"o\\misc\\leseni2x.p3d",6.75f,508,4,6200997610861275346ull,3613895339836946549ull},
+    {"o\\misc\\leseni2x.p3d",9.f,168,2,2698881146774479140ull,13364351600528371184ull},
+    {"o\\misc\\leseni4x.p3d",0.5f,2472,5,11229105078967952987ull,12388233298358411269ull},
+    {"o\\misc\\leseni4x.p3d",3.f,1539,5,10181813940138965791ull,7584468572618884569ull},
+    {"o\\misc\\leseni4x.p3d",6.75f,869,5,10987793746536990437ull,12388233298358411269ull},
+    {"o\\misc\\leseni4x.p3d",9.f,336,3,6154975240078087114ull,2195080624288555822ull}};
 inline const OriginalMaterialRegion* OriginalRegion(unsigned identity)
 {
     for (const auto& r : OriginalMaterialRegions) if (r.identity==identity) return &r;

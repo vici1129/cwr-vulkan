@@ -6,8 +6,8 @@ The [per-model ledger](evidence/material-modernization/progress.json) retains al
 and concrete prerequisite blockers. It is not a visible-coverage percentage.
 The original inventory remains an immutable baseline.
 
-After batch 35, 364 models have complete source assessment, 117 have partial source
-review, and 34 await source review. Complete assessments include explicitly
+After batch 36, 368 models have complete source assessment, 116 have partial source
+review, and 31 await source review. Complete assessments include explicitly
 retained optical cases, not only new material adoptions. Another 211 have no
 source-unknown triangles under the existing native classifier: their existing coverage and opacity,
 authored-lighting or geometry fallback contracts are retained. This last group
@@ -219,6 +219,16 @@ whole-face atlas boundaries, authored lighting and sampler gates remain original
 All four source assessments close without claiming full-model PBR coverage.
 Totals become 22,304 highest-detail / 44,246 alternative-LOD prerequisites,
 with 151 models in the assessment backlog and 408 distinct pending keys elsewhere.
+Batch 36 [assesses the original observation towers and scaffolding](material-modernization-batch-36.md):
+four models / 17 visual LODs / 76 placements / all seven pending texture keys.
+Eight exact-model rough coating regions add 1,862 highest-detail / 3,350
+alternative-LOD PBR/reflector prerequisites while preserving original ambient.
+No new native or captured CPU GI receiver is enabled. Transparent decks,
+ladders, rungs and basket cards retain their original render-behavior gates.
+All four source assessments close without implying full-model modernization.
+Totals become 24,166 highest-detail / 47,596 alternative-LOD prerequisites,
+with 147 models in the assessment backlog and 402 distinct pending keys elsewhere.
+The shared `hlaska_sum` source remains pending on its other three model users.
 The [ordinary-adapter census](evidence/material-modernization/runtime-census.json)
 rechecks 726 models / **1,708 retained visual LODs** under the inspection configuration.
 The separate [source-only census](evidence/material-modernization/source-census.json)
