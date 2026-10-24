@@ -130,7 +130,7 @@ inline constexpr OriginalMaterialRegion OriginalMaterialRegions[]{
     {581,5,"o\\hous\\dum_patr_nizky_prujezd.p3d","o\\hous\\dum_patrovy_balkon.pac",.9f,0.f,0.f,0.44f,0.47f,256,256,14158396793892771577ull,0},
     {582,5,"o\\hous\\dum_patrovy01.p3d","o\\hous\\dum_patrovy_balkon.pac",.9f,0.f,0.f,0.44f,0.47f,256,256,14158396793892771577ull,0},
     {583,5,"o\\hous\\dum_patrovy01c.p3d","o\\hous\\dum_patrovy_balkon.pac",.9f,0.f,0.f,0.44f,0.47f,256,256,14158396793892771577ull,0},
-    {584,6,"o\\hous\\dum_patrovy01c.p3d","o\\hous\\dum_patrovy_balkon.pac",.9f,0.f,0.53f,1.f,1.f,256,256,14158396793892771577ull,0},
+    {584,6,"o\\hous\\dum_patrovy01c.p3d","o\\hous\\dum_patrovy_balkon.pac",.9f,-2.f,0.496f,3.f,1.f,256,256,14158396793892771577ull,0},
     {585,5,"o\\hous\\dum_patrovy01d.p3d","o\\hous\\dum_patrovy_balkon.pac",.9f,0.f,0.f,0.44f,0.47f,256,256,14158396793892771577ull,0},
     {586,5,"o\\hous\\dum_patrovy01prujezd.p3d","o\\hous\\dum_patrovy_balkon.pac",.9f,0.f,0.f,0.44f,0.47f,256,256,14158396793892771577ull,0},
     {587,5,"o\\hous\\dum_patr_nizky_prujezd.p3d","o\\hous\\interier_chodba01.pac",.9f,-0.001f,-0.001f,0.499f,1.001f,512,512,5968244007576842269ull,49152},
@@ -297,7 +297,39 @@ inline constexpr OriginalMaterialRegion OriginalMaterialRegions[]{
     // Original dark roof-edge coating row; preserve authored ambient.
     {789,0,"o\\hous\\panelak.p3d","o\\hous\\panel05.pac",.9f,-8.f,0.f,8.f,.139f,256,256,16073327910406133478ull,0,false},
     {790,0,"o\\hous\\panelak2.p3d","o\\hous\\panel05.pac",.9f,-8.f,0.f,8.f,.139f,256,256,16073327910406133478ull,0,false},
-    {791,0,"o\\hous\\panelak3.p3d","o\\hous\\panel05.pac",.9f,-8.f,0.f,8.f,.139f,256,256,16073327910406133478ull,0,false}};
+    {791,0,"o\\hous\\panelak3.p3d","o\\hous\\panel05.pac",.9f,-8.f,0.f,8.f,.139f,256,256,16073327910406133478ull,0,false},
+    // Batch 40: shared original mineral finishes and conservative rough coatings.
+    // Windows remain outside exact atlas regions; coatings retain authored ambient.
+    // Vault/return trials 808..811,817..820,826..828 withdrawn: the forced-CPU
+    // GI-off control also has raster wedges, including ambient-preserving rules.
+    // Blank side walls and mineral paving retain separate qualification.
+    {792,6,"o\\hous\\dum_patr_nizky_prujezd.p3d","o\\hous\\dum_patrovy_balkon.pac",.9f,-2.f,0.496f,3.f,1.f,256,256,14158396793892771577ull,0,true},
+    {793,6,"o\\hous\\dum_patr_nizky_prujezd.p3d","o\\hous\\interier_chodba01.pac",.9f,0.502f,-0.001f,1.006f,1.001f,512,512,5968244007576842269ull,49152,true},
+    {794,0,"o\\hous\\dum_patr_nizky_prujezd.p3d","o\\hous\\orlhot_okap.pac",.9f,-16.f,-1.f,16.f,2.f,256,128,9321694209529729054ull,0,false},
+    {795,6,"o\\hous\\dum_patrovy01.p3d","o\\hous\\dum_patrovy_balkon.pac",.9f,-2.f,0.496f,3.f,1.f,256,256,14158396793892771577ull,0,true},
+    {796,0,"o\\hous\\dum_patrovy01.p3d","o\\hous\\orlhot_okap.pac",.9f,-16.f,-1.f,16.f,2.f,256,128,9321694209529729054ull,0,false},
+    {798,0,"o\\hous\\dum_patrovy01c.p3d","o\\hous\\orlhot_okap.pac",.9f,-16.f,-1.f,16.f,2.f,256,128,9321694209529729054ull,0,false},
+    {799,6,"o\\hous\\dum_patrovy01d.p3d","o\\hous\\dum_patrovy_balkon.pac",.9f,-2.f,0.496f,3.f,1.f,256,256,14158396793892771577ull,0,true},
+    {800,0,"o\\hous\\dum_patrovy01d.p3d","o\\hous\\orlhot_okap.pac",.9f,-16.f,-1.f,16.f,2.f,256,128,9321694209529729054ull,0,false},
+    {801,6,"o\\hous\\dum_patrovy01prujezd.p3d","o\\hous\\dum_patrovy_balkon.pac",.9f,-2.f,0.496f,3.f,1.f,256,256,14158396793892771577ull,0,true},
+    {802,0,"o\\hous\\dum_patrovy01prujezd.p3d","o\\hous\\orlhot_okap.pac",.9f,-16.f,-1.f,16.f,2.f,256,128,9321694209529729054ull,0,false},
+    {803,0,"o\\hous\\dum_patrovy02.p3d","o\\hous\\orlhot_okap.pac",.9f,-16.f,-1.f,16.f,2.f,256,128,9321694209529729054ull,0,false},
+    {804,0,"o\\hous\\dum_patrovy03.p3d","o\\hous\\orlhot_okap.pac",.9f,-16.f,-1.f,16.f,2.f,256,128,9321694209529729054ull,0,false},
+    {805,0,"o\\hous\\dum_patrovy04.p3d","o\\hous\\orlhot_okap.pac",.9f,-16.f,-1.f,16.f,2.f,256,128,9321694209529729054ull,0,false},
+    {806,0,"o\\hous\\dum_patrovy05.p3d","o\\hous\\orlhot_okap.pac",.9f,-16.f,-1.f,16.f,2.f,256,128,9321694209529729054ull,0,false},
+    {807,0,"o\\hous\\dum_patrovy06.p3d","o\\hous\\orlhot_okap.pac",.9f,-16.f,-1.f,16.f,2.f,256,128,9321694209529729054ull,0,false},
+    {812,6,"o\\hous\\dum_podloubi02.p3d","o\\hous\\dum_podl01_balk.pac",.9f,-4.f,-0.01f,4.f,1.01f,256,256,2434663855382783722ull,0,true},
+    {813,5,"o\\hous\\dum_podloubi02.p3d","o\\hous\\dum_podl01a.pac",.9f,0.335f,-0.001f,0.75f,1.002f,512,512,12341192642203358667ull,0,true},
+    {814,5,"o\\hous\\dum_podloubi02.p3d","o\\hous\\dum_podl01a.pac",.9f,0.75f,-2.f,0.916f,3.f,512,512,12341192642203358667ull,0,true},
+    {815,6,"o\\hous\\dum_podloubi02.p3d","o\\hous\\nam_chodnik.pac",.9f,-4.f,-2.f,5.f,3.f,256,256,3247525841116358686ull,0,true},
+    {816,6,"o\\hous\\dum_podloubi02.p3d","o\\hous\\nam_chodr02.pac",.9f,-4.f,-2.f,12.f,3.f,256,256,5764238351645406621ull,0,true},
+    {821,6,"o\\hous\\dum_podloubi03.p3d","o\\hous\\dum_podl01_balk.pac",.9f,-4.f,-0.01f,4.f,1.01f,256,256,2434663855382783722ull,0,true},
+    {822,5,"o\\hous\\dum_podloubi03.p3d","o\\hous\\dum_podl01a.pac",.9f,0.335f,-0.001f,0.75f,1.002f,512,512,12341192642203358667ull,0,true},
+    {823,5,"o\\hous\\dum_podloubi03.p3d","o\\hous\\dum_podl01a.pac",.9f,0.75f,-2.f,0.916f,3.f,512,512,12341192642203358667ull,0,true},
+    {824,6,"o\\hous\\dum_podloubi03.p3d","o\\hous\\nam_chodnik.pac",.9f,-4.f,-2.f,5.f,3.f,256,256,3247525841116358686ull,0,true},
+    {825,6,"o\\hous\\dum_podloubi03.p3d","o\\hous\\nam_chodr02.pac",.9f,-4.f,-2.f,12.f,3.f,256,256,5764238351645406621ull,0,true},
+    {829,5,"o\\hous\\dum_podloubi03klaster.p3d","o\\hous\\dum_podl01a.pac",.9f,0.335f,-0.001f,0.75f,1.002f,512,512,12341192642203358667ull,0,true},
+    {830,6,"o\\hous\\dum_podloubi03klaster.p3d","o\\hous\\dum_podl01b.pac",.9f,-0.001f,-0.001f,1.001f,1.001f,256,256,16231152413746065627ull,0,true}};
 struct OriginalRegionGeometry
 {
     std::string_view model;
@@ -563,7 +595,19 @@ inline constexpr OriginalRegionGeometry OriginalRegionGeometries[]{
     {"o\\hous\\panelak3.p3d",1.5f,8599,35,17413746873858860606ull,9857816185850547063ull},
     {"o\\hous\\panelak3.p3d",3.f,4943,31,8048977740940987990ull,2114046924668967339ull},
     {"o\\hous\\panelak3.p3d",6.f,1629,8,9532290774975405972ull,12644764923513758205ull},
-    {"o\\hous\\panelak3.p3d",9.f,194,4,10366708237327812399ull,17793343675670240920ull}};
+    {"o\\hous\\panelak3.p3d",9.f,194,4,10366708237327812399ull,17793343675670240920ull},
+    {"o\\hous\\dum_podloubi02.p3d",0.f,2721,10,12674518357705308436ull,17885917857073837494ull},
+    {"o\\hous\\dum_podloubi02.p3d",2.5f,1776,10,17214949148834432003ull,10487787221712317368ull},
+    {"o\\hous\\dum_podloubi02.p3d",5.f,1101,10,9078644129494205758ull,696593439875265056ull},
+    {"o\\hous\\dum_podloubi02.p3d",15.f,478,8,9768100006053389955ull,17789974311558015511ull},
+    {"o\\hous\\dum_podloubi03.p3d",0.5f,2605,8,16853037083271281867ull,3090147641559778564ull},
+    {"o\\hous\\dum_podloubi03.p3d",2.5f,1660,8,12089420313441929681ull,1896039798847545842ull},
+    {"o\\hous\\dum_podloubi03.p3d",5.f,985,7,16394653959434912413ull,8334684794624241592ull},
+    {"o\\hous\\dum_podloubi03.p3d",15.f,473,7,2548888198717593702ull,17789974311558015511ull},
+    {"o\\hous\\dum_podloubi03klaster.p3d",0.5f,2910,6,9418153568860966873ull,9221666549023694222ull},
+    {"o\\hous\\dum_podloubi03klaster.p3d",2.5f,1832,6,16481732131891078914ull,9221666549023694222ull},
+    {"o\\hous\\dum_podloubi03klaster.p3d",5.f,1293,6,18230449436297498785ull,15464942002880181192ull},
+    {"o\\hous\\dum_podloubi03klaster.p3d",7.5f,537,6,5979576421762374597ull,17689670398836914166ull}};
 inline const OriginalMaterialRegion* OriginalRegion(unsigned identity)
 {
     for (const auto& r : OriginalMaterialRegions) if (r.identity==identity) return &r;

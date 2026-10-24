@@ -177,6 +177,26 @@ TEST_CASE("Nogova apartment regions preserve grilles, glazing, authored ambient 
         REQUIRE_FALSE(vk::OriginalMaterialSource(texture));
 }
 
+TEST_CASE("Nogova town regions keep facade windows and passage gates outside mineral treatment",
+          "[Graphics][vulkan-shape][material-qualification]")
+{
+    const auto selected=[](unsigned anchor,float u,float v,int flags=ClampU|ClampV) {
+        const std::array<std::array<float,2>,3> uv{{{u,v},{u+.0001f,v},{u,v+.0001f}}};
+        return vk::SelectOriginalRegion(*vk::OriginalRegion(anchor),uv,flags);
+    };
+    for (unsigned id : {808,809,810,811,817,818,819,820,826,827,828})
+        REQUIRE_FALSE(vk::OriginalRegion(id)); // Built CPU raster wedges even with GI off.
+    REQUIRE(selected(813,.5f,.7f)==813); // Broad blank plaster side.
+    REQUIRE_FALSE(selected(813,.23f,.2f)); // Side window.
+    REQUIRE_FALSE(selected(813,.95f,.4f)); // Separate edge artwork.
+    REQUIRE(selected(792,1.2f,.7f)==792); // Repeated original mineral balcony row.
+    REQUIRE_FALSE(selected(792,.48f,.3f)); // Corroded upper joint.
+    REQUIRE(selected(793,.8f,.7f)==793); // Passage floor tiles.
+    REQUIRE_FALSE(selected(793,.8f,.7f,0)); // Original clamp remains required.
+    REQUIRE_FALSE(vk::OriginalRegion(794)->reception); // Rough coating retains ambient.
+    for (unsigned id : {571,572,573,574,575,576,577}) REQUIRE_FALSE(vk::OriginalRegion(id));
+}
+
 TEST_CASE("Original church regions preserve glazing, doors and shrine artwork",
           "[Graphics][vulkan-shape][material-qualification]")
 {

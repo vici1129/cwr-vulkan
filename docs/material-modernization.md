@@ -6,7 +6,7 @@ The [per-model ledger](evidence/material-modernization/progress.json) retains al
 and concrete prerequisite blockers. It is not a visible-coverage percentage.
 The original inventory remains an immutable baseline.
 
-After batch 39, 380 models have complete source assessment, 104 have partial source
+After batch 40, 380 models have complete source assessment, 104 have partial source
 review, and 31 await source review. Complete assessments include explicitly
 retained optical cases, not only new material adoptions. Another 211 have no
 source-unknown triangles under the existing native classifier: their existing coverage and opacity,
@@ -262,6 +262,17 @@ discontinuity. Roof/edge coatings and painted door frames also use the existing
 PBR/reflector-only contract. All three assessments close with 10,940 unknown
 alternatives explicitly retained; this is not full-model PBR coverage. Totals
 become 25,708 / 51,360 prerequisites, leaving 135 models / 385 pending keys.
+Batch 40 [adds grouped Nogova town material coverage](material-modernization-batch-40.md):
+13 original models / 50 visual LODs / 94 placements. Twenty-seven new exact-model
+regions and one existing balcony extension add 2,723 highest-detail / 4,341
+alternative-LOD prerequisites for blank plaster walls, balustrades, balcony
+minerals, passage tiles, paving and ambient-preserving gutter/downpipe coatings.
+The shared vault/return group is withdrawn after native GI discontinuities and
+forced-CPU GI-off raster wedges; prior gable failures remain closed. Native and
+captured CPU reception and independent reflectors are recorded separately.
+All 13 model assessments stay partial. Totals become 28,431 / 55,701 prerequisites,
+leaving 135 models / 384 distinct pending keys. The bounded apartment timing
+repeat confirms additional draw ranges and recording cost; no renderer redesign.
 The [ordinary-adapter census](evidence/material-modernization/runtime-census.json)
 rechecks 726 models / **1,708 retained visual LODs** under the inspection configuration.
 The separate [source-only census](evidence/material-modernization/source-census.json)
