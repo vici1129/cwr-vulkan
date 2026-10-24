@@ -266,7 +266,38 @@ inline constexpr OriginalMaterialRegion OriginalMaterialRegions[]{
     {746,6,"o\\hous\\domek_zluty_bez.p3d","o\\hous\\domek_zluty1.pac",0.9f,0.f,0.884f,0.5f,1.f,512,512,7192993945681733848ull,0,true},
     {747,5,"o\\hous\\domek_zluty_bez.p3d","o\\hous\\domek_zluty2.pac",0.9f,0.793f,0.2123f,1.f,0.44f,512,512,2079521803999605238ull,0,true},
     {748,4,"o\\hous\\domek_zluty_bez.p3d","o\\hous\\domek_zluty2.pac",0.85f,0.178f,0.724f,0.579f,0.962f,512,512,2079521803999605238ull,0,true},
-    {749,6,"o\\hous\\domek_zluty_bez.p3d","o\\hous\\domek_zluty2.pac",0.9f,0.793f,0.44f,1.f,0.589f,512,512,2079521803999605238ull,0,true}};
+    {749,6,"o\\hous\\domek_zluty_bez.p3d","o\\hous\\domek_zluty2.pac",0.9f,0.793f,0.44f,1.f,0.589f,512,512,2079521803999605238ull,0,true},
+    // Batch 39: exact original apartment concrete, wall finishes and coatings.
+    {759,7,"o\\hous\\panelak.p3d","o\\hous\\panel02.pac",0.9f,-8.f,-0.002f,8.f,0.139f,512,256,816340318396677072ull,0,true},
+    {760,7,"o\\hous\\panelak.p3d","o\\hous\\panel02.pac",0.9f,0.51f,0.139f,1.f,0.6f,512,256,816340318396677072ull,0,true},
+    {761,7,"o\\hous\\panelak.p3d","o\\hous\\panel02.pac",0.9f,0.f,0.139f,0.38f,0.6f,512,256,816340318396677072ull,0,true},
+    {762,7,"o\\hous\\panelak.p3d","o\\hous\\panel03.pac",0.9f,-4.f,0.066f,4.f,0.506f,512,512,4147978271045803459ull,0,false},
+    {763,7,"o\\hous\\panelak.p3d","o\\hous\\panel05.pac",0.9f,-8.f,0.139f,8.f,0.253f,256,256,16073327910406133478ull,0,true},
+    {764,0,"o\\hous\\panelak.p3d","o\\hous\\panel_dvere01.pac",0.9f,0.5f,0.f,0.562f,0.83f,512,256,15056324245113247282ull,0,false},
+    {765,0,"o\\hous\\panelak.p3d","o\\hous\\panel_dvere01.pac",0.9f,0.74f,0.f,0.76f,0.83f,512,256,15056324245113247282ull,0,false},
+    {767,7,"o\\hous\\panelak.p3d","o\\hous\\panel_lod.pac",0.9f,0.f,0.f,0.246f,1.f,512,256,931871493084549154ull,0,true},
+    {768,0,"o\\hous\\panelak.p3d","o\\hous\\panel_strecha.pac",0.9f,-8.f,-8.f,8.f,8.f,256,256,6034515491786019322ull,0,false},
+    {769,5,"o\\hous\\panelak.p3d","o\\hous\\panel_zabradli.pac",0.9f,0.f,0.f,0.49f,1.f,256,256,4939778240929575106ull,0,true},
+    {771,7,"o\\hous\\panelak2.p3d","o\\hous\\panel02.pac",0.9f,-8.f,-0.002f,8.f,0.139f,512,256,816340318396677072ull,0,true},
+    {772,7,"o\\hous\\panelak2.p3d","o\\hous\\panel02.pac",0.9f,0.51f,0.139f,1.f,0.6f,512,256,816340318396677072ull,0,true},
+    {773,7,"o\\hous\\panelak2.p3d","o\\hous\\panel02.pac",0.9f,0.f,0.139f,0.38f,0.6f,512,256,816340318396677072ull,0,true},
+    {774,7,"o\\hous\\panelak2.p3d","o\\hous\\panel03.pac",0.9f,-4.f,0.066f,4.f,0.506f,512,512,4147978271045803459ull,0,false},
+    {775,7,"o\\hous\\panelak2.p3d","o\\hous\\panel05.pac",0.9f,-8.f,0.139f,8.f,0.253f,256,256,16073327910406133478ull,0,true},
+    {776,0,"o\\hous\\panelak2.p3d","o\\hous\\panel_dvere01.pac",0.9f,0.5f,0.f,0.562f,0.83f,512,256,15056324245113247282ull,0,false},
+    {777,0,"o\\hous\\panelak2.p3d","o\\hous\\panel_dvere01.pac",0.9f,0.74f,0.f,0.76f,0.83f,512,256,15056324245113247282ull,0,false},
+    {779,7,"o\\hous\\panelak2.p3d","o\\hous\\panel_lod.pac",0.9f,0.f,0.f,0.246f,1.f,512,256,931871493084549154ull,0,true},
+    {780,0,"o\\hous\\panelak2.p3d","o\\hous\\panel_strecha.pac",0.9f,-8.f,-8.f,8.f,8.f,256,256,6034515491786019322ull,0,false},
+    {781,5,"o\\hous\\panelak2.p3d","o\\hous\\panel_zabradli.pac",0.9f,0.f,0.f,0.49f,1.f,256,256,4939778240929575106ull,0,true},
+    {783,7,"o\\hous\\panelak3.p3d","o\\hous\\panel02.pac",0.9f,-8.f,-0.002f,8.f,0.139f,512,256,816340318396677072ull,0,true},
+    {784,7,"o\\hous\\panelak3.p3d","o\\hous\\panel02.pac",0.9f,0.51f,0.139f,1.f,0.6f,512,256,816340318396677072ull,0,true},
+    {785,7,"o\\hous\\panelak3.p3d","o\\hous\\panel02.pac",0.9f,0.f,0.139f,0.38f,0.6f,512,256,816340318396677072ull,0,true},
+    {786,7,"o\\hous\\panelak3.p3d","o\\hous\\panel03.pac",0.9f,-4.f,0.066f,4.f,0.506f,512,512,4147978271045803459ull,0,false},
+    {787,7,"o\\hous\\panelak3.p3d","o\\hous\\panel05.pac",0.9f,-8.f,0.139f,8.f,0.253f,256,256,16073327910406133478ull,0,true},
+    {788,0,"o\\hous\\panelak3.p3d","o\\hous\\panel_strecha.pac",0.9f,-8.f,-8.f,8.f,8.f,256,256,6034515491786019322ull,0,false},
+    // Original dark roof-edge coating row; preserve authored ambient.
+    {789,0,"o\\hous\\panelak.p3d","o\\hous\\panel05.pac",.9f,-8.f,0.f,8.f,.139f,256,256,16073327910406133478ull,0,false},
+    {790,0,"o\\hous\\panelak2.p3d","o\\hous\\panel05.pac",.9f,-8.f,0.f,8.f,.139f,256,256,16073327910406133478ull,0,false},
+    {791,0,"o\\hous\\panelak3.p3d","o\\hous\\panel05.pac",.9f,-8.f,0.f,8.f,.139f,256,256,16073327910406133478ull,0,false}};
 struct OriginalRegionGeometry
 {
     std::string_view model;
@@ -519,7 +550,20 @@ inline constexpr OriginalRegionGeometry OriginalRegionGeometries[]{
     {"o\\misc\\leseni4x.p3d",0.5f,2472,5,11229105078967952987ull,12388233298358411269ull},
     {"o\\misc\\leseni4x.p3d",3.f,1539,5,10181813940138965791ull,7584468572618884569ull},
     {"o\\misc\\leseni4x.p3d",6.75f,869,5,10987793746536990437ull,12388233298358411269ull},
-    {"o\\misc\\leseni4x.p3d",9.f,336,3,6154975240078087114ull,2195080624288555822ull}};
+    {"o\\misc\\leseni4x.p3d",9.f,336,3,6154975240078087114ull,2195080624288555822ull},
+    {"o\\hous\\panelak.p3d",1.5f,6854,58,15024501311255812813ull,14592311169065736705ull},
+    {"o\\hous\\panelak.p3d",3.f,3755,48,8581898478602163653ull,12433162422308591176ull},
+    {"o\\hous\\panelak.p3d",6.f,1897,32,14028063843640254547ull,8422680042865911885ull},
+    {"o\\hous\\panelak.p3d",8.f,531,8,6617215846556989627ull,9960237243601318993ull},
+    {"o\\hous\\panelak.p3d",10.f,174,4,2529212143649406308ull,17793343675670240920ull},
+    {"o\\hous\\panelak2.p3d",1.5f,9016,52,9744542078899679571ull,1848684302292648962ull},
+    {"o\\hous\\panelak2.p3d",3.f,3799,39,17218464639420229519ull,9554512992094809772ull},
+    {"o\\hous\\panelak2.p3d",6.f,1107,12,4267120097261734925ull,12480795140092041081ull},
+    {"o\\hous\\panelak2.p3d",9.f,174,4,11510577576096611593ull,17793343675670240920ull},
+    {"o\\hous\\panelak3.p3d",1.5f,8599,35,17413746873858860606ull,9857816185850547063ull},
+    {"o\\hous\\panelak3.p3d",3.f,4943,31,8048977740940987990ull,2114046924668967339ull},
+    {"o\\hous\\panelak3.p3d",6.f,1629,8,9532290774975405972ull,12644764923513758205ull},
+    {"o\\hous\\panelak3.p3d",9.f,194,4,10366708237327812399ull,17793343675670240920ull}};
 inline const OriginalMaterialRegion* OriginalRegion(unsigned identity)
 {
     for (const auto& r : OriginalMaterialRegions) if (r.identity==identity) return &r;

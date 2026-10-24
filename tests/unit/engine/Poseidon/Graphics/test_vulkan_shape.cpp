@@ -149,6 +149,34 @@ TEST_CASE("Nogova barn, farm and village regions preserve ambient, apertures and
         REQUIRE_FALSE(vk::OriginalMaterialSource(texture));
 }
 
+TEST_CASE("Nogova apartment regions preserve grilles, glazing, authored ambient and rejected panels",
+          "[Graphics][vulkan-shape][material-qualification]")
+{
+    const auto selected=[](unsigned anchor,float u,float v) {
+        const std::array<std::array<float,2>,3> uv{{{u,v},{u+.0001f,v},{u,v+.0001f}}};
+        return vk::SelectOriginalRegion(*vk::OriginalRegion(anchor),uv,ClampU|ClampV);
+    };
+    for (unsigned id : {758,766,770,778,782}) REQUIRE_FALSE(vk::OriginalRegion(id)); // Built GI-off brightness patches.
+    REQUIRE(selected(759,1.2f,.1f)==759); // Original repeating concrete structural row.
+    REQUIRE(selected(759,.7f,.3f)==760);
+    REQUIRE(selected(759,.2f,.3f)==761);
+    REQUIRE_FALSE(selected(759,.45f,.48f)); // Photographed ventilation grille.
+    const std::array<std::array<float,2>,3> mixed{{{0,.13f},{1,.13f},{0,.99f}}};
+    REQUIRE_FALSE(vk::SelectOriginalRegion(*vk::OriginalRegion(759),mixed,ClampU|ClampV));
+    REQUIRE(selected(762,.7f,.3f)==762); // Rough mineral wall band.
+    REQUIRE_FALSE(selected(762,.7f,.75f)); // Balcony door/window glass.
+    REQUIRE_FALSE(selected(762,.4f,.03f)); // Separate upper metal hooks.
+    for (unsigned id : {762,774,786}) REQUIRE_FALSE(vk::OriginalRegion(id)->reception); // Built GI continuity failure.
+    for (unsigned id : {764,765,768,776,777,780,788,789,790,791})
+    {
+        REQUIRE(vk::OriginalRegion(id)->family==0);
+        REQUIRE_FALSE(vk::OriginalRegion(id)->reception); // Rough coatings retain original ambient.
+    }
+    for (auto texture : {"o\\hous\\panel01.pac","o\\hous\\panel02.pac","o\\hous\\panel03.pac",
+                         "o\\hous\\panel_dvere01.pac","o\\hous\\panel_strecha.pac","o\\hous\\panel_lod.pac"})
+        REQUIRE_FALSE(vk::OriginalMaterialSource(texture));
+}
+
 TEST_CASE("Original church regions preserve glazing, doors and shrine artwork",
           "[Graphics][vulkan-shape][material-qualification]")
 {

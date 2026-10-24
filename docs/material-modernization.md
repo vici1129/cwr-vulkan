@@ -6,13 +6,13 @@ The [per-model ledger](evidence/material-modernization/progress.json) retains al
 and concrete prerequisite blockers. It is not a visible-coverage percentage.
 The original inventory remains an immutable baseline.
 
-After batch 38, 377 models have complete source assessment, 107 have partial source
+After batch 39, 380 models have complete source assessment, 104 have partial source
 review, and 31 await source review. Complete assessments include explicitly
 retained optical cases, not only new material adoptions. Another 211 have no
 source-unknown triangles under the existing native classifier: their existing coverage and opacity,
 authored-lighting or geometry fallback contracts are retained. This last group
 is a prerequisite disposition, not a claim that all of its pixels are PBR or GI.
-Backlog tasks 1–4, 6–8, 14–16, 19–20 and 24–27 have source review complete; the remaining tasks continue.
+Backlog tasks 1–4, 6–8, 14–16, 19–20 and 23–27 have source review complete; the remaining tasks continue.
 Batch 02 covers [brick pillars, bark and stacked logs](material-modernization-batch-02.md);
 batch 03 covers [fence foundations, roof tiles and blank plaster](material-modernization-batch-03.md).
 Batch 04 adds [original-triangle UV regions for farm masonry](material-modernization-batch-04.md),
@@ -253,6 +253,15 @@ reception, with independent reflector hits distinguished. All four assessments
 close with 3,465 retained source-unknown alternatives explicitly disposed.
 Totals become 24,786 / 48,962 prerequisites, leaving 138 models / 394 distinct
 pending keys. Assessment completion remains separate from rendering coverage.
+Batch 39 [assesses the three original Nogova apartment blocks](material-modernization-batch-39.md):
+13 visual LODs / 36 placements / ten pending keys. Twenty-nine exact-model regions
+add 922 highest-detail / 2,398 alternative-LOD prerequisites. Built GI-off raster
+failures withdraw three broad concrete-panel and two wallpaper candidates;
+three mineral-band regions retain ambient after a demonstrated dusk GI
+discontinuity. Roof/edge coatings and painted door frames also use the existing
+PBR/reflector-only contract. All three assessments close with 10,940 unknown
+alternatives explicitly retained; this is not full-model PBR coverage. Totals
+become 25,708 / 51,360 prerequisites, leaving 135 models / 385 pending keys.
 The [ordinary-adapter census](evidence/material-modernization/runtime-census.json)
 rechecks 726 models / **1,708 retained visual LODs** under the inspection configuration.
 The separate [source-only census](evidence/material-modernization/source-census.json)
@@ -266,11 +275,13 @@ live instance lighting, GI reception or optical review of every original image.
 Backlog 28/29 retain their alpha-card and authored-lighting contracts after original
 pixel/geometry review; this is not newly implemented foliage coverage.
 Backlog 30 likewise retains the fitted-road contract after explicit source review.
-All 30 pilot tasks now have a disposition, but 16 remain partial source reviews;
+All 30 pilot tasks now have a disposition, but ten remain partial source reviews;
 the wider 726-model assessment and remaining defensible implementations continue.
 Use the [batch-29 inspection command](material-modernization-batch-29.md#validation-and-reproduction)
-with the [batch-33 census replay additions](material-modernization-batch-33.md)
-for the current executable; earlier batch commands describe their policy snapshots.
+with the [batch-33 census replay additions](material-modernization-batch-33.md).
+Current replay includes enhanced identities 130–207, the inspected
+`data/sloup_bily_orez_v.pac` identity 86, and regional identities 512–791 except
+565; earlier batch commands describe their policy snapshots.
 
 ## Batch 01: Nogova rough stone and boundary masonry
 
