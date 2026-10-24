@@ -32,10 +32,11 @@ inline constexpr OriginalMaterialRegion OriginalMaterialRegions[]{
     // Stone fills its entire inspected row, including the original repeated U.
     // Negative wood-edge overshoot additionally requires the original clamp mode.
     {518,4,"o\\hous\\domek_kovarna.p3d","o\\hous\\stodola01.pac",0.85f,-0.003f,-0.003f,0.501f,0.155f,512,512,17838487729387079901ull,49152},
-    {519,6,"o\\hous\\domek_sedy.p3d","o\\hous\\stodola01.pac",0.9f,-3.f,0.5f,3.f,1.f,512,512,17838487729387079901ull,0},
-    {520,6,"o\\hous\\domek_sedy_bez.p3d","o\\hous\\stodola01.pac",0.9f,-3.f,0.5f,3.f,1.f,512,512,17838487729387079901ull,0},
-    {521,6,"o\\hous\\domek_zluty.p3d","o\\hous\\stodola01.pac",0.9f,-3.f,0.5f,3.f,1.f,512,512,17838487729387079901ull,0},
-    {522,6,"o\\hous\\domek_zluty_bez.p3d","o\\hous\\stodola01.pac",0.9f,-3.f,0.5f,3.f,1.f,512,512,17838487729387079901ull,0},
+    // Batch 38: bounded original repeat; grey edge overshoot requires original ClampV.
+    {519,6,"o\\hous\\domek_sedy.p3d","o\\hous\\stodola01.pac",0.9f,-3.f,0.5f,3.f,1.003f,512,512,17838487729387079901ull,32768},
+    {520,6,"o\\hous\\domek_sedy_bez.p3d","o\\hous\\stodola01.pac",0.9f,-3.f,0.5f,3.f,1.003f,512,512,17838487729387079901ull,32768},
+    {521,6,"o\\hous\\domek_zluty.p3d","o\\hous\\stodola01.pac",0.9f,-4.f,0.5f,4.f,1.f,512,512,17838487729387079901ull,0},
+    {522,6,"o\\hous\\domek_zluty_bez.p3d","o\\hous\\stodola01.pac",0.9f,-4.f,0.5f,4.f,1.f,512,512,17838487729387079901ull,0},
     {523,4,"o\\hous\\stodola.p3d","o\\hous\\stodola01.pac",0.85f,0.f,-0.005f,0.501f,0.499f,512,512,17838487729387079901ull,32768},
     {524,6,"o\\hous\\stodola.p3d","o\\hous\\stodola01.pac",0.9f,-3.f,0.5f,3.f,1.f,512,512,17838487729387079901ull,0},
     {525,6,"o\\hous\\stodola.p3d","o\\hous\\stodola01a.pac",0.9f,0.f,0.674f,0.742f,1.f,512,512,18343219702901983844ull,0},
@@ -237,7 +238,35 @@ inline constexpr OriginalMaterialRegion OriginalMaterialRegions[]{
     {706,5,"o\\hous\\zluty_statek_in.p3d","o\\hous\\zlutstat01.pac",0.9f,0.f,0.f,0.502f,0.392f,512,512,12468669674644636230ull,0,true},
     {707,5,"o\\hous\\zluty_statek_in.p3d","o\\hous\\zlutstat01.pac",0.9f,0.99f,0.f,1.51f,0.392f,512,512,12468669674644636230ull,0,true},
     {709,6,"o\\hous\\zluty_statek_in.p3d","o\\hous\\zlutstat01.pac",0.9f,-2.f,0.392f,3.f,0.501f,512,512,12468669674644636230ull,0,true},
-    {712,6,"o\\hous\\zluty_statek_in.p3d","o\\hous\\zlutstat01.pac",0.9f,0.f,0.895f,0.633f,1.f,512,512,12468669674644636230ull,0,true}};
+    {712,6,"o\\hous\\zluty_statek_in.p3d","o\\hous\\zlutstat01.pac",0.9f,0.f,0.895f,0.633f,1.f,512,512,12468669674644636230ull,0,true},
+    // Batch 38: original Nogova village plaster, mineral, timber and paving.
+    // Built broad plaster/window-side trials made raster brightness patches
+    // with PBR on / GI off, including forced CPU. Their identities stay absent.
+    // Narrow lintel/sill trials also failed raster or native GI continuity.
+    {714,6,"o\\hous\\domek_sedy.p3d","o\\hous\\domsedy01.pac",0.9f,-3.f,0.416f,3.f,0.5002f,512,512,5975975147097993305ull,0,true},
+    {716,6,"o\\hous\\domek_sedy.p3d","o\\hous\\domsedy01.pac",0.9f,-0.006f,0.9141f,1.f,0.999f,512,512,5975975147097993305ull,0,true},
+    {717,5,"o\\hous\\domek_sedy.p3d","o\\hous\\domsedy02.pac",0.9f,0.32f,0.673f,0.59f,1.f,512,512,12301574803382486375ull,0,true},
+    {718,5,"o\\hous\\domek_sedy.p3d","o\\hous\\domsedy02.pac",0.9f,0.f,0.585f,0.78f,0.673f,512,512,12301574803382486375ull,0,true},
+    {719,6,"o\\hous\\domek_sedy.p3d","o\\hous\\dum_podhradi1_5.pac",0.9f,-8.f,0.f,8.f,1.f,512,512,10979874294750209330ull,0,true},
+    {721,6,"o\\hous\\domek_sedy_bez.p3d","o\\hous\\domsedy01.pac",0.9f,-3.f,0.416f,3.f,0.5002f,512,512,5975975147097993305ull,0,true},
+    {723,6,"o\\hous\\domek_sedy_bez.p3d","o\\hous\\domsedy01.pac",0.9f,-0.006f,0.9141f,1.f,0.999f,512,512,5975975147097993305ull,0,true},
+    {724,5,"o\\hous\\domek_sedy_bez.p3d","o\\hous\\domsedy02.pac",0.9f,0.32f,0.673f,0.59f,1.f,512,512,12301574803382486375ull,0,true},
+    {725,5,"o\\hous\\domek_sedy_bez.p3d","o\\hous\\domsedy02.pac",0.9f,0.f,0.585f,0.78f,0.673f,512,512,12301574803382486375ull,0,true},
+    {726,6,"o\\hous\\domek_sedy_bez.p3d","o\\hous\\dum_podhradi1_5.pac",0.9f,-8.f,0.f,8.f,1.f,512,512,10979874294750209330ull,0,true},
+    {727,5,"o\\hous\\domek_zluty.p3d","o\\hous\\domek_zluty1.pac",0.9f,0.f,0.f,1.f,0.073f,512,512,7192993945681733848ull,0,true},
+    {730,6,"o\\hous\\domek_zluty.p3d","o\\hous\\domek_zluty1.pac",0.9f,0.f,0.386f,1.f,0.4993f,512,512,7192993945681733848ull,0,true},
+    {731,5,"o\\hous\\domek_zluty.p3d","o\\hous\\domek_zluty1.pac",0.9f,0.f,0.4993f,1.f,0.574f,512,512,7192993945681733848ull,0,true},
+    {734,6,"o\\hous\\domek_zluty.p3d","o\\hous\\domek_zluty1.pac",0.9f,0.f,0.884f,0.5f,1.f,512,512,7192993945681733848ull,0,true},
+    {735,5,"o\\hous\\domek_zluty.p3d","o\\hous\\domek_zluty2.pac",0.9f,0.793f,0.2123f,1.f,0.44f,512,512,2079521803999605238ull,0,true},
+    {736,4,"o\\hous\\domek_zluty.p3d","o\\hous\\domek_zluty2.pac",0.85f,0.178f,0.724f,0.579f,0.962f,512,512,2079521803999605238ull,0,true},
+    {737,6,"o\\hous\\domek_zluty.p3d","o\\hous\\domek_zluty2.pac",0.9f,0.793f,0.44f,1.f,0.589f,512,512,2079521803999605238ull,0,true},
+    {738,5,"o\\hous\\domek_zluty_bez.p3d","o\\hous\\domek_zluty1.pac",0.9f,0.f,0.f,1.f,0.073f,512,512,7192993945681733848ull,0,true},
+    {742,6,"o\\hous\\domek_zluty_bez.p3d","o\\hous\\domek_zluty1.pac",0.9f,0.f,0.386f,1.f,0.4993f,512,512,7192993945681733848ull,0,true},
+    {743,5,"o\\hous\\domek_zluty_bez.p3d","o\\hous\\domek_zluty1.pac",0.9f,0.f,0.4993f,1.f,0.574f,512,512,7192993945681733848ull,0,true},
+    {746,6,"o\\hous\\domek_zluty_bez.p3d","o\\hous\\domek_zluty1.pac",0.9f,0.f,0.884f,0.5f,1.f,512,512,7192993945681733848ull,0,true},
+    {747,5,"o\\hous\\domek_zluty_bez.p3d","o\\hous\\domek_zluty2.pac",0.9f,0.793f,0.2123f,1.f,0.44f,512,512,2079521803999605238ull,0,true},
+    {748,4,"o\\hous\\domek_zluty_bez.p3d","o\\hous\\domek_zluty2.pac",0.85f,0.178f,0.724f,0.579f,0.962f,512,512,2079521803999605238ull,0,true},
+    {749,6,"o\\hous\\domek_zluty_bez.p3d","o\\hous\\domek_zluty2.pac",0.9f,0.793f,0.44f,1.f,0.589f,512,512,2079521803999605238ull,0,true}};
 struct OriginalRegionGeometry
 {
     std::string_view model;

@@ -6,13 +6,13 @@ The [per-model ledger](evidence/material-modernization/progress.json) retains al
 and concrete prerequisite blockers. It is not a visible-coverage percentage.
 The original inventory remains an immutable baseline.
 
-After batch 37, 373 models have complete source assessment, 111 have partial source
+After batch 38, 377 models have complete source assessment, 107 have partial source
 review, and 31 await source review. Complete assessments include explicitly
 retained optical cases, not only new material adoptions. Another 211 have no
 source-unknown triangles under the existing native classifier: their existing coverage and opacity,
 authored-lighting or geometry fallback contracts are retained. This last group
 is a prerequisite disposition, not a claim that all of its pixels are PBR or GI.
-Backlog tasks 1–4, 6–8, 14–15, 19 and 24–27 have source review complete; the remaining tasks continue.
+Backlog tasks 1–4, 6–8, 14–16, 19–20 and 24–27 have source review complete; the remaining tasks continue.
 Batch 02 covers [brick pillars, bark and stacked logs](material-modernization-batch-02.md);
 batch 03 covers [fence foundations, roof tiles and blank plaster](material-modernization-batch-03.md).
 Batch 04 adds [original-triangle UV regions for farm masonry](material-modernization-batch-04.md),
@@ -241,6 +241,18 @@ All five source assessments close with concrete retained geometry and rendering
 dispositions. Totals become 24,372 / 48,048 prerequisites, with 142 models /
 400 distinct pending keys in the assessment backlog. This is not full-model
 modernization or a visible-coverage percentage.
+Batch 38 [assesses the original Nogova village houses](material-modernization-batch-38.md):
+four models / 14 visual LODs / 104 placements / all seven pending texture keys.
+Twenty-four new exact-model regions and four bounded foundation extensions add
+414 highest-detail / 914 alternative-LOD prerequisites. Broad and narrowed
+plaster candidates are actually built: 17 raster brightness failures and four
+native-GI continuity failures are withdrawn. Mineral roofs/steps, foundations,
+trim, chimney plaster and timber hatches retain useful adoption. Closed variants
+demonstrate native reception; open variants demonstrate captured CPU-lit
+reception, with independent reflector hits distinguished. All four assessments
+close with 3,465 retained source-unknown alternatives explicitly disposed.
+Totals become 24,786 / 48,962 prerequisites, leaving 138 models / 394 distinct
+pending keys. Assessment completion remains separate from rendering coverage.
 The [ordinary-adapter census](evidence/material-modernization/runtime-census.json)
 rechecks 726 models / **1,708 retained visual LODs** under the inspection configuration.
 The separate [source-only census](evidence/material-modernization/source-census.json)

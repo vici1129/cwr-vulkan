@@ -95,7 +95,7 @@ TEST_CASE("Original atlas regions require exact geometry, pixels and entire orig
     REQUIRE(vk::OriginalRegionTextureBindings(bindings)!=vk::OriginalRegionTextureBindings(swapped));
 }
 
-TEST_CASE("Nogova barn and farm regions preserve ambient, apertures and original samplers",
+TEST_CASE("Nogova barn, farm and village regions preserve ambient, apertures and original samplers",
           "[Graphics][vulkan-shape][material-qualification]")
 {
     const auto selected=[](unsigned anchor,float u,float v,int flags=ClampU|ClampV) {
@@ -124,6 +124,28 @@ TEST_CASE("Nogova barn and farm regions preserve ambient, apertures and original
     REQUIRE_FALSE(selected(704,.25f,.5f)); // Door glass does not inherit border optics.
     for (auto texture : {"o\\hous\\stodola01.pac","o\\hous\\stodola01a.pac",
                          "o\\hous\\zlutstat01.pac","o\\hous\\dverein01.pac"})
+        REQUIRE_FALSE(vk::OriginalMaterialSource(texture));
+
+    // Batch 38 preserves the foundations' identities and original sampler.
+    REQUIRE_FALSE(selected(519,.2f,1.001f,0));
+    REQUIRE(selected(519,.2f,1.001f,ClampV)==519);
+    REQUIRE(selected(521,3.1f,.7f,ClampV)==521);
+    REQUIRE_FALSE(selected(521,4.1f,.7f,ClampV));
+    REQUIRE(selected(714,.2f,.45f)==714); // Grey mineral ledge.
+    REQUIRE(selected(719,4.f,.7f)==719); // Original mineral roof/step repeat.
+    REQUIRE(selected(735,.9f,.3f)==735); // Yellow chimney plaster.
+    REQUIRE(selected(736,.4f,.8f)==736); // Separate braced timber roof hatch.
+    REQUIRE_FALSE(selected(714,.23f,.7f)); // Grey window.
+    REQUIRE_FALSE(selected(730,.75f,.25f)); // Yellow upper window.
+    REQUIRE_FALSE(selected(730,.75f,.75f)); // Yellow door/glazing/hardware.
+    REQUIRE_FALSE(selected(735,.1f,.25f)); // Gable glazing.
+    for (unsigned id : {713,715,720,722,728,729,732,733,739,740,741,744,745})
+        REQUIRE_FALSE(vk::OriginalRegion(id)); // Built raster brightness failures.
+    for (unsigned id : {750,751,752,753,754,755,756,757})
+        REQUIRE_FALSE(vk::OriginalRegion(id)); // Narrow raster/native-GI seam trials.
+    for (auto texture : {"o\\hous\\domsedy01.pac","o\\hous\\domsedy02.pac",
+                         "o\\hous\\domek_zluty1.pac","o\\hous\\domek_zluty2.pac",
+                         "o\\hous\\dverein03.pac","o\\hous\\dum_podhradi1_5.pac"})
         REQUIRE_FALSE(vk::OriginalMaterialSource(texture));
 }
 
