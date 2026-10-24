@@ -197,6 +197,28 @@ TEST_CASE("Nogova town regions keep facade windows and passage gates outside min
     for (unsigned id : {571,572,573,574,575,576,577}) REQUIRE_FALSE(vk::OriginalRegion(id));
 }
 
+TEST_CASE("Classic building regions exclude apertures and preserve original sampler gates",
+          "[Graphics][vulkan-shape][material-qualification]")
+{
+    const auto selected=[](unsigned anchor,float u,float v,int flags=ClampU|ClampV) {
+        const std::array<std::array<float,2>,3> uv{{{u,v},{u+.0001f,v},{u,v+.0001f}}};
+        return vk::SelectOriginalRegion(*vk::OriginalRegion(anchor),uv,flags);
+    };
+    REQUIRE(selected(832,-.3f,.7f)==832); // Original repeated blank lower plaster.
+    REQUIRE_FALSE(selected(832,.4f,.35f)); // Photographed window row.
+    REQUIRE_FALSE(selected(833,.4f,1.1f,0)); // Far LOD wrap cannot inherit near ClampV.
+    REQUIRE(selected(838,1.5f,.85f)==838); // Mineral foundation, bounded original repeat.
+    REQUIRE_FALSE(selected(838,.5f,.4f)); // Window/frame artwork.
+    REQUIRE(selected(836,.5f,.3f)==836); // Mineral chimney body.
+    REQUIRE_FALSE(selected(836,.1f,.3f)); // Photographic canvas outside body.
+    REQUIRE_FALSE(selected(836,.27f,.3f)); // Flat left photo margin.
+    REQUIRE_FALSE(selected(836,.72f,.3f)); // Flat right photo margin.
+    for (unsigned id : {837,840,843,844,848}) REQUIRE_FALSE(vk::OriginalRegion(id)->reception);
+    for (const auto texture : {"data\\blok_a_strecha.pac","data\\blok_a_strecha_02.pac",
+                              "data\\komin_top_01.pac","data\\stena_in_okno2.pac"})
+        REQUIRE_FALSE(vk::OriginalMaterialSource(texture));
+}
+
 TEST_CASE("Original church regions preserve glazing, doors and shrine artwork",
           "[Graphics][vulkan-shape][material-qualification]")
 {

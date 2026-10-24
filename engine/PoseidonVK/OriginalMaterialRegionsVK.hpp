@@ -329,7 +329,27 @@ inline constexpr OriginalMaterialRegion OriginalMaterialRegions[]{
     {824,6,"o\\hous\\dum_podloubi03.p3d","o\\hous\\nam_chodnik.pac",.9f,-4.f,-2.f,5.f,3.f,256,256,3247525841116358686ull,0,true},
     {825,6,"o\\hous\\dum_podloubi03.p3d","o\\hous\\nam_chodr02.pac",.9f,-4.f,-2.f,12.f,3.f,256,256,5764238351645406621ull,0,true},
     {829,5,"o\\hous\\dum_podloubi03klaster.p3d","o\\hous\\dum_podl01a.pac",.9f,0.335f,-0.001f,0.75f,1.002f,512,512,12341192642203358667ull,0,true},
-    {830,6,"o\\hous\\dum_podloubi03klaster.p3d","o\\hous\\dum_podl01b.pac",.9f,-0.001f,-0.001f,1.001f,1.001f,256,256,16231152413746065627ull,0,true}};
+    {830,6,"o\\hous\\dum_podloubi03klaster.p3d","o\\hous\\dum_podl01b.pac",.9f,-0.001f,-0.001f,1.001f,1.001f,256,256,16231152413746065627ull,0,true},
+    // Batch 41: intact classic plaster/foundation, terrace and chimney faces.
+    // Mixed roofs/apertures stay original; rough coatings preserve ambient.
+    {831,5,"data3d\\bouda1.p3d","data\\bouda1_bck.pac",.9f,0.f,0.5f,1.f,1.f,256,256,16459890020986038436ull,0,true},
+    {832,5,"data3d\\budova1.p3d","data\\blok_a_side.pac",.9f,-0.51f,0.46f,1.06f,1.31f,256,128,12986712140053220762ull,32768,true},
+    {833,5,"data3d\\budova2.p3d","data\\blok_a_side.pac",.9f,-0.51f,0.46f,1.06f,1.31f,256,128,12986712140053220762ull,32768,true},
+    {834,5,"data3d\\budova3.p3d","data\\blok_b_side.pac",.9f,-2.f,0.73f,6.f,1.02f,256,128,8729128933426751291ull,32768,true},
+    {835,5,"data3d\\budova3.p3d","data\\blok_b_side_02.pac",.9f,-2.f,0.73f,6.f,1.02f,256,128,2027873802945937839ull,32768,true},
+    {836,6,"data3d\\budova3.p3d","data\\komin_maly_side_01.pac",.9f,0.29f,-0.001f,0.705f,1.f,64,64,6256116411793363263ull,32768,true},
+    {837,0,"data3d\\budova3.p3d","data\\okap_roura_side.pac",.9f,-24.f,-9.f,13.f,10.f,16,128,7480917214126107358ull,0,false},
+    {838,5,"data3d\\budova4.p3d","data\\blok_b_side_02.pac",.9f,-2.f,0.73f,6.f,1.02f,256,128,2027873802945937839ull,32768,true},
+    {839,6,"data3d\\budova4.p3d","data\\komin_maly_side_01.pac",.9f,0.29f,-0.001f,0.705f,1.f,64,64,6256116411793363263ull,32768,true},
+    {840,0,"data3d\\budova4.p3d","data\\okap_roura_side.pac",.9f,-24.f,-9.f,13.f,10.f,16,128,7480917214126107358ull,0,false},
+    {841,5,"data3d\\budova4_in.p3d","data\\blok_b_side_02.pac",.9f,-2.f,0.73f,6.f,1.02f,256,128,2027873802945937839ull,32768,true},
+    {842,6,"data3d\\budova4_in.p3d","data\\komin_maly_side_01.pac",.9f,0.29f,-0.001f,0.705f,1.f,64,64,6256116411793363263ull,32768,true},
+    {843,0,"data3d\\budova4_in.p3d","data\\okap_roura_side.pac",.9f,-24.f,-9.f,13.f,10.f,16,128,7480917214126107358ull,0,false},
+    {844,0,"data3d\\budova5.p3d","data\\blok_c_sloupek_01.pac",.9f,0.f,0.f,1.f,1.f,32,256,901627291296341246ull,0,false},
+    {845,6,"data3d\\budova5.p3d","data\\blok_c_terasa_top.pac",.9f,-0.01f,-0.01f,1.01f,1.01f,256,256,127320770919192222ull,0,true},
+    {846,5,"data3d\\hospital.p3d","data\\blok_b_side_02.pac",.9f,-2.f,0.73f,6.f,1.02f,256,128,2027873802945937839ull,32768,true},
+    {847,6,"data3d\\hospital.p3d","data\\komin_maly_side_01.pac",.9f,0.29f,-0.001f,0.705f,1.f,64,64,6256116411793363263ull,32768,true},
+    {848,0,"data3d\\hospital.p3d","data\\okap_roura_side.pac",.9f,-24.f,-9.f,13.f,10.f,16,128,7480917214126107358ull,0,false}};
 struct OriginalRegionGeometry
 {
     std::string_view model;
@@ -607,7 +627,42 @@ inline constexpr OriginalRegionGeometry OriginalRegionGeometries[]{
     {"o\\hous\\dum_podloubi03klaster.p3d",0.5f,2910,6,9418153568860966873ull,9221666549023694222ull},
     {"o\\hous\\dum_podloubi03klaster.p3d",2.5f,1832,6,16481732131891078914ull,9221666549023694222ull},
     {"o\\hous\\dum_podloubi03klaster.p3d",5.f,1293,6,18230449436297498785ull,15464942002880181192ull},
-    {"o\\hous\\dum_podloubi03klaster.p3d",7.5f,537,6,5979576421762374597ull,17689670398836914166ull}};
+    {"o\\hous\\dum_podloubi03klaster.p3d",7.5f,537,6,5979576421762374597ull,17689670398836914166ull},
+    {"data3d\\bouda1.p3d",0.5f,212,6,7476228373731589111ull,8419968376952841466ull},
+    {"data3d\\bouda1.p3d",1.f,118,6,17003267639014048038ull,6190477663561726912ull},
+    {"data3d\\bouda1.p3d",1.5f,48,4,25735465434341683ull,384696890833767574ull},
+    {"data3d\\budova1.p3d",1.f,512,8,7195064967082564272ull,12644319967163026123ull},
+    {"data3d\\budova1.p3d",2.f,273,7,10964573112396463113ull,13383307188595752591ull},
+    {"data3d\\budova1.p3d",4.f,113,7,18244024519163365541ull,1103796157627488243ull},
+    {"data3d\\budova1.p3d",6.f,83,7,16157180658375736117ull,1103796157627488243ull},
+    {"data3d\\budova1.p3d",9.f,43,4,1412799884757393771ull,16386853661216350341ull},
+    {"data3d\\budova2.p3d",1.f,442,6,6679793900034222421ull,12812998911822839923ull},
+    {"data3d\\budova2.p3d",2.f,220,5,218206820115042981ull,15669320290050894911ull},
+    {"data3d\\budova2.p3d",4.f,92,5,14319517249246399496ull,6405747529045809055ull},
+    {"data3d\\budova2.p3d",6.f,42,4,8247664357588487942ull,10639842194311886201ull},
+    {"data3d\\budova3.p3d",1.f,254,9,3142698151017780232ull,3589287567447973202ull},
+    {"data3d\\budova3.p3d",2.f,118,8,6829797447314411760ull,15923959126343475892ull},
+    {"data3d\\budova3.p3d",4.f,66,7,14919169680447087259ull,17273075347341625511ull},
+    {"data3d\\budova3.p3d",6.f,26,5,546971633266252080ull,12492312654417223257ull},
+    {"data3d\\budova4.p3d",1.f,394,8,13063630465625739530ull,4316055799696744837ull},
+    {"data3d\\budova4.p3d",2.f,182,7,7511122094820074530ull,13590438938570560697ull},
+    {"data3d\\budova4.p3d",4.f,106,6,8000931091620409836ull,12932963846929549872ull},
+    {"data3d\\budova4.p3d",6.f,26,4,14951225791952146366ull,5437096863520801622ull},
+    {"data3d\\budova4_in.p3d",0.25f,2623,70,15170896286144550548ull,1410843496311490868ull},
+    {"data3d\\budova4_in.p3d",0.5f,1707,62,5391116514808128021ull,6176946887407494014ull},
+    {"data3d\\budova4_in.p3d",1.5f,995,26,4623490152600602454ull,9847248945853355310ull},
+    {"data3d\\budova4_in.p3d",2.5f,472,21,5596617555156453867ull,52148190556236802ull},
+    {"data3d\\budova4_in.p3d",3.5f,181,14,4427948010376257463ull,6810553786572066671ull},
+    {"data3d\\budova4_in.p3d",5.f,66,12,8040693585760392921ull,6005295330339418649ull},
+    {"data3d\\budova5.p3d",1.5f,158,10,6845720192758557007ull,1277292095427941305ull},
+    {"data3d\\budova5.p3d",3.f,108,9,11392194352305580455ull,2350667138504004677ull},
+    {"data3d\\budova5.p3d",5.f,80,7,6772908696685055225ull,1633201173923944795ull},
+    {"data3d\\budova5.p3d",7.5f,48,5,10973147532441272228ull,9811712624336714115ull},
+    {"data3d\\hospital.p3d",1.f,1264,13,13484006071023606184ull,4209759231763846852ull},
+    {"data3d\\hospital.p3d",2.f,644,10,5108938789727820280ull,10763064968352325072ull},
+    {"data3d\\hospital.p3d",4.f,344,9,14014260794148537206ull,4057435937659824202ull},
+    {"data3d\\hospital.p3d",6.f,200,8,6349196293725643267ull,1771145749454257598ull},
+    {"data3d\\hospital.p3d",9.f,90,3,3918228194720973436ull,8289117671310582136ull}};
 inline const OriginalMaterialRegion* OriginalRegion(unsigned identity)
 {
     for (const auto& r : OriginalMaterialRegions) if (r.identity==identity) return &r;

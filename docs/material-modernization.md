@@ -6,7 +6,7 @@ The [per-model ledger](evidence/material-modernization/progress.json) retains al
 and concrete prerequisite blockers. It is not a visible-coverage percentage.
 The original inventory remains an immutable baseline.
 
-After batch 40, 380 models have complete source assessment, 104 have partial source
+After batch 41, 405 models have complete source assessment, 79 have partial source
 review, and 31 await source review. Complete assessments include explicitly
 retained optical cases, not only new material adoptions. Another 211 have no
 source-unknown triangles under the existing native classifier: their existing coverage and opacity,
@@ -273,6 +273,18 @@ captured CPU reception and independent reflectors are recorded separately.
 All 13 model assessments stay partial. Totals become 28,431 / 55,701 prerequisites,
 leaving 135 models / 384 distinct pending keys. The bounded apartment timing
 repeat confirms additional draw ranges and recording cost; no renderer redesign.
+Batch 41 [closes grouped town and classic-building source assessments](material-modernization-batch-41.md):
+25 models / 97 authored visual LODs / 330 placements. Twelve classic buildings
+are assessed together; the 13 town/arcade reviews reconcile earlier source,
+whole-fan and rendering dispositions without retrying rejected gables/vaults.
+Eighteen exact-model regions on eight models add 800 highest-detail / 1,462
+alternative-LOD prerequisites, approximately 396 square metres of original near
+mesh. Native and captured CPU reception and independent reflector hits are
+recorded separately. Mixed roof hatches, windows, doors, utility fills and
+unsupported original lighting retain explicit fallback. Totals become
+29,231 / 57,163 prerequisites, leaving 110 unresolved models / 351 distinct
+pending keys. Completed source assessment is not full-model PBR/GI coverage;
+the remaining work is grouped for subsequent batches.
 The [ordinary-adapter census](evidence/material-modernization/runtime-census.json)
 rechecks 726 models / **1,708 retained visual LODs** under the inspection configuration.
 The separate [source-only census](evidence/material-modernization/source-census.json)
@@ -286,7 +298,7 @@ live instance lighting, GI reception or optical review of every original image.
 Backlog 28/29 retain their alpha-card and authored-lighting contracts after original
 pixel/geometry review; this is not newly implemented foliage coverage.
 Backlog 30 likewise retains the fitted-road contract after explicit source review.
-All 30 pilot tasks now have a disposition, but ten remain partial source reviews;
+All 30 pilot tasks now have a disposition, but eight remain partial source reviews;
 the wider 726-model assessment and remaining defensible implementations continue.
 Use the [batch-29 inspection command](material-modernization-batch-29.md#validation-and-reproduction)
 with the [batch-33 census replay additions](material-modernization-batch-33.md).
